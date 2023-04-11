@@ -1,27 +1,105 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+body{
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	font-family: 'Inter', sans-serif;
+}
+.container {
+	/* width: 95; */
+	padding: 0 2em;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+.container h1 {
+	text-align: left;
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+.header_container{
+	height: 65px;
+	border-bottom: solid black 2px;
+	display: flex;
+	align-items: end;
+	justify-content: space-between;
 }
+
+
+.main_container{
+	height: 35vh;
+	border-bottom: solid black 2px;
+}
+
+
+.game_container{
+	height: 50vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	overflow-x: hidden;
+	border-bottom: solid black 2px;
+}
+
+.logo {
+	display: flex;
+	margin: 0px 0px 10px 6px;
+}
+
+.logo_square {
+	width: 30px;
+	height: 30px;
+	background-color: #EBB6A9;
+
+}
+
+.logo_name {
+	display: flex;
+	align-items: end;
+	transform: translate(-0.6em, 0.3em);
+	font-weight: 700;
+	font-size: 1.3em;
+}
+
+.avatar {
+	display: flex;
+	margin: 0px 0px 10px 6px;
+}
+
+.avatar_picture {
+	width: 30px;
+	height: 30px;
+	/* background: url('assets/avatar.jpg'); */
+
+}
+
+.avatar_name {
+	display: flex;
+	align-items: end;
+	transform: translate(-0.6em, 0.3em);
+	font-weight: 500;
+	font-size: 1em;
+}
+
+.menu_bar {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	height: 95%;
+	width: 100px;
+	justify-content: end;
+	margin-bottom: 1.5em;
+}
+
+.menu_item {
+	font-weight: 600;
+	font-size: 20;
+	line-height: 24px;
+	
+} 
+
+.menu_item:hover {
+	/* color: #EBB6A9; */
+	/* width: 1000px!important; */
+	border-bottom: 2px dashed ;
+
+}
+
