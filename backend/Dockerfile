@@ -4,21 +4,20 @@ RUN npm i -g @nestjs/cli
 
 # Create app directory
 WORKDIR /usr/src/app
+COPY app .
 
 # Install app dependencies
-COPY app .
-# COPY app/package*.json ./
-
 RUN npm install
-
-# Bundle app source
 
 COPY .env .
 
-# RUN npx prisma migrate dev
+EXPOSE 3000
+
+RUN apt-get update && apt-get install -y postgresql-client
+COPY scripts/db-check.sh /db-check.sh
+RUN chmod +x /db-check.sh
+ENTRYPOINT ["/db-check.sh"]
 
 # RUN npm run build
-
-EXPOSE 3000
 
 CMD [ "npm", "run" , "start:dev" ]

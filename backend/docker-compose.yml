@@ -10,28 +10,27 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
     networks:
-      - app
-  # nestjs:
-  #   container_name: nestapp
-  #   env_file:
-  #     - .env
-  #   volumes:
-  #     - nestapp:/usr/src/app
-  #   networks:
-  #     - app
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   depends_on:
-  #     - postgres
-  #   expose:
-  #     - "3000"
+      - transendance
+  nestjs:
+    container_name: nestapp
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    networks:
+      - transendance
 
 volumes:
   postgres:
     name: nest-init-docker-db
-  # nestapp:
-  #   name: nestapp
+  nestapp:
+    name: nestapp
 
 networks:
-  app:
+  transendance:
+    name: transendance
