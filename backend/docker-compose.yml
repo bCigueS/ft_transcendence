@@ -22,6 +22,8 @@ services:
       - "3000:3000"
     env_file:
       - .env
+    volumes:
+      - ./app:/usr/src/app
     networks:
       - transendance
 
