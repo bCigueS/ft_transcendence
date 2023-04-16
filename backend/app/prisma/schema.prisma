@@ -8,13 +8,13 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = "postgresql://postgres:123@localhost:5432/postgres?schema=public"
 }
 
 model User {
   id        Int     @id @default(autoincrement())
-  email     String  @unique
-  name      String
+  email     String  
+  name      String	@unique
   password  String
 
   @@map("users")
