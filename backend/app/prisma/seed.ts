@@ -5,7 +5,9 @@ const prisma = new PrismaClient();
 
 async function main() {
   const user1 = await prisma.user.upsert({
-    where: { name: 'yangchi' },
+    where: {
+      name: 'yangchi'
+    },
     update: {},
     create: {
       name: 'yangchi',
@@ -15,7 +17,9 @@ async function main() {
   });
 
   const user2 = await prisma.user.upsert({
-    where: { name: 'fany' },
+    where: { 
+      name: 'fany'
+     },
     update: {},
     create: {
       name: 'fany',
@@ -25,7 +29,9 @@ async function main() {
   });
 
   const user3 = await prisma.user.upsert({
-    where: { name: 'simon' },
+    where: { 
+      name: 'simon'
+    },
     update: {},
     create: {
       name: 'simon',
@@ -35,7 +41,9 @@ async function main() {
   });
 
   const user4 = await prisma.user.upsert({
-    where: { name: 'olivia' },
+    where: { 
+      name: 'olivia'
+    },
     update: {},
     create: {
       name: 'olivia',

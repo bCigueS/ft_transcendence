@@ -11,21 +11,21 @@ services:
       - postgres:/var/lib/postgresql/data
     networks:
       - transendance
-  nestjs:
-    container_name: nestapp
-    build:
-      context: .
-      dockerfile: Dockerfile
-    depends_on:
-      - postgres
-    ports:
-      - "3000:3000"
-    env_file:
-      - .env
-    volumes:
-      - ./app:/usr/src/app
-    networks:
-      - transendance
+  # nestjs:
+  #   container_name: nestapp
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   depends_on:
+  #     - postgres
+  #   ports:
+  #     - "3000:3000"
+  #   env_file:
+  #     - .env
+  #   volumes:
+  #     - ./app:/usr/src/app
+  #   networks:
+  #     - transendance
 
 volumes:
   postgres:
@@ -36,7 +36,7 @@ volumes:
     driver_opts:
       type: 'none'
       o: 'bind' 
-      device: '/mnt/nfs/homes/ykuo/data/nestapp'
+      device: '~/data/nestapp'
 
 
 networks:
