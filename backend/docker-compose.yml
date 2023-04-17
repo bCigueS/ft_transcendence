@@ -32,6 +32,12 @@ volumes:
     name: nest-init-docker-db
   nestapp:
     name: nestapp
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind' 
+      device: '/mnt/nfs/homes/ykuo/data/nestapp'
+
 
 networks:
   transendance:
