@@ -6,8 +6,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const config = new DocumentBuilder()
-    .setTitle('Median')
-    .setDescription('The Median API description')
+    .setTitle('Pong')
+    .setDescription('The Pong API description - for ft_transcendence 42 project.')
     .setVersion('0.1')
     .build();
 
