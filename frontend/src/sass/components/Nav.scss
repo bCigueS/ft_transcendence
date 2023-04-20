@@ -1,0 +1,22 @@
+.nav {
+	max-height: 70px;
+	width: 100%;
+	margin: 10px 30px;
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	grid-template-rows: 1fr;
+	justify-content: space-between;
+	align-items: center;
+
+	border-bottom: 1px;
+
+	#{&}-menu {
+		@include flexBox($direction: row);
+		width: 400px;
+	}
+
+	a {
+		color: $dark-space-blue;
+	}
+}
+

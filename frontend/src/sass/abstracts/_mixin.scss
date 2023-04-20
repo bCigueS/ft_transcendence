@@ -1,0 +1,47 @@
+@import './variables';
+
+@mixin text-body($color: black) {
+	font-size: 15px;
+	line-height: 26px;
+	color: $color;
+	font-weight: 400;
+}
+
+@mixin text-head-xs($color: black) {
+	font-size: 18px;
+	line-height: 24px;
+	color: $color;
+	font-weight: bold;
+}
+@mixin text-header-s($color: black) {
+	font-size: 20px;
+	line-height: 24px;
+	color: $color;
+	font-weight: bold;
+}
+@mixin text-head-m($color: black) {
+	font-size: 32px;
+	line-height: 32px;
+	color: $color;
+	font-weight: bold;
+}
+@mixin text-head-l($color: black) {
+	font-size: 40px;
+	line-height: 40px;
+	color: $color;
+	font-weight: bold;
+}
+@mixin text-head-xl($color: black) {
+	font-size: 56px;
+	line-height: 56px;
+	color: $color;
+	font-weight: bold;
+}
+
+
+@mixin flexBox($direction: column, $justify: space-between, $align: center) {
+	display: flex;
+	flex-direction: $direction;
+	justify-content: $justify;
+	align-items: $align;
+}
