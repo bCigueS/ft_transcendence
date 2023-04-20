@@ -1,0 +1,49 @@
+.profil-menu {
+	position: relative;
+
+	@include flexBox($justify: space-around);
+
+	&__picture {
+		height: 50px;
+		width: 50px;
+
+		border-radius: 50%;
+		background-repeat: no-repeat;
+		background-position: center center;
+		background-size: cover;
+
+		background-image: url('../../assets/images/profil-pic.jpg');
+	}
+
+	#{&}__items {
+		position: absolute;
+		width: 250px;
+		top: 70px;
+
+		background-color: $almost-white;
+		border-radius: 5px;
+
+		@include flexBox($align: left);
+		@include text-body();
+		gap: 9px;
+		padding: 10px;
+
+		.header {
+			width: 100%;
+			@include flexBox($direction: row, $justify:left);
+			gap: 20px;
+
+			padding: 10px 0;
+			border-bottom: 1px black solid;
+			.profil-menu__picture {
+				height: 65px;
+				width: 65px;
+			}
+		}
+
+		.option {
+			@include flexBox($direction: row);
+			width: 100%;
+		}
+	}
+}

@@ -1,0 +1,32 @@
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+html, body {
+	height: 100%;
+	font-family: 'Inter', sans-serif;
+}
+
+body {
+	padding: 145px 20px;
+	background-color: $background-color;
+	@include flexBox($justify: center);
+}
+
+li {
+	list-style: none;
+}
+
+a {
+	text-decoration: none !important;
+}
+
+.nav-link {
+	text-decoration: none !important;
+	color: black;
+	&:hover {
+		color: $light-vermillon;
+	}
+}
