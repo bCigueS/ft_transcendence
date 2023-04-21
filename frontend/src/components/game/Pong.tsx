@@ -1,6 +1,7 @@
 import React from 'react';
 import Canvas from '../Canvas';
-import Ball from './Ball'
+import Ball from './Ball';
+import Player from './Player';
 
 type PongProps = {
 	height: number;
@@ -17,9 +18,9 @@ type PongState = {
 	ball: {
 		x: number;
 		y: number;
-		speed: number;
 	};
-	velocity: {
+	ballSpeed: number;
+	direction: {
 		x: number;
 		y: number;
 	};
@@ -35,44 +36,81 @@ type PongState = {
 	};
 }
 
-const InitialState = () => {
+const InitialState = (props: PongProps) => {
 	return {
 		ball: {
 			x: 100,
 			y: 100,
-			speed: 2,
 		},
-		velocity: {
+		ballSpeed: 30,
+		direction: {
 			x: 0,
 			y: 0,
 		},
 		player: {
 			x: 10,
-			y: 100,
+			y: (props.height - props.paddleHeight) / 2,
 			score: 0,
 		},
 		opponent: {
-			x: 670,
-			y: 100,
+			x: props.width - props.paddleWidth - 10,
+			y: (props.height - props.paddleHeight) / 2,
 			score: 0,
 		},
 	}
 }
 
+const MIN_X = 12,
+	MIN_Y = 12,
+	MAX_X = 800 - MIN_X,
+	MAX_Y = 500 - MIN_Y
+
 class Pong extends React.Component<PongProps, PongState> {
 	constructor(props: PongProps) {
 		super(props);
-		this.state = InitialState();
+		this.state = InitialState(props);
 	}
 
-	renderBall() {
-		return (
-			<Ball 
-				// state={this.state}
-				// props={this.props}
-			/>
+	componentDidMount() {
+		const x = Math.floor(Math.random() * this.state.ballSpeed);
+		const y = this.state.ballSpeed - x;
+		this.setState({ direction: { x, y }});
+		this.animate();
+	}
 
-		)
+	newCoord = (val: number, delta: number, max: number, min: number) => {
+		let newVal = val + delta;
+		let newDelta = delta;
+
+		if (newVal > max || newVal < min) {
+			newDelta = -delta;
+		}
+
+		if (newVal< min) {
+			newVal = min - newVal;
+		}
+
+		if (newVal > max) {
+			newVal = newVal - (newVal - max);
+		}
+
+		return { val: newVal, delta: newDelta };
+	};
+
+	animate = () => {
+		const { ball, direction } = this.state;
+
+		if (direction.x !== 0 || direction.y !== 0) {
+			const newX = this.newCoord(ball.x, direction.x, MAX_X, MIN_X);
+			const newY = this.newCoord(ball.y, direction.y, MAX_Y, MIN_Y);
+
+			this.setState({
+				ball: { x: newX.val, y: newY.val, },
+				direction: { x: newX.delta, y: newY.delta,}
+			});
+		}
+
+		setTimeout(this.animate, 50);
 	}
 
 	render() {
@@ -109,16 +147,34 @@ class Pong extends React.Component<PongProps, PongState> {
 		const draw = (ctx: CanvasRenderingContext2D, frameCount: number) => {
 			// draw background
 			ctx.clearRect(0, 0, this.props.width, this.props.height);
+			ctx.fillStyle = '#6EB0D9';
 			ctx.fillRect(0, 0, this.props.width, this.props.height);
 			ctx.save();
-			ctx.fillStyle = '#6EB0D9';
 
+			// draw player
+			ctx.fillStyle = '#F5F2E9';
+			ctx.fillRect(this.state.player.x, this.state.player.y,
+				this.props.paddleWidth, this.props.paddleHeight);
+			ctx.save();
+
+			// draw opponent
+			ctx.fillStyle = '#F5F2E9';
+			ctx.fillRect(this.state.opponent.x, this.state.opponent.y,
+				this.props.paddleWidth, this.props.paddleHeight);
+			ctx.save();
+			
+			// draw ball
+			ctx.beginPath();
+			ctx.arc(100, 100, 10, 0, 2 * Math.PI);
+			ctx.fill();
+			ctx.lineWidth = 0;
+			ctx.strokeStyle = '#F5F2E9';
+			ctx.stroke();
+			
 			// draw scoreboard
 			ctx.font = '10px Arial';
 			ctx.fillText('Player: ' + this.state.player.score, 10, 10);
-			ctx.fillText('Opponent: ' + this.state.opponent.score, 500, 10);
-
-			this.renderBall();
+			ctx.fillText('Opponent: ' + this.state.opponent.score, 700, 10);
 		}
 		
 		return (
