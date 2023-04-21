@@ -1,1 +1,5 @@
-export default function Opponent() {}
+import React from 'react';
+
+function Opponent() {}
+
+export default Opponent; 

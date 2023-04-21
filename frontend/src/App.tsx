@@ -31,7 +31,7 @@ function App() {
 					height={500}
 					width={800}
 					paddleHeight={100}
-					paddleWidth={20}
+					paddleWidth={15}
 					paddleSpeed={5}
 					ballSize={10}
 					upArrow={38}

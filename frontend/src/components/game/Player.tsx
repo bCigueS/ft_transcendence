@@ -19,9 +19,20 @@ type PlayerState = {
 	}
 }
 
+const InitialState = () => {
+	return {
+		player: {
+			x: 10,
+			y: 100,
+			score: 0,
+		}
+	}
+}
+
 class Player extends React.Component<PlayerProps, PlayerState> {
 	constructor(props: PlayerProps) {
 		super(props);
+		this.state = InitialState();
 	}
 
 	render() {
@@ -29,7 +40,7 @@ class Player extends React.Component<PlayerProps, PlayerState> {
 			ctx.clearRect(0, 0, this.props.width, this.props.height);
 			ctx.fillRect(this.state.player.x, this.state.player.y, this.props.paddleWidth, this.props.paddleHeight);
 			ctx.save();
-			ctx.fillStyle = '#F5F2E9';
+			ctx.fillStyle = '#000000';
 		}
 
 		return <Canvas
