@@ -27,16 +27,7 @@ function App() {
 			<Route path='/profil'></Route>
 			<Route path='/chat'></Route>
 			<Route path='/privmessage'></Route>
-			<Route path='/pong' element={<Pong 
-					height={500}
-					width={800}
-					paddleHeight={100}
-					paddleWidth={15}
-					paddleSpeed={5}
-					ballSize={10}
-					upArrow={38}
-					downArrow={40}
-				/>}></Route>
+			<Route path='/pong' element={<Pong/>}></Route>
 			<Route path='/leaderboard'></Route>
 			<Route path='/rules'></Route>
 			<Route path='/about-us'></Route>

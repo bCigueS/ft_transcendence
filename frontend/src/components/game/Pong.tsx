@@ -1,195 +1,125 @@
-import React from 'react';
+import { useState } from 'react';
 import Canvas from '../Canvas';
 import Ball from './Ball';
 import Player from './Player';
 
-type PongProps = {
-	height: number;
-	width: number;
-	paddleHeight: number;
+type PongInfo = {
+	boardWidth: number;
+	boardHeight: number;
 	paddleWidth: number;
+	paddleHeight: number;
 	paddleSpeed: number;
 	ballSize: number;
 	upArrow: number;
 	downArrow: number;
 }
 
-type PongState = {
-	ball: {
-		x: number;
-		y: number;
-	};
-	ballSpeed: number;
-	direction: {
-		x: number;
-		y: number;
-	};
-	player: {
-		x: number;
-		y: number;
-		score: number;
-	};
-	opponent: {
-		x: number;
-		y: number;
-		score: number;
-	};
-}
-
-const InitialState = (props: PongProps) => {
-	return {
-		ball: {
-			x: 100,
-			y: 100,
-		},
-		ballSpeed: 30,
-		direction: {
-			x: 0,
-			y: 0,
-		},
-		player: {
-			x: 10,
-			y: (props.height - props.paddleHeight) / 2,
-			score: 0,
-		},
-		opponent: {
-			x: props.width - props.paddleWidth - 10,
-			y: (props.height - props.paddleHeight) / 2,
-			score: 0,
-		},
+export default function Pong() {
+	
+	const pongInfo: PongInfo = {
+		boardWidth: 640,
+		boardHeight: 440,
+		paddleWidth: 10,
+		paddleHeight: 80,
+		paddleSpeed: 5,
+		ballSize: 10,
+		upArrow: 38,
+		downArrow: 40,
 	}
-}
+	
+	// ball position
+	const [ballX, setBallX] = useState(100);
+	const [ballY, setBallY] = useState(100);
+	// direction
+	const [deltaX, setDeltaX] = useState(0);
+	const [deltaY, setDeltaY] = useState(0);
+	// player position
+	const [playerX, setPlayerX] = useState(10);
+	const [playerY, setPlayerY] = useState((pongInfo.boardHeight - pongInfo.paddleHeight) / 2);
+	// opponnent position
+	const [opponentX, setOpponentX] = useState(pongInfo.boardWidth - pongInfo.paddleWidth - 10);
+	const [opponentY, setOpponentY] = useState((pongInfo.boardHeight - pongInfo.paddleHeight) / 2);
+	// score
+	const [playerScore, setPlayerScore] = useState(0);
+	const [opponentScore, setOpponentScore] = useState(0);
+	// animation
+	const [frameCount, setFrameCount] = useState(0);
+	const [speed, setSpeed] = useState(30);
+	// game over
+	const [gameOver, setGameOver] = useState(false);
 
-const MIN_X = 12,
-	MIN_Y = 12,
-	MAX_X = 800 - MIN_X,
-	MAX_Y = 500 - MIN_Y
-
-class Pong extends React.Component<PongProps, PongState> {
-	constructor(props: PongProps) {
-		super(props);
-		this.state = InitialState(props);
+	const outerGround = {
+		margin: "50px",
+		borderRadius: "40px",
+		display: "inline-block",
+		width: "860px",
+		height: "660px",
+		backgroundColor: "#EBB6A9",
+		alignItems: "center",
 	}
 
-	componentDidMount() {
-		const x = Math.floor(Math.random() * this.state.ballSpeed);
-		const y = this.state.ballSpeed - x;
-		this.setState({ direction: { x, y }});
-		this.animate();
+	const innerGround = {
+		margin: "100px 100px",
+		display: "inline-block",
+		width: "660px",
+		height: "460px",
+		backgroundColor: "#6EB0D9",
+		alignItems: "center",
+		border: "10px solid #F5F2E9",
+		zIndex: "1",
 	}
 
-	newCoord = (val: number, delta: number, max: number, min: number) => {
-		let newVal = val + delta;
-		let newDelta = delta;
-
-		if (newVal > max || newVal < min) {
-			newDelta = -delta;
-		}
-
-		if (newVal< min) {
-			newVal = min - newVal;
-		}
-
-		if (newVal > max) {
-			newVal = newVal - (newVal - max);
-		}
-
-		return { val: newVal, delta: newDelta };
-	};
-
-	animate = () => {
-		const { ball, direction } = this.state;
-
-		if (direction.x !== 0 || direction.y !== 0) {
-			const newX = this.newCoord(ball.x, direction.x, MAX_X, MIN_X);
-			const newY = this.newCoord(ball.y, direction.y, MAX_Y, MIN_Y);
-
-			this.setState({
-				ball: { x: newX.val, y: newY.val, },
-				direction: { x: newX.delta, y: newY.delta,}
-			});
-		}
-
-		setTimeout(this.animate, 50);
+	const dividerLine = {
+		margin: "0px 430px",
+		width: "15px",
+		height: "660px",
+		backgroundColor: "#F5F2E9",
+		position: "absolute" as "absolute",
+		zIndex: "2",
 	}
 
-	render() {
-		const outerGround = {
-			margin: "50px",
-			borderRadius: "40px",
-			display: "inline-block",
-			width: "1260px",
-			height: "840px",
-			backgroundColor: "#EBB6A9",
-			alignItems: "center",
-		}
+	const drawBoard = (ctx: CanvasRenderingContext2D, frameCount: number) => {
+		// draw background
+		ctx.fillStyle = '#6EB0D9';
+		ctx.fillRect(0, 0, pongInfo.boardWidth, pongInfo.boardHeight);
+		ctx.save();
 
-		const innerGround = {
-			margin: "160px 220px",
-			display: "inline-block",
-			width: "820px",
-			height: "520px",
-			backgroundColor: "#6EB0D9",
-			alignItems: "center",
-			border: "10px solid #F5F2E9",
-			zIndex: "1",
-		}
+		// draw player
+		ctx.fillStyle = '#F5F2E9';
+		ctx.fillRect(playerX, playerY,
+			pongInfo.paddleWidth, pongInfo.paddleHeight);
+		ctx.save();
 
-		const dividerLine = {
-			margin: "0px 620px",
-			width: "15px",
-			height: "840px",
-			backgroundColor: "#F5F2E9",
-			position: "absolute" as "absolute",
-			zIndex: "2",
-		}
-
-		const draw = (ctx: CanvasRenderingContext2D, frameCount: number) => {
-			// draw background
-			ctx.clearRect(0, 0, this.props.width, this.props.height);
-			ctx.fillStyle = '#6EB0D9';
-			ctx.fillRect(0, 0, this.props.width, this.props.height);
-			ctx.save();
-
-			// draw player
-			ctx.fillStyle = '#F5F2E9';
-			ctx.fillRect(this.state.player.x, this.state.player.y,
-				this.props.paddleWidth, this.props.paddleHeight);
-			ctx.save();
-
-			// draw opponent
-			ctx.fillStyle = '#F5F2E9';
-			ctx.fillRect(this.state.opponent.x, this.state.opponent.y,
-				this.props.paddleWidth, this.props.paddleHeight);
-			ctx.save();
-			
-			// draw ball
-			ctx.beginPath();
-			ctx.arc(100, 100, 10, 0, 2 * Math.PI);
-			ctx.fill();
-			ctx.lineWidth = 0;
-			ctx.strokeStyle = '#F5F2E9';
-			ctx.stroke();
-			
-			// draw scoreboard
-			ctx.font = '10px Arial';
-			ctx.fillText('Player: ' + this.state.player.score, 10, 10);
-			ctx.fillText('Opponent: ' + this.state.opponent.score, 700, 10);
-		}
+		// draw opponent
+		ctx.fillStyle = '#F5F2E9';
+		ctx.fillRect(opponentX, opponentY,
+			pongInfo.paddleWidth, pongInfo.paddleHeight);
+		ctx.save();
 		
-		return (
-			<div style={outerGround} className="outer_ground">
-				<div style={dividerLine} className="divider_line"></div>
-				<div style={innerGround} className="inner_ground">
-					<Canvas 
-						draw={draw} 
-						width={this.props.width}
-						height={this.props.height}
-					/>
-				</div>
-			</div>
-		);
+		// draw ball
+		ctx.beginPath();
+		ctx.arc(ballX, ballY, pongInfo.ballSize, 0, 2 * Math.PI);
+		ctx.fill();
+		ctx.lineWidth = 0;
+		ctx.strokeStyle = '#F5F2E9';
+		ctx.stroke();
+		// draw score
+		ctx.font = '42px Inter';
+		ctx.fillText(' ' + playerScore, 250, 50);
+		ctx.fillText(' ' + opponentScore, 355, 50);
 	}
-}
+	
+	return (
+		<div style={outerGround} className="outer_ground">
+			<div style={dividerLine} className="divider_line"></div>
+			<div style={innerGround} className="inner_ground">
+				<Canvas 
+					draw={drawBoard} 
+					width={pongInfo.boardWidth}
+					height={pongInfo.boardHeight}
+				/>
+			</div>
+		</div>
+	);
 
-export default Pong;
+}
