@@ -1,5 +1,9 @@
 import React from 'react';
 
-function Opponent() {}
+type OpponentProps = {
 
-export default Opponent; 
+};
+
+export default function Opponent(props: OpponentProps) {
+	return ;
+}

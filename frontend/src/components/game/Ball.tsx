@@ -1,6 +1,9 @@
 import React from 'react';
 
+type BallProps = {
 
-function Ball() {}
+};
 
-export default Ball;
+export default function Ball(props: BallProps) {
+	return ;
+}
