@@ -16,7 +16,7 @@ const useCanvas = (draw: Function) => {
 			return;
 		const context = canvas.getContext('2d');
 		if (!context)
-			return                                                                                                ;
+			return;
 		let frameCount = 0;
 		let animationFrameId: any;
 
