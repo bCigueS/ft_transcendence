@@ -1,7 +1,4 @@
-import { useState } from 'react';
-import Canvas from '../Canvas';
-import Ball from './Ball';
-import Player from './Player';
+import { useState, useRef, useEffect, useLayoutEffect } from 'react';
 
 type PongInfo = {
 	boardWidth: number;
@@ -9,45 +6,12 @@ type PongInfo = {
 	paddleWidth: number;
 	paddleHeight: number;
 	paddleSpeed: number;
-	ballSize: number;
+	ballRadius: number;
 	upArrow: number;
 	downArrow: number;
 }
 
 export default function Pong() {
-	
-	const pongInfo: PongInfo = {
-		boardWidth: 640,
-		boardHeight: 440,
-		paddleWidth: 10,
-		paddleHeight: 80,
-		paddleSpeed: 5,
-		ballSize: 10,
-		upArrow: 38,
-		downArrow: 40,
-	}
-	
-	// ball position
-	const [ballX, setBallX] = useState(100);
-	const [ballY, setBallY] = useState(100);
-	// direction
-	const [deltaX, setDeltaX] = useState(0);
-	const [deltaY, setDeltaY] = useState(0);
-	// player position
-	const [playerX, setPlayerX] = useState(10);
-	const [playerY, setPlayerY] = useState((pongInfo.boardHeight - pongInfo.paddleHeight) / 2);
-	// opponnent position
-	const [opponentX, setOpponentX] = useState(pongInfo.boardWidth - pongInfo.paddleWidth - 10);
-	const [opponentY, setOpponentY] = useState((pongInfo.boardHeight - pongInfo.paddleHeight) / 2);
-	// score
-	const [playerScore, setPlayerScore] = useState(0);
-	const [opponentScore, setOpponentScore] = useState(0);
-	// animation
-	const [frameCount, setFrameCount] = useState(0);
-	const [speed, setSpeed] = useState(30);
-	// game over
-	const [gameOver, setGameOver] = useState(false);
-
 	const outerGround = {
 		margin: "50px",
 		borderRadius: "40px",
@@ -77,44 +41,156 @@ export default function Pong() {
 		position: "absolute" as "absolute",
 		zIndex: "2",
 	}
+	
+	const pongInfo: PongInfo = {
+		boardWidth: 640,
+		boardHeight: 440,
+		paddleWidth: 10,
+		paddleHeight: 80,
+		paddleSpeed: 5,
+		ballRadius: 10,
+		upArrow: 38,
+		downArrow: 40,
+	}
+	
+	// ball position
+	const [ballX, setBallX] = useState(pongInfo.boardWidth / 2);
+	const [ballY, setBallY] = useState(pongInfo.boardHeight / 2);
+	// direction
+	const [deltaX, setDeltaX] = useState(4);
+	const [deltaY, setDeltaY] = useState(2);
+	// player position
+	const [playerX, setPlayerX] = useState(10);
+	const [playerY, setPlayerY] = useState((pongInfo.boardHeight - pongInfo.paddleHeight) / 2);
+	// opponnent position
+	const [opponentX, setOpponentX] = useState(pongInfo.boardWidth - pongInfo.paddleWidth - 10);
+	const [opponentY, setOpponentY] = useState((pongInfo.boardHeight - pongInfo.paddleHeight) / 2);
+	// score
+	const [playerScore, setPlayerScore] = useState(0);
+	const [opponentScore, setOpponentScore] = useState(0);
+	// animation
+	const [frameCount, setFrameCount] = useState(0);
+	const [speed, setSpeed] = useState(3);
+	// game over
+	const [gameOver, setGameOver] = useState(false);
+	// canvas
+	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-	const drawBoard = (ctx: CanvasRenderingContext2D, frameCount: number) => {
+	// render game
+	useEffect(() => {
+		const canvas = canvasRef.current;
+		if (!canvas)
+			return;
+		const context = canvas.getContext('2d');
+		if (!context)
+			return;
+
+		draw(context);
+		moveBall();
+		detectWallCollision();
+		detectPlayerCollision();
+		detectOpponentCollision();
+			
+	}, [frameCount])
+	
+	// update the frameCount
+	useLayoutEffect(() => {
+		let frameId: any;
+		const render = () => {
+			setFrameCount(fc => fc + 1);
+			frameId = requestAnimationFrame(render);
+		}
+		render();
+
+		return () => {window.cancelAnimationFrame(frameId);}
+	}, [])
+	
+	const detectOpponentCollision = () => {
+		
+	}
+
+	const detectPlayerCollision = () => {
+
+	}
+	
+	const reset = () => {
+		setBallX(pongInfo.boardWidth / 2);
+		setBallY(pongInfo.boardHeight / 2);
+		
+		setDeltaX(2);
+		setDeltaY(2);
+	}
+	
+	const detectWallCollision = () => {
+		// top collision
+		if (ballY < pongInfo.ballRadius) {
+			setDeltaY(y => y *= -1);
+			setBallY(y => y += pongInfo.ballRadius);
+		}
+		// bottom collision
+		if (ballY > pongInfo.boardHeight - pongInfo.ballRadius) {
+			setDeltaY(y => y *= -1);
+			setBallY(y => y -= pongInfo.ballRadius);
+		}
+		// right collision
+		if (ballX >= pongInfo.boardWidth) {
+			setPlayerScore(p => p += 1);
+			reset();
+		}
+		// left collision
+		if (ballX <= 0) {
+			setOpponentScore(o => o += 1);
+			reset();
+		}
+	}
+	
+	const moveBall = () => {
+		setBallX(x => x += deltaX);
+		setBallY(y => y += deltaY);
+		
+		setOpponentY(y => ballY - pongInfo.paddleHeight /2); // to delete later
+	}
+	
+	const draw = (context: CanvasRenderingContext2D) => {
+		context.clearRect(0, 0, pongInfo.boardWidth, pongInfo.boardHeight);
 		// draw background
-		ctx.fillStyle = '#6EB0D9';
-		ctx.fillRect(0, 0, pongInfo.boardWidth, pongInfo.boardHeight);
-		ctx.save();
+		context.fillStyle = '#6EB0D9';
+		context.fillRect(0, 0, pongInfo.boardWidth, pongInfo.boardHeight);
+		context.save();
 
 		// draw player
-		ctx.fillStyle = '#F5F2E9';
-		ctx.fillRect(playerX, playerY,
+		context.fillStyle = '#F5F2E9';
+		context.fillRect(playerX, playerY,
 			pongInfo.paddleWidth, pongInfo.paddleHeight);
-		ctx.save();
+		context.save();
 
 		// draw opponent
-		ctx.fillStyle = '#F5F2E9';
-		ctx.fillRect(opponentX, opponentY,
+		context.fillStyle = '#F5F2E9';
+		context.fillRect(opponentX, opponentY,
 			pongInfo.paddleWidth, pongInfo.paddleHeight);
-		ctx.save();
+		context.save();
 		
 		// draw ball
-		ctx.beginPath();
-		ctx.arc(ballX, ballY, pongInfo.ballSize, 0, 2 * Math.PI);
-		ctx.fill();
-		ctx.lineWidth = 0;
-		ctx.strokeStyle = '#F5F2E9';
-		ctx.stroke();
+		context.beginPath();
+		context.arc(ballX, ballY, pongInfo.ballRadius, 0, 2 * Math.PI);
+		context.fill();
+		context.lineWidth = 0;
+		context.strokeStyle = '#F5F2E9';
+		context.stroke();
 		// draw score
-		ctx.font = '42px Inter';
-		ctx.fillText(' ' + playerScore, 250, 50);
-		ctx.fillText(' ' + opponentScore, 355, 50);
+		context.font = '42px Inter';
+		context.fillText(' ' + playerScore, 250, 50);
+		context.fillText(' ' + opponentScore, 355, 50);
+
+		// requestAnimationFrame(move);
 	}
 	
 	return (
 		<div style={outerGround} className="outer_ground">
 			<div style={dividerLine} className="divider_line"></div>
 			<div style={innerGround} className="inner_ground">
-				<Canvas 
-					draw={drawBoard} 
+				<canvas 
+					ref={canvasRef}
 					width={pongInfo.boardWidth}
 					height={pongInfo.boardHeight}
 				/>
