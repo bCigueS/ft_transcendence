@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useLayoutEffect } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, MouseEventHandler } from 'react';
 
 type PongInfo = {
 	boardWidth: number;
@@ -34,8 +34,8 @@ export default function Pong() {
 	}
 
 	const dividerLine = {
-		margin: "0px 430px",
-		width: "15px",
+		margin: "0px 425px",
+		width: "10px",
 		height: "660px",
 		backgroundColor: "#F5F2E9",
 		position: "absolute" as "absolute",
@@ -106,11 +106,37 @@ export default function Pong() {
 	}, [])
 	
 	const detectOpponentCollision = () => {
-		
+		if (ballX + pongInfo.ballRadius >= opponentX && ballY > opponentY && ballY < opponentY + pongInfo.paddleHeight) {
+			setDeltaX(x => x *= -1);
+			setBallX(x => x -= pongInfo.ballRadius);
+
+			let collisionPoint = (ballY + (pongInfo.ballRadius / 2)) - (opponentY + (pongInfo.paddleHeight / 2));
+			collisionPoint = collisionPoint / (pongInfo.paddleHeight / 2) + Math.random();
+
+			let angle = (Math.PI / 4) * collisionPoint;
+
+			setDeltaX(-speed * Math.cos(angle));
+			setDeltaY(speed * Math.sin(angle));
+
+			setSpeed(s => s += 0.5);
+		}
 	}
 
 	const detectPlayerCollision = () => {
+		if (ballX - pongInfo.ballRadius <= playerX && ballY > playerY && ballY < playerY + pongInfo.paddleHeight) {
+			// setDeltaX(x => x *= -1);
+			setBallX(x => x += pongInfo.ballRadius);
 
+			let collisionPoint = (ballY + (pongInfo.ballRadius / 2)) - (playerY + (pongInfo.paddleHeight / 2));
+			collisionPoint = collisionPoint / (pongInfo.paddleHeight / 2) + Math.random();
+
+			let angle = (Math.PI / 4) * collisionPoint;
+
+			setDeltaX(speed * Math.cos(angle));
+			setDeltaY(speed * Math.sin(angle));
+
+			setSpeed(s => s += 0.5);
+		}
 	}
 	
 	const reset = () => {
@@ -181,12 +207,14 @@ export default function Pong() {
 		context.font = '42px Inter';
 		context.fillText(' ' + playerScore, 250, 50);
 		context.fillText(' ' + opponentScore, 355, 50);
+	}
 
-		// requestAnimationFrame(move);
+	const handleMouseEvent: MouseEventHandler<HTMLDivElement> = (event) => {
+		setPlayerY(y => event.clientY - pongInfo.boardHeight - (pongInfo.paddleHeight / 2));
 	}
 	
 	return (
-		<div style={outerGround} className="outer_ground">
+		<div style={outerGround} className="outer_ground" onMouseMove={handleMouseEvent}>
 			<div style={dividerLine} className="divider_line"></div>
 			<div style={innerGround} className="inner_ground">
 				<canvas 
