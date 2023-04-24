@@ -21,6 +21,7 @@ export default function Pong() {
 		height: "660px",
 		backgroundColor: "#EBB6A9",
 		alignItems: "center",
+		zIndex: "1",
 	}
 
 	const innerGround = {
@@ -178,7 +179,9 @@ export default function Pong() {
 		// right & left collision
 		if (ballX <= 0 || ballX >= pongInfo.boardWidth)
 		{
-			ballX <= 0 ? setOpponentScore(o => o += 1) : setPlayerScore(p => p += 1);
+			if (playerScore < pongInfo.winnerScore && opponentScore < pongInfo.winnerScore) {
+				ballX <= 0 ? setOpponentScore(o => o += 1) : setPlayerScore(p => p += 1);
+			}
 			ballX <= 0 ? serve(1) : serve(-1);
 			// detect next scene
 			if (playerScore >= pongInfo.winnerScore || opponentScore >= pongInfo.winnerScore) {
@@ -218,13 +221,6 @@ export default function Pong() {
 		context.lineWidth = 0;
 		context.strokeStyle = '#F5F2E9';
 		context.stroke();
-		// draw net
-		context.beginPath();
-		context.lineWidth = 10;
-		context.strokeStyle = '#F5F2E9';
-		context.moveTo(pongInfo.boardWidth / 2, 0);
-		context.lineTo(pongInfo.boardWidth / 2, pongInfo.boardHeight);
-		context.stroke();
 		// draw score
 		context.font = '42px Inter';
 		context.fillText(' ' + playerScore, 245, 50);
@@ -233,26 +229,28 @@ export default function Pong() {
 
 	const handleMouseEvent: MouseEventHandler<HTMLDivElement> = (event) => {
 		if (!gameOver)
-			setPlayerY(y => event.clientY - pongInfo.boardHeight - (pongInfo.paddleHeight / 2));
+		setPlayerY(y => event.clientY - pongInfo.boardHeight - (pongInfo.paddleHeight / 2));
 	}
 	
 	return (
-		<div style={outerGround} className="outer_ground" onMouseMove={handleMouseEvent}>
-			{/* <div style={dividerLine} className="divider_line"></div> */}
-			<div style={innerGround} className="inner_ground">
-				<canvas 
-					ref={canvasRef}
-					width={pongInfo.boardWidth}
-					height={pongInfo.boardHeight}
+		<>
+			{gameOver && (
+				<Modal
+				text={winner == 1 ? "You wins!" : "You lose!"}
+				onClick={() => restartGame(winner == 1 ? -1 : 1)}
 				/>
-				{gameOver && (
-					<Modal
-						text={winner == 1 ? "You wins!" : "You lose!"}
-						onClick={() => restartGame(winner == 1 ? -1 : 1)}
+			)}
+			<div style={outerGround} className="outer_ground" onMouseMove={handleMouseEvent}>
+				<div style={dividerLine} className="divider_line"></div>
+				<div style={innerGround} className="inner_ground">
+					<canvas 
+						ref={canvasRef}
+						width={pongInfo.boardWidth}
+						height={pongInfo.boardHeight}
 					/>
-				)}
+				</div>
 			</div>
-		</div>
+		</>
 	);
 
 }
