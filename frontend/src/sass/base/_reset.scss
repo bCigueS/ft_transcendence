@@ -1,3 +1,4 @@
+/* Global */
 * {
 	margin: 0;
 	padding: 0;
@@ -7,16 +8,21 @@
 html, body {
 	height: 100%;
 	font-family: 'Inter', sans-serif;
+	font-size: 62.5%;
 }
 
+/* Body */
 body {
-	padding: 145px 20px;
+	padding: 14.5rem 2rem;
 	background-color: $background-color;
 	@include flexBox($justify: center);
 }
 
+/* Selector */
 li {
 	list-style: none;
+	margin: 0;
+	padding: 0;
 }
 
 a {
@@ -30,3 +36,16 @@ a {
 		color: $light-vermillon;
 	}
 }
+
+main {
+	height: 50rem;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin: 1rem 3rem;
+
+	border: 0.3rem black solid;
+
+	@include shadowBox();
+}
+/* --- Homepage --- */

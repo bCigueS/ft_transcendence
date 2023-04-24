@@ -1,38 +1,41 @@
 import React, { useState } from 'react';
-import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
-import Nav from './components/Nav'
+import { createBrowserRouter, RouterProvider} from 'react-router-dom';
 
+import RootLayout from './pages/RootLayout';
+import ErrorPage from './pages/Error';
+import Homepage from './pages/Homepage';
+import ProfilPage from './pages/Profil';
+import PrivateMessagePage from './pages/PrivateMessagePage';
+import ChatPage from './pages/Chat';
+import Game from './pages/Game';
+import Leaderboard from './pages/Leaderboard';
+import Rules from './pages/Rules';
+import AboutUs from './pages/AboutUs';
 
-{/* Old Stuff */}
-// import Login from './components/Login';
-// import  Register from './components/Register';
-
+const router = createBrowserRouter([
+	{
+		path: '/',
+		element: <RootLayout />,
+		errorElement: <ErrorPage />,
+		children: [
+			{index: true, element: <Homepage />},
+			{path: 'profil', element: <ProfilPage />},
+			{path: 'privmessage', element: <PrivateMessagePage />},
+			{path: 'chat', element: <ChatPage />},
+			{path: 'pong', element: <Game />},
+			{path: 'leaderboard', element: <Leaderboard />},
+			{path: 'rules', element: <Rules/>},
+			{path: 'about-us', element: <AboutUs />},
+		]
+	}
+])
 
 function App() {
 
-	// const [currentForm, setCurrentForm] = useState('login');
-
-	// const toggleForm = (forName: string) => {
-	// 	setCurrentForm(forName);
-	// }
-	// {/* { currentForm === 'login' ? <Login onFormSwitch={toggleForm}/> : <Register onFormSwitch={toggleForm} />	} */}
-
 	return (
-	<Router>
 		<div className="App">
-		<Nav />
-		<Routes>
-			<Route path='/'></Route>
-			<Route path='/profil'></Route>
-			<Route path='/chat'></Route>
-			<Route path='/privmessage'></Route>
-			<Route path='/pong'></Route>
-			<Route path='/leaderboard'></Route>
-			<Route path='/rules'></Route>
-			<Route path='/about-us'></Route>
-		</Routes>
+			<RouterProvider router={ router } />
 		</div>
-	</Router>
 	);
 	}
 
