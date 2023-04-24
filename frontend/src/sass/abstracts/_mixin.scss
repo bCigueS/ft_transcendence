@@ -1,39 +1,39 @@
 @import './variables';
 
 @mixin text-body($color: black) {
-	font-size: 15px;
-	line-height: 26px;
+	font-size: 1.5rem;
+	line-height: 2.6rem;
 	color: $color;
 	font-weight: 400;
 }
 
 @mixin text-head-xs($color: black) {
-	font-size: 18px;
-	line-height: 24px;
+	font-size: 1.8rem;
+	line-height: 2.4rem;
 	color: $color;
 	font-weight: bold;
 }
 @mixin text-header-s($color: black) {
-	font-size: 20px;
-	line-height: 24px;
+	font-size: 2rem;
+	line-height: 2.4rem;
 	color: $color;
 	font-weight: bold;
 }
 @mixin text-head-m($color: black) {
-	font-size: 32px;
-	line-height: 32px;
+	font-size: 3.2rem;
+	line-height: 3.2rem;
 	color: $color;
 	font-weight: bold;
 }
 @mixin text-head-l($color: black) {
-	font-size: 40px;
-	line-height: 40px;
+	font-size: 4rem;
+	line-height: 4rem;
 	color: $color;
 	font-weight: bold;
 }
 @mixin text-head-xl($color: black) {
-	font-size: 56px;
-	line-height: 56px;
+	font-size: 5.6rem;
+	line-height: 5.6rem;
 	color: $color;
 	font-weight: bold;
 }
@@ -44,4 +44,8 @@
 	flex-direction: $direction;
 	justify-content: $justify;
 	align-items: $align;
+}
+
+@mixin shadowBox() {
+	box-shadow: -8px 5px 0px 1px $light-vermillon;
 }

@@ -9,12 +9,12 @@ interface menuOption {
 }
 
 export default function ProfilIcon() {
-	const [menuOpen, setMenuOpen] = useState(true);
+	const [menuOpen, setMenuOpen] = useState(false);
 
 	const menuOptions: menuOption[] = [
-		{icon1: 'fa-solid fa-user', icon2: 'fa-solid fa-chevron-right', text: 'Profil', link: ''},
-		{icon1: 'fa-solid fa-message', icon2: 'fa-solid fa-chevron-right', text: 'Message', link: ''},
-		{icon1: 'fa-solid fa-right-from-bracket', icon2: 'fa-solid fa-chevron-right', text: 'Log out', link: ''}
+		{icon1: 'fa-solid fa-user', icon2: 'fa-solid fa-chevron-right', text: 'Profil', link: '/profil'},
+		{icon1: 'fa-solid fa-message', icon2: 'fa-solid fa-chevron-right', text: 'Message', link: '/privmessage'},
+		{icon1: 'fa-solid fa-right-from-bracket', icon2: 'fa-solid fa-chevron-right', text: 'Log out', link: '/'}
 	]
 
 	return (
