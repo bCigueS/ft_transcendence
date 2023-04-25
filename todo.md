@@ -1,0 +1,56 @@
+# ft_transcendence
+
+--- 
+
+- ENV
+    - [X] docker
+
+- Backend
+    - [X] NestJs
+    - [ ] Database
+        - [X] User
+        - [ ] Game 
+        - [ ] Message
+        - [ ] Channel
+    - [ ] API
+        - [ ] **User**
+            - [ ] CRUD for user
+            - [ ] User upload image
+            - [ ] add friend
+            - [ ] see friend's status
+            - [ ] login status
+        - [ ] **Game**
+            - [ ] CRUD for game
+            - [ ] match user for game
+            - [ ] game history
+            - [ ] game stat (calculation)
+        - [ ] **Message**
+            - [ ] CRUD for message
+    - [ ] Cyber security
+        - [ ] Hash Password
+        - [ ] SQL injection
+        - [ ] Server validation
+    - [ ] 42 API for login
+    - [ ] 2 factor authentication
+        
+- Frontend
+    - [X] ReactJs
+    - [X] Single page application
+    - [ ] SQL injection (optional)
+    - [ ] **User**
+        - [ ] profile
+        - [ ] friends list with status
+        - [ ] game history / statistic (display)
+    - [ ] **Game**
+        - [ ] 2D / 3D display
+        - [ ] default + custom option (different map / power ups / etc)
+        - [ ] live game (socket)
+        - [ ] timeout for unexpected disconnection
+        - [ ] matchmaking system (send request to back, open socket, loading display)
+     - [ ] **Message**
+        - [ ] web socket
+        - [ ] direct message
+        - [ ] channel with modes (private / public / protected) and admin
+        - [ ] blocked user
+        - [ ] invitation to play game
+        - [ ] access to other user status
