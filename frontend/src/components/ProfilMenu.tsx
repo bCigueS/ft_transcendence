@@ -8,7 +8,7 @@ interface menuOption {
 	link: string
 }
 
-export default function ProfilIcon() {
+const ProfilIcon: React.FC = () => {
 	const [menuOpen, setMenuOpen] = useState(false);
 
 	const menuOptions: menuOption[] = [
@@ -34,7 +34,7 @@ export default function ProfilIcon() {
 					{
 						menuOptions.map(items => {
 							return (
-								<Link className="option" to={items.link}>
+								<Link key={items.text} className="option" to={items.link} onClick={() => setMenuOpen((prev) => !prev)}>
 									<i className={items.icon1}></i>
 									<span>{items.text}</span>
 									<i className={items.icon2}></i>
@@ -47,3 +47,5 @@ export default function ProfilIcon() {
 		</div>
 	);
 }
+
+export default ProfilIcon;

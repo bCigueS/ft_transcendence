@@ -11,6 +11,7 @@ import Game from './pages/Game';
 import Leaderboard from './pages/Leaderboard';
 import Rules from './pages/Rules';
 import AboutUs from './pages/AboutUs';
+import LoginPage from './pages/Login';
 
 const router = createBrowserRouter([
 	{
@@ -26,6 +27,7 @@ const router = createBrowserRouter([
 			{path: 'leaderboard', element: <Leaderboard />},
 			{path: 'rules', element: <Rules/>},
 			{path: 'about-us', element: <AboutUs />},
+			{path: 'login', element: <LoginPage />}
 		]
 	}
 ])

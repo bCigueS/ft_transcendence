@@ -11,7 +11,7 @@ interface navItem {
 	link: string
 }
 
-export default function Nav() {
+const Nav: React.FC = () => {
 
 	const navItems: navItem[] = [
 		{text: "Home", link:"/"},
@@ -34,7 +34,7 @@ export default function Nav() {
 					{
 						navItems.map(items => {
 							return (
-								<li className="nav-item">
+								<li key={items.text} className="nav-item">
 									<NavLink to={ items.link } className="nav-link">
 										<span className="nav-item_text">{ items.text }</span>
 									</NavLink>
@@ -48,3 +48,5 @@ export default function Nav() {
 		</header>
 	);
 }
+
+export default Nav;
