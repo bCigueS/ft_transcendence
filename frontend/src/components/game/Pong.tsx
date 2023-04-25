@@ -26,37 +26,6 @@ type PongInfo = {
 }
 
 export default function Pong() {
-	const outerGround = {
-		margin: "50px",
-		borderRadius: "40px",
-		display: "inline-block",
-		width: "860px",
-		height: "660px",
-		backgroundColor: "#EBB6A9",
-		alignItems: "center",
-		zIndex: "1",
-	}
-
-	const innerGround = {
-		margin: "80px 100px",
-		display: "inline-block",
-		width: "660px",
-		height: "500px",
-		backgroundColor: "#6EB0D9",
-		alignItems: "center",
-		border: "10px solid #F5F2E9",
-		zIndex: "1",
-	}
-
-	const dividerLine = {
-		margin: "0px 425px",
-		width: "10px",
-		height: "660px",
-		backgroundColor: "#F5F2E9",
-		position: "absolute" as "absolute",
-		zIndex: "2",
-	}
-
 	const pongInfo: PongInfo = {
 		boardWidth: 640,
 		boardHeight: 480,
@@ -220,16 +189,16 @@ export default function Pong() {
 	const draw = (context: CanvasRenderingContext2D) => {
 		context.clearRect(0, 0, pongInfo.boardWidth, pongInfo.boardHeight);
 		// draw background
-		context.fillStyle = '#6EB0D9';
+		context.fillStyle = '#4E6E81';
 		context.fillRect(0, 0, pongInfo.boardWidth, pongInfo.boardHeight);
 		context.save();
 		// draw player
-		context.fillStyle = '#F5F2E9';
+		context.fillStyle = '#F2F2F2';
 		context.fillRect(playerX, playerY,
 			pongInfo.paddleWidth, pongInfo.paddleHeight);
 		context.save();
 		// draw opponent
-		context.fillStyle = '#F5F2E9';
+		context.fillStyle = '#F2F2F2';
 		context.fillRect(opponentX, opponentY,
 			pongInfo.paddleWidth, pongInfo.paddleHeight);
 		context.save();
@@ -237,9 +206,15 @@ export default function Pong() {
 		context.beginPath();
 		context.arc(ballX, ballY, pongInfo.ballRadius, 0, 2 * Math.PI);
 		context.fill();
-		context.lineWidth = 0;
-		context.strokeStyle = '#F5F2E9';
+		context.strokeStyle = '#F2F2F2';
 		context.stroke();
+		// // draw net
+		// context.beginPath();
+		// context.strokeStyle = '#F2F2F2';
+		// context.lineWidth = 8;
+		// context.moveTo(pongInfo.boardWidth / 2, 0);
+		// context.lineTo(pongInfo.boardWidth / 2, pongInfo.boardHeight);
+		// context.stroke();
 		// draw score
 		context.font = '42px Inter';
 		context.fillText(' ' + playerScore, 245, 50);
@@ -277,9 +252,9 @@ export default function Pong() {
 					onMode={(mode) => {mode === "keyboard" ? setMode(KEYBOARD_MODE) : setMode(MOUSE_MODE)}}
 				/>
 			)}
-			<div style={outerGround} className="outer_ground" onMouseMove={handleMouseEvent} onKeyPress={handleKeyboardEvent}>
-				<div style={dividerLine} className="divider_line"></div>
-				<div style={innerGround} className="inner_ground">
+			<div className="outer_ground">
+				<div className="divider_line"></div>
+				<div className="inner_ground" onMouseMove={handleMouseEvent}>
 					<canvas 
 						ref={canvasRef}
 						width={pongInfo.boardWidth}

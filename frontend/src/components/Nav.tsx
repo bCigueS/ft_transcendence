@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, NavLink } from "react-router-dom"
 
 import LogoPong from '../assets/logo/pong.svg'
 import ProfilPic from '../assets/images/profil-pic.jpg'
@@ -16,18 +16,18 @@ export default function Nav() {
 	const navItems: navItem[] = [
 		{text: "Home", link:"/"},
 		{text: "PingPong", link:"/pong"},
-		{text: "Community", link: "/community"},
+		{text: "Community", link: "/leaderboard"},
+		{text: "Rules", link: "/rules"},
 		{text: "About-us", link: "/about-us"}
 	]
 
-	const [menuOpen, setMenuOpen] = useState(false);
-
 	return (
+		<header>
 			<nav className="nav">
-				{/* Logo */}
-				<a href="#">
-					<img src={ LogoPong } alt="Logo PingPong" />
-				</a>
+				<Link to='/'>
+					<p>LOGO</p>
+					{/* <img src={ LogoPong } alt="Logo PingPong" /> */}
+				</Link>
 
 				{/* Navigation Menu */}
 				<ul className='nav-menu'>
@@ -35,9 +35,9 @@ export default function Nav() {
 						navItems.map(items => {
 							return (
 								<li className="nav-item">
-									<Link to={ items.link } className="nav-link">
+									<NavLink to={ items.link } className="nav-link">
 										<span className="nav-item_text">{ items.text }</span>
-									</Link>
+									</NavLink>
 								</li>
 							)
 						})
@@ -45,5 +45,6 @@ export default function Nav() {
 				</ul>
 				<ProfilMenu />
 			</nav>
+		</header>
 	);
 }
