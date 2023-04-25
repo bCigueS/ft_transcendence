@@ -1,0 +1,34 @@
+.nav {
+	max-height: 10rem;
+	max-width: 110rem;
+	min-width: 70rem;
+	margin: 1rem 3rem;
+	padding: 2rem;
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	grid-template-rows: 1fr;
+	justify-content: space-between;
+	align-items: center;
+
+	@include shadowBox();
+
+	border: 0.3rem black solid;
+	#{&}-menu {
+		@include flexBox($direction: row, $justify: center);
+		width: 60rem;
+		a {
+			color: $dark-space-blue;
+			font-size: 1.4rem;
+			padding: 1rem 3rem;
+		}
+	
+		a:hover {
+			border: 0.2rem black solid;
+			font-size: 1.4rem;
+			padding: 1rem 3rem;
+	
+		}
+	}
+
+}
+
