@@ -252,9 +252,9 @@ export default function Pong() {
 					onMode={(mode) => {mode === "keyboard" ? setMode(KEYBOARD_MODE) : setMode(MOUSE_MODE)}}
 				/>
 			)}
-			<div className="outer_ground">
+			<div className="outer_ground" onMouseMove={handleMouseEvent} onKeyPress={handleKeyboardEvent}>
 				<div className="divider_line"></div>
-				<div className="inner_ground" onMouseMove={handleMouseEvent}>
+				<div className="inner_ground">
 					<canvas 
 						ref={canvasRef}
 						width={pongInfo.boardWidth}
