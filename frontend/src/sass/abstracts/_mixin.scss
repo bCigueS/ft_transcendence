@@ -46,6 +46,6 @@
 	align-items: $align;
 }
 
-@mixin shadowBox() {
-	box-shadow: -8px 5px 0px 1px $light-vermillon;
+@mixin shadowBox($color: $light-vermillon) {
+	box-shadow: -8px 5px 0px 1px $color;
 }
