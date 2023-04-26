@@ -3,7 +3,6 @@
 
 @import './base/reset';
 
-@import './components/Nav.scss';
-@import './components/ProfilMenu.scss';
-@import './components/ProfilCardInfo.scss';
+@import './components/Nav/Nav.scss';
+@import './components/Nav/ProfilMenu.scss';
 @import './pages/Login.scss';

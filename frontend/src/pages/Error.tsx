@@ -1,4 +1,4 @@
-import Nav from "../components/Nav";
+import Nav from "../components/Nav/Nav";
 
 export default function Error() {
 	return (

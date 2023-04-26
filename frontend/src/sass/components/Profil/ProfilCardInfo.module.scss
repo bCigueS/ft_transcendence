@@ -1,11 +1,16 @@
-.profil-card {
+@import '../../abstracts/mixin.scss';
+@import '../../abstracts/variables.scss';
+
+.container {
+	padding: 2rem;
+	border: 0.2rem black solid;
+	background-color: $almost-white;
+	@include shadowBox($color: rgb(255, 231, 50));
+
 	@include flexBox($justify: top, $align: left);
 	gap: 1rem;
 
-	padding: 2rem;
-	border: 0.2rem black solid;
-
-	&__picture {
+	.picture {
 		height: 15rem;
 		width: 15rem;
 		background-color: red;
@@ -14,11 +19,11 @@
 		background-position: center center;
 		background-size: cover;
 
-		background-image: url('../../assets/images/profil-pic.jpg');
+		// background-image: $profil-pic;
 
 	}
 
-	&__user {
+	.user {
 		padding: 0.5rem 0;
 		border-bottom: 0.2rem black solid;
 		h1 {
@@ -33,8 +38,8 @@
 		}
 	}
 
-	&__stat {
-		#{&}__info {
+	.stat {
+		.info {
 			margin: 1rem 0;
 			padding: 0.5rem 0;
 			border-bottom: 0.2rem black solid;

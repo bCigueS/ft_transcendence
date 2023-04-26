@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { createBrowserRouter, RouterProvider} from 'react-router-dom';
 
 import RootLayout from './pages/RootLayout';
@@ -12,6 +12,8 @@ import Leaderboard from './pages/Leaderboard';
 import Rules from './pages/Rules';
 import AboutUs from './pages/AboutUs';
 import LoginPage from './pages/Login';
+
+import './sass/main.scss';
 
 const router = createBrowserRouter([
 	{
@@ -32,13 +34,13 @@ const router = createBrowserRouter([
 	}
 ])
 
-function App() {
+const App: React.FC = () => {
 
 	return (
 		<div className="App">
 			<RouterProvider router={ router } />
 		</div>
 	);
-	}
+}
 
 export default App;

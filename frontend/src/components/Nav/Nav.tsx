@@ -1,9 +1,5 @@
-import { useState } from "react"
 import { Link, NavLink } from "react-router-dom"
 
-import LogoPong from '../assets/logo/pong.svg'
-import ProfilPic from '../assets/images/profil-pic.jpg'
-import '../sass/main.scss'
 import ProfilMenu from "./ProfilMenu"
 
 interface navItem {
@@ -26,7 +22,6 @@ const Nav: React.FC = () => {
 			<nav className="nav">
 				<Link to='/'>
 					<p>LOGO</p>
-					{/* <img src={ LogoPong } alt="Logo PingPong" /> */}
 				</Link>
 
 				{/* Navigation Menu */}
