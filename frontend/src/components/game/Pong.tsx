@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useLayoutEffect, MouseEventHandler, KeyboardEventHandler } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect, MouseEvent, KeyboardEvent, FormEventHandler } from 'react';
 import '../../sass/main.scss';
 import Modal from './Modal';
 
@@ -11,9 +11,8 @@ const OPPONENT_WIN = 4;
 const PLAYER_SIDE = -1;
 const OPPONENT_SIDE = 1;
 
-const PLAYER_UP = 38;
-const PLAYER_DOWN = 40;
-const PAUSE = 32;
+const PLAYER_UP = "ArrowUp";
+const PLAYER_DOWN = "ArrowDown";
 
 type PongInfo = {
 	boardWidth: number;
@@ -39,13 +38,13 @@ export default function Pong() {
 	const angle = (Math.PI/ 4) + Math.random();
 	// animation
 	const [frameCount, setFrameCount] = useState(0);
-	const [speed, setSpeed] = useState(5);
+	const [speed, setSpeed] = useState(10);
 	// ball position
 	const [ballX, setBallX] = useState(pongInfo.boardWidth / 2);
 	const [ballY, setBallY] = useState(pongInfo.boardHeight / 2);
 	// direction
 	const [deltaX, setDeltaX] = useState(4); // speed * Math.cos(angle));
-	const [deltaY, setDeltaY] = useState(3); // speed * Math.sin(angle));
+	const [deltaY, setDeltaY] = useState(4); // speed * Math.sin(angle));
 	// player position
 	const [playerX, setPlayerX] = useState(10);
 	const [playerY, setPlayerY] = useState((pongInfo.boardHeight - pongInfo.paddleHeight) / 2);
@@ -78,6 +77,12 @@ export default function Pong() {
 			detectWallCollision();
 			detectPlayerCollision();
 			detectOpponentCollision();
+			// check game status
+			if (opponentScore > pongInfo.winnerScore || playerScore > pongInfo.winnerScore) {
+				playerScore > pongInfo.winnerScore ? setWinner(PLAYER_WIN) : setWinner(OPPONENT_WIN);
+				setIsRunning(false);
+				setGameOver(true);
+			}
 		}
 			
 	}, [frameCount])
@@ -134,8 +139,8 @@ export default function Pong() {
 
 		setSpeed(5);
 		
-		setDeltaX(4); // speed * Math.cos(angle) * side);
-		setDeltaY(3); // speed * Math.sin(angle));
+		setDeltaX(4 * side); // speed * Math.cos(angle) * side);
+		setDeltaY(4); // speed * Math.sin(angle));
 	}
 
 	const restartGame = (side: number) => {
@@ -151,27 +156,30 @@ export default function Pong() {
 	}
 	
 	const detectWallCollision = () => {
+		const minY    = pongInfo.ballRadius;
+		const maxY    = pongInfo.boardHeight - pongInfo.ballRadius;
+
 		// top collision
-		if (ballY < pongInfo.ballRadius) {
-			setDeltaY(y => y *= -1);
-			setBallY(y => y += pongInfo.ballRadius);
+		if (ballY < minY) {
+			setDeltaY(y => y * -1);
+			setBallY(minY);
 		}
 		// bottom collision
-		if (ballY > pongInfo.boardHeight - pongInfo.ballRadius) {
-			setDeltaY(y => y *= -1);
-			setBallY(y => y -= pongInfo.ballRadius);
+		if (ballY > maxY) {
+			setDeltaY(y => y * -1);
+			setBallY(maxY);
 		}
-		// right & left collision
-		if (ballX <= 0 || ballX >= pongInfo.boardWidth)
+		// left collision
+		if (ballX <= 0)
 		{
-			ballX <= 0 ? setOpponentScore(o => o += 1) : setPlayerScore(p => p += 1);
-			ballX <= 0 ? serve(OPPONENT_SIDE) : serve(PLAYER_SIDE);
-			// detect next scene
-			if (playerScore >= pongInfo.winnerScore || opponentScore >= pongInfo.winnerScore) {
-				setIsRunning(false);
-				setGameOver(true);
-				playerScore >= pongInfo.winnerScore ? setWinner(PLAYER_WIN) : setWinner(OPPONENT_WIN);
-			}
+			setOpponentScore(o => o += 1);
+			serve(PLAYER_SIDE);
+		}
+		//right collision
+		if (ballX >= pongInfo.boardWidth)
+		{
+			setPlayerScore(p => p += 1);
+			serve(OPPONENT_SIDE);	
 		}
 	}
 	
@@ -179,7 +187,7 @@ export default function Pong() {
 		setBallX(x => x += deltaX);
 		setBallY(y => y += deltaY);
 
-		const nextPos = ballY - (pongInfo.paddleHeight / 2);
+		const nextPos = ballY - (pongInfo.paddleHeight / 2) * 0.1;
 		
 		if (nextPos >= 0 && nextPos + pongInfo.paddleHeight <= pongInfo.boardHeight) {
 			setOpponentY(nextPos); // to delete later
@@ -208,21 +216,14 @@ export default function Pong() {
 		context.fill();
 		context.strokeStyle = '#F2F2F2';
 		context.stroke();
-		// // draw net
-		// context.beginPath();
-		// context.strokeStyle = '#F2F2F2';
-		// context.lineWidth = 8;
-		// context.moveTo(pongInfo.boardWidth / 2, 0);
-		// context.lineTo(pongInfo.boardWidth / 2, pongInfo.boardHeight);
-		// context.stroke();
 		// draw score
 		context.font = '42px Inter';
 		context.fillText(' ' + playerScore, 245, 50);
 		context.fillText(' ' + opponentScore, 345, 50);
 	}
 
-	const handleMouseEvent: MouseEventHandler<HTMLDivElement> = (event) => {
-		const nextPos = event.clientY - pongInfo.boardHeight - (pongInfo.paddleHeight / 2);
+	const handleMouseEvent = (event: MouseEvent<HTMLDivElement>) => {
+		const nextPos = event.clientY - pongInfo.boardHeight + pongInfo.paddleHeight;
 
 		if (mode === MOUSE_MODE 
 			&& isRunning 
@@ -232,13 +233,17 @@ export default function Pong() {
 		}
 	}
 
-	const handleKeyboardEvent: KeyboardEventHandler<HTMLDivElement> = (keyCode) => {
-		console.log(keyCode);
-		// if (keyCode == PAUSE) {}
+	const handleKeyDownEvent = (event: KeyboardEvent<HTMLElement>) => {
 		if (mode === KEYBOARD_MODE && isRunning)
 		{
-			// if (keyCode == PLAYER_UP) {}
-			// if (keyCode == PLAYER_DOWN) {}
+			const nextPostUp = playerY - 20;
+			const nextPostDown = playerY + 20 + pongInfo.paddleHeight;
+			if (event.code === PLAYER_UP && nextPostUp >= 0) {
+				setPlayerY(y => y -= 20);
+			}
+			if (event.code === PLAYER_DOWN && nextPostDown <= pongInfo.boardHeight) {
+				setPlayerY(y => y += 20);
+			}
 		}
 	}
 	
@@ -252,7 +257,7 @@ export default function Pong() {
 					onMode={(mode) => {mode === "keyboard" ? setMode(KEYBOARD_MODE) : setMode(MOUSE_MODE)}}
 				/>
 			)}
-			<div className="outer_ground" onMouseMove={handleMouseEvent} onKeyPress={handleKeyboardEvent}>
+			<div className="outer_ground" onMouseMove={handleMouseEvent} onKeyDown={handleKeyDownEvent} tabIndex={0}>
 				<div className="divider_line"></div>
 				<div className="inner_ground">
 					<canvas 
@@ -264,5 +269,4 @@ export default function Pong() {
 			</div>
 		</>
 	);
-
 }
