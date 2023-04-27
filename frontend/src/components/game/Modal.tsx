@@ -92,21 +92,21 @@ export default function Modal({ buttonText, text, onStartPage, onTool, onDifficu
 				)}
 				{(!isGameOver && page === 1 && onDifficulty) && (
 					<DifficultyLevelPage
-						onBeginner={() => {onDifficulty("beginner"); onNextPage();}}
-						onMedium={() => {onDifficulty("medium"); onNextPage();}}
-						onHard={() => {onDifficulty("hard"); onNextPage();}}
+						onBeginner={() => {onDifficulty("beginner")}}
+						onMedium={() => {onDifficulty("medium")}}
+						onHard={() => {onDifficulty("hard")}}
 					/>
 				)}
 				{(!isGameOver && page === 2 && onTool) && (
 					<ToolModePage
-						onKeyboard={() => {onTool("keyboard"); onNextPage();}}
-						onMouse={() => {onTool("mouse"); onNextPage();}}
+						onKeyboard={() => {onTool("keyboard")}}
+						onMouse={() => {onTool("mouse")}}
 					/>
 				)}
 				{(!isGameOver && page === 3 && onPlayerMode) && (
 					<PlayerModePage
-						onSingle={() => {onPlayerMode("single"); onNextPage();}}
-						onDouble={() => {onPlayerMode("double"); onNextPage();}}
+						onSingle={() => {onPlayerMode("single")}}
+						onDouble={() => {onPlayerMode("double")}}
 					/>
 				)}
 				{(isGameOver || page === 4) && (

@@ -205,7 +205,7 @@ export default function Pong() {
 		}
 	}
 
-	const handleKeyDownEvent = (event: KeyboardEvent<HTMLElement>) => {
+	const handleKeyDownEvent = (event: KeyboardEvent<HTMLDivElement>) => {
 		if (toolMode === KEYBOARD_MODE && isRunning)
 		{
 			const nextPostUp = playerY - 20;
