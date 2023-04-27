@@ -2,5 +2,71 @@
 @import '../../../abstracts/variables.scss';
 
 .container {
-	height: 10rem;
+	width: 100%;
+	height: 7rem;
+	background-color: $dark-space-blue;
+
+	display: grid;
+	grid-template-columns: 2fr 1fr 2fr;
+	grid-template-rows: 1fr;
+	justify-content: center;
+	align-items: center;
+
+
+
+	// border: 0.2rem black solid;
+
+	.score {
+		@include flexBox();
+		color: white;
+
+		h1 {
+			font-size: 3rem;
+		}
+
+	}
+	.img {
+		height: 100%;
+		width: 100%;
+		background-color: coral ;
+
+	}
+
+	.card {
+		// background-color: aquamarine;
+		display: grid;
+		grid-template-columns: 7rem 2fr;
+		grid-template-rows: 7rem;
+		gap: 1rem;
+
+		justify-content: center;
+		align-items:center;
+
+	}
+
+	.cardM {
+		// background-color: cadetblue;
+		display: grid;
+		grid-template-columns: 2fr 7rem;
+		grid-template-rows: 7rem;
+		gap: 1rem;
+
+		justify-content: space-between;
+		align-items:center;
+
+		.info {
+			text-align: right;
+		}
+	}
+
+	p {
+		@include text-body();
+		color: white;
+
+	}
+
+	h1 {
+		@include text-header-xs();
+		color: white;
+	}
 }
