@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect, useLayoutEffect, MouseEvent, KeyboardEvent, FormEventHandler } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect, MouseEvent, KeyboardEvent } from 'react';
 import '../../sass/main.scss';
 import Modal from './Modal';
 
-const KEYBOARD_MODE = 1;
-const MOUSE_MODE = 2;
+const KEYBOARD_MODE = "keyboard";
+const MOUSE_MODE = "mouse";
 
 const PLAYER_WIN = 3;
 const OPPONENT_WIN = 4;
@@ -13,6 +13,13 @@ const OPPONENT_SIDE = 1;
 
 const PLAYER_UP = "ArrowUp";
 const PLAYER_DOWN = "ArrowDown";
+
+const BEGINNER_LEVEL = "beginner";
+const MEDIUM_LEVEL = "medium";
+const HARD_LEVEL = "hard";
+
+const SINGLE_MODE = "single";
+const DOUBLE_MODE = "double";
 
 type PongInfo = {
 	boardWidth: number;
@@ -58,46 +65,11 @@ export default function Pong() {
 	const [isRunning, setIsRunning] = useState(false);
 	const [gameOver, setGameOver] = useState(false);
 	const [winner, setWinner] = useState(0);
-	const [mode, setMode] = useState(MOUSE_MODE);
+	const [toolMode, setToolMode] = useState(MOUSE_MODE);
+	const [level, setLevel] = useState(BEGINNER_LEVEL);
+	const [playerMode, setPlayerMode] = useState(SINGLE_MODE);
 	// canvas
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
-
-	// render game
-	useEffect(() => {
-		const canvas = canvasRef.current;
-		if (!canvas)
-			return;
-		const context = canvas.getContext('2d');
-		if (!context)
-			return;
-
-		draw(context);
-		if (isRunning) {
-			moveBall();
-			detectWallCollision();
-			detectPlayerCollision();
-			detectOpponentCollision();
-			// check game status
-			if (opponentScore > pongInfo.winnerScore || playerScore > pongInfo.winnerScore) {
-				playerScore > pongInfo.winnerScore ? setWinner(PLAYER_WIN) : setWinner(OPPONENT_WIN);
-				setIsRunning(false);
-				setGameOver(true);
-			}
-		}
-			
-	}, [frameCount])
-	
-	// update the frameCount
-	useLayoutEffect(() => {
-		let frameId: any;
-		const render = () => {
-			setFrameCount(fc => fc + 1);
-			frameId = requestAnimationFrame(render);
-		}
-		render();
-
-		return () => {window.cancelAnimationFrame(frameId);}
-	}, [])
 	
 	const detectOpponentCollision = () => {
 		if (ballX + pongInfo.ballRadius >= opponentX && ballY > opponentY && ballY < opponentY + pongInfo.paddleHeight) {
@@ -225,7 +197,7 @@ export default function Pong() {
 	const handleMouseEvent = (event: MouseEvent<HTMLDivElement>) => {
 		const nextPos = event.clientY - pongInfo.boardHeight + pongInfo.paddleHeight;
 
-		if (mode === MOUSE_MODE 
+		if (toolMode === MOUSE_MODE 
 			&& isRunning 
 			&& nextPos >= 0 
 			&& nextPos + pongInfo.paddleHeight <= pongInfo.boardHeight) {
@@ -234,7 +206,7 @@ export default function Pong() {
 	}
 
 	const handleKeyDownEvent = (event: KeyboardEvent<HTMLElement>) => {
-		if (mode === KEYBOARD_MODE && isRunning)
+		if (toolMode === KEYBOARD_MODE && isRunning)
 		{
 			const nextPostUp = playerY - 20;
 			const nextPostDown = playerY + 20 + pongInfo.paddleHeight;
@@ -246,15 +218,54 @@ export default function Pong() {
 			}
 		}
 	}
+
+	// render game
+	useEffect(() => {
+		const canvas = canvasRef.current;
+		if (!canvas)
+			return;
+		const context = canvas.getContext('2d');
+		if (!context)
+			return;
+
+		draw(context);
+		if (isRunning) {
+			moveBall();
+			detectWallCollision();
+			detectPlayerCollision();
+			detectOpponentCollision();
+			// check game status
+			if (opponentScore > pongInfo.winnerScore || playerScore > pongInfo.winnerScore) {
+				playerScore > pongInfo.winnerScore ? setWinner(PLAYER_WIN) : setWinner(OPPONENT_WIN);
+				setIsRunning(false);
+				setGameOver(true);
+			}
+		}
+			
+	}, [frameCount])
 	
+	// update the frameCount
+	useLayoutEffect(() => {
+		let frameId: any;
+		const render = () => {
+			setFrameCount(fc => fc + 1);
+			frameId = requestAnimationFrame(render);
+		}
+		render();
+
+		return () => {window.cancelAnimationFrame(frameId);}
+	}, [])
+
 	return (
 		<>
 			{(!isRunning || gameOver) && (
 				<Modal 
 					buttonText={gameOver ? "Play again" : "Start playing"}
 					text={winner === PLAYER_WIN ? "You wins!" : "You lose!"}
-					onClickStart={() => restartGame(winner === PLAYER_WIN ? PLAYER_SIDE : OPPONENT_SIDE)}
-					onMode={(mode) => {mode === "keyboard" ? setMode(KEYBOARD_MODE) : setMode(MOUSE_MODE)}}
+					onStartPage={() => restartGame(winner === PLAYER_WIN ? PLAYER_SIDE : OPPONENT_SIDE)}
+					onTool={(mode) => {setToolMode(mode)}}
+					onDifficulty={(level) => {setLevel(level)}}
+					onPlayerMode={(mode) => {setPlayerMode(mode)}}
 				/>
 			)}
 			<div className="outer_ground" onMouseMove={handleMouseEvent} onKeyDown={handleKeyDownEvent} tabIndex={0}>
