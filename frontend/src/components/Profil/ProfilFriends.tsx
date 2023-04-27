@@ -1,7 +1,15 @@
-const ProfilMatchHistory = () => {
+import React from 'react';
+
+
+const ProfilMatchHistory: React.FC = () => {
 	return (
 		<div>
-			<h1>Friends List</h1>
+			<div>
+				<div>Image placeholder</div>
+				<div>
+					<h1></h1>
+				</div>
+			</div>
 		</div>
 	)
 }
