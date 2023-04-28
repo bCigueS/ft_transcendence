@@ -11,17 +11,9 @@
 	gap: 1rem;
 
 	.picture {
-		height: 15rem;
-		width: 15rem;
-		background-color: red;
-
-		background-repeat: no-repeat;
-		background-position: center center;
-		background-size: cover;
-
-		// background-image: $profil-pic;
-
+		@include pictureProfil($width: 15rem, $height: 15rem);
 	}
+
 
 	.user {
 		padding: 0.5rem 0;

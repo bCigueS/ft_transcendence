@@ -1,6 +1,6 @@
 import React from 'react';
 
-import classes from '../../../sass/components/Profil/Matches/MatchSummary.module.scss'
+import classes from '../../../sass/components/Profile/Matches/MatchSummary.module.scss'
 
 interface matchSummaryContent  {
 	imgP: string,

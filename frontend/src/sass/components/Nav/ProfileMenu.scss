@@ -1,4 +1,4 @@
-.profil-menu {
+.profile-menu {
 	position: relative;
 
 	@include flexBox($justify: space-around);
@@ -13,7 +13,7 @@
 		background-position: center center;
 		background-size: cover;
 
-		// background-image: url('../../assets/images/profil-pic.jpg');
+		background-image: $profile-pic2;
 	}
 
 	#{&}__items {
@@ -37,7 +37,7 @@
 
 			padding: 1rem 0;
 			border-bottom: 1px black solid;
-			.profil-menu__picture {
+			.profile-menu__picture {
 				height: 6.5rem;
 				width: 6.5rem;
 			}

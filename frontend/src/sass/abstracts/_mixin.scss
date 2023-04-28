@@ -49,3 +49,13 @@
 @mixin shadowBox($color: $light-vermillon) {
 	box-shadow: -8px 5px 0px 1px $color;
 }
+
+@mixin pictureProfil($url: $profile-pic, $width: 5rem, $height: 5rem) {
+	height: $width;
+	width: $height;
+
+	background-image: $url;
+	background-repeat: no-repeat;
+	background-position: center center;
+	background-size: cover;
+}

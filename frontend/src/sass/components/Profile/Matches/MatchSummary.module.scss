@@ -2,9 +2,9 @@
 @import '../../../abstracts/variables.scss';
 
 .container {
-	width: 100%;
-	height: 7rem;
-	background-color: $dark-space-blue;
+	min-width: 15rem;
+	height: 10rem;
+	background-color: $background-color;
 
 	display: grid;
 	grid-template-columns: 2fr 1fr 2fr;
@@ -12,44 +12,56 @@
 	justify-content: center;
 	align-items: center;
 
+	margin:0.6rem;
+	padding: 1rem 2rem;
+	border: 0.2rem $dark-space-blue solid;
+	background-color: $background-color;
+	@include shadowBox();
 
+	transition: min-width 0.5s ease-in-out ;
+
+	&:hover {
+		min-width: 95%;
+	}
 
 	// border: 0.2rem black solid;
 
 	.score {
 		@include flexBox();
-		color: white;
-
+		
 		h1 {
+			color: $dark-space-blue;
 			font-size: 3rem;
 		}
 
 	}
 	.img {
-		height: 100%;
-		width: 100%;
+		@include flexBox();
+		height: 5rem;
+		width: 5rem;
+		border-radius: 50%;
+		margin: 1rem;		
 		background-color: coral ;
 
 	}
 
 	.card {
-		// background-color: aquamarine;
+		width: 100%;
+		height: 100%;
 		display: grid;
 		grid-template-columns: 7rem 2fr;
 		grid-template-rows: 7rem;
-		gap: 1rem;
-
 		justify-content: center;
 		align-items:center;
 
 	}
 
 	.cardM {
-		// background-color: cadetblue;
+		width: 100%;
+		height: 100%;
 		display: grid;
 		grid-template-columns: 2fr 7rem;
 		grid-template-rows: 7rem;
-		gap: 1rem;
 
 		justify-content: space-between;
 		align-items:center;
@@ -61,12 +73,12 @@
 
 	p {
 		@include text-body();
-		color: white;
+		color: $dark-space-blue;
 
 	}
 
 	h1 {
 		@include text-header-xs();
-		color: white;
+		color: $dark-space-blue;
 	}
 }
