@@ -12,24 +12,24 @@ const ProfilIcon: React.FC = () => {
 	const [menuOpen, setMenuOpen] = useState(false);
 
 	const menuOptions: menuOption[] = [
-		{icon1: 'fa-solid fa-user', icon2: 'fa-solid fa-chevron-right', text: 'Profil', link: '/profil'},
+		{icon1: 'fa-solid fa-user', icon2: 'fa-solid fa-chevron-right', text: 'Profile', link: '/profile'},
 		{icon1: 'fa-solid fa-message', icon2: 'fa-solid fa-chevron-right', text: 'Message', link: '/privmessage'},
 		{icon1: 'fa-solid fa-right-from-bracket', icon2: 'fa-solid fa-chevron-right', text: 'Log out', link: '/'}
 	]
 
 	return (
-		<div className="profil-menu">
+		<div className="profile-menu">
 			<div
-				className="profil-menu__picture"
+				className="profile-menu__picture"
 				onClick={() => setMenuOpen((prev) => !prev)}>
 			</div>
 
 			{ menuOpen && (
-				<div className="profil-menu__items">
+				<div className="profile-menu__items">
 
 					<div className="header">
-						<div className="profil-menu__picture"></div>
-						<h1>Profil Name</h1>
+						<div className="profile-menu__picture"></div>
+						<h1>Profile Name</h1>
 					</div>
 					{
 						menuOptions.map(items => {

@@ -1,6 +1,6 @@
 import { Link, NavLink } from "react-router-dom"
 
-import ProfilMenu from "./ProfilMenu"
+import ProfileMenu from "./ProfileMenu"
 
 interface navItem {
 	text: string,
@@ -38,7 +38,7 @@ const Nav: React.FC = () => {
 						})
 					}
 				</ul>
-				<ProfilMenu />
+				<ProfileMenu />
 			</nav>
 		</header>
 	);

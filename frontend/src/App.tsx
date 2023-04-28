@@ -4,7 +4,7 @@ import { createBrowserRouter, RouterProvider} from 'react-router-dom';
 import RootLayout from './pages/RootLayout';
 import ErrorPage from './pages/Error';
 import Homepage from './pages/Homepage';
-import ProfilPage from './pages/Profil';
+import ProfilePage from './pages/Profile';
 import PrivateMessagePage from './pages/PrivateMessagePage';
 import ChatPage from './pages/Chat';
 import Game from './pages/Game';
@@ -22,7 +22,7 @@ const router = createBrowserRouter([
 		errorElement: <ErrorPage />,
 		children: [
 			{index: true, element: <Homepage />},
-			{path: 'profil', element: <ProfilPage />},
+			{path: 'profile', element: <ProfilePage />},
 			{path: 'privmessage', element: <PrivateMessagePage />},
 			{path: 'chat', element: <ChatPage />},
 			{path: 'pong', element: <Game />},
