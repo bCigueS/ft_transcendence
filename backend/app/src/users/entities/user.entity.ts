@@ -1,4 +1,5 @@
 import { User } from '@prisma/client';
+
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UserEntity implements User {
@@ -14,13 +15,13 @@ export class UserEntity implements User {
 	@ApiProperty()
 	password: string;
 
-	@ApiProperty({ required: false })
+	@ApiProperty()
 	avatar: string;
 
-	@ApiProperty({ required: false })
-	friends: User[]
+	// @ApiProperty({ required: false, type: () => [UserEntity] })
+	// friends?: Friendship[];
 
-	@ApiProperty({ required: false })
-	blocked: User[]
+	// @ApiProperty({ required: false })
+	// blocked?: User[];
 	
 }
