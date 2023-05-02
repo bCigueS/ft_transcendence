@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
+// import { Friendship } from '.prisma/client';
 
 export class CreateUserDto {
 	@IsString()
@@ -20,10 +21,13 @@ export class CreateUserDto {
     @ApiProperty()
     password: string;
 
+	@ApiProperty()
+	friends: any;
+
 	@IsString()
+	@IsNotEmpty()
 	@MaxLength(255)
-	@IsOptional()
-	@ApiProperty({ required: false, default: ''})
+	@ApiProperty()
 	avatar: string;
 
 }
