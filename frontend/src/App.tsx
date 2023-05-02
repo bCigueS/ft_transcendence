@@ -14,6 +14,7 @@ import AboutUs from './pages/AboutUs';
 import LoginPage from './pages/Login';
 
 import './sass/main.scss';
+import UsersContextProvider from './store/users-contexte';
 
 const router = createBrowserRouter([
 	{
@@ -34,12 +35,13 @@ const router = createBrowserRouter([
 	}
 ])
 
+
 const App: React.FC = () => {
 
 	return (
-		<div className="App">
+		<UsersContextProvider className="App">
 			<RouterProvider router={ router } />
-		</div>
+		</UsersContextProvider>
 	);
 }
 

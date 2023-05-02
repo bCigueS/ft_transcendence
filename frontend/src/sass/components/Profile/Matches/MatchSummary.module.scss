@@ -3,13 +3,14 @@
 
 .container {
 	min-width: 15rem;
+	width: 35rem;
 	height: 10rem;
 	background-color: $background-color;
 
 	display: grid;
 	grid-template-columns: 2fr 1fr 2fr;
 	grid-template-rows: 1fr;
-	justify-content: center;
+	justify-content: space-between;
 	align-items: center;
 
 	margin:0.6rem;
@@ -48,20 +49,22 @@
 	.card {
 		width: 100%;
 		height: 100%;
-		display: grid;
-		grid-template-columns: 7rem 2fr;
-		grid-template-rows: 7rem;
+		@include flexBox();
+		// display: grid;
+		// grid-template-columns: 7rem 2fr;
+		// grid-template-rows: 7rem;
 		justify-content: center;
 		align-items:center;
-
 	}
 
 	.cardM {
 		width: 100%;
 		height: 100%;
-		display: grid;
-		grid-template-columns: 2fr 7rem;
-		grid-template-rows: 7rem;
+		@include flexBox();
+
+		// display: grid;
+		// grid-template-columns: 2fr 7rem;
+		// grid-template-rows: 7rem;
 
 		justify-content: space-between;
 		align-items:center;
