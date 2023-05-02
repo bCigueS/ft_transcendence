@@ -3,7 +3,7 @@ import Modal from './Modal';
 import '../../sass/main.scss';
 import io from 'socket.io-client';
 
-const socket = io('localhost:3000');
+const socket = io('http://localhost:3001');
 
 // Modal's element
 const BEGINNER_LEVEL = "beginner";
@@ -74,21 +74,27 @@ export default function Pong() {
 	// canvas
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-	// useEffect(() => {
-	// 	socket.emit('join', { name: 'Fany', gameId: 19 }, ({ error }) => {});
-	// 	socket.on('welcome', ({ message, opponent }) => {
-	// 		console.log({ message, opponent });
-	// 	});
-	// 	socket.on('opponentJoin', ({ message, opponent }) => {
-	// 		console.log({ message, opponent });
-	// 	});
-	// 	socket.on('opponentMove', ({ from, to }) => {
-	// 		// set a move opponent function to receive opponent move event
-	// 	});
-	// 	socket.on('message', ({ message }) => {
-	// 		console.log({ message });
-	// 	});
-	// } [])
+
+	var i =  1;
+	useEffect(() => {
+		if (i++ === 1 && playerMode === DOUBLE_MODE)
+		{
+			// socket.emit('update', {x: ballX, y: ballY});
+			socket.emit('join', { name: 'Fany', level: level, gameId: 19 }, () => {});
+			socket.on('welcome', ({ message, opponent }) => {
+				console.log({ message, opponent });
+			});
+			socket.on('opponentJoin', ({ message, opponent }) => {
+				console.log({ message, opponent });
+			});
+			socket.on('opponentMove', ({ from, to }) => {
+				// set a move opponent function to receive opponent move event
+			});
+			socket.on('message', ({ message }) => {
+				console.log({ message });
+			});
+		}
+	}, [playerMode])
 	
 	const detectOpponentCollision = () => {
 		if (ballX + ballRadius >= info.opponentX && ballY > opponentY && ballY < opponentY + paddleHeight) {
@@ -231,11 +237,12 @@ export default function Pong() {
 	useEffect(() => {
 		const canvas = canvasRef.current;
 		if (!canvas)
-			return;
+		return;
 		const context = canvas.getContext('2d');
 		if (!context)
-			return;
-
+		return;
+		
+		
 		drawBoard(context);
 		if (isRunning) {
 			drawElement(context);
@@ -251,7 +258,7 @@ export default function Pong() {
 				setGameOver(true);
 			}
 		}
-			
+
 	}, [frameCount])
 	
 	// update the frameCount

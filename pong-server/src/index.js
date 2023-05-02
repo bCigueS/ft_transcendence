@@ -1,21 +1,28 @@
-const http = require('http');
-const socketio = require('socket.io');
 const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
 const cors = require('cors');
 const { game, addPlayer, removePlayer } = require('./game');
 
+const PORT = 3001;
 const app = express();
 const server = http.createServer(app);
-const PORT = 3000;
-const io = socketio(server);
 
 app.use(cors());
 
+const io = new Server(server, {
+	cors: {
+		origin: 'http://localhost:3000',
+	},
+});
+
+
 io.on('connection', (socket) => {
-	socket.on('join', ({ name, gameId }, callback) => {
+	socket.on('join', ({ name, level, gameId }, callback) => {
 		const { error, player, opponent } = addPlayer({
 			name,
 			playerId: socket.id,
+			level,
 			gameId,
 		});
 		if (error) {
@@ -53,9 +60,9 @@ io.on('connection', (socket) => {
 			io.to(player.game).emit('message', {
 				message: `${player.name} has left the game`,
 			});
-			socket.broadcast.to(Player.game).emit('opponentLeft');
+			socket.broadcast.to(player.game).emit('opponentLeft');
 		}
 	});
 });
 
-server.listen(PORT, () => console.log('Server is running on port ' + PORT));
+server.listen(PORT, () => {console.log('Server is running on port ' + PORT)});
