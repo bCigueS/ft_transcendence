@@ -1,36 +1,31 @@
 import React from 'react';
 
 import classes from '../../../sass/components/Profile/Matches/MatchSummary.module.scss'
+import { UserMatch, User } from '../../../store/users-contexte';
+import ProfilIcon from '../ProfilIcon';
 
-interface matchSummaryContent  {
-	imgP: string,
-	imgO: string,
-	nameP: string,
-	nameO: string,
-	statusP: string,
-	statusO: string,
-	score: string
-}
 
-const MatchSummary: React.FC<{summary: matchSummaryContent}> = (props) => {
+const MatchSummary: React.FC<{summary: UserMatch; user: User}> = (props) => {
 	return (
 		<div className={classes.container}>
+
+			
 			<div className={classes.card}>
-				<div className={classes.img}>{props.summary.imgP}</div>
+				<ProfilIcon user={props.user} />
 				<div>
-					<h1>{props.summary.nameP}</h1>
-					{/* <p>{props.summary.statusP}</p>  */}
+					<h1>{props.user.nickname}</h1>
 				</div>
 			</div>
+
 			<div className={classes.score}>
-				<h1>{props.summary.score}</h1>
+				<h1>{props.summary.playerScore}:{props.summary.opponentScore}</h1>
 			</div>
+
 			<div className={classes.cardM}>
+				<ProfilIcon user={props.summary.opponent} />
 				<div className={classes.info}>
-					<h1>{props.summary.nameO}</h1>
-					{/* <p>{props.summary.statusO}</p> */}
+					<h1>{props.summary.opponent.nickname}</h1>
 				</div>
-				<div className={classes.img}>{props.summary.imgO}</div>
 			</div>
 		</div>
 	);
