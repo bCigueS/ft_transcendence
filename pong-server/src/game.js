@@ -1,16 +1,19 @@
 const games = {};
 
 class Player {
-	constructor(name, playerId, gameId) {
+	constructor(name, playerId, level, gameId) {
 		this.name = name;
 		this.playerId = playerId;
+		this.level = level;
 		this.gameId = gameId
 	}
 };
 
-const addPlayer = ({ gameId, name, playerId }) => {
+const game = (id) => games[id];
+
+const addPlayer = ({ name, playerId, level, gameId }) => {
 	if (!games[gameId]) {
-		const player = new Player(name, playerId, gameId);
+		const player = new Player(name, playerId, level, gameId);
 		games[gameId] = [player];
 		return {
 			message: 'Joined successfully',
@@ -23,14 +26,17 @@ const addPlayer = ({ gameId, name, playerId }) => {
 		return { error: 'This game is full' };
 	}
 
-	const opponent = games[gameId][0];
-	const player = new Player(name, playerId, gameId);
-	games[gameId].push(player);
+	if (games[gameId][0].level === level)
+	{
+		const opponent = games[gameId][0];
+		const player = new Player(name, playerId, level, gameId);
+		games[gameId].push(player);
 
-	return {
-		message: 'Added successfully',
-		opponent,
-		player,
+		return {
+			message: 'Added successfully',
+			opponent,
+			player,
+		}
 	}
 };
 
@@ -44,8 +50,6 @@ const removePlayer = (playerId) => {
 		}
 	}
 };
-
-const game = (id) => games[id];
 
 module.exports = {
 	addPlayer,
