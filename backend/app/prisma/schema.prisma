@@ -1,9 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-	provider = "prisma-client-js"
-	binaryTargets = ["native"]
+  provider      = "prisma-client-js"
+  binaryTargets = ["native"]
 }
 
 datasource db {
@@ -12,12 +9,24 @@ datasource db {
 }
 
 model User {
-	id			Int     @id @default(autoincrement())
-	email		String
-	name		String	@unique
-	password	String
-	avatar		String?	@default("") @db.VarChar(255)
-	
-	
+  id        Int          @id @default(autoincrement())
+  email     String
+  name      String       @unique
+  password  String
+  avatar    String
+  friends   Friendship[]  @relation(name: "friends")
+  followers Friendship[]  @relation(name: "followers")
+  
   @@map("users")
+}
+
+model Friendship {
+  id        Int  @id @default(autoincrement())
+
+  MyId      Int
+  friendId  Int
+  friends   User @relation(name: "friends", fields: [friendId], references: [id])
+  followers   User @relation(name: "followers", fields: [MyId], references: [id])
+ 
+  @@map("friends")
 }
