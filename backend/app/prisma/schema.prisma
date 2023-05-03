@@ -16,6 +16,9 @@ model User {
   avatar    String
   friends   Friendship[]  @relation(name: "friends")
   followers Friendship[]  @relation(name: "followers")
+
+  blocked   Block[]  @relation(name: "blocked")
+  haters    Block[]  @relation(name: "haters")
   
   @@map("users")
 }
@@ -29,4 +32,15 @@ model Friendship {
   followers   User @relation(name: "followers", fields: [MyId], references: [id])
  
   @@map("friends")
+}
+
+model Block {
+  id        Int  @id @default(autoincrement())
+
+  MyId      Int
+  blockedId Int
+  blocked   User @relation(name: "blocked", fields: [blockedId], references: [id])
+  haters     User @relation(name: "haters", fields: [MyId], references: [id])
+ 
+  @@map("blocked")
 }
