@@ -12,7 +12,7 @@ class Player {
 const game = (id) => games[id];
 
 const addPlayer = ({ name, playerId, level, gameId }) => {
-	if (!games[gameId]) {
+	if (!games[gameId] || games[gameId][0].level !== level) {
 		const player = new Player(name, playerId, level, gameId);
 		games[gameId] = [player];
 		return {
@@ -25,7 +25,6 @@ const addPlayer = ({ name, playerId, level, gameId }) => {
 	if (games[gameId].length >= 2) {
 		return { error: 'This game is full' };
 	}
-
 	if (games[gameId][0].level === level)
 	{
 		const opponent = games[gameId][0];
@@ -56,3 +55,5 @@ module.exports = {
 	game,
 	removePlayer,
 }
+
+// export { addPlayer, game, removePlayer }
