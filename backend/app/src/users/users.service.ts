@@ -69,11 +69,38 @@ export class UsersService {
       },
       include: {
         friends: true,
-        followers: true
+        // followers: true
       }
     });
 
     return friendship.friends;
+
+  }
+
+  async removeFriend(id: number, friendId: number) {
+
+  
+    const user = await this.prisma.user.findUnique({ where: { id: id } });
+    const friend = await this.prisma.user.findUnique({ where: { id: friendId } });
+   
+    const existingFriendship = await this.prisma.friendship.findFirst({
+      where: {
+        MyId: id,
+        friendId: friendId,
+      },
+    });
+  
+    if (!existingFriendship) {
+      throw new BadRequestException('Cannot remove user from friend list since its not your friend.');
+    }
+
+    await this.prisma.friendship.delete({
+        where: {
+          id: existingFriendship.id,
+        },
+    });
+
+    return this.showFriends(id);
 
   }
 
@@ -87,13 +114,12 @@ export class UsersService {
       },
       include: {
         friends: true,
-        followers: true,
+        // followers: true,
       },
     });
 
     const friendsList = existingFriendships.map((friendship) => friendship.friends);
 
-    // return friendsList;
     return existingFriendships;
   }
 
