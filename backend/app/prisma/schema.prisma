@@ -14,7 +14,7 @@ model User {
   email     String
   name      String       @unique
   password  String
-  avatar    String
+  avatar    String?       @default("uploads/default.jpg")
   
   friends   Friendship[]  @relation(name: "friends")
   followers Friendship[]  @relation(name: "followers")
