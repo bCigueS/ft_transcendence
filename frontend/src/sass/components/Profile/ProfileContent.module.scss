@@ -28,11 +28,6 @@
 			border-bottom: none;
 			background-color: $almost-white;
 		}
-
-		.btn:hover {
-			// background-color: $silver;
-
-		}
 	}
 
 	.tabContent {
@@ -41,9 +36,10 @@
 		overflow: scroll !important;
 		background-color: $almost-white;
 		height: 100%;
-		padding: 1rem;
+		padding: 2rem;
 		overflow: hidden;
 		overflow-x: hidden !important;
+		overflow-y: hidden !important;
 		border: 0.2rem solid black;
 		
 		.listContent {
