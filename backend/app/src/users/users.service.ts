@@ -222,4 +222,19 @@ export class UsersService {
     return community;
   }
 
+  async updateAvatar(id: number, avatarPath: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: id } });
+  
+    if (!user) {
+      throw new NotFoundException(`User with ${id} does not exist.`);
+    }
+  
+    console.log(avatarPath);
+    
+    return this.prisma.user.update({
+      where: { id: id },
+      data: { avatar: avatarPath },
+    });
+  }
+
 }

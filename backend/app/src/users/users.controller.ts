@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, NotFoundException, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, NotFoundException, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -8,6 +8,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AddFriendDto } from './dto/add-friend.dto';
 import { BlockingDto } from './dto/blocking.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('users') @ApiTags('users')
 export class UsersController {
@@ -161,4 +162,18 @@ export class UsersController {
 		return this.usersService.showCommunity(id);
 	}
 
+	@Post(':id/avatar')
+	// @UseGuards(JwtAuthGuard)
+	// @ApiBearerAuth()
+	@ApiOkResponse({ type: UserEntity })
+	@UseInterceptors(FileInterceptor('avatar'))
+	async uploadAvatar(
+		@Param('id', ParseIntPipe) id: number,
+		@Body() filePath: string) {
+
+		// console.log(file.originalname);
+
+		return this.usersService.updateAvatar(id, filePath);
+	}
+	
 }
