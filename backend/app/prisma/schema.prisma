@@ -10,10 +10,12 @@ datasource db {
 
 model User {
   id        Int          @id @default(autoincrement())
+
   email     String
   name      String       @unique
   password  String
   avatar    String
+  
   friends   Friendship[]  @relation(name: "friends")
   followers Friendship[]  @relation(name: "followers")
 
