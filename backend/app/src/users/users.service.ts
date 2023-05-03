@@ -203,4 +203,23 @@ export class UsersService {
     return blockedUsers;
   }
 
+  async showCommunity(id: number) {
+  
+    const user = await this.prisma.user.findMany({ 
+      where: { id: id }
+    });
+
+    const blocked = await this.showBlockedUsers(id);
+
+    const blockedUserIds = blocked.map((block) => block.id);
+
+    const community = await this.prisma.user.findMany({
+      where: {
+        id: { notIn: blockedUserIds.concat(id) },
+      },
+    });
+    
+    return community;
+  }
+
 }
