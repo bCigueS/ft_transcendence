@@ -7,6 +7,7 @@ import { UserEntity } from './entities/user.entity';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AddFriendDto } from './dto/add-friend.dto';
+import { BlockingDto } from './dto/blocking.dto';
 
 @Controller('users') @ApiTags('users')
 export class UsersController {
@@ -100,6 +101,52 @@ export class UsersController {
 			throw new NotFoundException(`User with ${id} does not exist.`);
 
 		return this.usersService.showFriends(id);
+	}
+
+	@Patch(':id/block-user')
+	// @UseGuards(JwtAuthGuard)
+	// @ApiBearerAuth()
+	@ApiOkResponse({ type: UserEntity })
+	async blockUser(@Param('id', ParseIntPipe) id: number, @Body() blockingDto: BlockingDto) {
+		const user = await this.usersService.findOne(id);
+		if (!user)
+			throw new NotFoundException(`User with ${id} does not exist.`);
+
+		const blockedId = blockingDto.blockedId;
+		const toBlock = await this.usersService.findOne(blockedId);
+		if (!toBlock)
+			throw new NotFoundException(`User with ${blockedId} does not exist.`);
+
+		return this.usersService.blockUser(id, blockedId);
+	}
+
+	@Patch(':id/unblock-user')
+	// @UseGuards(JwtAuthGuard)
+	// @ApiBearerAuth()
+	@ApiOkResponse({ type: UserEntity })
+	async unblockUser(@Param('id', ParseIntPipe) id: number, @Body() blockingDto: BlockingDto) {
+		const user = await this.usersService.findOne(id);
+		if (!user)
+			throw new NotFoundException(`User with ${id} does not exist.`);
+
+		const blockedId = blockingDto.blockedId;
+		const toUnblock = await this.usersService.findOne(blockedId);
+		if (!toUnblock)
+			throw new NotFoundException(`User with ${blockedId} does not exist.`);
+
+		return this.usersService.unblockUser(id, blockedId);
+	}
+
+	@Get(':id/show-blocked-users')
+	// @UseGuards(JwtAuthGuard)
+	// @ApiBearerAuth()
+	@ApiOkResponse({ type: UserEntity })
+	async seeBlockedUsers(@Param('id', ParseIntPipe) id: number) {
+		const user = await this.usersService.findOne(id);
+		if (!user)
+			throw new NotFoundException(`User with ${id} does not exist.`);
+
+		return this.usersService.showBlockedUsers(id);
 	}
 
 }
