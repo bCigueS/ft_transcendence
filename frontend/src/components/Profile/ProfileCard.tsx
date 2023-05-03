@@ -3,6 +3,7 @@ import React, { useContext } from 'react';
 import { UserContext } from '../../store/users-contexte';
 
 import classes from '../../sass/components/Profile/ProfileCardInfo.module.scss';
+import ProfilIcon from './ProfilIcon';
 
 const ProfileCard: React.FC = () => {
 
@@ -10,7 +11,7 @@ const ProfileCard: React.FC = () => {
 
 	return (
 		<div className={classes.container}>
-			<div className={classes.picture}></div>
+			<ProfilIcon user={userCtx.user} displayCo={false} size={['15rem', '15rem']}/>
 			<div className={classes.user}>
 				<h1>{userCtx.user.nickname}</h1>
 				<p>{userCtx.user.login}</p>

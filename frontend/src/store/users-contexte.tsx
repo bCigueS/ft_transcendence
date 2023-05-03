@@ -97,13 +97,15 @@ export const UserContext = React.createContext<{
 		blockUser: (user: User) => void;
 		unblockUser: (user: User) => void;
 		unfriendUser: (user: User) => void;
-		changeNickname: (newNickname: string) => void
+		changeNickname: (newNickname: string) => void;
+		updateImage: (newImage: string) => void;
 	}>({
 	user: simonUser,
 	blockUser: (user: User) => {},
 	unblockUser: (user: User) => {},
 	unfriendUser: (user: User) => {},
-	changeNickname: (newNickname: string) => {}
+	changeNickname: (newNickname: string) => {},
+	updateImage: (newImage: string) => {}
 });
 
 type Props = {
@@ -146,12 +148,20 @@ const UsersContextProvider: React.FC<Props> = ( {children, className} ) => {
 		}));
 	};
 
+	const changeProfilPicture = (newImage: string) => {
+		setUser(prevState => ({
+			...prevState,
+			profilePic: newImage
+		}));
+	};
+
 	const contextValue = {
 		user: user,
 		blockUser: addBlockUser,
 		unblockUser: removeBlockUser,
 		unfriendUser: removeFriendUser,
-		changeNickname: changeNickname
+		changeNickname: changeNickname,
+		updateImage: changeProfilPicture
 	};
 
 	return (

@@ -10,11 +10,6 @@
 	@include flexBox($justify: top, $align: left);
 	gap: 1rem;
 
-	.picture {
-		@include pictureProfil($width: 15rem, $height: 15rem);
-	}
-
-
 	.user {
 		padding: 0.5rem 0;
 		border-bottom: 0.2rem black solid;
