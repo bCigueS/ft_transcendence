@@ -16,7 +16,7 @@
         - [ ] **User**
             - [X] CRUD for user
             - [ ] User upload image
-            - [ ] add friend
+            - [X] add friend
             - [ ] see friend's status
             - [ ] login status
         - [ ] **Game**
