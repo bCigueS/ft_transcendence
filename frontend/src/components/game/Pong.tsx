@@ -34,7 +34,12 @@ type PongInfo = {
 	winnerScore: number;
 }
 
-export default function Pong() {
+type PongProps = {
+	username: string;
+	gameId: string;
+}
+
+export default function Pong({username, gameId}: PongProps) {
 	const info: PongInfo = {
 		boardWidth: 640,
 		boardHeight: 480,
@@ -74,25 +79,43 @@ export default function Pong() {
 	// canvas
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
+	let client = {};
 
-	var i =  1;
 	useEffect(() => {
-		if (i++ === 1 && playerMode === DOUBLE_MODE)
+		if (playerMode === DOUBLE_MODE)
 		{
+			socket.emit('newPlayer', {name: username, gameId: gameId, level: level});
+			// socket.on('updatePlayers', ply => {
+			// 	playersFound = {};
+			// 	for (let id in ply)
+			// 	{
+			// 		if (client[id] === undefined && id !== socket.id) {
+			// 			console.log("created opponent");
+			// 		}
+			// 		playersFound[id] = true;
+			// 	}
+			// 	for (let id in clientBalls) {
+			// 		if (!playerFound[id]) {
+			// 			client[id].remove();
+			// 			delete client[id];
+			// 		}
+
+			// 	}
+
+			// })
 			// socket.emit('update', {x: ballX, y: ballY});
-			socket.emit('join', { name: 'Fany', level: level, gameId: 19 }, () => {});
-			socket.on('welcome', ({ message, opponent }) => {
-				console.log({ message, opponent });
-			});
-			socket.on('opponentJoin', ({ message, opponent }) => {
-				console.log({ message, opponent });
-			});
-			socket.on('opponentMove', ({ from, to }) => {
-				// set a move opponent function to receive opponent move event
-			});
-			socket.on('message', ({ message }) => {
-				console.log({ message });
-			});
+			// socket.emit('join', { name: username, level: level, gameId: gameId }, ({ error, loading }) => {
+			// 	console.log({ loading });
+			// });
+			// socket.on('welcome', ({ message, opponent }) => {
+			// 	console.log({ message, opponent });
+			// });
+			// socket.on('opponentJoin', ({ message, opponent }) => {
+			// 	console.log({ message, opponent });
+			// });
+			// socket.on('message', ({ message }) => {
+			// 	console.log({ message });
+			// });
 		}
 	}, [playerMode])
 	
@@ -198,6 +221,10 @@ export default function Pong() {
 			&& nextPos >= 0 
 			&& nextPos + paddleHeight <= info.boardHeight) {
 			setOpponentY(nextPos);
+		} else if (playerMode === DOUBLE_MODE) {
+			socket.on('paddleMove', ({y}) => {
+				setOpponentY(y);
+			});
 		}
 	}
 	
@@ -246,7 +273,7 @@ export default function Pong() {
 		drawBoard(context);
 		if (isRunning) {
 			drawElement(context);
-			moveBall();
+			// moveBall();
 			moveOpponent();
 			detectWallCollision();
 			detectPlayerCollision();
@@ -291,9 +318,15 @@ export default function Pong() {
 			const nextPostDown = playerY + 20 + paddleHeight;
 			if (event.code === "ArrowUp" && nextPostUp >= 0) {
 				setPlayerY(y => y -= 20);
+				if (playerMode === DOUBLE_MODE) {
+					socket.emit('opponentMove', {y: nextPostUp, gameId: '19'});
+				}
 			}
 			if (event.code === "ArrowDown" && nextPostDown <= info.boardHeight) {
 				setPlayerY(y => y += 20);
+				if (playerMode === DOUBLE_MODE) {
+					socket.emit('opponentMove', {y: nextPostDown, gameId: '19'});
+				}
 			}
 		}
 	}
