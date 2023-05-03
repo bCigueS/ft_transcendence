@@ -73,6 +73,23 @@ export class UsersController {
 		return this.usersService.addFriend(id, friendId);
 	}
 
+	@Patch(':id/remove-friend')
+	// @UseGuards(JwtAuthGuard)
+	// @ApiBearerAuth()
+	@ApiOkResponse({ type: UserEntity })
+	async removeFriend(@Param('id', ParseIntPipe) id: number, @Body() addFriendDto: AddFriendDto) {
+		const user = await this.usersService.findOne(id);
+		if (!user)
+			throw new NotFoundException(`User with ${id} does not exist.`);
+
+		const friendId = addFriendDto.friendId;
+		const friend = await this.usersService.findOne(friendId);
+		if (!friend)
+			throw new NotFoundException(`Friend with ${friendId} does not exist.`);
+
+		return this.usersService.removeFriend(id, friendId);
+	}
+
 	@Get(':id/show-friends')
 	// @UseGuards(JwtAuthGuard)
 	// @ApiBearerAuth()
