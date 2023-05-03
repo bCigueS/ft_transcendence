@@ -16,7 +16,15 @@
         - [ ] **User**
             - [X] CRUD for user
             - [ ] User upload image
-            - [X] add friend
+            - [ ] Friend
+                - [X] add friend
+                - [X] remove friend
+                - [X] show all friend
+            - [ ] Blocked
+                - [X] block user
+                - [X] unblock user
+                - [X] show blocked users
+            - [ ] see community (all users in db except blocked ones)
             - [ ] see friend's status
             - [ ] login status
         - [ ] **Game**
