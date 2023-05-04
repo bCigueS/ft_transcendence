@@ -1,0 +1,46 @@
+@import '../../abstracts/mixin.scss';
+@import '../../abstracts/variables.scss';
+
+.container {
+	height: 75px;
+	margin: 1rem 2rem;
+	padding: 1rem;
+	padding-right: 4rem;
+	border: 0.2rem solid black;
+	display: grid;
+	gap: 2rem;
+	justify-content: center;
+	align-items: center;
+	grid-template-columns: 6rem 6rem 1fr;
+	grid-template-rows: 1fr;
+	transition: height 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+
+	.icon {
+		margin-left: 2rem;
+		@include flexBox($direction: row);
+		i {
+			&:hover {
+				animation: scaleButton 0.5s ease-in-out;
+				color:$light-vermillon;
+			}
+		}
+	}
+	&:hover {
+		height: 10rem;
+		@include shadowBox();
+	}
+}
+
+@keyframes scaleButton {
+	0% {
+		transform: scale(1);
+	}
+
+	30% {
+		transform: scale(1.2);
+	}
+
+	100% {
+		transform: scale(1);
+	}
+}

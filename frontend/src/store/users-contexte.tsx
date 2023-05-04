@@ -4,6 +4,8 @@ import OliviaPic from '../assets/images/owalsh.jpg';
 import FanyPic from '../assets/images/foctavia.jpg';
 import YangPic from '../assets/images/ykuo.jpg';
 import SimonPic from '../assets/images/profile-pic.jpg';
+import Dummy1Pic from '../assets/images/Dog_Breeds.jpg';
+import Dummy2Pic from '../assets/images/corgi.jpeg';
 
 export type UserMatch = {
 	opponent: User,
@@ -66,6 +68,32 @@ const ychiUser: User = {
 	doubleAuth: false
 }
 
+const dummy1: User = {
+	login: 'Dummy',
+	nickname: 'Dum1',
+	wins: 0,
+	lose: 99,
+	profilePic: Dummy1Pic,
+	friends: [],
+	block: [],
+	matchs: [],
+	connected: false,
+	doubleAuth: false
+}
+
+const dummy2: User = {
+	login: 'Corgi',
+	nickname: 'Corg',
+	wins: 99,
+	lose: 0,
+	profilePic: Dummy2Pic,
+	friends: [],
+	block: [],
+	matchs: [],
+	connected: false,
+	doubleAuth: false
+}
+
 const match1: UserMatch = {
 	opponent: fanyUser,
 	playerScore: 2,
@@ -91,9 +119,19 @@ const simonUser: User = {
 	doubleAuth: false
 }
 
+const userList: User[] = [
+	simonUser,
+	fanyUser,
+	oliviaUser,
+	ychiUser,
+	dummy1,
+	dummy2
+]
+
 
 export const UserContext = React.createContext<{
-		user: User; 
+		user: User;
+		userList: User[];
 		blockUser: (user: User) => void;
 		unblockUser: (user: User) => void;
 		unfriendUser: (user: User) => void;
@@ -101,6 +139,7 @@ export const UserContext = React.createContext<{
 		updateImage: (newImage: string) => void;
 	}>({
 	user: simonUser,
+	userList: userList,
 	blockUser: (user: User) => {},
 	unblockUser: (user: User) => {},
 	unfriendUser: (user: User) => {},
@@ -157,6 +196,7 @@ const UsersContextProvider: React.FC<Props> = ( {children, className} ) => {
 
 	const contextValue = {
 		user: user,
+		userList: userList,
 		blockUser: addBlockUser,
 		unblockUser: removeBlockUser,
 		unfriendUser: removeFriendUser,

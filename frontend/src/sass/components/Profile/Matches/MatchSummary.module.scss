@@ -3,8 +3,8 @@
 
 .container {
 	min-width: 15rem;
-	width: 35rem;
-	height: 10rem;
+	width: 25rem;
+	max-height: 10rem;
 	background-color: $background-color;
 
 	display: grid;

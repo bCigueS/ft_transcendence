@@ -18,8 +18,10 @@
 
 	#{&}__items {
 		position: absolute;
-		width: 25rem;
+		min-width: 25rem;
+		right: -1.5rem;
 		top: 9rem;
+		z-index: 10;
 
 		background-color: $almost-white;
 		border: 0.3rem black solid;

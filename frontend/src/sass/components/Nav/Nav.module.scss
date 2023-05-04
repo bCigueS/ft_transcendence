@@ -1,0 +1,67 @@
+@import '../../abstracts/mixin.scss';
+@import '../../abstracts/variables.scss';
+
+
+.nav {
+	max-height: 10rem;
+	max-width: 110rem;
+	min-width: 70rem;
+	margin: 1rem 3rem;
+	padding: 2rem;
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	grid-template-rows: 1fr;
+	justify-content: space-between;
+	align-items: center;
+	background-color: $almost-white;
+
+
+	@include shadowBox();
+
+	border: 0.3rem black solid;
+	.menu {
+		@include flexBox($direction: row, $justify: center);
+		max-width: 50rem;
+		
+		
+		.item {
+			@include flexBox($justify: center);
+			position: relative;
+			max-width: 10rem;
+			max-height: 3rem;
+			padding: 0.5rem 0.5rem;
+			margin: 0 0.5rem;
+			background-color:$background-color;
+
+			border: 0.2rem black solid;
+			transform-style: preserve-3d;
+			
+			&::before {
+				content: '';
+				position: absolute;
+				height: 100%;
+				width: 100%;
+				border: 0.1rem solid $light-vermillon;
+				background: $light-vermillon-gradient;
+				transform: translateZ(-1px);
+				z-index: -1;
+				bottom: -2px;
+				left: -2px;
+				transition: all 0.3s;
+			}
+			
+			&:hover::before {
+				bottom: -8px;
+				left: -8px;
+			}
+		}
+
+		a {
+			color: $dark-space-blue;
+			font-size: 1.4rem;
+			padding: 1rem 3rem;
+		}
+	}
+
+}
+
