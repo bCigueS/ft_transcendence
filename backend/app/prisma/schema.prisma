@@ -31,7 +31,7 @@ model Friendship {
   MyId      Int
   friendId  Int
   friends   User @relation(name: "friends", fields: [friendId], references: [id])
-  followers   User @relation(name: "followers", fields: [MyId], references: [id])
+  followers User @relation(name: "followers", fields: [MyId], references: [id])
  
   @@map("friends")
 }
