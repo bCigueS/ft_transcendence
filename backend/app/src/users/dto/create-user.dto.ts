@@ -25,8 +25,8 @@ export class CreateUserDto {
 	friends: any;
 
 	@IsString()
-	@IsNotEmpty()
 	@MaxLength(255)
+	@IsOptional()
 	@ApiProperty()
 	avatar: string;
 

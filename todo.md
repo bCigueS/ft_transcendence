@@ -16,23 +16,25 @@
         - [ ] **User**
             - [X] CRUD for user
             - [ ] User upload image
-            - [ ] Friend
+            - [X] Friend
                 - [X] add friend
                 - [X] remove friend
                 - [X] show all friend
-            - [ ] Blocked
+            - [X] Blocked
                 - [X] block user
                 - [X] unblock user
                 - [X] show blocked users
-            - [ ] see community (all users in db except blocked ones)
-            - [ ] see friend's status
-            - [ ] login status
+            - [X] see community (all users in db except blocked ones)
+            - [ ] see friend's status - after authentication done
+            - [ ] login status - after authentication done
         - [ ] **Game**
             - [ ] CRUD for game
             - [ ] match user for game
             - [ ] game history
             - [ ] game stat (calculation)
         - [ ] **Message**
+            - [ ] CRUD for message
+        - [ ] **Channel**
             - [ ] CRUD for message
     - [ ] Cyber security
         - [ ] Hash Password
