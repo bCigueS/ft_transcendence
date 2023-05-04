@@ -11,17 +11,28 @@ const ProfilSettings: React.FC<{user: User}> = ( props ) => {
 
 	const settingTextInput = useRef<HTMLInputElement>(null);
 
+	const textInputEmpty = (input: string) => {
+		return input.trim().length === 0;
+	}
+
 	const submitHandler = (event: React.FormEvent) => {
 		event.preventDefault();
 		const enteredText = settingTextInput.current!.value;
+
+		if (image !== null || !textInputEmpty(enteredText)) {
+			if (image !== null) {
+				userCtx.updateImage(preview);
+				setPreview(preview);
+			}
+			if (!textInputEmpty(enteredText)) {
+				userCtx.changeNickname(enteredText);
+				settingTextInput.current!.value = '';
+			}
+		}
 		if (enteredText.trim().length === 0 || enteredText.trim().length > 12) {
 			settingTextInput.current!.value = '';
 			return ;
 		}
-		userCtx.changeNickname(enteredText);
-		settingTextInput.current!.value = '';
-		userCtx.updateImage(preview);
-		setPreview(preview);
 	}
 
 	const imageChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,7 +42,7 @@ const ProfilSettings: React.FC<{user: User}> = ( props ) => {
 	}
 
 	return (
-		<form className={classes.container} onSubmit={submitHandler}>
+		<form className={classes.container} onSubmit={submitHandler} autoComplete='off'>
 			<div className={classes.grid}>
 				<div className={classes.name}>
 					<label htmlFor="text">Nickname</label>
@@ -45,7 +56,7 @@ const ProfilSettings: React.FC<{user: User}> = ( props ) => {
 							<img src={preview} alt="" />
 						</div>
 					</label>
-					<input className={classes.file} type="file" name='file' id='profil' onChange={imageChangeHandler}/>
+					<input className={classes.file} type="file" name='file' id='profil' onChange={imageChangeHandler} multiple/>
 				</div>
 
 				<div className={classes.auth}>
