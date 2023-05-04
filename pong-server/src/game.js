@@ -12,27 +12,28 @@ class Player {
 const game = (id) => games[id];
 
 const addPlayer = ({ name, playerId, level, gameId }) => {
-	if (!games[gameId] || games[gameId][0].level !== level) {
+	if (!games[gameId]) {
 		const player = new Player(name, playerId, level, gameId);
 		games[gameId] = [player];
 		return {
-			message: 'Joined successfully',
-			opponent: null,
 			player,
+			opponent: null,
+			message: 'Created game room ' + gameId + ' on ' + level + ' level successfully, please wait for other player to join',
 		};
 	}
 
 	if (games[gameId].length >= 2) {
-		return { error: 'This game is full' };
+		return { full: 'This game room is full' };
 	}
-	if (games[gameId][0].level === level)
+
+	if (games[gameId] && games[gameId][0] && games[gameId][0].level === level)
 	{
 		const opponent = games[gameId][0];
 		const player = new Player(name, playerId, level, gameId);
 		games[gameId].push(player);
 
 		return {
-			message: 'Added successfully',
+			message: 'Joined game room ' + gameId + ' on ' + level + ' level successfully',
 			opponent,
 			player,
 		}

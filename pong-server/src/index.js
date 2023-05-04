@@ -22,69 +22,66 @@ const io = new Server(server, {
 	},
 });
 
-let ply = {};
+let room = 1;
 
 io.on('connection', (socket) => {
-	socket.on('newPlayer', data => {
-		console.log("New client connected, with id: " + socket.id);
-		ply[socket.id] = data;
-		console.log("name of player: " + ply[socket.id].name + ", level: " + ply[socket.id].level + " , gameId: " + ply[socket.id].gameId);
-		console.log("Current number of players: " + Object.keys(ply).length);
-		console.log("players dictionary: ", ply);
-		io.emit('updatePlayers', ply);
-	})
-	socket.on('disconnect', function() {
-		delete ply[socket.id];
-		console.log("Goodbye client with id " + socket.id);
-		console.log("Current number of players: " + Object.keys(ply).length);
-		io.emit('updatePlayers', ply);
-	})
-	// socket.on('join', ({ name, level, gameId }, callback) => {
-	// 	const { player, opponent, error, lo ading } = addPlayer({
-	// 		name,
-	// 		playerId: socket.id,
-	// 		level,
-	// 		gameId,
-	// 	});
-	// 	if (error) {
-	// 		return callback({ error });
-	// 	}
-	// 	socket.join(gameId);
-	// 	callback({ loading: `Please wait for other player to join` });
+	socket.on('join', ({ name, level }, callback) => {
+		const {player, opponent, message, full} = addPlayer({
+			name,
+			playerId: socket.id,
+			level,
+			gameId: room,
+		});
+		if (full) {
+			room += 1;
+			const {player, opponent, message, full} = addPlayer({
+				name,
+				playerId: socket.id,
+				level,
+				gameId: room,
+			});
+			socket.join(room);
+			return callback({ message });
+		}
+		socket.join(room);
+		callback({ message });
+
+		// send welcome message to player1, and also send the opponent player's data
+		socket.emit('welcome', {
+			message: `Hello ${player.name}, Welcome to the game`,
+			opponent,
+			gameId: player.gameId,
+		});
 		
-	// 	// send welcome message to player1, and also send the opponent player's data
-	// 	socket.emit('welcome', {
-	// 		message: `Hello ${player.name}, Welcome to the game`,
-	// 		opponent,
-	// 	});
+		// tell player1 that player2 has joined the game
+		socket.broadcast.to(player.gameId).emit('opponentJoin', {
+			message: `${player.name} has joined the game`,
+			opponent: player,
+		});
 		
-	// 	// tell player2 that player1 has joined the game
-	// 	socket.broadcast.to(player.gameId).emit('opponentJoin', {
-	// 		message: `${player.name} has joined the game`,
-	// 		opponent: player,
-	// 	});
-		
-	// 	if (game(gameId).length >= 2) {
-	// 		io.to(gameId).emit('message', {
-	// 			message: `Let's start the game!`,
-	// 		});
-	// 	}
-	// });
+		if (game(room).length >= 2) {
+			io.to(room).emit('startGame', {
+				message: `Let's start the game!`,
+			});
+		}
+	});
 	
-	// socket.on('opponentMove', ({ y, gameId }) => {
-	// 	socket.broadcast.to(gameId).emit('paddleMove', { y });
-	// });
+	socket.on('move', ({ y, gameId }) => {
+		socket.broadcast.to(gameId).emit('paddleMove', { y });
+	});
 
-	// socket.on('disconnect', () => {
-	// 	const player = removePlayer(socket.id);
+	socket.on('disconnect', () => {
+		const player = removePlayer(socket.id);
 
-	// 	if (player) {
-	// 		io.to(player.playerId).emit('message', {
-	// 			message: `${player.name} has left the game`,
-	// 		});
-	// 		socket.broadcast.to(player.playerId).emit('opponentLeft');
-	// 	}
-	// });
+		if (player) {
+			socket.broadcast.to(player.gameId).emit('opponentLeft', {
+				message: `${player.name} has left the game`,
+			});
+			io.to(player.gameId).emit('stopGame', {
+				message: `Game has ended, you won!`,
+			});
+		}
+	});
 });
 
 server.listen(PORT, () => {console.log('Server is running on port ' + PORT)});
