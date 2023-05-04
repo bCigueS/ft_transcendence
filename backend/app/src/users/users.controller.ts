@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, NotFoundException, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, NotFoundException, UseGuards, UseInterceptors, UploadedFile, Res, ParseFilePipeBuilder, HttpStatus } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -9,6 +9,8 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { AddFriendDto } from './dto/add-friend.dto';
 import { BlockingDto } from './dto/blocking.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { Express } from 'express'
 
 @Controller('users') @ApiTags('users')
 export class UsersController {
@@ -165,15 +167,26 @@ export class UsersController {
 	@Post(':id/avatar')
 	// @UseGuards(JwtAuthGuard)
 	// @ApiBearerAuth()
-	@ApiOkResponse({ type: UserEntity })
-	@UseInterceptors(FileInterceptor('avatar'))
-	async uploadAvatar(
+	@UseInterceptors(FileInterceptor('file'))
+	async uploadFile(
 		@Param('id', ParseIntPipe) id: number,
-		@Body() filePath: string) {
+		@UploadedFile(
+			new ParseFilePipeBuilder()
+				.addFileTypeValidator({
+				fileType: 'jpeg',
+				})
+				.build({
+				errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
+			}),
+		) file: Express.Multer.File) {
+			
+		console.log(file);
+	}
 
-		// console.log(file.originalname);
-
-		return this.usersService.updateAvatar(id, filePath);
+	@Get(':imgpath')
+	seeUploadedFile(@Param('imgpath') image, @Res() res) {
+		
+		return res.sendFile(image, { root: './uploads' });
 	}
 	
 }
