@@ -36,10 +36,9 @@ type PongInfo = {
 
 type PongProps = {
 	username: string;
-	gameId: string;
 }
 
-export default function Pong({username, gameId}: PongProps) {
+export default function Pong({username}: PongProps) {
 	const info: PongInfo = {
 		boardWidth: 640,
 		boardHeight: 480,
@@ -55,6 +54,7 @@ export default function Pong({username, gameId}: PongProps) {
 	const [isRunning, setIsRunning] = useState(false);
 	const [gameOver, setGameOver] = useState(false);
 	const [winner, setWinner] = useState(0);
+	const [gameId, setGameId] = useState(0);
 	// game mode
 	const [toolMode, setToolMode] = useState(MOUSE_MODE);
 	const [level, setLevel] = useState(BEGINNER_LEVEL);
@@ -79,43 +79,28 @@ export default function Pong({username, gameId}: PongProps) {
 	// canvas
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-	let client = {};
-
 	useEffect(() => {
-		if (playerMode === DOUBLE_MODE)
-		{
-			socket.emit('newPlayer', {name: username, gameId: gameId, level: level});
-			// socket.on('updatePlayers', ply => {
-			// 	playersFound = {};
-			// 	for (let id in ply)
-			// 	{
-			// 		if (client[id] === undefined && id !== socket.id) {
-			// 			console.log("created opponent");
-			// 		}
-			// 		playersFound[id] = true;
-			// 	}
-			// 	for (let id in clientBalls) {
-			// 		if (!playerFound[id]) {
-			// 			client[id].remove();
-			// 			delete client[id];
-			// 		}
+		if (playerMode === DOUBLE_MODE) {
 
-			// 	}
-
-			// })
-			// socket.emit('update', {x: ballX, y: ballY});
-			// socket.emit('join', { name: username, level: level, gameId: gameId }, ({ error, loading }) => {
-			// 	console.log({ loading });
-			// });
-			// socket.on('welcome', ({ message, opponent }) => {
-			// 	console.log({ message, opponent });
-			// });
-			// socket.on('opponentJoin', ({ message, opponent }) => {
-			// 	console.log({ message, opponent });
-			// });
-			// socket.on('message', ({ message }) => {
-			// 	console.log({ message });
-			// });
+			socket.emit('join', {name: username, level: level}, (message: string) => {
+				console.log(message);
+			});
+			socket.on('welcome', ({ message, opponent, gameId }) => {
+				console.log({ message, opponent, gameId });
+				setGameId(gameId);
+			});
+			socket.on('opponentJoin', ({ message, opponent }) => {
+				console.log({ message, opponent });
+			});
+			socket.on('startGame', ({ message }) => {
+				console.log({ message });
+			});
+			socket.on('opponentLeft', ({message}) => {
+				console.log({message});
+			});
+			socket.on('stopGame', ({ message }) => {
+				console.log({ message });
+			});
 		}
 	}, [playerMode])
 	
@@ -213,7 +198,7 @@ export default function Pong({username, gameId}: PongProps) {
 		setBallX(x => x += deltaX);
 		setBallY(y => y += deltaY);
 	}
-	
+
 	const moveOpponent = () => {
 		const nextPos = ballY - (paddleHeight / 2) * (level === HARD_LEVEL ? 0.3 : 0.1);
 		
@@ -296,41 +281,66 @@ export default function Pong({username, gameId}: PongProps) {
 			frameId = requestAnimationFrame(render);
 		}
 		render();
-
+		
 		return () => {window.cancelAnimationFrame(frameId);}
 	}, [])
-
-	const handleMouseEvent = (event: MouseEvent<HTMLDivElement>) => {
-		const nextPos = event.clientY - info.boardHeight + paddleHeight;
-
+	
+	
+	
+	const handleMouseEvent = (event: MouseEvent<HTMLDivElement>): void => {
+		const nextPost = event.clientY - info.boardHeight + paddleHeight;
+		
 		if (toolMode === MOUSE_MODE 
-			&& isRunning 
-			&& nextPos >= 0 
-			&& nextPos + paddleHeight <= info.boardHeight) {
-			setPlayerY(nextPos);
+			&& isRunning) {
+			if ( nextPost >= 0 && nextPost + paddleHeight <= info.boardHeight) {
+					setPlayerY(nextPost);
+					if (playerMode === DOUBLE_MODE) {
+						socket.emit('move', {y: nextPost, gameId: gameId});
+					}
+			} else if (nextPost < 0) {
+				setPlayerY(0);
+				if (playerMode === DOUBLE_MODE) {
+					socket.emit('move', {y: 0, gameId: gameId});
+				}
+			} else if (nextPost + paddleHeight > info.boardHeight) {
+				setPlayerY(info.boardHeight - paddleHeight);
+				if (playerMode === DOUBLE_MODE) {
+					socket.emit('move', {y: info.boardHeight - paddleHeight, gameId: gameId})
+				}
+			}
 		}
 	}
-
-	const handleKeyDownEvent = (event: KeyboardEvent<HTMLDivElement>) => {
+		
+	const handleKeyDownEvent = (ev: KeyboardEvent): any => {
 		if (toolMode === KEYBOARD_MODE && isRunning)
 		{
 			const nextPostUp = playerY - 20;
 			const nextPostDown = playerY + 20 + paddleHeight;
-			if (event.code === "ArrowUp" && nextPostUp >= 0) {
+			if (ev.key === "ArrowUp" && nextPostUp >= 0) {
 				setPlayerY(y => y -= 20);
 				if (playerMode === DOUBLE_MODE) {
-					socket.emit('opponentMove', {y: nextPostUp, gameId: '19'});
+					console.log(nextPostUp);
+					socket.emit('move', {y: nextPostUp, gameId: gameId});
 				}
 			}
-			if (event.code === "ArrowDown" && nextPostDown <= info.boardHeight) {
+			if (ev.code === "ArrowDown" && nextPostDown <= info.boardHeight) {
 				setPlayerY(y => y += 20);
 				if (playerMode === DOUBLE_MODE) {
-					socket.emit('opponentMove', {y: nextPostDown, gameId: '19'});
+					console.log(nextPostDown - paddleHeight);
+					socket.emit('move', {y: nextPostDown - paddleHeight, gameId: gameId});
 				}
 			}
 		}
 	}
+	
+	// useEffect(() => {
+	// 	window.addEventListener('keydown', handleKeyDownEvent);
 
+	// 	return () => {
+	// 		window.removeEventListener('keydown', handleKeyDownEvent);
+	// 	};
+	// }, []);
+	
 	return (
 		<>
 			{(!isRunning || gameOver) && (

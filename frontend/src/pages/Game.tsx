@@ -10,7 +10,6 @@ export default function Game() {
 		<>
 			<Pong 
 				username={username}
-				gameId={gameId}	
 			/>
 		</>
 	)
