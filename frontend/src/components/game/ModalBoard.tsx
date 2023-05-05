@@ -10,9 +10,10 @@ type ModalProps = {
 	onPlayerMode(mode: "single" | "double"): void;
 }
 
-export default function Modal({ onDifficulty, onTool, onPlayerMode, onStartPage, buttonText, text }: ModalProps) {
-	const isStarting = buttonText === "Start playing" ? true : false;
+export default function ModalBoard({ onDifficulty, onTool, onPlayerMode, onStartPage, buttonText, text }: ModalProps) {
+	const [isStarting, setIsStarting] = useState(buttonText === "Start playing" ? true : false);
 	const [page, setPage] = useState(0);
+	const [isDouble, setIsDouble] = useState(false);
 
 	const onNextPage = () => {
 		setPage(p => p += 1);
@@ -27,26 +28,26 @@ export default function Modal({ onDifficulty, onTool, onPlayerMode, onStartPage,
 						<p>(click anywhere ...)</p>
 					</>
 				)}
-				{(isStarting && page === 1 && onDifficulty) && (
+				{(isStarting && page === 1) && (
 					<>
 						<button onClick={() => {onDifficulty("beginner")}}>Beginner level</button>
 						<button onClick={() => {onDifficulty("medium")}}>Medium level</button>
 						<button onClick={() => {onDifficulty("hard")}}>Hard level</button>
 					</>
 				)}
-				{(isStarting && page === 2 && onTool) && (
+				{(isStarting && page === 2) && (
 					<>
 						<button onClick={() => {onTool("keyboard")}}>Play with keyboard</button>
 						<button onClick={() => {onTool("mouse")}}>Play with mouse</button>
 					</>
 				)}
-				{(isStarting && page === 3 && onPlayerMode) && (
+				{(isStarting && page === 3) && (
 					<>
-						<button onClick={() => {onPlayerMode("single")}}>1 Player</button>
-						<button onClick={() => {onPlayerMode("double")}}>2 Players</button>
+						<button onClick={() => {onPlayerMode("single")}}>1 player</button>
+						<button onClick={() => {onPlayerMode("double"); setIsDouble(true);}}>2 players</button>
 					</>
 				)}
-				{(isStarting && page === 4) && (
+				{(isStarting && page === 4 && !isDouble) && (
 					<>
 						<h2>Are you ready?</h2>
 						<button onClick={onStartPage}>{buttonText}</button>
@@ -55,7 +56,7 @@ export default function Modal({ onDifficulty, onTool, onPlayerMode, onStartPage,
 				{!isStarting && (
 					<>
 						<h2>{text}</h2>
-						<button onClick={onStartPage}>{buttonText}</button>
+						<button onClick={() => {setIsStarting(true); setPage(0); onPlayerMode("single");}}>{buttonText}</button>
 					</>
 				)}
 			</div>
