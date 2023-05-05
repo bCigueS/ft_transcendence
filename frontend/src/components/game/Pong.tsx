@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useLayoutEffect, MouseEvent, KeyboardEvent } from 'react';
-import Modal from './Modal';
+import ModalBoard from './ModalBoard';
+import LiveBoard from './LiveBoard';
 import '../../sass/main.scss';
 import io from 'socket.io-client';
 
@@ -52,6 +53,9 @@ export default function Pong({username}: PongProps) {
 	const angle = (Math.PI/ 4) + Math.random();
 	// game play
 	const [isRunning, setIsRunning] = useState(false);
+	const [isPaused, setIsPaused] = useState(false);
+	const [isLive, setIsLive] = useState(false);
+	const [isReady, setIsReady] = useState(false);
 	const [gameOver, setGameOver] = useState(false);
 	const [winner, setWinner] = useState(0);
 	const [gameId, setGameId] = useState(0);
@@ -69,10 +73,14 @@ export default function Pong({username}: PongProps) {
 	// ball direction
 	const [deltaX, setDeltaX] = useState(4); // speed * Math.cos(angle));
 	const [deltaY, setDeltaY] = useState(4); // speed * Math.sin(angle));
-	// players info
+	// paddle info
+	const [paddleUp, setPaddleUp] = useState(false);
+	const [paddleDown, setPaddleDown] = useState(false);
 	const [paddleHeight, setPaddleHeight] = useState(120);
+	// players info
 	const [playerY, setPlayerY] = useState((info.boardHeight - paddleHeight) / 2);
 	const [opponentY, setOpponentY] = useState((info.boardHeight - paddleHeight) / 2);
+	const [opponentName, setOpponentName] = useState('');
 	// score
 	const [playerScore, setPlayerScore] = useState(0);
 	const [opponentScore, setOpponentScore] = useState(0);
@@ -88,18 +96,27 @@ export default function Pong({username}: PongProps) {
 			socket.on('welcome', ({ message, opponent, gameId }) => {
 				console.log({ message, opponent, gameId });
 				setGameId(gameId);
+				setIsLive(true);
+				if (opponent) {
+					setOpponentName(opponent.name);
+				}
 			});
 			socket.on('opponentJoin', ({ message, opponent }) => {
 				console.log({ message, opponent });
+				setOpponentName(opponent.name);
 			});
 			socket.on('startGame', ({ message }) => {
 				console.log({ message });
+				setIsReady(true);
 			});
 			socket.on('opponentLeft', ({message}) => {
 				console.log({message});
+				setGameOver(true);
+				setWinner(PLAYER_WIN);
 			});
 			socket.on('stopGame', ({ message }) => {
 				console.log({ message });
+				setIsRunning(false);
 			});
 		}
 	}, [playerMode])
@@ -212,6 +229,26 @@ export default function Pong({username}: PongProps) {
 			});
 		}
 	}
+
+	const movePlayer = () => {
+		if (toolMode === KEYBOARD_MODE && isRunning)
+		{
+			const nextPostUp = playerY - 15;
+			const nextPostDown = playerY + 15 + paddleHeight;
+			if (paddleUp && nextPostUp >= 0) {
+				setPlayerY(nextPostUp);
+				if (playerMode === DOUBLE_MODE) {
+					socket.emit('move', {y: nextPostUp, gameId: gameId});
+				}
+			}
+			if (paddleDown && nextPostDown <= info.boardHeight) {
+				setPlayerY(nextPostDown - paddleHeight);
+				if (playerMode === DOUBLE_MODE) {
+					socket.emit('move', {y: nextPostDown - paddleHeight, gameId: gameId});
+				}
+			}
+		}
+	}
 	
 	const drawBoard = (context: CanvasRenderingContext2D) => {
 		context.clearRect(0, 0, info.boardWidth, info.boardHeight);
@@ -258,16 +295,19 @@ export default function Pong({username}: PongProps) {
 		drawBoard(context);
 		if (isRunning) {
 			drawElement(context);
-			// moveBall();
-			moveOpponent();
-			detectWallCollision();
-			detectPlayerCollision();
-			detectOpponentCollision();
-			// check game status
-			if (opponentScore > info.winnerScore || playerScore > info.winnerScore) {
-				playerScore > info.winnerScore ? setWinner(PLAYER_WIN) : setWinner(OPPONENT_WIN);
-				setIsRunning(false);
-				setGameOver(true);
+			if (!isPaused) { 
+				// moveBall();
+				movePlayer();
+				moveOpponent();
+				detectWallCollision();
+				detectPlayerCollision();
+				detectOpponentCollision();
+				// check game status
+				if (opponentScore > info.winnerScore || playerScore > info.winnerScore) {
+					playerScore > info.winnerScore ? setWinner(PLAYER_WIN) : setWinner(OPPONENT_WIN);
+					setIsRunning(false);
+					setGameOver(true);
+				}
 			}
 		}
 
@@ -284,67 +324,72 @@ export default function Pong({username}: PongProps) {
 		
 		return () => {window.cancelAnimationFrame(frameId);}
 	}, [])
-	
-	
-	
-	const handleMouseEvent = (event: MouseEvent<HTMLDivElement>): void => {
-		const nextPost = event.clientY - info.boardHeight + paddleHeight;
-		
-		if (toolMode === MOUSE_MODE 
-			&& isRunning) {
-			if ( nextPost >= 0 && nextPost + paddleHeight <= info.boardHeight) {
-					setPlayerY(nextPost);
-					if (playerMode === DOUBLE_MODE) {
-						socket.emit('move', {y: nextPost, gameId: gameId});
-					}
-			} else if (nextPost < 0) {
-				setPlayerY(0);
-				if (playerMode === DOUBLE_MODE) {
-					socket.emit('move', {y: 0, gameId: gameId});
-				}
-			} else if (nextPost + paddleHeight > info.boardHeight) {
-				setPlayerY(info.boardHeight - paddleHeight);
-				if (playerMode === DOUBLE_MODE) {
-					socket.emit('move', {y: info.boardHeight - paddleHeight, gameId: gameId})
-				}
-			}
-		}
-	}
-		
-	const handleKeyDownEvent = (ev: KeyboardEvent): any => {
-		if (toolMode === KEYBOARD_MODE && isRunning)
-		{
-			const nextPostUp = playerY - 20;
-			const nextPostDown = playerY + 20 + paddleHeight;
-			if (ev.key === "ArrowUp" && nextPostUp >= 0) {
-				setPlayerY(y => y -= 20);
-				if (playerMode === DOUBLE_MODE) {
-					console.log(nextPostUp);
-					socket.emit('move', {y: nextPostUp, gameId: gameId});
-				}
-			}
-			if (ev.code === "ArrowDown" && nextPostDown <= info.boardHeight) {
-				setPlayerY(y => y += 20);
-				if (playerMode === DOUBLE_MODE) {
-					console.log(nextPostDown - paddleHeight);
-					socket.emit('move', {y: nextPostDown - paddleHeight, gameId: gameId});
-				}
-			}
-		}
-	}
-	
-	// useEffect(() => {
-	// 	window.addEventListener('keydown', handleKeyDownEvent);
 
-	// 	return () => {
-	// 		window.removeEventListener('keydown', handleKeyDownEvent);
-	// 	};
-	// }, []);
+	// event handler
+	useEffect(() => {
+		window.onkeydown = function(event) {
+			if (toolMode === KEYBOARD_MODE && isRunning)
+			{
+				if (event.code === "ArrowUp") {
+					setPaddleUp(true);
+				}
+				if (event.code === "ArrowDown") {
+					setPaddleDown(true);
+				}
+				if (event.code === "Space") {
+					setIsPaused(current => !current);
+				}
+			}
+		}
+
+		window.onkeyup = function(event) {
+			if (toolMode === KEYBOARD_MODE && isRunning)
+			{
+				if (event.code === "ArrowUp") {
+					setPaddleUp(false);
+				}
+				if (event.code === "ArrowDown") {
+					setPaddleDown(false);
+				}
+			}
+		}
+
+		window.onmousemove = function(event) {
+			const nextPost = event.clientY - info.boardHeight + (paddleHeight / 2);
+		
+			if (toolMode === MOUSE_MODE && isRunning) {
+				if ( nextPost >= 0 && nextPost + paddleHeight <= info.boardHeight) {
+						setPlayerY(nextPost);
+						if (playerMode === DOUBLE_MODE) {
+							socket.emit('move', {y: nextPost, gameId: gameId});
+						}
+				} else if (nextPost < 0) {
+					setPlayerY(0);
+					if (playerMode === DOUBLE_MODE) {
+						socket.emit('move', {y: 0, gameId: gameId});
+					}
+				} else if (nextPost + paddleHeight > info.boardHeight) {
+					setPlayerY(info.boardHeight - paddleHeight);
+					if (playerMode === DOUBLE_MODE) {
+						socket.emit('move', {y: info.boardHeight - paddleHeight, gameId: gameId})
+					}
+				}
+			}
+		}
+	}, [toolMode, isRunning, paddleUp, paddleDown, isPaused, playerY]);
 	
 	return (
 		<>
-			{(!isRunning || gameOver) && (
-				<Modal 
+			{(!isRunning && isLive) && (
+				<LiveBoard
+					isReady={isReady}
+					username={username}
+					opponentName={opponentName}
+					start={(status) => {setIsRunning(status); setIsLive(false)}}
+				/>
+			)}
+			{((!isRunning && !isLive) || gameOver) && (
+				<ModalBoard 
 					onDifficulty={(level) => {setLevel(level)}}
 					onTool={(mode) => {setToolMode(mode)}}
 					onPlayerMode={(mode) => {setPlayerMode(mode)}}
@@ -353,7 +398,7 @@ export default function Pong({username}: PongProps) {
 					text={winner === PLAYER_WIN ? "You wins!" : "You lose!"}
 				/>
 			)}
-			<div className="outer_ground" onMouseMove={handleMouseEvent} onKeyDown={handleKeyDownEvent} tabIndex={0}>
+			<div className="outer_ground">
 				<div className="divider_line"></div>
 				<div className="inner_ground">
 					<canvas 
