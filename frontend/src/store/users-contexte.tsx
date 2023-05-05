@@ -134,6 +134,7 @@ export const UserContext = React.createContext<{
 		userList: User[];
 		blockUser: (user: User) => void;
 		unblockUser: (user: User) => void;
+		friendUser: (user: User) => void; 
 		unfriendUser: (user: User) => void;
 		changeNickname: (newNickname: string) => void;
 		updateImage: (newImage: string) => void;
@@ -142,6 +143,7 @@ export const UserContext = React.createContext<{
 	userList: userList,
 	blockUser: (user: User) => {},
 	unblockUser: (user: User) => {},
+	friendUser: (user: User) => {},
 	unfriendUser: (user: User) => {},
 	changeNickname: (newNickname: string) => {},
 	updateImage: (newImage: string) => {}
@@ -174,11 +176,23 @@ const UsersContextProvider: React.FC<Props> = ( {children, className} ) => {
 	};
 
 	const removeFriendUser = (userToUnfriend: User) => {
+		if (userToUnfriend === user)
+		return ;
+
 		setUser(prevState => ({
 			...prevState,
 			friends: prevState.friends.filter(friend => friend.nickname !== userToUnfriend.nickname)
 		}));
 	};
+
+	const addFriendUser = (userToFriend: User) => {
+		if (userToFriend === user)
+			return ;
+		setUser(prevState => ({
+			...prevState,
+			friends: [...prevState.friends, userToFriend]
+		}))
+	}
 
 	const changeNickname = (newNickname: string) => {
 		setUser(prevState => ({
@@ -199,6 +213,7 @@ const UsersContextProvider: React.FC<Props> = ( {children, className} ) => {
 		userList: userList,
 		blockUser: addBlockUser,
 		unblockUser: removeBlockUser,
+		friendUser: addFriendUser,
 		unfriendUser: removeFriendUser,
 		changeNickname: changeNickname,
 		updateImage: changeProfilPicture

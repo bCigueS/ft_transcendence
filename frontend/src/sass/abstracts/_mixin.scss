@@ -47,7 +47,7 @@
 }
 
 @mixin shadowBox($color: $light-vermillon) {
-	box-shadow: -8px 5px 0px 1px $color;
+	box-shadow: -0.8rem 0.5rem 0rem 0.1rem $color;
 }
 
 @mixin pictureProfil($url: $profile-pic, $width: 5rem, $height: 5rem) {
