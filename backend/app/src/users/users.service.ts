@@ -4,6 +4,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User as UserEntity } from '.prisma/client';
 import { Friendship } from '@prisma/client';
+import { toSafeUser } from './user.utils';
 
 @Injectable()
 export class UsersService {
@@ -11,15 +12,18 @@ export class UsersService {
 
   async create(data: CreateUserDto) {
 
-    return this.prisma.user.create({ data });
+    const newUser = await this.prisma.user.create({ data });
+    return toSafeUser(newUser);
   }
 
-  findAll() {
-    return this.prisma.user.findMany();
+  async findAll() {
+    const users = await this.prisma.user.findMany();
+
+    return users.map(toSafeUser);
   }
 
-  findOne(id: number) {
-    return this.prisma.user.findUnique({
+  async findOne(id: number) {
+    const user = await this.prisma.user.findUnique({
       where: { 
         id 
       },
@@ -28,18 +32,24 @@ export class UsersService {
         followers: true
       }    
     });
+
+    return toSafeUser(user);
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
 
-    return this.prisma.user.update({
+    const updatedUser = await this.prisma.user.update({
       where: { id },
       data: updateUserDto,
     });
+
+    return toSafeUser(updatedUser);
   }
 
-  remove(id: number) {
-    return this.prisma.user.delete({ where: { id } });
+  async remove(id: number) {
+
+    const deletedUser = await this.prisma.user.delete({ where: { id } });
+    return toSafeUser(deletedUser);
   }
 
   async addFriend(id: number, friendId: number) {
@@ -73,7 +83,7 @@ export class UsersService {
       }
     });
 
-    return friendship.friends;
+    return toSafeUser(friendship.friends);
 
   }
 
@@ -120,7 +130,7 @@ export class UsersService {
 
     const friendsList = existingFriendships.map((friendship) => friendship.friends);
 
-    return existingFriendships;
+    return friendsList.map(toSafeUser);
   }
 
   async blockUser(id: number, blockId: number) {
@@ -154,7 +164,7 @@ export class UsersService {
       }
     });
 
-    return block.blocked;
+    return toSafeUser(block.blocked);
 
   }
 
@@ -200,7 +210,7 @@ export class UsersService {
 
     const blockedUsers = blockings.map((block) => block.blocked);
 
-    return blockedUsers;
+    return blockedUsers.map(toSafeUser);
   }
 
   async showCommunity(id: number) {
@@ -219,7 +229,7 @@ export class UsersService {
       },
     });
     
-    return community;
+    return community.map(toSafeUser);
   }
 
   async updateAvatar(id: number, avatarPath: string) {

@@ -11,6 +11,7 @@ import { BlockingDto } from './dto/blocking.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { Express } from 'express'
+import { toSafeUser } from './user.utils';
 
 @Controller('users') @ApiTags('users')
 export class UsersController {
@@ -46,10 +47,12 @@ export class UsersController {
 	// @ApiBearerAuth()
 	@ApiOkResponse({ type: UserEntity })
 	async update(@Param('id', ParseIntPipe) id: number, @Body() updateUserDto: UpdateUserDto) {
+
 		const user = await this.usersService.findOne(id);
 		if (!user)
 			throw new NotFoundException(`User with ${id} does not exist.`);
-		return this.usersService.findOne(id);
+		
+		return this.usersService.update(id, updateUserDto);
 	}
 	
 	@Delete(':id')
