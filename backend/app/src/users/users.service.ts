@@ -232,7 +232,7 @@ export class UsersService {
     return community.map(toSafeUser);
   }
 
-  async updateAvatar(id: number, avatarPath: string) {
+  async uploadAvatar(id: number, avatarPath: string) {
     const user = await this.prisma.user.findUnique({ where: { id: id } });
   
     if (!user) {
