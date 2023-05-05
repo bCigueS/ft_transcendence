@@ -167,11 +167,11 @@ export class UsersController {
 		return this.usersService.showCommunity(id);
 	}
 
-	@Post(':id/avatar')
+	@Post(':id/upload-avatar')
 	// @UseGuards(JwtAuthGuard)
 	// @ApiBearerAuth()
 	@UseInterceptors(FileInterceptor('file'))
-	async uploadFile(
+	async uploadAvatar(
 		@Param('id', ParseIntPipe) id: number,
 		@UploadedFile(
 			new ParseFilePipeBuilder()
@@ -182,14 +182,22 @@ export class UsersController {
 				errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
 			}),
 		) file: Express.Multer.File) {
-			
+		
 		console.log(file);
+
+		// const avatarPath = './uploads/' + file.filename;
+		const avatarPath = file.filename;
+
+		this.usersService.uploadAvatar(id, avatarPath);
 	}
 
-	@Get(':imgpath')
-	seeUploadedFile(@Param('imgpath') image, @Res() res) {
+	@Get(':id/avatar')
+	async seeUploadedFile(
+		@Param('id', ParseIntPipe) id: number,
+		@Res() res) {
 		
-		return res.sendFile(image, { root: './uploads' });
+		const user = await this.usersService.findOne(id);
+		return res.sendFile(user.avatar, { root: './uploads'});
 	}
 	
 }
