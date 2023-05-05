@@ -46,3 +46,38 @@ model Block {
  
   @@map("blocked")
 }
+
+// model Game {
+//   id            Int      @id @default(autoincrement())
+//   createdAt     DateTime @default(now())
+
+//   type          GameType
+//   level         Int
+//   state         GameState
+
+//   player1Id     Int
+//   player1       User     @relation("Player1Games", fields: [player1Id], references: [id])
+//   player2Id     Int?
+//   player2       User?    @relation("Player2Games", fields: [player2Id], references: [id])
+
+//   scorePlayer1  Int
+//   scorePlayer2  Int
+
+//   winnerId      Int?
+//   winner        User?    @relation("WinnerGames", fields: [winnerId], references: [id])
+
+//   duration      Int
+
+//   @@map("games")
+// }
+
+// enum GameType {
+//   PLAYER
+//   COMPUTER
+// }
+
+// enum GameState {
+//   PENDING
+//   PLAYING
+//   FINISHED
+// }
