@@ -6,7 +6,7 @@ services:
     ports:
       - 5432:5432
     env_file:
-      - .env
+      - ./backend/.env
     volumes:
       - postgres:/var/lib/postgresql/data
     networks:
@@ -14,16 +14,29 @@ services:
   nestjs:
     container_name: nestapp
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
     depends_on:
       - postgres
     ports:
       - "3000:3000"
     env_file:
-      - .env
+      - ./backend/.env
     volumes:
-      - ./app:/usr/src/app
+      - ./backend/app:/usr/src/app
+    networks:
+      - transendance
+  reactjs:
+    container_name: reactapp
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+    ports:
+      - "80:3000"
+    volumes:
+      - ./frontend/app:/usr/src/app
     networks:
       - transendance
 
@@ -37,6 +50,13 @@ volumes:
       type: 'none'
       o: 'bind' 
       device: '~/data/nestapp'
+  reactapp:
+    name: reactapp
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind' 
+      device: '~/data/reactapp'
 
 
 networks:
