@@ -9,12 +9,12 @@ import PrivateMessagePage from './pages/PrivateMessagePage';
 import ChatPage from './pages/Chat';
 import Game from './pages/Game';
 import Leaderboard from './pages/Leaderboard';
-import Rules from './pages/Rules';
 import AboutUs from './pages/AboutUs';
 import LoginPage from './pages/Login';
 
 import './sass/main.scss';
 import UsersContextProvider from './store/users-contexte';
+import AuthenticationPage from './pages/Authentication';
 
 const router = createBrowserRouter([
 	{
@@ -24,13 +24,14 @@ const router = createBrowserRouter([
 		children: [
 			{index: true, element: <Homepage />},
 			{path: 'profile', element: <ProfilePage />},
+			{path: 'profile/:id', element: <ProfilePage />},
 			{path: 'privmessage', element: <PrivateMessagePage />},
 			{path: 'chat', element: <ChatPage />},
 			{path: 'pong', element: <Game />},
 			{path: 'leaderboard', element: <Leaderboard />},
-			{path: 'rules', element: <Rules/>},
 			{path: 'about-us', element: <AboutUs />},
-			{path: 'login', element: <LoginPage />}
+			{path: 'login', element: <LoginPage />},
+			{path: 'auth', element: <AuthenticationPage />}
 		]
 	}
 ])

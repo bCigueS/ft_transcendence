@@ -16,6 +16,7 @@ export type UserMatch = {
 export type User = {
 	login: string,
 	nickname: string,
+	password: string,
 	wins: number,
 	lose: number,
 	profilePic: string,
@@ -23,7 +24,7 @@ export type User = {
 	block: User[],
 	matchs: UserMatch[],
 	connected: boolean,
-	doubleAuth: boolean
+	doubleAuth: boolean,
 }
 
 export type UserFunction = (user: User) => void;
@@ -31,6 +32,7 @@ export type UserFunction = (user: User) => void;
 const oliviaUser: User = {
 		login: 'OWalsh',
 		nickname: 'Oliv',
+		password: 'simon',
 		wins: 2,
 		lose: 3,
 		profilePic: OliviaPic,
@@ -43,6 +45,7 @@ const oliviaUser: User = {
 
 const fanyUser: User = {
 	login: 'FOctavia',
+	password: 'simon',
 	nickname: 'Faaaaany',
 	wins: 0,
 	lose: 2,
@@ -57,6 +60,7 @@ const fanyUser: User = {
 
 const ychiUser: User = {
 	login: 'Ykuo',
+	password: 'simon',
 	nickname: 'Yang',
 	wins: 2,
 	lose: 0,
@@ -70,6 +74,7 @@ const ychiUser: User = {
 
 const dummy1: User = {
 	login: 'Dummy',
+	password: 'simon',
 	nickname: 'Dum1',
 	wins: 0,
 	lose: 99,
@@ -83,6 +88,7 @@ const dummy1: User = {
 
 const dummy2: User = {
 	login: 'Corgi',
+	password: 'simon',
 	nickname: 'Corg',
 	wins: 99,
 	lose: 0,
@@ -109,6 +115,7 @@ const match2: UserMatch = {
 const simonUser: User = {
 	login: 'Sbeylot',
 	nickname: 'SimSim',
+	password: 'simon',
 	wins: 3,
 	lose: 2,
 	profilePic: SimonPic,
@@ -130,7 +137,7 @@ const userList: User[] = [
 
 
 export const UserContext = React.createContext<{
-		user: User;
+		user: User | null;
 		userList: User[];
 		blockUser: (user: User) => void;
 		unblockUser: (user: User) => void;
@@ -139,7 +146,7 @@ export const UserContext = React.createContext<{
 		changeNickname: (newNickname: string) => void;
 		updateImage: (newImage: string) => void;
 	}>({
-	user: simonUser,
+	user: null,
 	userList: userList,
 	blockUser: (user: User) => {},
 	unblockUser: (user: User) => {},
