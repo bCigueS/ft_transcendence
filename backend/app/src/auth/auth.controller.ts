@@ -5,6 +5,7 @@ import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AuthEntity } from './entity/auth.entity';
 import { LoginDto } from './dto/login.dto';
 import { OAuth42Strategy } from './strategy/passport.strategy';
+import {OAuth42Guard} from './auth.guard';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -18,9 +19,15 @@ export class AuthController {
 	}
 	
 	@Get('forty-two')
-	@UseGuards(AuthGuard(), OAuth42Strategy)
+	@UseGuards(OAuth42Guard, OAuth42Strategy)
 	@ApiOkResponse({ type: AuthEntity })
 	fortyTwo() {
 		return "";
+	}
+
+	@Get('forty-two/callback')
+	@ApiOkResponse({ type: AuthEntity })
+	fortyTwoCallback() {
+		return "this.authService.fortyTwo()";
 	}
 }

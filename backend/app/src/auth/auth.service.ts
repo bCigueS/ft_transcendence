@@ -30,5 +30,5 @@ async fortyTwo(): Promise<AuthEntity> {
       accessToken: this.jwtService.sign({ userId: 42 }),
     };
   }
-  
+
 }
