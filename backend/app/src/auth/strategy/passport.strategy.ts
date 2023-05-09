@@ -4,21 +4,26 @@ import { Strategy } from 'passport-oauth2';
 // import Strategy from "passport-activedirectory";
 
 @Injectable()
-export class OAuth42Strategy extends PassportStrategy(Strategy) {
+export class OAuth42Strategy extends PassportStrategy(Strategy, '42Gaurd') {
   constructor() {
     super({
       authorizationURL: 'https://api.intra.42.fr/oauth/authorize',
-      tokenURL: 'https://www.example.com/oauth2/token',
+      tokenURL: 'https://api.intra.42.fr/oauth2/token',
       clientID: "",
       clientSecret: "",
-      callbackURL: 'http://127.0.0.1:3000/auth/example/callback',
-	  redirect_uri: 'http://127.0.0.1:3000/auth/example/callback',
-	  response_type: 'code'
+	  callbackURL: 'http://127.0.0.1:3000/auth/forty-two/callback',
+	  response_type: 'code',
+	  scope: ['public']
     });
   }
 
-  async validate(accessToken: string, refreshToken: string, profile: any) {
+  async validate(accessToken: string, refreshToken: string, profile: any) : Promise<any> 
+  {
+	console.log("validate");
+	console.log(accessToken);
+	console.log(refreshToken);
+	console.log(profile);
     // handle the authenticated user's profile
-    return { ...profile, accessToken };
+    // return { ...profile, accessToken };
   }
 }
