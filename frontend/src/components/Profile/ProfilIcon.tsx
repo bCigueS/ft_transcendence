@@ -1,10 +1,11 @@
 import React from 'react';
 import { User } from '../../store/users-contexte';
+import { useNavigate } from 'react-router-dom';
 import classes from '../../sass/components/Profile/ProfilIcon.module.scss';
 
 
 
-const ProfilIcon: React.FC<{user: User; displayCo?: boolean; size?: string[]}> = ( { user, displayCo = true, size = []}) => {
+const ProfilIcon: React.FC<{user?: User; displayCo?: boolean; size?: string[]}> = ( { user, displayCo = true, size = []}) => {
 
 	const stylePicture: React.CSSProperties = {
 		content: '',
@@ -13,6 +14,8 @@ const ProfilIcon: React.FC<{user: User; displayCo?: boolean; size?: string[]}> =
 		background: 'linear-gradient(90deg, rgba(245,173,167,1) 0%, rgba(241,93,81,1) 35%, rgba(235,137,71,1) 100%)',
 		borderRadius: '50%'
 	};
+
+	const navigate = useNavigate();
 
 	return (
 		<div 
@@ -26,15 +29,15 @@ const ProfilIcon: React.FC<{user: User; displayCo?: boolean; size?: string[]}> =
 				className={classes.picture}
 				style={size.length > 0 ? {width: size[0], height: size[1] } : {}}>
 				<img 
-					src={user.profilePic} 
-					alt={user.nickname} 
+					src={user?.profilePic} 
+					alt={user?.nickname} 
 				/>
 			</div>
 			{
 				displayCo &&
 				<i 
 					className="fa-solid fa-circle" 
-					style={{color: user.connected ? 'green' : 'red' }
+					style={{color: user?.connected ? 'green' : 'red' }
 					}>
 				</i>
 			}
