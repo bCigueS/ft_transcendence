@@ -86,6 +86,12 @@ const dummy1: User = {
 	doubleAuth: false
 }
 
+const match3: UserMatch = {
+	opponent: dummy1,
+	playerScore: 99,
+	opponentScore: 0
+}
+
 const dummy2: User = {
 	login: 'Corgi',
 	password: 'simon',
@@ -95,7 +101,7 @@ const dummy2: User = {
 	profilePic: Dummy2Pic,
 	friends: [],
 	block: [],
-	matchs: [],
+	matchs: [match3],
 	connected: false,
 	doubleAuth: false
 }
@@ -137,7 +143,7 @@ const userList: User[] = [
 
 
 export const UserContext = React.createContext<{
-		user: User | null;
+		user: User;
 		userList: User[];
 		blockUser: (user: User) => void;
 		unblockUser: (user: User) => void;
@@ -146,7 +152,7 @@ export const UserContext = React.createContext<{
 		changeNickname: (newNickname: string) => void;
 		updateImage: (newImage: string) => void;
 	}>({
-	user: null,
+	user: simonUser,
 	userList: userList,
 	blockUser: (user: User) => {},
 	unblockUser: (user: User) => {},
