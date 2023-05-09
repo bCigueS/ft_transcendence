@@ -65,14 +65,14 @@ export default function Pong({username}: PongProps) {
 	const [playerMode, setPlayerMode] = useState(SINGLE_MODE);
 	// animation
 	const [frameCount, setFrameCount] = useState(0);
-	const [speed, setSpeed] = useState(info.initialSpeed);
+	const [speed, setSpeed] = useState(0);
 	// ball info
 	const [ballRadius, setBallRadius] = useState(10);
-	const [ballX, setBallX] = useState(info.boardWidth / 2);
-	const [ballY, setBallY] = useState(info.boardHeight / 2);
+	const [ballX, setBallX] = useState(0);
+	const [ballY, setBallY] = useState(0);
 	// ball direction
-	const [deltaX, setDeltaX] = useState(4); // speed * Math.cos(angle));
-	const [deltaY, setDeltaY] = useState(4); // speed * Math.sin(angle));
+	const [deltaX, setDeltaX] = useState(0); // speed * Math.cos(angle));
+	const [deltaY, setDeltaY] = useState(0); // speed * Math.sin(angle));
 	// paddle info
 	const [paddleUp, setPaddleUp] = useState(false);
 	const [paddleDown, setPaddleDown] = useState(false);
@@ -139,7 +139,7 @@ export default function Pong({username}: PongProps) {
 	}
 
 	const detectPlayerCollision = () => {
-		if (ballX - ballRadius <= info.playerX && ballY > playerY && ballY < playerY + paddleHeight) {
+		if (ballX - ballRadius <= info.playerX + info.paddleWidth && ballY > playerY && ballY < playerY + paddleHeight) {
 			setBallX(x => x += ballRadius);
 
 			let collisionPoint = (ballY + (ballRadius / 2)) - (playerY + (paddleHeight / 2));
@@ -153,16 +153,32 @@ export default function Pong({username}: PongProps) {
 			setSpeed(s => s += 0.5);
 		}
 	}
-	
-	const serve = (side: number) => {
 
+	useEffect(() => {
+		if (isRunning)
+		{		
+			setSpeed(info.initialSpeed);
+
+			setBallX(info.boardWidth / 2);
+			setBallY(info.boardHeight / 2);
+
+			let angle = (Math.PI / 4) * Math.random();
+
+			setDeltaX(speed * Math.cos(angle));
+			setDeltaY(speed * Math.sin(angle));
+		}
+	}, [isRunning]);
+	
+	const serve = (side: number) => {		
 		setSpeed(info.initialSpeed);
 
 		setBallX(info.boardWidth / 2);
 		setBallY(info.boardHeight / 2);
 
-		setDeltaX(4 * side); // speed * Math.cos(angle) * side);
-		setDeltaY(4); // speed * Math.sin(angle));
+		let angle = (Math.PI / 4) * Math.random();
+
+		setDeltaX(speed * Math.cos(angle) * side);
+		setDeltaY(speed * Math.sin(angle));
 	}
 
 	const startGame = (side: number) => {
@@ -170,7 +186,6 @@ export default function Pong({username}: PongProps) {
 			setPlayerScore(0);
 			setOpponentScore(0);
 			setGameOver(false);
-			setSpeed(3);
 			if (level !== BEGINNER_LEVEL) {
 				setBallRadius(level === MEDIUM_LEVEL ? 10 : 6);
 				setPaddleHeight(level === MEDIUM_LEVEL ? 80 : 40);
@@ -179,8 +194,8 @@ export default function Pong({username}: PongProps) {
 			}
 		}
 
+		// serve(side);
 		setIsRunning(true);
-		serve(side);
 	}
 	
 	const detectWallCollision = () => {
@@ -212,6 +227,9 @@ export default function Pong({username}: PongProps) {
 	}
 	
 	const moveBall = () => {
+		// setDeltaX(x => x += speed);
+		// setDeltaY(y => y += speed);
+
 		setBallX(x => x += deltaX);
 		setBallY(y => y += deltaY);
 	}
@@ -296,7 +314,7 @@ export default function Pong({username}: PongProps) {
 		if (isRunning) {
 			drawElement(context);
 			if (!isPaused) { 
-				// moveBall();
+				moveBall();
 				movePlayer();
 				moveOpponent();
 				detectWallCollision();
