@@ -10,7 +10,6 @@ import ChatPage from './pages/Chat';
 import Game from './pages/Game';
 import Leaderboard from './pages/Leaderboard';
 import AboutUs from './pages/AboutUs';
-import LoginPage from './pages/Login';
 
 import './sass/main.scss';
 import UsersContextProvider from './store/users-contexte';
@@ -30,7 +29,6 @@ const router = createBrowserRouter([
 			{path: 'pong', element: <Game />},
 			{path: 'leaderboard', element: <Leaderboard />},
 			{path: 'about-us', element: <AboutUs />},
-			{path: 'login', element: <LoginPage />},
 			{path: 'auth', element: <AuthenticationPage />}
 		]
 	}
