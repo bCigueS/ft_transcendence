@@ -6,9 +6,12 @@
 }
 
 html, body {
+	min-height: 100%;
 	height: 100%;
+	// width: 120rem;
 	font-family: 'Inter', sans-serif;
-	font-size: 62.5%;
+	font-size: 85.5%;
+	// font-size: 62.5%;
 }
 
 /* Body */
@@ -37,8 +40,13 @@ a {
 	}
 }
 
+button {
+	font-family: 'Inter', sans-serif;
+}
+
 main {
 	height: 50rem;
+	// min-width: 100%;
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -47,5 +55,6 @@ main {
 	border: 0.3rem black solid;
 
 	@include shadowBox();
+	// position: absolute;
 }
 /* --- Homepage --- */
