@@ -63,7 +63,7 @@ model Game {
   winnerId      Int?
   winner        User?     @relation("WinnerGames", fields: [winnerId], references: [id])
 
-  duration      Int
+  duration      Int?
 
   @@map("games")
 }
