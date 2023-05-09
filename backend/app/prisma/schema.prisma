@@ -63,9 +63,6 @@ model Game {
   winnerId      Int?
   winner        User?     @relation("WinnerGames", fields: [winnerId], references: [id])
 
-  scorePlayer1  Int       @default(0)
-  scorePlayer2  Int       @default(0)
-
   duration      Int
 
   @@map("games")
@@ -85,13 +82,15 @@ enum GameState {
 model UserGame {
   createdAt     DateTime @default(now())
 
-  user          User   @relation(fields: [userId], references: [id])
+  user          User    @relation(fields: [userId], references: [id])
   userId        Int
 
-  game          Game   @relation(fields: [gameId], references: [id])
+  game          Game    @relation(fields: [gameId], references: [id])
   gameId        Int
 
-  playerIndex   Int    @default(1)
+  playerIndex   Int     @default(1)
+
+  score         Int     @default(0)
 
   @@id([userId, gameId])
 }
