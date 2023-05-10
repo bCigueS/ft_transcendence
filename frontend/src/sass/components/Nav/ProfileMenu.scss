@@ -1,4 +1,4 @@
-.profil-menu {
+.profile-menu {
 	position: relative;
 
 	@include flexBox($justify: space-around);
@@ -13,14 +13,21 @@
 		background-position: center center;
 		background-size: cover;
 
-		background-image: url('../../assets/images/profil-pic.jpg');
+		background-image: $profile-pic2;
 	}
 
 	#{&}__items {
 		position: absolute;
+<<<<<<< HEAD:frontend/src/sass/components/ProfilMenu.scss
 		z-index: 3;
 		width: 25rem;
 		top: 8rem;
+=======
+		min-width: 25rem;
+		right: -1.5rem;
+		top: 9rem;
+		z-index: 10;
+>>>>>>> main:frontend/src/sass/components/Nav/ProfileMenu.scss
 
 		background-color: $almost-white;
 		border: 0.3rem black solid;
@@ -37,8 +44,8 @@
 			gap: 2rem;
 
 			padding: 1rem 0;
-			border-bottom: 1px black solid;
-			.profil-menu__picture {
+			border-bottom: 0.2rem black solid;
+			.profile-menu__picture {
 				height: 6.5rem;
 				width: 6.5rem;
 			}
