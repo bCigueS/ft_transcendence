@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "npx tsc && node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -19,6 +19,7 @@
     "socket.io": "^4.6.1",
     "ts-loader": "^9.4.2",
     "ts-node": "^10.9.1",
+    "tsconfig.json": "^1.0.11",
     "typescript": "^5.0.4"
   }
 }

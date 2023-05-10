@@ -1,14 +1,10 @@
-// import express from 'express';
-// import http from 'http';
-// import { Server } from 'socket.io';
-// import cors from 'cors';
-// import { game, addPlayer, removePlayer} from './game';
+import { game, addPlayer, removePlayer} from './game';
+import { JoinCallback } from './types';
 
+const http = require ('http');
+const { Server, Socket } = require('socket.io');
 const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
 const cors = require('cors');
-const { game, addPlayer, removePlayer } = require('./game');
 
 const PORT = 3001;
 const app = express();
@@ -22,29 +18,16 @@ const io = new Server(server, {
 	},
 });
 
-let room = 1;
-
-io.on('connection', (socket) => {
-	socket.on('join', ({ name, level }, callback) => {
-		const {player, opponent, message, full} = addPlayer({
+io.on('connection', (socket: typeof Socket) => {
+	socket.on('join', ({ name, level }: { name: string, level: string }, callback: JoinCallback) => {
+		const {player, opponent, message} = addPlayer({
 			name,
 			playerId: socket.id,
 			level,
-			gameId: room,
+			gameId: 'pong',
 		});
-		if (full) {
-			room += 1;
-			const {player, opponent, message, full} = addPlayer({
-				name,
-				playerId: socket.id,
-				level,
-				gameId: room,
-			});
-			socket.join(room);
-			return callback({ message });
-		}
-		socket.join(room);
-		callback({ message });
+		socket.join(player.gameId);
+		callback(message);
 
 		// send welcome message to player1, and also send the opponent player's data
 		socket.emit('welcome', {
@@ -59,14 +42,14 @@ io.on('connection', (socket) => {
 			opponent: player,
 		});
 		
-		if (game(room).length >= 2) {
-			io.to(room).emit('startGame', {
+		if (game(player.gameId).length >= 2) {
+			io.to(player.gameId).emit('startGame', {
 				message: `Let's start the game!`,
 			});
 		}
 	});
 	
-	socket.on('move', ({ y, gameId }) => {
+	socket.on('move', ({ y, gameId }: {y: number, gameId: string}) => {
 		socket.broadcast.to(gameId).emit('paddleMove', { y });
 	});
 
@@ -80,6 +63,25 @@ io.on('connection', (socket) => {
 			io.to(player.gameId).emit('stopGame', {
 				message: `Game has ended, you won!`,
 			});
+
+			const remainingPlayer = io.sockets.adapter.rooms.get(player.gameId);
+			if (remainingPlayer) {
+				console.log('get remaining player, length ' + remainingPlayer.length);
+				for (const otherPlayerId in remainingPlayer) {
+					console.log(otherPlayerId);
+					io.sockets.connected[otherPlayerId].disconnect();
+					const check = removePlayer(otherPlayerId);
+					if (check) {
+						console.log('succeed deleting');
+					} else {
+						console.log('nothing deleted');
+					}
+				}
+			} else {
+				console.log('cannot get remaining player');
+			}
+
+			console.log('length of game: ' + game(player.gameId).length);
 		}
 	});
 });
