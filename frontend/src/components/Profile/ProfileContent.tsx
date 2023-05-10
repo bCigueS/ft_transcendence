@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 
 import classes from '../../sass/components/Profile/ProfileContent.module.scss';
 import MatchSummary from './Matches/MatchSummary';
@@ -25,6 +25,10 @@ const ProfileContent: React.FC<{ user?: User }> = ({ user }) => {
 	const isBlock = (user: User) => {
 		return userCtx.user.block.includes(user);
 	}
+
+	useEffect(() => {
+		setContentDisplay('Matchs');
+	}, [user])
 
 	return (
 		<div className={classes.container}>
