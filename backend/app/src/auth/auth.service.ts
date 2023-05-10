@@ -24,4 +24,11 @@ async login(name: string, password: string): Promise<AuthEntity> {
 		accessToken: this.jwtService.sign({ userId: user.id }),
 	};
 }
+
+async fortyTwo(): Promise<AuthEntity> {
+    return {
+      accessToken: this.jwtService.sign({ userId: 42 }),
+    };
+  }
+
 }
