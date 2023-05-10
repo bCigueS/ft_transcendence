@@ -17,7 +17,7 @@ const config = {
   },
   devServer: {
     open: true,
-    host: "localhost",
+    host: "postgres",
   },
   plugins: [
     new HtmlWebpackPlugin({
