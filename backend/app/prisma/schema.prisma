@@ -9,22 +9,26 @@ datasource db {
 }
 
 model User {
-  id        Int          @id @default(autoincrement())
+  id          Int          @id @default(autoincrement())
 
   email     String
-  name      String       @unique
+  name      String        @unique
   password  String
   avatar    String?       @default("default.jpg")
   
   friends   Friendship[]  @relation(name: "friends")
   followers Friendship[]  @relation(name: "followers")
 
-  blocked   Block[]  @relation(name: "blocked")
-  haters    Block[]  @relation(name: "haters")
+  blocked   Block[]       @relation(name: "blocked")
+  haters    Block[]       @relation(name: "haters")
 
   games         UserGame[]
   winnerGames   Game[]    @relation("WinnerGames")
-  
+
+  doubleAuth    Boolean   @default(false)
+
+  wins          Int       @default(0)
+
   @@map("users")
 }
 
