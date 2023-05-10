@@ -17,6 +17,7 @@
   "devDependencies": {
     "nodemon": "^2.0.22",
     "socket.io": "^4.6.1",
+    "ts-loader": "^9.4.2",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.4"
   }
