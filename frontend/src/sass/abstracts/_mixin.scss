@@ -7,8 +7,8 @@
 	font-weight: 400;
 }
 
-@mixin text-head-xs($color: black) {
-	font-size: 1.8rem;
+@mixin text-header-xs($color: black) {
+	font-size: 1.6rem;
 	line-height: 2.4rem;
 	color: $color;
 	font-weight: bold;
@@ -19,19 +19,19 @@
 	color: $color;
 	font-weight: bold;
 }
-@mixin text-head-m($color: black) {
+@mixin text-header-m($color: black) {
 	font-size: 3.2rem;
 	line-height: 3.2rem;
 	color: $color;
 	font-weight: bold;
 }
-@mixin text-head-l($color: black) {
+@mixin text-header-l($color: black) {
 	font-size: 4rem;
 	line-height: 4rem;
 	color: $color;
 	font-weight: bold;
 }
-@mixin text-head-xl($color: black) {
+@mixin text-header-xl($color: black) {
 	font-size: 5.6rem;
 	line-height: 5.6rem;
 	color: $color;
@@ -46,6 +46,16 @@
 	align-items: $align;
 }
 
-@mixin shadowBox() {
-	box-shadow: -8px 5px 0px 1px $light-vermillon;
+@mixin shadowBox($color: $light-vermillon) {
+	box-shadow: -0.8rem 0.5rem 0rem 0.1rem $color;
+}
+
+@mixin pictureProfil($url: $profile-pic, $width: 5rem, $height: 5rem) {
+	height: $width;
+	width: $height;
+
+	background-image: $url;
+	background-repeat: no-repeat;
+	background-position: center center;
+	background-size: cover;
 }
