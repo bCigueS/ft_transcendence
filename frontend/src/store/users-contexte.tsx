@@ -167,9 +167,6 @@ type Props = {
 	className?: string
 };
 
-
-
-
 const UsersContextProvider: React.FC<Props> = ( {children, className} ) => {
 
 	const [user, setUser] = useState<User>(simonUser);

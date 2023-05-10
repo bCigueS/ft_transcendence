@@ -1,11 +1,13 @@
 import React from 'react';
 import { User } from '../../store/users-contexte';
-import { useNavigate } from 'react-router-dom';
+import { NavigateOptions, useNavigate } from 'react-router-dom';
 import classes from '../../sass/components/Profile/ProfilIcon.module.scss';
 
 
 
 const ProfilIcon: React.FC<{user?: User; displayCo?: boolean; size?: string[]}> = ( { user, displayCo = true, size = []}) => {
+
+	const navigate = useNavigate();
 
 	const stylePicture: React.CSSProperties = {
 		content: '',
@@ -15,11 +17,19 @@ const ProfilIcon: React.FC<{user?: User; displayCo?: boolean; size?: string[]}> 
 		borderRadius: '50%'
 	};
 
-	const navigate = useNavigate();
+	const navHandler = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+		const option: NavigateOptions = {
+			replace: false,
+			state: { message: "Failed to submit form!"}
+		}
+		navigate(`/profile/${user?.nickname.toLowerCase()}`, option);
+	}
+
 
 	return (
 		<div 
-			className={classes.profilPic} 
+			className={classes.profilPic}
+			onClick={navHandler} 
 			style={size.length > 0 ? {width: size[0], height: size[1]} : {}}>
 			
 			{ size.length > 0 &&
