@@ -5,24 +5,23 @@ RUN npm i -g @nestjs/cli
 # Create app directory
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
-COPY app .
+
+RUN rm -rf ./app/node_modules
+
+# Copy app dependencies
+COPY ./app/package*.json ./
+COPY ./app/prisma ./prisma/
 
 # Install app dependencies
-RUN npm install
+RUN npm ci
 
-RUN npm install @prisma/client
+# Copy remaining app files
+COPY ./app ./
+COPY ./.env .
 
+# Generate Prisma client
 RUN npx prisma generate --schema ./prisma/schema.prisma
-
-COPY .env .
 
 EXPOSE 3000
 
-# RUN apt-get update && apt-get install -y postgresql-client
-# COPY scripts/db-check.sh /db-check.sh
-# RUN chmod +x /db-check.sh
-# ENTRYPOINT ["/db-check.sh"]
-
-# RUN npm run build
-
-CMD [ "npm", "run" , "start:dev" ]
+CMD [ "npm", "run", "start:dev" ]
