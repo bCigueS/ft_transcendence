@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, NotFoundException } from '@nestjs/common';
 import { GamesService } from './games.service';
 import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
@@ -24,7 +24,12 @@ export class GamesController {
 
   @Get(':id')
   @ApiOkResponse({ type: GameEntity })
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    
+    const game = await this.gamesService.findOne(id);
+		if (!game)
+			throw new NotFoundException(`Game with ${id} does not exist.`);
+
     return this.gamesService.findOne(id);
   }
 
