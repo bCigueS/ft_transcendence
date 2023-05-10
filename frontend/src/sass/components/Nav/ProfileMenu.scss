@@ -18,16 +18,10 @@
 
 	#{&}__items {
 		position: absolute;
-<<<<<<< HEAD:frontend/src/sass/components/ProfilMenu.scss
-		z-index: 3;
-		width: 25rem;
-		top: 8rem;
-=======
 		min-width: 25rem;
 		right: -1.5rem;
 		top: 9rem;
 		z-index: 10;
->>>>>>> main:frontend/src/sass/components/Nav/ProfileMenu.scss
 
 		background-color: $almost-white;
 		border: 0.3rem black solid;
