@@ -1,10 +1,13 @@
 import React from 'react';
 import { User } from '../../store/users-contexte';
+import { NavigateOptions, useNavigate } from 'react-router-dom';
 import classes from '../../sass/components/Profile/ProfilIcon.module.scss';
 
 
 
-const ProfilIcon: React.FC<{user: User; displayCo?: boolean; size?: string[]}> = ( { user, displayCo = true, size = []}) => {
+const ProfilIcon: React.FC<{user?: User; displayCo?: boolean; size?: string[]}> = ( { user, displayCo = true, size = []}) => {
+
+	const navigate = useNavigate();
 
 	const stylePicture: React.CSSProperties = {
 		content: '',
@@ -14,9 +17,19 @@ const ProfilIcon: React.FC<{user: User; displayCo?: boolean; size?: string[]}> =
 		borderRadius: '50%'
 	};
 
+	const navHandler = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+		const option: NavigateOptions = {
+			replace: false,
+			state: { message: "Failed to submit form!"}
+		}
+		navigate(`/profile/${user?.nickname.toLowerCase()}`, option);
+	}
+
+
 	return (
 		<div 
-			className={classes.profilPic} 
+			className={classes.profilPic}
+			onClick={navHandler} 
 			style={size.length > 0 ? {width: size[0], height: size[1]} : {}}>
 			
 			{ size.length > 0 &&
@@ -26,15 +39,15 @@ const ProfilIcon: React.FC<{user: User; displayCo?: boolean; size?: string[]}> =
 				className={classes.picture}
 				style={size.length > 0 ? {width: size[0], height: size[1] } : {}}>
 				<img 
-					src={user.profilePic} 
-					alt={user.nickname} 
+					src={user?.profilePic} 
+					alt={user?.nickname} 
 				/>
 			</div>
 			{
 				displayCo &&
 				<i 
 					className="fa-solid fa-circle" 
-					style={{color: user.connected ? 'green' : 'red' }
+					style={{color: user?.connected ? 'green' : 'red' }
 					}>
 				</i>
 			}

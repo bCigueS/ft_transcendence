@@ -1,35 +1,37 @@
 import React, { useContext } from 'react';
 
-import { UserContext } from '../../store/users-contexte';
+import { User, UserContext } from '../../store/users-contexte';
 
 import classes from '../../sass/components/Profile/ProfileCardInfo.module.scss';
 import ProfilIcon from './ProfilIcon';
 
-const ProfileCard: React.FC = () => {
+const ProfileCard: React.FC<{ user?: User}> = ( { user } ) => {
 
 	const userCtx = useContext(UserContext);
 
 	return (
 		<div className={classes.container}>
-			<ProfilIcon user={userCtx.user} displayCo={false} size={['15rem', '15rem']}/>
+			<ProfilIcon user={user} displayCo={false} size={['15rem', '15rem']}/>
 			<div className={classes.user}>
-				<h1>{userCtx.user.nickname}</h1>
-				<p>{userCtx.user.login}</p>
+				<h1>{user?.nickname}</h1>
+				<p>{user?.login}</p>
 			</div>
 			<div className={classes.stat}>
 				<div className={classes.info}>
 					<i className="fa-solid fa-trophy"></i>
-					<p>{userCtx.user.wins}</p>
+					<p>{user?.wins}</p>
 				</div>
 				<div className={classes.info}>
 					<i className="fa-solid fa-bolt"></i>
-					<p>{userCtx.user.lose}</p>
+					<p>{user?.lose}</p>
 				</div>
 				<div className={classes.info}>
 					<i className="fa-sharp fa-solid fa-chart-simple"></i>
 					<p>
-						{
-							`${userCtx.user.wins / (userCtx.user.wins + userCtx.user.lose) * 100}%`
+						{ user &&
+							user.lose !== 0
+							? `${user.wins / (user.wins + userCtx.user.lose) * 100}%`
+							: '100' 
 						}
 					</p>
 				</div>

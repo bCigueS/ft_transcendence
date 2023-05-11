@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 
 import classes from '../../sass/components/Leaderboard/LeaderboardProfil.module.scss';
 import ProfilIcon from '../Profile/ProfilIcon';
@@ -30,7 +30,6 @@ const LeaderboardProfil: React.FC<{user: User}> = ( { user }) => {
 					></i>);
 		}
 	}
-
 
 	return (
 		<div className={classes.container}>
