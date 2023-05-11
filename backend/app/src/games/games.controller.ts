@@ -33,11 +33,11 @@ export class GamesController {
     return this.gamesService.findOne(id);
   }
 
-  @Patch(':id')
-  @ApiOkResponse({ type: GameEntity })
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateGameDto: UpdateGameDto) {
-    return this.gamesService.update(id, updateGameDto);
-  }
+  // @Patch(':id')
+  // @ApiOkResponse({ type: GameEntity })
+  // update(@Param('id', ParseIntPipe) id: number, @Body() updateGameDto: UpdateGameDto) {
+  //   return this.gamesService.update(id, updateGameDto);
+  // }
 
   @Delete(':id')
   @ApiOkResponse({ type: GameEntity })
