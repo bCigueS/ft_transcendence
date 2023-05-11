@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useLayoutEffect, MouseEvent, KeyboardEvent } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import ModalBoard from './ModalBoard';
 import LiveBoard from './LiveBoard';
 import classes from '../../sass/components/Game/Pong.module.scss';
@@ -24,6 +24,8 @@ const OPPONENT_WIN = 1;
 const PLAYER_SIDE = -1;
 const OPPONENT_SIDE = 1;
 
+const angle = (Math.PI/ 4) + Math.random();
+
 // type
 type PongInfo = {
 	boardWidth: number;
@@ -39,18 +41,18 @@ type PongProps = {
 	username: string;
 }
 
+const info: PongInfo = {
+	boardWidth: 640,
+	boardHeight: 480,
+	paddleWidth: 10,
+	initialSpeed: 5,
+	playerX: 10,
+	opponentX: 620, // boardWidth - paddleWidth - 10,
+	winnerScore: 3,
+}
+
+
 export default function Pong({username}: PongProps) {
-	const info: PongInfo = {
-		boardWidth: 640,
-		boardHeight: 480,
-		paddleWidth: 10,
-		initialSpeed: 5,
-		playerX: 10,
-		opponentX: 620, // boardWidth - paddleWidth - 10,
-		winnerScore: 3,
-	}
-	
-	const angle = (Math.PI/ 4) + Math.random();
 	// game play
 	const [isRunning, setIsRunning] = useState(false);
 	const [isPaused, setIsPaused] = useState(false);
@@ -97,6 +99,7 @@ export default function Pong({username}: PongProps) {
 				console.log({ message, opponent, gameId });
 				setGameId(gameId);
 				setIsLive(true);
+				setIsReady(false);
 				if (opponent) {
 					setOpponentName(opponent.name);
 				}
@@ -153,21 +156,6 @@ export default function Pong({username}: PongProps) {
 			setSpeed(s => s += 0.5);
 		}
 	}
-
-	useEffect(() => {
-		if (isRunning)
-		{		
-			setSpeed(info.initialSpeed);
-
-			setBallX(info.boardWidth / 2);
-			setBallY(info.boardHeight / 2);
-
-			let angle = (Math.PI / 4) * Math.random();
-
-			setDeltaX(speed * Math.cos(angle));
-			setDeltaY(speed * Math.sin(angle));
-		}
-	}, [isRunning]);
 	
 	const serve = (side: number) => {		
 		setSpeed(info.initialSpeed);
@@ -192,9 +180,9 @@ export default function Pong({username}: PongProps) {
 				setPlayerY((info.boardHeight - paddleHeight) / 2);
 				setOpponentY((info.boardHeight - paddleHeight) / 2);
 			}
+			serve(side);
 		}
 
-		// serve(side);
 		setIsRunning(true);
 	}
 	
@@ -227,9 +215,6 @@ export default function Pong({username}: PongProps) {
 	}
 	
 	const moveBall = () => {
-		// setDeltaX(x => x += speed);
-		// setDeltaY(y => y += speed);
-
 		setBallX(x => x += deltaX);
 		setBallY(y => y += deltaY);
 	}
@@ -403,7 +388,7 @@ export default function Pong({username}: PongProps) {
 				}
 			}
 		}
-	}, [toolMode, isRunning, paddleUp, paddleDown, isPaused, playerY]);
+	}, [toolMode, isRunning, paddleUp, paddleDown, isPaused, playerY, gameId, paddleHeight, playerMode]);
 	
 	return (
 		<>
