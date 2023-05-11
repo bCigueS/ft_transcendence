@@ -22,7 +22,7 @@ COPY ./.env .
 # Generate Prisma client
 RUN npx prisma generate --schema ./prisma/schema.prisma
 
-RUN npx prisma migrate dev
+# RUN npx prisma migrate dev
 
 EXPOSE 3000
 
