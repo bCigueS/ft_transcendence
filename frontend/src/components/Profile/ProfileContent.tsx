@@ -5,11 +5,11 @@ import MatchSummary from './Matches/MatchSummary';
 import ProfileFriends from './ProfileFriends';
 import { User, UserContext } from '../../store/users-contexte';
 import ProfilSettings from './ProfilSettings';
+import { useParams } from 'react-router-dom';
 
 const ProfileContent: React.FC<{ user?: User }> = ({ user }) => {
 
 	const userCtx = useContext(UserContext);
-
 
 	const [contentDisplay, setContentDisplay] = useState<string>('Matchs');
 
@@ -28,7 +28,9 @@ const ProfileContent: React.FC<{ user?: User }> = ({ user }) => {
 
 	useEffect(() => {
 		setContentDisplay('Matchs');
-	}, [user])
+	}, [user?.nickname])
+
+
 
 	return (
 		<div className={classes.container}>
