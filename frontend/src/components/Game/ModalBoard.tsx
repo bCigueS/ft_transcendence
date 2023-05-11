@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import '../../sass/main.scss'
+import classes from  '../../sass/components/Game/Modal.module.scss';
+import '../../sass/components/Game/Modal.module.scss';
+
 
 type ModalProps = {
 	buttonText: string;
@@ -20,8 +22,8 @@ export default function ModalBoard({ onDifficulty, onTool, onPlayerMode, onStart
 	}
 
 	return (
-		<div className="modal">
-			<div className="modal-contents" onClick={onNextPage}>
+		<div className={classes.container}>
+			<div className={classes.content} onClick={onNextPage}>
 				{(isStarting && page === 0) && (
 					<>
 						<h2>Ready to have fun?</h2>

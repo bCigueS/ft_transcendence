@@ -10,15 +10,15 @@ html, body {
 	height: 100%;
 	// width: 120rem;
 	font-family: 'Inter', sans-serif;
-	font-size: 85.5%;
-	// font-size: 62.5%;
+	// font-size: 85.5%;
+	font-size: 62.5%;
 }
 
 /* Body */
 body {
 	padding: 14.5rem 2rem;
 	background-color: $background-color;
-	@include flexBox();
+	@include flexBox($justify:center, $align: center);
 }
 
 /* Selector */
@@ -45,11 +45,8 @@ button {
 }
 
 main {
-	display: grid;
-	grid-template-columns: 1fr;
-	grid-template-rows: 1fr;
 	height: 70rem;
-	max-width: 100%;
+	display: flex;
 	justify-content: center;
 	align-items: center;
 	margin: 1rem 3rem;
