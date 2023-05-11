@@ -46,15 +46,15 @@ export class GamesService {
     return game;
   }
 
-  async update(id: number, updateGameDto: UpdateGameDto) {
+  // async update(id: number, updateGameDto: UpdateGameDto) {
     
-    const updatedGame = await this.prisma.game.update({
-      where: { id },
-      data: updateGameDto,
-    });
+  //   const updatedGame = await this.prisma.game.update({
+  //     where: { id },
+  //     data: updateGameDto,
+  //   });
 
-    return updatedGame;
-  }
+  //   return updatedGame;
+  // }
 
   async remove(id: number) {
 
