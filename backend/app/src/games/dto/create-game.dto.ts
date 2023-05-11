@@ -1,6 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
+import { IsInt, IsNotEmpty, IsOptional, IsString, MaxLength, MinLength, ValidateNested } from "class-validator";
 import { GameType, GameState } from '@prisma/client';
+import { Type } from "class-transformer";
+import { CreateUserGameDto } from "./create-user-game.dto";
 
 export class CreateGameDto {
    
@@ -8,12 +10,19 @@ export class CreateGameDto {
     @ApiProperty()
     type: GameType;
 
-	@IsNotEmpty()
+    @IsNotEmpty()
+    @IsInt()
     @ApiProperty()
     level: number;
 
-	@IsNotEmpty()
-    @ApiProperty()
-    state: GameState;
+    @IsNotEmpty()
+    @ValidateNested({ each: true })
+    @Type(() => CreateUserGameDto)
+    @ApiProperty({ type: [CreateUserGameDto] })
+    players: CreateUserGameDto[];
+
+    @IsInt()
+    @ApiProperty({ required: false })
+    winnerId?: number;
 
 }
