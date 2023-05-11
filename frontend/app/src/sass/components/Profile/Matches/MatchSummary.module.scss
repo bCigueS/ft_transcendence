@@ -1,0 +1,87 @@
+@import '../../../abstracts/mixin.scss';
+@import '../../../abstracts/variables.scss';
+
+.container {
+	min-width: 15rem;
+	width: 25rem;
+	max-height: 10rem;
+	background-color: $background-color;
+
+	display: grid;
+	grid-template-columns: 2fr 1fr 2fr;
+	grid-template-rows: 1fr;
+	justify-content: space-between;
+	align-items: center;
+
+	margin:0.6rem;
+	padding: 1rem 2rem;
+	border: 0.2rem $dark-space-blue solid;
+	background-color: $background-color;
+	@include shadowBox();
+
+	transition: min-width 0.5s ease-in-out ;
+
+	&:hover {
+		min-width: 95%;
+	}
+
+	// border: 0.2rem black solid;
+
+	.score {
+		@include flexBox();
+		
+		h1 {
+			color: $dark-space-blue;
+			font-size: 3rem;
+		}
+
+	}
+	.img {
+		@include flexBox();
+		height: 5rem;
+		width: 5rem;
+		border-radius: 50%;
+		margin: 1rem;		
+		background-color: coral ;
+
+	}
+
+	.card {
+		width: 100%;
+		height: 100%;
+		@include flexBox();
+		// display: grid;
+		// grid-template-columns: 7rem 2fr;
+		// grid-template-rows: 7rem;
+		justify-content: center;
+		align-items:center;
+	}
+
+	.cardM {
+		width: 100%;
+		height: 100%;
+		@include flexBox();
+
+		// display: grid;
+		// grid-template-columns: 2fr 7rem;
+		// grid-template-rows: 7rem;
+
+		justify-content: space-between;
+		align-items:center;
+
+		.info {
+			text-align: right;
+		}
+	}
+
+	p {
+		@include text-body();
+		color: $dark-space-blue;
+
+	}
+
+	h1 {
+		@include text-header-xs();
+		color: $dark-space-blue;
+	}
+}
