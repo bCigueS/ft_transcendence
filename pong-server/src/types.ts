@@ -11,6 +11,11 @@ export type AddPlayerResult = {
 	message: string;
 }
 
-export type JoinCallback = (message: string) => {
+export type RemovePlayerResult = {
+	player: PlayerInfo | null;
+	message: string;
+}
+
+export type CallbackInfo = (message: string) => {
 	message: string;
 }
