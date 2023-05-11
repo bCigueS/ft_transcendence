@@ -10,11 +10,22 @@ export class GamesService {
   /* CRUD */
   async create(data: CreateGameDto) {
 
-    const newGame = await this.prisma.game.create({
-      data
+    const { type, level, players, winnerId } = data;
+
+    return this.prisma.game.create({
+        data: {
+            type,
+            level,
+            winnerId,
+            players: {
+                create: players.map(player => ({
+                    userId: player.userId,
+                    playerIndex: player.playerIndex
+                }))
+            }
+        }
     });
-    
-    return newGame;
+
   }
 
   async findAll() {
@@ -52,37 +63,5 @@ export class GamesService {
     await this.prisma.game.delete({ where: { id } });
     return this.findAll();
   }
-
-  async play(userId: number)
-  {
-    const pendingGames = await this.prisma.game.findMany({
-      where:
-      {
-        state: "PENDING"
-      }
-    })
-
-    if (!pendingGames)
-    {
-      // create a new game with state to pending
-      // create a UserGame with current user and assign it to this game
-
-    }
-    else
-    {
-      // get the pendingGame that has the latest createdAt date
-      // create a userGame with current user and assign it to this game
-      // set game s state to playing
-    }
-
-  }
-
-  /* set score, if one player gets highest score set winner and set state to finished */
-  // async increasePlayerScore(id: number)
-  // {
-  //   const game = await this.prisma.game.findUnique({ where: { id } });
-
-
-  // }
 
 }
