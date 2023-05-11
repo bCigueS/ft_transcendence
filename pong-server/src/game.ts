@@ -1,4 +1,4 @@
-import { AddPlayerResult, PlayerInfo } from './types';
+import { AddPlayerResult, RemovePlayerResult, PlayerInfo } from './types';
 
 let beginnerLvl = 1;
 let mediumLvl = 2;
@@ -65,15 +65,36 @@ const addPlayer = (user: PlayerInfo): AddPlayerResult => {
 	}
 };
 
-const removePlayer = (playerId: string) => {
-	for (const game in games) {
-		let players = games[game];
+const removePlayer = (playerId: string, gameId?: string): RemovePlayerResult => {
+	if (gameId) {
+		let players = games[gameId];
 		const index = players.findIndex((pl: Player) => pl.playerId === playerId);
 		
 		if (index !== -1) {
-			return players.splice(index, 1)[0];
+			return {
+				player: players.splice(index, 1)[0],
+				message: 'Player successfully removed from ' + gameId,
+			}
+		}
+	} else {
+		for (const id in games) {
+			let players = games[id];
+			const index = players.findIndex((pl: Player) => pl.playerId === playerId);
+			
+			if (index !== -1) {
+				return {
+					player: players.splice(index, 1)[0],
+					message: 'Player successfully removed from ' + id,
+				}
+			}
 		}
 	}
+
+	return {
+		player: null,
+		message: 'Cannot find player in ' + (gameId ? gameId : 'any existing gameId'),
+	}
+
 };
 
 export { addPlayer, game, removePlayer };

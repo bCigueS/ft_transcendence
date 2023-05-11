@@ -8,9 +8,9 @@ export default function Game() {
 
 	return (
 		<>
-			<Pong 
+			{/* <Pong 
 				username={username}
-			/>
+			/> */}
 		</>
 	)
 }

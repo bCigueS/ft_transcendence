@@ -116,7 +116,7 @@ export default function Pong({username}: PongProps) {
 			});
 			socket.on('stopGame', ({ message }) => {
 				console.log({ message });
-				setIsRunning(false);
+				stopGame();
 			});
 		}
 	}, [playerMode])
@@ -300,6 +300,15 @@ export default function Pong({username}: PongProps) {
 		context.stroke();
 	}
 
+	const stopGame = () => {
+		setIsRunning(false);
+		if (playerMode === DOUBLE_MODE) {
+			socket.emit('leave', gameId, (message: string) => {
+				console.log(message);
+			});
+		}
+	}
+
 	// render game
 	useEffect(() => {
 		const canvas = canvasRef.current;
@@ -323,8 +332,8 @@ export default function Pong({username}: PongProps) {
 				// check game status
 				if (opponentScore > info.winnerScore || playerScore > info.winnerScore) {
 					playerScore > info.winnerScore ? setWinner(PLAYER_WIN) : setWinner(OPPONENT_WIN);
-					setIsRunning(false);
 					setGameOver(true);
+					stopGame();
 				}
 			}
 		}

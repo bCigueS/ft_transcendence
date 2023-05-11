@@ -1,5 +1,5 @@
 import { game, addPlayer, removePlayer} from './game';
-import { JoinCallback } from './types';
+import { CallbackInfo } from './types';
 
 const http = require ('http');
 const { Server, Socket } = require('socket.io');
@@ -19,7 +19,7 @@ const io = new Server(server, {
 });
 
 io.on('connection', (socket: typeof Socket) => {
-	socket.on('join', ({ name, level }: { name: string, level: string }, callback: JoinCallback) => {
+	socket.on('join', ({ name, level }: { name: string, level: string }, callback: CallbackInfo) => {
 		const {player, opponent, message} = addPlayer({
 			name,
 			playerId: socket.id,
@@ -53,8 +53,22 @@ io.on('connection', (socket: typeof Socket) => {
 		socket.broadcast.to(gameId).emit('paddleMove', { y });
 	});
 
+	socket.on('leave', (gameId: string, callback: CallbackInfo) => {
+		const {player, message} = removePlayer(socket.id, gameId);
+
+		if (player) {
+			socket.broadcast.to(gameId).emit('opponentLeft', {
+				message: `${player.name} has left the game`,
+			});
+
+			socket.leave(gameId);
+			callback(message);
+			console.log('length of game: ' + game(player.gameId).length);
+		}
+	});
+
 	socket.on('disconnect', () => {
-		const player = removePlayer(socket.id);
+		const {player, message} = removePlayer(socket.id);
 
 		if (player) {
 			socket.broadcast.to(player.gameId).emit('opponentLeft', {
@@ -64,22 +78,24 @@ io.on('connection', (socket: typeof Socket) => {
 				message: `Game has ended, you won!`,
 			});
 
-			const remainingPlayer = io.sockets.adapter.rooms.get(player.gameId);
-			if (remainingPlayer) {
-				console.log('get remaining player, length ' + remainingPlayer.length);
-				for (const otherPlayerId in remainingPlayer) {
-					console.log(otherPlayerId);
-					io.sockets.connected[otherPlayerId].disconnect();
-					const check = removePlayer(otherPlayerId);
-					if (check) {
-						console.log('succeed deleting');
-					} else {
-						console.log('nothing deleted');
-					}
-				}
-			} else {
-				console.log('cannot get remaining player');
-			}
+			socket.leave(player.gameId);
+
+			// const remainingPlayer = io.sockets.adapter.rooms.get(player.gameId);
+			// if (remainingPlayer) {
+			// 	console.log('get remaining player, length ' + remainingPlayer.length);
+			// 	for (const otherPlayerId in remainingPlayer) {
+			// 		console.log(otherPlayerId);
+			// 		io.sockets.connected[otherPlayerId].disconnect();
+			// 		const check = removePlayer(otherPlayerId);
+			// 		if (check) {
+			// 			console.log('succeed deleting');
+			// 		} else {
+			// 			console.log('nothing deleted');
+			// 		}
+			// 	}
+			// } else {
+			// 	console.log('cannot get remaining player');
+			// }
 
 			console.log('length of game: ' + game(player.gameId).length);
 		}
