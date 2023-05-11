@@ -34,7 +34,7 @@ services:
     depends_on:
       - postgres
     ports:
-      - "80:3000"
+      - "8000:3000"
     volumes:
       - ./frontend/app:/usr/src/app
     networks:
