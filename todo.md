@@ -15,7 +15,7 @@
     - [ ] API
         - [ ] **User**
             - [X] CRUD for user
-            - [ ] User upload image
+            - [X] User upload image
             - [X] Friend
                 - [X] add friend
                 - [X] remove friend
@@ -28,8 +28,8 @@
             - [ ] see friend's status - after authentication done
             - [ ] login status - after authentication done
         - [ ] **Game**
-            - [ ] CRUD for game
-            - [ ] match user for game
+            - [X] CRUD for game
+            - [ ] match user for game - apparently this is done in Fany s server and Yangchi agreed
             - [ ] game history
             - [ ] game stat (calculation)
         - [ ] **Message**
