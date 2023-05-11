@@ -11,12 +11,12 @@ interface navItem {
 
 const Nav: React.FC = () => {
 
-	const styleNav: React.CSSProperties = {
-		content: '',
-		opacity: 1,
-		bottom: '-0.8rem',
-		left: '-0.8rem',
-	}
+	// const styleNav: React.CSSProperties = {
+	// 	content: '',
+	// 	opacity: 1,
+	// 	bottom: '-0.8rem',
+	// 	left: '-0.8rem',
+	// }
 
 	const navItems: navItem[] = [
 		{text: "Home", link:"/"},
@@ -41,6 +41,7 @@ const Nav: React.FC = () => {
 							return (
 								<NavLink 
 									to={ items.link } 
+									key={items.text}
 									// className={classes.item}
 									className={({isActive}) => isActive ? classes.item + " " + classes.active : classes.item }
 									>

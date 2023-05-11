@@ -68,6 +68,9 @@
 				opacity: 0;
 			}
 			
+			&:hover {
+				color: $light-vermillon;
+			}
 			&:hover::before {
 				bottom: -0.8rem;
 				left: -0.8rem;
