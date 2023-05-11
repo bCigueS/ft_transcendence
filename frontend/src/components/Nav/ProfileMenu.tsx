@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 interface menuOption {
@@ -10,6 +10,20 @@ interface menuOption {
 
 const ProfilIcon: React.FC = () => {
 	const [menuOpen, setMenuOpen] = useState(false);
+	const menuRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		const handleOutsideClick = (event: MouseEvent) => {
+			if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+				setMenuOpen(false);
+			}
+		}
+
+		window.addEventListener('mousedown', handleOutsideClick);
+		return () => {
+			window.removeEventListener('mousedown', handleOutsideClick);
+		};
+	}, [menuRef]);
 
 	const menuOptions: menuOption[] = [
 		{icon1: 'fa-solid fa-user', icon2: 'fa-solid fa-chevron-right', text: 'Profile', link: '/profile'},
@@ -18,7 +32,7 @@ const ProfilIcon: React.FC = () => {
 	]
 
 	return (
-		<div className="profile-menu">
+		<div className="profile-menu" ref={menuRef}>
 			<div
 				className="profile-menu__picture"
 				onClick={() => setMenuOpen((prev) => !prev)}>
