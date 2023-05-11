@@ -60,7 +60,7 @@ model Game {
 
   type          GameType
   level         Int
-  state         GameState
+  // state         GameState
 
   players       UserGame[]
 

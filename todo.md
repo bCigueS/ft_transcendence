@@ -29,7 +29,7 @@
             - [ ] login status - after authentication done
         - [ ] **Game**
             - [X] CRUD for game
-            - [ ] match user for game
+            - [ ] match user for game - apparently this is done in Fany s server and Yangchi agreed
             - [ ] game history
             - [ ] game stat (calculation)
         - [ ] **Message**
