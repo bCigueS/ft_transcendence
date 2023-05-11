@@ -2,19 +2,21 @@
 FROM node:16-alpine
 
 # Set the working directory to /app
-WORKDIR /app
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+# WORKDIR /app
 
 # Copy the package.json and package-lock.json files to the container
-COPY package*.json ./
+COPY ./app/package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm ci
 
 # Copy the rest of the app's source code to the container
-COPY . .
+COPY ./app ./
 
 # Build the app for production
-RUN npm run build
+# RUN npm run build
 
 # Expose port 80 to the outside world
 EXPOSE 3000
