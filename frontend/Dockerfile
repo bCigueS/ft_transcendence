@@ -6,6 +6,8 @@ RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 # WORKDIR /app
 
+RUN rm -rf ./app/node_modules
+
 # Copy the package.json and package-lock.json files to the container
 COPY ./app/package*.json ./
 
