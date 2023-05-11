@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useLayoutEffect, MouseEvent, KeyboardEvent } from 'react';
 import ModalBoard from './ModalBoard';
 import LiveBoard from './LiveBoard';
-import '../../sass/main.scss';
+import classes from '../../sass/components/Game/Pong.module.scss';
 import io from 'socket.io-client';
 
 const socket = io('http://localhost:3001');
@@ -425,9 +425,9 @@ export default function Pong({username}: PongProps) {
 					text={winner === PLAYER_WIN ? "You wins!" : "You lose!"}
 				/>
 			)}
-			<div className="outer_ground">
-				<div className="divider_line"></div>
-				<div className="inner_ground">
+			<div className={classes.container}>
+				<div className={classes.divider_line}></div>
+				<div className={classes.playground}>
 					<canvas 
 						ref={canvasRef}
 						width={info.boardWidth}

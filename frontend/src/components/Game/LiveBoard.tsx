@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import '../../sass/main.scss'
+import classes from '../../sass/components/Game/Liveboard.module.scss';
 
 type LiveBoardProps = {
 	isReady: boolean;
@@ -38,8 +38,8 @@ export default function LiveBoard({ isReady, username, opponentName, start }: Li
 	}, [state.time, isReady]);
 
 	return (
-		<div className="liveboard">
-			<div className="liveboard-contents">
+		<div className={classes.container}>
+			<div className={classes.content}>
 				{!isReady && (
 					<>
 						<h2>Welcome to live battle!!</h2>

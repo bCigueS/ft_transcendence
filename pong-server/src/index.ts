@@ -63,7 +63,7 @@ io.on('connection', (socket: typeof Socket) => {
 
 			socket.leave(gameId);
 			callback(message);
-			console.log('length of game: ' + game(player.gameId).length);
+			// console.log('length of game: ' + game(player.gameId).length);
 		}
 	});
 
@@ -79,25 +79,7 @@ io.on('connection', (socket: typeof Socket) => {
 			});
 
 			socket.leave(player.gameId);
-
-			// const remainingPlayer = io.sockets.adapter.rooms.get(player.gameId);
-			// if (remainingPlayer) {
-			// 	console.log('get remaining player, length ' + remainingPlayer.length);
-			// 	for (const otherPlayerId in remainingPlayer) {
-			// 		console.log(otherPlayerId);
-			// 		io.sockets.connected[otherPlayerId].disconnect();
-			// 		const check = removePlayer(otherPlayerId);
-			// 		if (check) {
-			// 			console.log('succeed deleting');
-			// 		} else {
-			// 			console.log('nothing deleted');
-			// 		}
-			// 	}
-			// } else {
-			// 	console.log('cannot get remaining player');
-			// }
-
-			console.log('length of game: ' + game(player.gameId).length);
+			// console.log('length of game: ' + game(player.gameId).length);
 		}
 	});
 });
