@@ -7,7 +7,7 @@ let hardLvl = 3;
 class Player {
 	public name: string;
 	public playerId: string;
-	public level: string;
+	public level: number;
 	public gameId: string;
 	
 	constructor(user: PlayerInfo) {
@@ -23,23 +23,23 @@ const games: Record<string, Player[]> = {};
 const game = (id: string): Player[] => { return games[id] };
 
 const addPlayer = (user: PlayerInfo): AddPlayerResult => {
-	if (user.level === 'beginner') {
+	if (user.level === 0) {
 		user.gameId += beginnerLvl;
-	} else if (user.level === 'medium') {
+	} else if (user.level === 1) {
 		user.gameId += mediumLvl;
-	} else if (user.level === 'hard') {
+	} else if (user.level === 2) {
 		user.gameId += hardLvl;
 	}
 	
 	if (games[user.gameId] && games[user.gameId].length >= 2) {
 		user.gameId = 'pong';
-		if (user.level === 'beginner') {
+		if (user.level === 0) {
 			beginnerLvl += 3;
 			user.gameId += beginnerLvl;
-		} else if (user.level === "medium") {
+		} else if (user.level === 1) {
 			mediumLvl += 3;
 			user.gameId += mediumLvl;
-		} else if (user.level === "hard") {
+		} else if (user.level === 2) {
 			hardLvl += 3;
 			user.gameId += hardLvl;
 		}

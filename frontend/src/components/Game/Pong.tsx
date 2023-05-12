@@ -7,9 +7,9 @@ import io from 'socket.io-client';
 const socket = io('http://localhost:3001');
 
 // Modal's element
-const BEGINNER_LEVEL = "beginner";
-const MEDIUM_LEVEL = "medium";
-const HARD_LEVEL = "hard";
+const BEGINNER_LEVEL = 0;
+const MEDIUM_LEVEL = 1;
+const HARD_LEVEL = 2;
 
 const KEYBOARD_MODE = "keyboard";
 const MOUSE_MODE = "mouse";
@@ -24,14 +24,13 @@ const OPPONENT_WIN = 1;
 const PLAYER_SIDE = -1;
 const OPPONENT_SIDE = 1;
 
-const angle = (Math.PI/ 4) + Math.random();
-
 // type
 type PongInfo = {
 	boardWidth: number;
 	boardHeight: number;
 	paddleWidth: number;
 	initialSpeed: number;
+	initialDelta: number;
 	playerX: number;
 	opponentX: number;
 	winnerScore: number;
@@ -46,6 +45,7 @@ const info: PongInfo = {
 	boardHeight: 480,
 	paddleWidth: 10,
 	initialSpeed: 5,
+	initialDelta: 3,
 	playerX: 10,
 	opponentX: 620, // boardWidth - paddleWidth - 10,
 	winnerScore: 3,
@@ -132,7 +132,7 @@ export default function Pong({username}: PongProps) {
 			let collisionPoint = (ballY + (ballRadius / 2)) - (opponentY + (paddleHeight / 2));
 			collisionPoint = collisionPoint / (paddleHeight / 2);
 
-			let angle = (Math.PI / 4) * collisionPoint + Math.random();
+			let angle = (Math.PI / 4) * collisionPoint;
 
 			setDeltaX(-speed * Math.cos(angle));
 			setDeltaY(speed * Math.sin(angle));
@@ -148,7 +148,7 @@ export default function Pong({username}: PongProps) {
 			let collisionPoint = (ballY + (ballRadius / 2)) - (playerY + (paddleHeight / 2));
 			collisionPoint = collisionPoint / (paddleHeight / 2);
 
-			let angle = (Math.PI / 4) * collisionPoint + Math.random();
+			let angle = (Math.PI / 4) * collisionPoint;
 
 			setDeltaX(speed * Math.cos(angle));
 			setDeltaY(speed * Math.sin(angle));
@@ -157,16 +157,14 @@ export default function Pong({username}: PongProps) {
 		}
 	}
 	
-	const serve = (side: number) => {		
-		setSpeed(info.initialSpeed);
+	const serve = (side: number) => {	
+		setSpeed(info.initialSpeed + level);
 
 		setBallX(info.boardWidth / 2);
 		setBallY(info.boardHeight / 2);
 
-		let angle = (Math.PI / 4) * Math.random();
-
-		setDeltaX(speed * Math.cos(angle) * side);
-		setDeltaY(speed * Math.sin(angle));
+		setDeltaX((info.initialDelta + level) * side);
+		setDeltaY(5 * (Math.random() * 2 - 1));
 	}
 
 	const startGame = (side: number) => {
@@ -180,9 +178,9 @@ export default function Pong({username}: PongProps) {
 				setPlayerY((info.boardHeight - paddleHeight) / 2);
 				setOpponentY((info.boardHeight - paddleHeight) / 2);
 			}
-			serve(side);
 		}
-
+		
+		serve(side);
 		setIsRunning(true);
 	}
 	
