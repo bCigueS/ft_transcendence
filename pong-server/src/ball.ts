@@ -13,23 +13,14 @@ const serve = (info: GameInfo): BallInfo => {
 	deltaY = 5 * (Math.random() * 2 - 1);
 	speed = info.initialSpeed + info.level;
 
-	return {
-		x,
-		y,
-		deltaX,
-		deltaY,
-		speed,
-	}
+	return { x, y, deltaX, deltaY, speed }
 }
 
-const moveBall = (ball: BallInfo): {x: number, y: number} => {
+const moveBall = () => {
 	x += deltaX;
 	y += deltaY;
 
-	return {
-		x,
-		y,
-	}
+	return { x, y }
 }
 
 // const detectOpponentCollision = (info: GameInfo) => {

@@ -5,7 +5,7 @@ type LiveBoardProps = {
 	isReady: boolean;
 	username: string;
 	opponentName: string;
-	start(status: true | false): void;
+	start(): void;
 }
 
 interface State {
@@ -33,7 +33,7 @@ export default function LiveBoard({ isReady, username, opponentName, start }: Li
 			}, 1000);
 		}
 		if (state.seconds === 0) {
-			start(true);
+			start();
 		}
 	}, [state.time, isReady]);
 

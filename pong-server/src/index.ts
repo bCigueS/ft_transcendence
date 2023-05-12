@@ -1,5 +1,6 @@
-import { game, addPlayer, removePlayer} from './game';
-import { CallbackInfo } from './types';
+import { game, addPlayer, removePlayer } from './game';
+import { CallbackInfo, GameInfo } from './types';
+import { serve, moveBall } from './ball';
 
 const http = require ('http');
 const { Server, Socket } = require('socket.io');
@@ -47,6 +48,15 @@ io.on('connection', (socket: typeof Socket) => {
 				message: `Let's start the game!`,
 			});
 		}
+	});
+
+	socket.on('startBall', ({gameInfo, gameId}: {gameInfo: GameInfo, gameId: string}) => {
+		io.to(gameId).emit('ballServe', (serve(gameInfo)));
+	});
+	
+	socket.on('moveBall', (gameId: string) => {
+		io.to(gameId).emit('ballMove', (moveBall()));
+
 	});
 	
 	socket.on('move', ({ y, gameId }: {y: number, gameId: string}) => {
