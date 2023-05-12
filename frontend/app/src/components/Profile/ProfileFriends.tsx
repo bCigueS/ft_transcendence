@@ -26,7 +26,7 @@ const ProfileFriends: React.FC<{user: User; block: boolean; friend: boolean}> = 
 			<ProfilIcon user={props.user} />
 
 			<div className={classes.info}>
-				<h1>{props.user.nickname}</h1>
+				<h1>{props.user.name}</h1>
 				<i 
 					title='Private Message'
 					className='fa-solid fa-message'>
