@@ -12,5 +12,5 @@
 	"moduleResolution": "node",
 	"lib": ["es5"]
   },
-  "include": ["./src/**/*"]
+  "include": ["./src/*"]
 }
