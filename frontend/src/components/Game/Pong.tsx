@@ -157,17 +157,29 @@ export default function Pong({username}: PongProps) {
 		}
 	}
 	
-	const serve = (side: number) => {	
-		setSpeed(info.initialSpeed + level);
-
-		setBallX(info.boardWidth / 2);
-		setBallY(info.boardHeight / 2);
-
-		setDeltaX((info.initialDelta + level) * side);
-		setDeltaY(5 * (Math.random() * 2 - 1));
+	const serve = (side: number) => {
+		if (playerMode === SINGLE_MODE) {
+			setSpeed(info.initialSpeed + level);
+	
+			setBallX(info.boardWidth / 2);
+			setBallY(info.boardHeight / 2);
+	
+			setDeltaX((info.initialDelta + level) * side);
+			setDeltaY(5 * (Math.random() * 2 - 1));
+		} else if (playerMode === DOUBLE_MODE) {
+			socket.on('ballServe', ({x, y, dx, dy, s}) => {
+				setBallX(x);
+				setBallY(y);
+				setDeltaX(dx);
+				setDeltaY(dy);
+				setSpeed(s);
+			})
+		}
 	}
 
 	const startGame = (side: number) => {
+		console.log("inside startGame");
+
 		if (!isRunning) {
 			setPlayerScore(0);
 			setOpponentScore(0);
@@ -213,8 +225,15 @@ export default function Pong({username}: PongProps) {
 	}
 	
 	const moveBall = () => {
-		setBallX(x => x += deltaX);
-		setBallY(y => y += deltaY);
+		if (playerMode === SINGLE_MODE) {
+			setBallX(x => x += deltaX);
+			setBallY(y => y += deltaY);
+		} else if (playerMode === DOUBLE_MODE) {
+			socket.on('ballMove', ({x, y}) => {
+				setBallX(x);
+				setBallY(y);
+			});
+		}
 	}
 
 	const moveOpponent = () => {
@@ -306,7 +325,7 @@ export default function Pong({username}: PongProps) {
 		if (isRunning) {
 			drawElement(context);
 			if (!isPaused) { 
-				moveBall();
+				// moveBall();
 				movePlayer();
 				moveOpponent();
 				detectWallCollision();
@@ -337,6 +356,7 @@ export default function Pong({username}: PongProps) {
 
 	// event handler
 	useEffect(() => {
+
 		window.onkeydown = function(event) {
 			if (toolMode === KEYBOARD_MODE && isRunning)
 			{
@@ -364,6 +384,9 @@ export default function Pong({username}: PongProps) {
 			}
 		}
 
+	}, [toolMode, isRunning, paddleUp, paddleDown, isPaused]);
+	
+	useEffect(() => {
 		window.onmousemove = function(event) {
 			const nextPost = event.clientY - info.boardHeight + (paddleHeight / 2);
 		
@@ -386,8 +409,8 @@ export default function Pong({username}: PongProps) {
 				}
 			}
 		}
-	}, [toolMode, isRunning, paddleUp, paddleDown, isPaused, playerY, gameId, paddleHeight, playerMode]);
-	
+	}, [toolMode, isRunning, playerY, gameId, paddleHeight, playerMode])
+
 	return (
 		<>
 			{(!isRunning && isLive) && (
