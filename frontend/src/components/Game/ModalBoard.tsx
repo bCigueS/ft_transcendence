@@ -8,7 +8,7 @@ type ModalProps = {
 	text: string;
 	onStartPage(): void;
 	onTool(mode: "keyboard" | "mouse"): void;
-	onDifficulty(level: "beginner" | "medium" | "hard"): void;
+	onDifficulty(level: 0 | 1 | 2): void;
 	onPlayerMode(mode: "single" | "double"): void;
 }
 
@@ -32,9 +32,9 @@ export default function ModalBoard({ onDifficulty, onTool, onPlayerMode, onStart
 				)}
 				{(isStarting && page === 1) && (
 					<>
-						<button onClick={() => {onDifficulty("beginner")}}>Beginner level</button>
-						<button onClick={() => {onDifficulty("medium")}}>Medium level</button>
-						<button onClick={() => {onDifficulty("hard")}}>Hard level</button>
+						<button onClick={() => {onDifficulty(0)}}>Beginner level</button>
+						<button onClick={() => {onDifficulty(1)}}>Medium level</button>
+						<button onClick={() => {onDifficulty(2)}}>Hard level</button>
 					</>
 				)}
 				{(isStarting && page === 2) && (
