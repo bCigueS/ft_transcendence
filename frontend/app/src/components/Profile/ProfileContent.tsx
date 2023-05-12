@@ -85,7 +85,7 @@ const ProfileContent: React.FC<{ user?: User }> = ({ user }) => {
 						{
 							userCtx.user.friends.map((friend) => (
 								!isBlock(friend) && <ProfileFriends 
-									key={friend.nickname} 
+									key={friend.name} 
 									user={friend} 
 									block={isBlock(friend)}
 									friend={isFriend(friend)} />
@@ -102,7 +102,7 @@ const ProfileContent: React.FC<{ user?: User }> = ({ user }) => {
 						{
 							userCtx.user.block.map((block) => (
 								<ProfileFriends 
-									key={block.nickname} 
+									key={block.name} 
 									user={block} 
 									block={isBlock(block)} 
 									friend={isFriend(block)}/>

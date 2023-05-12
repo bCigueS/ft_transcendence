@@ -58,7 +58,6 @@ volumes:
       o: 'bind' 
       device: '~/data/reactapp'
 
-
 networks:
   transendance:
     name: transendance
