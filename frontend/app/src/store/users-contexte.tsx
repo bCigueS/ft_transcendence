@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import OliviaPic from '../assets/images/owalsh.jpg';
 import FanyPic from '../assets/images/foctavia.jpg';
@@ -13,19 +13,33 @@ export type UserMatch = {
 	opponentScore: number
 }
 
+// export type User = {
+// 	login: string,
+// 	nickname: string,
+// 	password: string,
+// 	wins: number,
+// 	lose: number,
+// 	profilePic: string,
+// 	friends: User[],
+// 	block: User[],
+// 	matchs: UserMatch[],
+// 	connected: boolean,
+// 	doubleAuth: boolean,
+// }
+
 export type User = {
-	login: string,
-	nickname: string,
-	password: string,
-	wins: number,
-	lose: number,
-	profilePic: string,
+	id: number;
+	email: string;
+	name: string;
+	avatar: string;
+	doubleAuth: boolean;
+	wins: number;
+	gamesPlayed: number;
 	friends: User[],
 	block: User[],
 	matchs: UserMatch[],
 	connected: boolean,
-	doubleAuth: boolean,
-}
+  };
 
 export type UserFunction = (user: User) => void;
 
@@ -141,7 +155,6 @@ const userList: User[] = [
 	dummy2
 ]
 
-
 export const UserContext = React.createContext<{
 		user: User;
 		userList: User[];
@@ -166,10 +179,21 @@ type Props = {
 	children?: React.ReactNode,
 	className?: string
 };
+	
+	const UsersContextProvider: React.FC<Props> = ( {children, className} ) => {
+		
+		const [user, setUser] = useState<User>(simonUser);
+		const [userList, setUserList] = useState<User[]>([]);
 
-const UsersContextProvider: React.FC<Props> = ( {children, className} ) => {
-
-	const [user, setUser] = useState<User>(simonUser);
+		useEffect(() => {
+		
+			fetch('http://localhost:3000/users')
+			.then(response => response.json())
+			.then(data => setUserList(data));
+			// .then(data => console.log(data));
+			// .catch(error => console.error('Error:', error));
+		}, []);
+		
 
 	const addBlockUser = (userToBlock: User) => {
 		setUser(prevState => ({
@@ -181,7 +205,7 @@ const UsersContextProvider: React.FC<Props> = ( {children, className} ) => {
 	const removeBlockUser = (userToUnblock: User) => {
 		setUser(prevState => ({
 			...prevState,
-			block: prevState.block.filter(friend => friend.nickname !== userToUnblock.nickname)
+			block: prevState.block.filter(friend => friend.name !== userToUnblock.name)
 		}));
 	};
 
@@ -191,7 +215,7 @@ const UsersContextProvider: React.FC<Props> = ( {children, className} ) => {
 
 		setUser(prevState => ({
 			...prevState,
-			friends: prevState.friends.filter(friend => friend.nickname !== userToUnfriend.nickname)
+			friends: prevState.friends.filter(friend => friend.name !== userToUnfriend.name)
 		}));
 	};
 
