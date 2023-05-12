@@ -31,13 +31,13 @@ export type CallbackInfo = (message: string) => {
 export type GameInfo = {
 	boardWidth: number;
 	boardHeight: number;
-	paddleWidth: number;
-	paddleHeight: number;
+	// paddleWidth: number;
+	// paddleHeight: number;
 	initialSpeed: number;
 	initialDelta: number;
-	playerX: number;
-	opponentX: number;
-	winnerScore: number;
+	// playerX: number;
+	// opponentX: number;
+	// winnerScore: number;
 	level: number;
 	side: number;
 }

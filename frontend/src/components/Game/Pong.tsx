@@ -166,6 +166,8 @@ export default function Pong({username}: PongProps) {
 	
 			setDeltaX((info.initialDelta + level) * side);
 			setDeltaY(5 * (Math.random() * 2 - 1));
+			console.log(ballX, ballY, deltaX, deltaY, speed);
+
 		} else if (playerMode === DOUBLE_MODE) {
 			socket.on('ballServe', ({x, y, dx, dy, s}) => {
 				setBallX(x);
@@ -173,13 +175,12 @@ export default function Pong({username}: PongProps) {
 				setDeltaX(dx);
 				setDeltaY(dy);
 				setSpeed(s);
+				console.log(x, y, deltaX, deltaY, speed);
 			})
 		}
 	}
 
 	const startGame = (side: number) => {
-		console.log("inside startGame");
-
 		if (!isRunning) {
 			setPlayerScore(0);
 			setOpponentScore(0);
@@ -191,6 +192,18 @@ export default function Pong({username}: PongProps) {
 				setOpponentY((info.boardHeight - paddleHeight) / 2);
 			}
 		}
+
+		socket.emit('startBall', {
+			gameInfo: {
+				boardWidth: info.boardWidth,
+				boardHeight: info.boardHeight,
+				initialDelta: info.initialDelta,
+				initialSpeed: info.initialSpeed,
+				level: level,
+				side: side,
+			}, 
+			gameId: gameId,
+		})
 		
 		serve(side);
 		setIsRunning(true);
@@ -229,9 +242,11 @@ export default function Pong({username}: PongProps) {
 			setBallX(x => x += deltaX);
 			setBallY(y => y += deltaY);
 		} else if (playerMode === DOUBLE_MODE) {
+			socket.emit('moveBall', gameId);
 			socket.on('ballMove', ({x, y}) => {
 				setBallX(x);
 				setBallY(y);
+				console.log(x, y);
 			});
 		}
 	}
@@ -325,7 +340,7 @@ export default function Pong({username}: PongProps) {
 		if (isRunning) {
 			drawElement(context);
 			if (!isPaused) { 
-				// moveBall();
+				moveBall();
 				movePlayer();
 				moveOpponent();
 				detectWallCollision();
@@ -418,7 +433,7 @@ export default function Pong({username}: PongProps) {
 					isReady={isReady}
 					username={username}
 					opponentName={opponentName}
-					start={(status) => {setIsRunning(status); setIsLive(false)}}
+					start={() => {startGame(winner === PLAYER_WIN ? PLAYER_SIDE : OPPONENT_SIDE); setIsLive(false)}}
 				/>
 			)}
 			{((!isRunning && !isLive) || gameOver) && (
