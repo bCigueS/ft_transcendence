@@ -19,7 +19,7 @@ const io = new Server(server, {
 });
 
 io.on('connection', (socket: typeof Socket) => {
-	socket.on('join', ({ name, level }: { name: string, level: string }, callback: CallbackInfo) => {
+	socket.on('join', ({ name, level }: { name: string, level: number }, callback: CallbackInfo) => {
 		const {player, opponent, message} = addPlayer({
 			name,
 			playerId: socket.id,

@@ -1,7 +1,7 @@
 export type PlayerInfo = {
 	name: string;
 	playerId: string;
-	level: string;
+	level: number;
 	gameId: string;
 }
 
