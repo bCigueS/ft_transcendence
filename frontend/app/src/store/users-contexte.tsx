@@ -16,6 +16,7 @@ export type UserMatch = {
 export type User = {
 	login: string,
 	nickname: string,
+	password: string,
 	wins: number,
 	lose: number,
 	profilePic: string,
@@ -23,7 +24,7 @@ export type User = {
 	block: User[],
 	matchs: UserMatch[],
 	connected: boolean,
-	doubleAuth: boolean
+	doubleAuth: boolean,
 }
 
 export type UserFunction = (user: User) => void;
@@ -31,6 +32,7 @@ export type UserFunction = (user: User) => void;
 const oliviaUser: User = {
 		login: 'OWalsh',
 		nickname: 'Oliv',
+		password: 'simon',
 		wins: 2,
 		lose: 3,
 		profilePic: OliviaPic,
@@ -43,6 +45,7 @@ const oliviaUser: User = {
 
 const fanyUser: User = {
 	login: 'FOctavia',
+	password: 'simon',
 	nickname: 'Faaaaany',
 	wins: 0,
 	lose: 2,
@@ -57,6 +60,7 @@ const fanyUser: User = {
 
 const ychiUser: User = {
 	login: 'Ykuo',
+	password: 'simon',
 	nickname: 'Yang',
 	wins: 2,
 	lose: 0,
@@ -70,6 +74,7 @@ const ychiUser: User = {
 
 const dummy1: User = {
 	login: 'Dummy',
+	password: 'simon',
 	nickname: 'Dum1',
 	wins: 0,
 	lose: 99,
@@ -81,15 +86,22 @@ const dummy1: User = {
 	doubleAuth: false
 }
 
+const match3: UserMatch = {
+	opponent: dummy1,
+	playerScore: 99,
+	opponentScore: 0
+}
+
 const dummy2: User = {
 	login: 'Corgi',
+	password: 'simon',
 	nickname: 'Corg',
 	wins: 99,
 	lose: 0,
 	profilePic: Dummy2Pic,
 	friends: [],
 	block: [],
-	matchs: [],
+	matchs: [match3],
 	connected: false,
 	doubleAuth: false
 }
@@ -109,6 +121,7 @@ const match2: UserMatch = {
 const simonUser: User = {
 	login: 'Sbeylot',
 	nickname: 'SimSim',
+	password: 'simon',
 	wins: 3,
 	lose: 2,
 	profilePic: SimonPic,
@@ -134,6 +147,7 @@ export const UserContext = React.createContext<{
 		userList: User[];
 		blockUser: (user: User) => void;
 		unblockUser: (user: User) => void;
+		friendUser: (user: User) => void; 
 		unfriendUser: (user: User) => void;
 		changeNickname: (newNickname: string) => void;
 		updateImage: (newImage: string) => void;
@@ -142,6 +156,7 @@ export const UserContext = React.createContext<{
 	userList: userList,
 	blockUser: (user: User) => {},
 	unblockUser: (user: User) => {},
+	friendUser: (user: User) => {},
 	unfriendUser: (user: User) => {},
 	changeNickname: (newNickname: string) => {},
 	updateImage: (newImage: string) => {}
@@ -151,9 +166,6 @@ type Props = {
 	children?: React.ReactNode,
 	className?: string
 };
-
-
-
 
 const UsersContextProvider: React.FC<Props> = ( {children, className} ) => {
 
@@ -174,11 +186,23 @@ const UsersContextProvider: React.FC<Props> = ( {children, className} ) => {
 	};
 
 	const removeFriendUser = (userToUnfriend: User) => {
+		if (userToUnfriend === user)
+		return ;
+
 		setUser(prevState => ({
 			...prevState,
 			friends: prevState.friends.filter(friend => friend.nickname !== userToUnfriend.nickname)
 		}));
 	};
+
+	const addFriendUser = (userToFriend: User) => {
+		if (userToFriend === user)
+			return ;
+		setUser(prevState => ({
+			...prevState,
+			friends: [...prevState.friends, userToFriend]
+		}))
+	}
 
 	const changeNickname = (newNickname: string) => {
 		setUser(prevState => ({
@@ -199,6 +223,7 @@ const UsersContextProvider: React.FC<Props> = ( {children, className} ) => {
 		userList: userList,
 		blockUser: addBlockUser,
 		unblockUser: removeBlockUser,
+		friendUser: addFriendUser,
 		unfriendUser: removeFriendUser,
 		changeNickname: changeNickname,
 		updateImage: changeProfilPicture
