@@ -12,7 +12,7 @@ const Searchbar: React.FC<{onSaveSearch: (input: string) => void}> = ( props ) =
 
 	useEffect(() => {
 		props.onSaveSearch(enteredInput);
-	}, [enteredInput])
+	}, [enteredInput, props])
 
 	return (
 		<div className={classes.container}>

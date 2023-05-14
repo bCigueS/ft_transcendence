@@ -5,7 +5,7 @@ import { UserMatch, User } from '../../../store/users-contexte';
 import ProfilIcon from '../ProfilIcon';
 
 
-const MatchSummary: React.FC<{summary: UserMatch; user: User}> = (props) => {
+const MatchSummary: React.FC<{summary: UserMatch; user?: User}> = (props) => {
 	return (
 		<div className={classes.container}>
 
@@ -13,7 +13,7 @@ const MatchSummary: React.FC<{summary: UserMatch; user: User}> = (props) => {
 			<div className={classes.card}>
 				<ProfilIcon user={props.user} />
 				<div>
-					<h1>{props.user.nickname}</h1>
+					<h1>{props.user?.nickname}</h1>
 				</div>
 			</div>
 
