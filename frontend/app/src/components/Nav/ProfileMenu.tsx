@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { UserContext } from "../../store/users-contexte";
 
 interface menuOption {
 	icon1: string,
@@ -37,14 +38,13 @@ const ProfilIcon: React.FC = () => {
 				className="profile-menu__picture"
 				onClick={() => setMenuOpen((prev) => !prev)}>
 			</div>
-
 			{ menuOpen && (
 				<div className="profile-menu__items">
 
-					<div className="header">
+					{/* <div className="header">
 						<div className="profile-menu__picture"></div>
 						<h1>Profile Name</h1>
-					</div>
+					</div> */}
 					{
 						menuOptions.map(items => {
 							return (
