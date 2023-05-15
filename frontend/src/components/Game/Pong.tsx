@@ -162,19 +162,11 @@ export default function Pong({username}: PongProps) {
 	}
 	
 	const serve = (side: number) => {
-		console.log("inside serve");
 
 		setBallX(info.boardWidth / 2);
 		setBallY(info.boardHeight / 2);
 		
 		setSpeed(info.initialSpeed + level);
-		
-		socket.emit('startBall', {
-			gameInfo: {
-				initialDelta: info.initialDelta,
-				level: level,
-			}, gameId: gameId,
-		});
 		
 		if (playerMode === SINGLE_MODE) {
 
@@ -193,7 +185,6 @@ export default function Pong({username}: PongProps) {
 	}
 
 	const startGame = (side: number) => {
-		console.log("inside start game");
 
 		if (!isRunning) {
 			setPlayerScore(0);
@@ -206,6 +197,13 @@ export default function Pong({username}: PongProps) {
 				setOpponentY((info.boardHeight - paddleHeight) / 2);
 			}
 		}
+		
+		socket.emit('startBall', {
+			gameInfo: {
+				initialDelta: info.initialDelta,
+				level: level,
+			}, gameId: gameId,
+		});
 		
 		serve(side);
 		setIsRunning(true);
@@ -229,6 +227,13 @@ export default function Pong({username}: PongProps) {
 		if (ballX <= 0)
 		{
 			setOpponentScore(o => o += 1);
+
+			socket.emit('startBall', {
+				gameInfo: {
+					initialDelta: info.initialDelta,
+					level: level,
+				}, gameId: gameId,
+			});
 			serve(PLAYER_SIDE);
 		}
 		//right collision
