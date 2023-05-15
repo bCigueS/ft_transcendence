@@ -9,8 +9,8 @@ export class OAuth42Strategy extends PassportStrategy(Strategy, '42Gaurd') {
     super({
       authorizationURL: 'https://api.intra.42.fr/oauth/authorize',
       tokenURL: 'https://api.intra.42.fr/oauth2/token',
-      clientID: "",
-      clientSecret: "",
+      clientID: `${process.env.CLIENT_ID}`,
+      clientSecret: `${process.env.CLEINT_SECRET}`,
 	  callbackURL: 'http://127.0.0.1:3000/auth/forty-two/callback',
 	  response_type: 'code',
 	  scope: ['public']
@@ -26,4 +26,4 @@ export class OAuth42Strategy extends PassportStrategy(Strategy, '42Gaurd') {
     // handle the authenticated user's profile
     // return { ...profile, accessToken };
   }
-}
+} 
