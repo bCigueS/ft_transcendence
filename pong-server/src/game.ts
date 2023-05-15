@@ -1,4 +1,4 @@
-import { AddPlayerResult, RemovePlayerResult, PlayerInfo } from './types';
+import { AddPlayerResult, RemovePlayerResult, PlayerInfo, GameInfo, BallInfo } from './types';
 
 let beginnerLvl = 1;
 let mediumLvl = 2;
@@ -97,4 +97,15 @@ const removePlayer = (playerId: string, gameId?: string): RemovePlayerResult => 
 
 };
 
-export { addPlayer, game, removePlayer };
+let dx = 0;
+let dy = 0;
+
+const serveBall = (info: GameInfo): BallInfo => {
+	dx = (info.initialDelta + info.level);
+	dy = 5 * (Math.random() * 2 - 1);
+
+	console.log(dx, dy);
+	return {dx, dy};
+}
+
+export { addPlayer, game, removePlayer, serveBall };

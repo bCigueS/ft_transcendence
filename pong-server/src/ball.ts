@@ -1,27 +1,27 @@
 import { GameInfo, BallInfo } from './types'; 
 
-let x = 0;
-let y = 0;
-let deltaX = 0;
-let deltaY = 0;
-let speed = 0;
+// let x = 0;
+// let y = 0;
+// let deltaX = 0;
+// let deltaY = 0;
+// let speed = 0;
 
-const serve = (info: GameInfo): BallInfo => {
-	x = info.boardWidth / 2;
-	y = info.boardHeight / 2;
-	deltaX = (info.initialDelta + info.level) * info.side;
-	deltaY = 5 * (Math.random() * 2 - 1);
-	speed = info.initialSpeed + info.level;
+// const serve = (info: GameInfo): BallInfo => {
+// 	x = info.boardWidth / 2;
+// 	y = info.boardHeight / 2;
+// 	deltaX = (info.initialDelta + info.level) * info.side;
+// 	deltaY = 5 * (Math.random() * 2 - 1);
+// 	speed = info.initialSpeed + info.level;
 
-	return { x, y, deltaX, deltaY, speed }
-}
+// 	return { x, y, deltaX, deltaY, speed }
+// }
 
-const moveBall = () => {
-	x += deltaX;
-	y += deltaY;
+// const moveBall = () => {
+// 	x += deltaX;
+// 	y += deltaY;
 
-	return { x, y }
-}
+// 	return { x, y }
+// }
 
 // const detectOpponentCollision = (info: GameInfo) => {
 // 	if (ballX + ballRadius >= info.opponentX && ballY > opponentY && ballY < opponentY + paddleHeight) {
@@ -84,4 +84,4 @@ const moveBall = () => {
 // 	}
 // }
 
-export { serve, moveBall };
+// export { serve, moveBall };
