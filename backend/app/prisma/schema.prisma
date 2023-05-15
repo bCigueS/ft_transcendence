@@ -9,19 +9,26 @@ datasource db {
 }
 
 model User {
-  id        Int          @id @default(autoincrement())
+  id          Int          @id @default(autoincrement())
 
   email     String
-  name      String       @unique
+  name      String        @unique
   password  String
   avatar    String?       @default("default.jpg")
   
   friends   Friendship[]  @relation(name: "friends")
   followers Friendship[]  @relation(name: "followers")
 
-  blocked   Block[]  @relation(name: "blocked")
-  haters    Block[]  @relation(name: "haters")
-  
+  blocked   Block[]       @relation(name: "blocked")
+  haters    Block[]       @relation(name: "haters")
+
+  games         UserGame[]
+  winnerGames   Game[]    @relation("WinnerGames")
+
+  doubleAuth    Boolean   @default(false)
+
+  wins          Int       @default(0)
+
   @@map("users")
 }
 
@@ -47,37 +54,47 @@ model Block {
   @@map("blocked")
 }
 
-// model Game {
-//   id            Int      @id @default(autoincrement())
-//   createdAt     DateTime @default(now())
+model Game {
+  id            Int       @id @default(autoincrement())
+  createdAt     DateTime  @default(now())
 
-//   type          GameType
-//   level         Int
-//   state         GameState
+  type          GameType
+  level         Int
+  // state         GameState
 
-//   player1Id     Int
-//   player1       User     @relation("Player1Games", fields: [player1Id], references: [id])
-//   player2Id     Int?
-//   player2       User?    @relation("Player2Games", fields: [player2Id], references: [id])
+  players       UserGame[]
 
-//   scorePlayer1  Int
-//   scorePlayer2  Int
+  winnerId      Int?
+  winner        User?     @relation("WinnerGames", fields: [winnerId], references: [id])
 
-//   winnerId      Int?
-//   winner        User?    @relation("WinnerGames", fields: [winnerId], references: [id])
+  duration      Int?
 
-//   duration      Int
+  @@map("games")
+}
 
-//   @@map("games")
-// }
+enum GameType {
+  PLAYER
+  COMPUTER
+}
 
-// enum GameType {
-//   PLAYER
-//   COMPUTER
-// }
+enum GameState {
+  PENDING
+  PLAYING
+  FINISHED
+}
 
-// enum GameState {
-//   PENDING
-//   PLAYING
-//   FINISHED
-// }
+model UserGame {
+  createdAt     DateTime @default(now())
+
+  user          User    @relation(fields: [userId], references: [id])
+  userId        Int
+
+  game          Game    @relation(fields: [gameId], references: [id])
+  gameId        Int
+
+  playerIndex   Int     @default(1)
+
+  score         Int     @default(0)
+
+  @@id([userId, gameId])
+}

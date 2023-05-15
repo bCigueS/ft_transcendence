@@ -4,12 +4,15 @@ FROM node:16-alpine
 # Set the working directory to /app
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
+# WORKDIR /app
+
+RUN rm -rf ./app/node_modules
 
 # Copy the package.json and package-lock.json files to the container
-COPY package*.json ./
+COPY ./app/package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm ci
 
 # Copy the rest of the app's source code to the container
 COPY ./app ./
