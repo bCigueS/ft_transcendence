@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import { PrismaClientExceptionFilter } from './prisma-client-exception/prisma-client-exception.filter';
+import { config } from 'dotenv';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -28,3 +29,4 @@ async function bootstrap() {
   await app.listen(3000);
 }
 bootstrap();
+config();
