@@ -23,13 +23,13 @@ const router = createBrowserRouter([
 		children: [
 			{index: true, element: <Homepage />},
 			{path: 'profile', element: <ProfilePage />},
-			{path: 'profile/:id', element: <ProfilePage />},
-			{path: 'privmessage', element: <PrivateMessagePage />},
-			{path: 'chat', element: <ChatPage />},
-			{path: 'pong', element: <Game />},
-			{path: 'leaderboard', element: <Leaderboard />},
-			{path: 'about-us', element: <AboutUs />},
-			{path: 'auth', element: <AuthenticationPage />}
+			// {path: 'profile/:id', element: <ProfilePage />},
+			// {path: 'privmessage', element: <PrivateMessagePage />},
+			// {path: 'chat', element: <ChatPage />},
+			// {path: 'pong', element: <Game />},
+			// {path: 'leaderboard', element: <Leaderboard />},
+			// {path: 'about-us', element: <AboutUs />},
+			// {path: 'auth', element: <AuthenticationPage />}
 		]
 	}
 ])
