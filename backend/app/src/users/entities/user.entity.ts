@@ -18,6 +18,12 @@ export class UserEntity implements User {
 	@ApiProperty()
 	avatar: string;
 
+	@ApiProperty()
+	doubleAuth: boolean;
+
+	@ApiProperty()
+	wins: number;
+
 	// @ApiProperty({ required: false })
 	// friends?: Friendship[];
 
