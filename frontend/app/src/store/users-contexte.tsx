@@ -185,14 +185,14 @@ type Props = {
 		const [user, setUser] = useState<User>(simonUser);
 		const [userList, setUserList] = useState<User[]>([]);
 
-		useEffect(() => {
+		// useEffect(() => {
 		
-			fetch('http://localhost:3000/users')
-			.then(response => response.json())
-			.then(data => setUserList(data));
-			// .then(data => console.log(data));
-			// .catch(error => console.error('Error:', error));
-		}, []);
+		// 	fetch('http://localhost:3000/users')
+		// 	.then(response => response.json())
+		// 	.then(data => setUserList(data));
+		// 	// .then(data => console.log(data));
+		// 	// .catch(error => console.error('Error:', error));
+		// }, []);
 		
 
 	const addBlockUser = (userToBlock: User) => {
