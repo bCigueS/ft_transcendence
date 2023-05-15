@@ -1,0 +1,64 @@
+version: '3'
+services:
+  postgres:
+    container_name: database
+    image: postgres:13-alpine
+    ports:
+      - 5432:5432
+    env_file:
+      - ./backend/.env
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    networks:
+      - transendance
+  nestjs:
+    container_name: nestapp
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend/app:/usr/src/app
+    networks:
+      - transendance
+  reactjs:
+    container_name: reactapp
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+    ports:
+      - "8000:3000"
+    volumes:
+      - ./frontend/app:/usr/src/app
+    networks:
+      - transendance
+
+volumes:
+  postgres:
+    name: nest-init-docker-db
+  nestapp:
+    name: nestapp
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind' 
+      device: '~/data/nestapp'
+  reactapp:
+    name: reactapp
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind' 
+      device: '~/data/reactapp'
+
+
+networks:
+  transendance:
+    name: transendance
