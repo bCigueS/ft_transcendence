@@ -28,7 +28,7 @@ const ProfileContent: React.FC<{ user?: User }> = ({ user }) => {
 
 	useEffect(() => {
 		setContentDisplay('Matchs');
-	}, [user?.nickname])
+	}, [user?.name])
 
 	return (
 		<div className={classes.container}>
@@ -65,7 +65,7 @@ const ProfileContent: React.FC<{ user?: User }> = ({ user }) => {
 			</div>
 
 			{/* Content */}
-			{
+			{/* {
 				contentDisplay === 'Matchs' &&
 				<div className={classes.tabContent}>
 					<div className={classes.listContent}>
@@ -76,13 +76,14 @@ const ProfileContent: React.FC<{ user?: User }> = ({ user }) => {
 						}
 					</div>
 				</div>
-			}
+			} */}
 			
 			{
 				(contentDisplay === 'Friends' && user === userCtx.user) &&
 				<div className={classes.tabContent}>
 					<div className={classes.listContent}>
 						{
+							userCtx.user.friends && 
 							userCtx.user.friends.map((friend) => (
 								!isBlock(friend) && <ProfileFriends 
 									key={friend.name} 
@@ -100,6 +101,7 @@ const ProfileContent: React.FC<{ user?: User }> = ({ user }) => {
 				<div className={classes.tabContent}>
 					<div className={classes.listContent}>
 						{
+							userCtx.user.block && 
 							userCtx.user.block.map((block) => (
 								<ProfileFriends 
 									key={block.name} 

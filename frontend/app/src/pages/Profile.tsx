@@ -11,7 +11,7 @@ const Profile: React.FC = () => {
 	const userCtx = useContext(UserContext);
 	const params = useParams();
 
-	console.log(params.id);
+	// console.log(params.id);
 
 	const displayUser = (() => {
 		if (params.id === undefined)
