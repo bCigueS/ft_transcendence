@@ -38,8 +38,6 @@ const ProfilIcon: React.FC = () => {
 				className="profile-menu__picture"
 				onClick={() => setMenuOpen((prev) => !prev)}>
 			</div>
-
-
 			{ menuOpen && (
 				<div className="profile-menu__items">
 
