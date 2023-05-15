@@ -12,7 +12,7 @@ RUN rm -rf ./app/node_modules
 COPY ./app/package*.json ./
 
 # Install dependencies
-RUN npm i
+RUN npm ci
 
 # Copy the rest of the app's source code to the container
 COPY ./app ./
