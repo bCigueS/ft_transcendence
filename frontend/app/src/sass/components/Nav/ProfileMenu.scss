@@ -2,6 +2,7 @@
 	position: relative;
 
 	@include flexBox($justify: space-around);
+
 	transition: all 0.3s ease-in-out;
 
 	&:hover {
@@ -19,9 +20,7 @@
 		background-size: cover;
 
 		background-image: $profile-pic2;
-
 		cursor: pointer;
-
 	}
 
 	#{&}__items {

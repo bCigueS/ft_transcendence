@@ -7,10 +7,10 @@ import { User, UserContext } from '../../store/users-contexte';
 import ProfilSettings from './ProfilSettings';
 import { useParams } from 'react-router-dom';
 
+
 const ProfileContent: React.FC<{ user?: User }> = ({ user }) => {
 
 	const userCtx = useContext(UserContext);
-
 	const [contentDisplay, setContentDisplay] = useState<string>('Matchs');
 
 	const tabHandler = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -29,8 +29,6 @@ const ProfileContent: React.FC<{ user?: User }> = ({ user }) => {
 	useEffect(() => {
 		setContentDisplay('Matchs');
 	}, [user?.nickname])
-
-
 
 	return (
 		<div className={classes.container}>

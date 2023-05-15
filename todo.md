@@ -1,7 +1,5 @@
 # ft_transcendence
 
---- 
-
 - ENV
     - [X] docker
 
@@ -14,18 +12,29 @@
         - [ ] Channel
     - [ ] API
         - [ ] **User**
-            - [ ] CRUD for user
-            - [ ] User upload image
-            - [ ] add friend
-            - [ ] see friend's status
-            - [ ] login status
+            - [X] CRUD for user
+            - [X] User upload image
+            - [X] Friend
+                - [X] add friend
+                - [X] remove friend
+                - [X] show all friend
+            - [X] Blocked
+                - [X] block user
+                - [X] unblock user
+                - [X] show blocked users
+            - [X] see community (all users in db except blocked ones)
+            - [ ] see friend's status - after authentication done
+            - [ ] login status - after authentication done
         - [ ] **Game**
-            - [ ] CRUD for game
-            - [ ] match user for game
+            - [X] CRUD for game
+            - [ ] match user for game - apparently this is done in Fany s server and Yangchi agreed
             - [ ] game history
             - [ ] game stat (calculation)
         - [ ] **Message**
             - [ ] CRUD for message
+        - [ ] **Channel**
+            - [ ] CRUD for message
+
     - [ ] Cyber security
         - [ ] Hash Password
         - [ ] SQL injection
