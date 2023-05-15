@@ -17,7 +17,7 @@ const Profile: React.FC = () => {
 		if (params.id === undefined)
 			return (userCtx.user);
 		else {
-			return (userCtx.userList.find(user => user.nickname.toLowerCase() === params.id?.toLowerCase()))
+			return (userCtx.userList.find(user => user.name.toLowerCase() === params.id?.toLowerCase()))
 		}
 	});
 
