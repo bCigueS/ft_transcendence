@@ -133,12 +133,12 @@ const match2: UserMatch = {
 }
 
 const simonUser: User = {
-	login: 'Sbeylot',
-	nickname: 'SimSim',
-	password: 'simon',
+	id: 2,
+	name: 'simon',
+	email: 'sbeylot@student.42.fr',
+	avatar: 'sbeylot.jpg',
 	wins: 3,
-	lose: 2,
-	profilePic: SimonPic,
+	gamesPlayed: 5,
 	friends: [oliviaUser, fanyUser, ychiUser],
 	block: [],
 	matchs: [match1, match2],
@@ -186,10 +186,19 @@ type Props = {
 		const [userList, setUserList] = useState<User[]>([]);
 
 		useEffect(() => {
-		
 			fetch('http://localhost:3000/users')
 			.then(response => response.json())
-			.then(data => setUserList(data));
+			.then(data => {
+				setUserList(data);
+				// if (data.length > 0) {
+				// 	setUser(data[0]); // set the first user as the current user
+				// }
+				console.log('user ', user);
+				console.log('userList ', data);
+				console.log('data[0] ', data[0]);
+				setUser(data[0]);
+				console.log('set user as first user in list: ', user);
+			})
 			// .then(data => console.log(data));
 			// .catch(error => console.error('Error:', error));
 
@@ -203,6 +212,24 @@ type Props = {
 			block: [...prevState.block.includes(userToBlock) ? prevState.block : [...prevState.block, userToBlock]]
 		}));
 	};
+
+	// const addBlockUser = (userToBlock: User) => {
+	// 	fetch(`http://localhost:3000/users/${user.id}/block-user`, {
+	// 		method: 'PATCH',
+	// 		headers: {
+	// 			'Content-Type': 'application/json',
+	// 		},
+	// 		body: JSON.stringify({ blockedId: userToBlock.id }),
+	// 	})
+	// 	.then(response => response.json())
+	// 	.then(data => {
+	// 		setUser(prevState => ({
+	// 			...prevState, 
+	// 			block: [...prevState.block.includes(userToBlock) ? prevState.block : [...prevState.block, userToBlock]]
+	// 		}));
+	// 	})
+	// 	.catch(error => console.error('Error:', error));
+	// };
 
 	const removeBlockUser = (userToUnblock: User) => {
 		setUser(prevState => ({
@@ -221,14 +248,32 @@ type Props = {
 		}));
 	};
 
-	const addFriendUser = (userToFriend: User) => {
-		if (userToFriend === user)
-			return ;
-		setUser(prevState => ({
-			...prevState,
-			friends: [...prevState.friends, userToFriend]
-		}))
-	}
+	// const addFriendUser = (userToFriend: User) => {
+	// 	if (userToFriend === user)
+	// 		return ;
+	// 	setUser(prevState => ({
+	// 		...prevState,
+	// 		friends: [...prevState.friends, userToFriend]
+	// 	}))
+	// }
+
+	const addFriendUser = (newFriend: User) => {
+		fetch(`http://localhost:3000/users/${user.id}/add-friend`, {
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ friendId: newFriend.id }),
+		})
+		.then(response => response.json())
+		.then(data => {
+			setUser(prevState => ({
+				...prevState, 
+				block: [...prevState.block.includes(newFriend) ? prevState.block : [...prevState.block, newFriend]]
+			}));
+		})
+		.catch(error => console.error('Error:', error));
+	};
 
 	const changeNickname = (newNickname: string) => {
 		setUser(prevState => ({
