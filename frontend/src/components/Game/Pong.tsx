@@ -73,8 +73,8 @@ export default function Pong({username}: PongProps) {
 	const [ballX, setBallX] = useState(0);
 	const [ballY, setBallY] = useState(0);
 	// ball direction
-	const [deltaX, setDeltaX] = useState(0); // speed * Math.cos(angle));
-	const [deltaY, setDeltaY] = useState(0); // speed * Math.sin(angle));
+	const [deltaX, setDeltaX] = useState(0);
+	const [deltaY, setDeltaY] = useState(0);
 	// paddle info
 	const [paddleUp, setPaddleUp] = useState(false);
 	const [paddleDown, setPaddleDown] = useState(false);
@@ -92,7 +92,11 @@ export default function Pong({username}: PongProps) {
 	useEffect(() => {
 		if (playerMode === DOUBLE_MODE) {
 
-			socket.emit('join', {name: username, level: level}, (message: string) => {
+			socket.emit('join', {
+				name: username,
+				level: level,
+				
+				}, (message: string) => {
 				console.log(message);
 			});
 			socket.on('welcome', ({ message, opponent, gameId }) => {
@@ -158,29 +162,39 @@ export default function Pong({username}: PongProps) {
 	}
 	
 	const serve = (side: number) => {
+		console.log("inside serve");
+
+		setBallX(info.boardWidth / 2);
+		setBallY(info.boardHeight / 2);
+		
+		setSpeed(info.initialSpeed + level);
+		
+		socket.emit('startBall', {
+			gameInfo: {
+				initialDelta: info.initialDelta,
+				level: level,
+			}, gameId: gameId,
+		});
+		
 		if (playerMode === SINGLE_MODE) {
-			setSpeed(info.initialSpeed + level);
-	
-			setBallX(info.boardWidth / 2);
-			setBallY(info.boardHeight / 2);
-	
+
 			setDeltaX((info.initialDelta + level) * side);
 			setDeltaY(5 * (Math.random() * 2 - 1));
-			console.log(ballX, ballY, deltaX, deltaY, speed);
 
 		} else if (playerMode === DOUBLE_MODE) {
-			socket.on('ballServe', ({x, y, dx, dy, s}) => {
-				setBallX(x);
-				setBallY(y);
+			socket.on('ballServe', ({dx, dy}) => {
+				console.log(dx, dy);
 				setDeltaX(dx);
 				setDeltaY(dy);
-				setSpeed(s);
-				console.log(x, y, deltaX, deltaY, speed);
-			})
+			});
 		}
+
+		console.log(ballX, ballY, deltaX, deltaY, speed);
 	}
 
 	const startGame = (side: number) => {
+		console.log("inside start game");
+
 		if (!isRunning) {
 			setPlayerScore(0);
 			setOpponentScore(0);
@@ -192,18 +206,6 @@ export default function Pong({username}: PongProps) {
 				setOpponentY((info.boardHeight - paddleHeight) / 2);
 			}
 		}
-
-		socket.emit('startBall', {
-			gameInfo: {
-				boardWidth: info.boardWidth,
-				boardHeight: info.boardHeight,
-				initialDelta: info.initialDelta,
-				initialSpeed: info.initialSpeed,
-				level: level,
-				side: side,
-			}, 
-			gameId: gameId,
-		})
 		
 		serve(side);
 		setIsRunning(true);
@@ -238,17 +240,17 @@ export default function Pong({username}: PongProps) {
 	}
 	
 	const moveBall = () => {
-		if (playerMode === SINGLE_MODE) {
-			setBallX(x => x += deltaX);
-			setBallY(y => y += deltaY);
-		} else if (playerMode === DOUBLE_MODE) {
-			socket.emit('moveBall', gameId);
-			socket.on('ballMove', ({x, y}) => {
-				setBallX(x);
-				setBallY(y);
-				console.log(x, y);
-			});
-		}
+		// if (playerMode === SINGLE_MODE) {
+		setBallX(x => x += deltaX);
+		setBallY(y => y += deltaY);
+		// } else if (playerMode === DOUBLE_MODE) {
+		// 	socket.emit('moveBall', gameId);
+		// 	socket.on('ballMove', ({x, y}) => {
+		// 		setBallX(x);
+		// 		setBallY(y);
+		// 		console.log(x, y);
+		// 	});
+		// }
 	}
 
 	const moveOpponent = () => {
