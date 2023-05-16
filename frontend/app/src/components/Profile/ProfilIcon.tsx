@@ -22,7 +22,7 @@ const ProfilIcon: React.FC<{user?: User; displayCo?: boolean; size?: string[]}> 
 			replace: false,
 			state: { message: "Failed to submit form!"}
 		}
-		navigate(`/profile/${user?.name.toLowerCase()}`, option);
+		navigate(`/profile/${user?.nickname.toLowerCase()}`, option);
 	}
 
 
@@ -39,8 +39,8 @@ const ProfilIcon: React.FC<{user?: User; displayCo?: boolean; size?: string[]}> 
 				className={classes.picture}
 				style={size.length > 0 ? {width: size[0], height: size[1] } : {}}>
 				<img 
-					src={'http://localhost:3000/users/' + user?.id + '/avatar'} 
-					alt={user?.name} 
+					src={user?.profilePic} 
+					alt={user?.nickname} 
 				/>
 			</div>
 			{
