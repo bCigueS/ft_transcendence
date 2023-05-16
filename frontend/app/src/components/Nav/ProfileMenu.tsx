@@ -1,6 +1,6 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { UserContext } from "../../store/users-contexte";
+// import { UserContext } from "../../store/users-contexte";
 
 interface menuOption {
 	icon1: string,
