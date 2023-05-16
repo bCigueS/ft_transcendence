@@ -3,6 +3,7 @@ import ModalBoard from './ModalBoard';
 import LiveBoard from './LiveBoard';
 import classes from '../../sass/components/Game/Pong.module.scss';
 import io from 'socket.io-client';
+import { Sign } from 'crypto';
 
 const socket = io('http://localhost:3001');
 
@@ -92,11 +93,7 @@ export default function Pong({username}: PongProps) {
 	useEffect(() => {
 		if (playerMode === DOUBLE_MODE) {
 
-			socket.emit('join', {
-				name: username,
-				level: level,
-				
-				}, (message: string) => {
+			socket.emit('join', { name: username, level: level }, (message: string) => {
 				console.log(message);
 			});
 			socket.on('welcome', ({ message, opponent, gameId }) => {
@@ -130,33 +127,61 @@ export default function Pong({username}: PongProps) {
 	
 	const detectOpponentCollision = () => {
 		if (ballX + ballRadius >= info.opponentX && ballY > opponentY && ballY < opponentY + paddleHeight) {
-			setDeltaX(x => x *= -1);
+
+			if (playerMode === SINGLE_MODE) {
+				setDeltaX(x => x *= -1);
+				
+				let collisionPoint = (ballY + (ballRadius / 2)) - (opponentY + (paddleHeight / 2));
+				collisionPoint = collisionPoint / (paddleHeight / 2);
+				
+				let angle = (Math.PI / 4) * collisionPoint;
+				
+				setDeltaX(-speed * Math.cos(angle));
+				setDeltaY(speed * Math.sin(angle));
+			} else if (playerMode === DOUBLE_MODE) {
+				socket.on('ballLaunch', ({dx, dy}) => {
+					console.log(dx, dy);
+					setDeltaX(dx);
+					setDeltaY(dy);
+				});
+			}
+			
 			setBallX(x => x -= ballRadius);
-
-			let collisionPoint = (ballY + (ballRadius / 2)) - (opponentY + (paddleHeight / 2));
-			collisionPoint = collisionPoint / (paddleHeight / 2);
-
-			let angle = (Math.PI / 4) * collisionPoint;
-
-			setDeltaX(-speed * Math.cos(angle));
-			setDeltaY(speed * Math.sin(angle));
-
 			setSpeed(s => s += 0.5);
 		}
 	}
 
 	const detectPlayerCollision = () => {
 		if (ballX - ballRadius <= info.playerX + info.paddleWidth && ballY > playerY && ballY < playerY + paddleHeight) {
+			
+			socket.emit('ballCollision', {
+				gameInfo: {
+					y: ballY,
+					dx: deltaX,
+					r: ballRadius,
+					playerY: playerY,
+					paddleHeight: paddleHeight,
+					speed: speed,
+				}, gameId: gameId,
+			});
+			if (playerMode === SINGLE_MODE) {
+				
+				let collisionPoint = (ballY + (ballRadius / 2)) - (playerY + (paddleHeight / 2));
+				collisionPoint = collisionPoint / (paddleHeight / 2);
+				
+				let angle = (Math.PI / 4) * collisionPoint;
+				
+				setDeltaX(speed * Math.cos(angle));
+				setDeltaY(speed * Math.sin(angle));
+			} else if (playerMode === DOUBLE_MODE) {
+				socket.on('ballLaunch', ({dx, dy}) => {
+					console.log(dx, dy);
+					setDeltaX(dx);
+					setDeltaY(dy);
+				});
+			}
+			
 			setBallX(x => x += ballRadius);
-
-			let collisionPoint = (ballY + (ballRadius / 2)) - (playerY + (paddleHeight / 2));
-			collisionPoint = collisionPoint / (paddleHeight / 2);
-
-			let angle = (Math.PI / 4) * collisionPoint;
-
-			setDeltaX(speed * Math.cos(angle));
-			setDeltaY(speed * Math.sin(angle));
-
 			setSpeed(s => s += 0.5);
 		}
 	}
@@ -175,13 +200,13 @@ export default function Pong({username}: PongProps) {
 
 		} else if (playerMode === DOUBLE_MODE) {
 			socket.on('ballServe', ({dx, dy}) => {
-				console.log(dx, dy);
+				// console.log(dx, dy);
 				setDeltaX(dx);
 				setDeltaY(dy);
 			});
 		}
 
-		console.log(ballX, ballY, deltaX, deltaY, speed);
+		// console.log(ballX, ballY, deltaX, deltaY, speed);
 	}
 
 	const startGame = (side: number) => {
@@ -245,17 +270,8 @@ export default function Pong({username}: PongProps) {
 	}
 	
 	const moveBall = () => {
-		// if (playerMode === SINGLE_MODE) {
 		setBallX(x => x += deltaX);
 		setBallY(y => y += deltaY);
-		// } else if (playerMode === DOUBLE_MODE) {
-		// 	socket.emit('moveBall', gameId);
-		// 	socket.on('ballMove', ({x, y}) => {
-		// 		setBallX(x);
-		// 		setBallY(y);
-		// 		console.log(x, y);
-		// 	});
-		// }
 	}
 
 	const moveOpponent = () => {
@@ -334,7 +350,7 @@ export default function Pong({username}: PongProps) {
 	}
 
 	// render game
-	useEffect(() => {
+	useLayoutEffect(() => {
 		const canvas = canvasRef.current;
 		if (!canvas)
 		return;
@@ -342,23 +358,20 @@ export default function Pong({username}: PongProps) {
 		if (!context)
 		return;
 		
-		
 		drawBoard(context);
 		if (isRunning) {
 			drawElement(context);
-			if (!isPaused) { 
-				moveBall();
-				movePlayer();
-				moveOpponent();
-				detectWallCollision();
-				detectPlayerCollision();
-				detectOpponentCollision();
-				// check game status
-				if (opponentScore > info.winnerScore || playerScore > info.winnerScore) {
-					playerScore > info.winnerScore ? setWinner(PLAYER_WIN) : setWinner(OPPONENT_WIN);
-					setGameOver(true);
-					stopGame();
-				}
+			moveBall();
+			movePlayer();
+			moveOpponent();
+			detectWallCollision();
+			detectPlayerCollision();
+			detectOpponentCollision();
+			// check game status
+			if (opponentScore > info.winnerScore || playerScore > info.winnerScore) {
+				playerScore > info.winnerScore ? setWinner(PLAYER_WIN) : setWinner(OPPONENT_WIN);
+				setGameOver(true);
+				stopGame();
 			}
 		}
 
@@ -366,17 +379,24 @@ export default function Pong({username}: PongProps) {
 	
 	// update the frameCount
 	useLayoutEffect(() => {
-		let frameId: any;
-		const render = () => {
-			setFrameCount(fc => fc + 1);
-			frameId = requestAnimationFrame(render);
+		if (!isPaused) {
+			const fps = 24;
+			let frameId: number;
+	
+			const render = () => {
+				setTimeout(() => {
+					setFrameCount(fc => fc + 1);
+					frameId = requestAnimationFrame(render);
+				}, 1000 / fps);
+			}
+	
+			render();
+			
+			return () => {window.cancelAnimationFrame(frameId);}
 		}
-		render();
-		
-		return () => {window.cancelAnimationFrame(frameId);}
-	}, [])
+	}, [isPaused])
 
-	// event handler
+	// keyboard event handler
 	useEffect(() => {
 
 		window.onkeydown = function(event) {
@@ -406,8 +426,9 @@ export default function Pong({username}: PongProps) {
 			}
 		}
 
-	}, [toolMode, isRunning, paddleUp, paddleDown, isPaused]);
+	}, [frameCount]);
 	
+	// mouse event handler
 	useEffect(() => {
 		window.onmousemove = function(event) {
 			const nextPost = event.clientY - info.boardHeight + (paddleHeight / 2);
@@ -431,7 +452,7 @@ export default function Pong({username}: PongProps) {
 				}
 			}
 		}
-	}, [toolMode, isRunning, playerY, gameId, paddleHeight, playerMode])
+	}, [frameCount])
 
 	return (
 		<>

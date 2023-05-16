@@ -1,87 +1,47 @@
-import { GameInfo, BallInfo } from './types'; 
+import { ServeInfo, CollisionInfo, BallInfo } from './types'; 
 
-// let x = 0;
-// let y = 0;
-// let deltaX = 0;
-// let deltaY = 0;
-// let speed = 0;
 
-// const serve = (info: GameInfo): BallInfo => {
-// 	x = info.boardWidth / 2;
-// 	y = info.boardHeight / 2;
-// 	deltaX = (info.initialDelta + info.level) * info.side;
-// 	deltaY = 5 * (Math.random() * 2 - 1);
-// 	speed = info.initialSpeed + info.level;
+const serveBall = (info: ServeInfo): BallInfo => {
+	let dx = 0, dy = 0;
 
-// 	return { x, y, deltaX, deltaY, speed }
-// }
+	dx = (info.initialDelta + info.level);
+	dy = 5 * (Math.random() * 2 - 1);
+	
+	console.log("result of serve ball: ", dx, dy);
+	return {dx, dy}
+}
 
-// const moveBall = () => {
-// 	x += deltaX;
-// 	y += deltaY;
+const playerCollision = (info: CollisionInfo): BallInfo => {
+	let dx = 0, dy = 0;
 
-// 	return { x, y }
-// }
+	let collisionPoint = (info.y + (info.r / 2)) - (info.playerY + (info.paddleHeight / 2));
+	collisionPoint = collisionPoint / (info.paddleHeight / 2);
 
-// const detectOpponentCollision = (info: GameInfo) => {
-// 	if (ballX + ballRadius >= info.opponentX && ballY > opponentY && ballY < opponentY + paddleHeight) {
-// 		setDeltaX(x => x *= -1);
-// 		setBallX(x => x -= ballRadius);
+	let angle = (Math.PI / 4) * collisionPoint;
 
-// 		let collisionPoint = (ballY + (ballRadius / 2)) - (opponentY + (paddleHeight / 2));
-// 		collisionPoint = collisionPoint / (paddleHeight / 2);
+	dx = info.speed * Math.cos(angle);
+	dy = info.speed * Math.sin(angle);
 
-// 		let angle = (Math.PI / 4) * collisionPoint;
+	console.log("result of playerCollision", dx, dy);
+	return {dx, dy}
+}
+	
+const opponentCollision = (info: CollisionInfo): BallInfo => {
+	let dx = 0, dy = 0;
 
-// 		setDeltaX(-speed * Math.cos(angle));
-// 		setDeltaY(speed * Math.sin(angle));
+	// dx = info.dx * -1;
+	// x = info.x - info.r;
 
-// 		setSpeed(s => s += 0.5);
-// 	}
-// }
+	// let collisionPoint = (info.y + (info.r / 2)) - (info.opponentY + (info.paddleHeight / 2));
+	// collisionPoint = collisionPoint / (info.paddleHeight / 2);
 
-// const detectPlayerCollision = (info: GameInfo) => {
-// 	if (ballX - ballRadius <= info.playerX + info.paddleWidth && ballY > playerY && ballY < playerY + paddleHeight) {
-// 		setBallX(x => x += ballRadius);
+	// let angle = (Math.PI / 4) * collisionPoint;
 
-// 		let collisionPoint = (ballY + (ballRadius / 2)) - (playerY + (paddleHeight / 2));
-// 		collisionPoint = collisionPoint / (paddleHeight / 2);
+	// dx = -info.speed * Math.cos(angle);
+	// dy = info.speed * Math.sin(angle);
 
-// 		let angle = (Math.PI / 4) * collisionPoint;
+	console.log("result of playerCollision", dx, dy);
+	return {dx, dy}
+}
 
-// 		setDeltaX(speed * Math.cos(angle));
-// 		setDeltaY(speed * Math.sin(angle));
-
-// 		setSpeed(s => s += 0.5);
-// 	}
-// }
-
-// const detectWallCollision = (info: GameInfo) => {
-// 	const minY    = ballRadius;
-// 	const maxY    = info.boardHeight - ballRadius;
-
-// 	// top collision
-// 	if (ballY < minY) {
-// 		setDeltaY(y => y * -1);
-// 		setBallY(minY);
-// 	}
-// 	// bottom collision
-// 	if (ballY > maxY) {
-// 		setDeltaY(y => y * -1);
-// 		setBallY(maxY);
-// 	}
-// 	// left collision
-// 	if (ballX <= 0)
-// 	{
-// 		setOpponentScore(o => o += 1);
-// 		serve(PLAYER_SIDE);
-// 	}
-// 	//right collision
-// 	if (ballX >= info.boardWidth)
-// 	{
-// 		setPlayerScore(p => p += 1);
-// 		serve(OPPONENT_SIDE);	
-// 	}
-// }
-
-// export { serve, moveBall };
+export { serveBall, playerCollision, opponentCollision };
