@@ -13,8 +13,8 @@ const ProfileCard: React.FC<{ user?: User}> = ( { user } ) => {
 		<div className={classes.container}>
 			<ProfilIcon user={user} displayCo={false} size={['15rem', '15rem']}/>
 			<div className={classes.user}>
-				<h1>{user?.name}</h1>
-				<p>{user?.email}</p>
+				<h1>{user?.nickname}</h1>
+				{/* <p>{user?.email}</p> */}
 			</div>
 			<div className={classes.stat}>
 				<div className={classes.info}>
@@ -23,17 +23,17 @@ const ProfileCard: React.FC<{ user?: User}> = ( { user } ) => {
 				</div>
 				<div className={classes.info}>
 					<i className="fa-solid fa-bolt"></i>
-					{/* <p>{user?.lose}</p> */}
+					<p>{user?.lose}</p>
 				</div>
 				<div className={classes.info}>
 					<i className="fa-sharp fa-solid fa-chart-simple"></i>
-					{/* <p>
+					<p>
 						{ user &&
 							user.lose !== 0
 							? `${user.wins / (user.wins + userCtx.user.lose) * 100}%`
 							: '100' 
 						}
-					</p> */}
+					</p>
 				</div>
 			</div>
 		</div>

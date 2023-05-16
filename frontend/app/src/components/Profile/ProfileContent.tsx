@@ -5,7 +5,7 @@ import MatchSummary from './Matches/MatchSummary';
 import ProfileFriends from './ProfileFriends';
 import { User, UserContext } from '../../store/users-contexte';
 import ProfilSettings from './ProfilSettings';
-import { useParams } from 'react-router-dom';
+// import { useParams } from 'react-router-dom';
 
 
 const ProfileContent: React.FC<{ user?: User }> = ({ user }) => {
@@ -85,7 +85,7 @@ const ProfileContent: React.FC<{ user?: User }> = ({ user }) => {
 						{
 							userCtx.user.friends.map((friend) => (
 								!isBlock(friend) && <ProfileFriends 
-									key={friend.name} 
+									key={friend.nickname} 
 									user={friend} 
 									block={isBlock(friend)}
 									friend={isFriend(friend)} />
@@ -102,7 +102,7 @@ const ProfileContent: React.FC<{ user?: User }> = ({ user }) => {
 						{
 							userCtx.user.block.map((block) => (
 								<ProfileFriends 
-									key={block.name} 
+									key={block.nickname} 
 									user={block} 
 									block={isBlock(block)} 
 									friend={isFriend(block)}/>
