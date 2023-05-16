@@ -25,6 +25,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
+      - "5555:5555"
     env_file:
       - .env
     volumes:
@@ -35,22 +36,22 @@ services:
       postgres:
         condition: service_healthy
 
-  reactjs:
-    container_name: reactapp
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - "8000:3000"
-    env_file:
-      - .env
-    volumes:
-      - ./frontend/app:/usr/src/app
-    networks:
-      - transendance
-    depends_on:
-      postgres:
-        condition: service_healthy
+  # reactjs:
+  #   container_name: reactapp
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "8000:3000"
+  #   env_file:
+  #     - .env
+  #   volumes:
+  #     - ./frontend/app:/usr/src/app
+  #   networks:
+  #     - transendance
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
 
 volumes:
   postgres:
