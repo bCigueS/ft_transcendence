@@ -1,6 +1,6 @@
-import { game, addPlayer, removePlayer, serveBall } from './game';
-import { CallbackInfo, GameInfo, BallInfo } from './types';
-// import { serve, moveBall } from './ball';
+import { game, addPlayer, removePlayer } from './game';
+import { CallbackInfo, ServeInfo, CollisionInfo } from './types';
+import { serveBall, playerCollision, opponentCollision } from './ball';
 
 const http = require ('http');
 const { Server, Socket } = require('socket.io');
@@ -21,7 +21,7 @@ const io = new Server(server, {
 
 io.on('connection', (socket: typeof Socket) => {
 
-	socket.on('join', ({ name, level, gameInfo }: { name: string, level: number, gameInfo: GameInfo }, callback: CallbackInfo) => {
+	socket.on('join', ({ name, level }: { name: string, level: number }, callback: CallbackInfo) => {
 		const {player, opponent, message} = addPlayer({
 			name,
 			playerId: socket.id,
@@ -51,15 +51,13 @@ io.on('connection', (socket: typeof Socket) => {
 		}
 	});
 	
-	socket.on('startBall', ({gameInfo, gameId}: {gameInfo: GameInfo, gameId: string}) => {
+	socket.on('startBall', ({gameInfo, gameId}: {gameInfo: ServeInfo, gameId: string}) => {
 		const {dx, dy} = serveBall(gameInfo);
 
 		let i = 0;
 		let room = io.sockets.adapter.rooms.get(gameId);
 		if (room) {
 			for (let id = room.values(), val = null; val = id.next().value; ) {
-				console.log("inside room loop, socketId " + val);
-				// let socket = io.sockets.connected[socketId];
 				io.to(val).emit('ballServe', {
 					dx: (i === 0 ? dx : dx * -1),
 					dy: dy,
@@ -69,10 +67,26 @@ io.on('connection', (socket: typeof Socket) => {
 		}
 	});
 	
-	// socket.on('moveBall', (gameId: string) => {
-	// 	io.to(gameId).emit('ballMove', (moveBall()));
-	// });
-	
+	socket.on('ballCollision', ({gameInfo, gameId}: {gameInfo: CollisionInfo, gameId: string}) => {
+		let {dx, dy} = playerCollision(gameInfo);
+
+		let room = io.sockets.adapter.rooms.get(gameId);
+		if (room) {
+			for (let id = room.values(), val = null; val = id.next().value; ) {
+				io.to(val).emit('ballLaunch', {
+					dx: dx,
+					dy: dy,
+				});
+
+				// if (val === socket.id) {
+				// 	io.to(val).emit('ballLaunch', playerCollision(gameInfo));
+				// } else {
+				// 	io.to(val).emit('ballLaunch', opponentCollision(gameInfo));
+				// }
+			}
+		}
+	})
+		
 	socket.on('move', ({ y, gameId }: {y: number, gameId: string}) => {
 		socket.broadcast.to(gameId).emit('paddleMove', { y });
 	});
