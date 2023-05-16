@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import OliviaPic from '../assets/images/owalsh.jpg';
 import FanyPic from '../assets/images/foctavia.jpg';
@@ -13,33 +13,33 @@ export type UserMatch = {
 	opponentScore: number
 }
 
-// export type User = {
-// 	login: string,
-// 	nickname: string,
-// 	password: string,
-// 	wins: number,
-// 	lose: number,
-// 	profilePic: string,
-// 	friends: User[],
-// 	block: User[],
-// 	matchs: UserMatch[],
-// 	connected: boolean,
-// 	doubleAuth: boolean,
-// }
-
 export type User = {
-	id: number;
-	email: string;
-	name: string;
-	avatar: string;
-	doubleAuth: boolean;
-	wins: number;
-	gamesPlayed: number;
+	login: string,
+	nickname: string,
+	password: string,
+	wins: number,
+	lose: number,
+	profilePic: string,
 	friends: User[],
 	block: User[],
 	matchs: UserMatch[],
 	connected: boolean,
-  };
+	doubleAuth: boolean,
+}
+
+// export type User = {
+// 	id: number;
+// 	email: string;
+// 	name: string;
+// 	avatar: string;
+// 	doubleAuth: boolean;
+// 	wins: number;
+// 	gamesPlayed: number;
+// 	friends: User[],
+// 	block: User[],
+// 	matchs: UserMatch[],
+// 	connected: boolean,
+//   };
 
 export type UserFunction = (user: User) => void;
 
@@ -183,7 +183,7 @@ type Props = {
 	const UsersContextProvider: React.FC<Props> = ( {children, className} ) => {
 		
 		const [user, setUser] = useState<User>(simonUser);
-		const [userList, setUserList] = useState<User[]>([]);
+		// const [userList, setUserList] = useState<User[]>([]);
 
 		// useEffect(() => {
 		
@@ -193,52 +193,51 @@ type Props = {
 		// 	// .then(data => console.log(data));
 		// 	// .catch(error => console.error('Error:', error));
 		// }, []);
-		
+	
+		const addBlockUser = (userToBlock: User) => {
+			setUser(prevState => ({
+				...prevState, 
+				block: [...prevState.block.includes(userToBlock) ? prevState.block : [...prevState.block, userToBlock]]
+			}));
+		};
 
-	const addBlockUser = (userToBlock: User) => {
-		setUser(prevState => ({
-			...prevState, 
-			block: [...prevState.block.includes(userToBlock) ? prevState.block : [...prevState.block, userToBlock]]
-		}));
-	};
+		const removeBlockUser = (userToUnblock: User) => {
+			setUser(prevState => ({
+				...prevState,
+				block: prevState.block.filter(friend => friend.nickname !== userToUnblock.nickname)
+			}));
+		};
 
-	const removeBlockUser = (userToUnblock: User) => {
-		setUser(prevState => ({
-			...prevState,
-			block: prevState.block.filter(friend => friend.name !== userToUnblock.name)
-		}));
-	};
-
-	const removeFriendUser = (userToUnfriend: User) => {
-		if (userToUnfriend === user)
-		return ;
-
-		setUser(prevState => ({
-			...prevState,
-			friends: prevState.friends.filter(friend => friend.name !== userToUnfriend.name)
-		}));
-	};
-
-	const addFriendUser = (userToFriend: User) => {
-		if (userToFriend === user)
+		const removeFriendUser = (userToUnfriend: User) => {
+			if (userToUnfriend === user)
 			return ;
-		setUser(prevState => ({
-			...prevState,
-			friends: [...prevState.friends, userToFriend]
-		}))
-	}
 
-	const changeNickname = (newNickname: string) => {
-		setUser(prevState => ({
-			...prevState,
-			nickname: newNickname
-		}));
-	};
+			setUser(prevState => ({
+				...prevState,
+				friends: prevState.friends.filter(friend => friend.nickname !== userToUnfriend.nickname)
+			}));
+		};
 
-	const changeProfilPicture = (newImage: string) => {
-		setUser(prevState => ({
-			...prevState,
-			profilePic: newImage
+		const addFriendUser = (userToFriend: User) => {
+			if (userToFriend === user)
+				return ;
+			setUser(prevState => ({
+				...prevState,
+				friends: [...prevState.friends, userToFriend]
+			}))
+		}
+
+		const changeNickname = (newNickname: string) => {
+			setUser(prevState => ({
+				...prevState,
+				nickname: newNickname
+			}));
+		};
+
+		const changeProfilPicture = (newImage: string) => {
+			setUser(prevState => ({
+				...prevState,
+				profilePic: newImage
 		}));
 	};
 

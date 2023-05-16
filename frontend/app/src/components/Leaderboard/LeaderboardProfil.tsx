@@ -34,7 +34,7 @@ const LeaderboardProfil: React.FC<{user: User}> = ( { user }) => {
 	return (
 		<div className={classes.container}>
 			<ProfilIcon user={user}/>
-			<p>{user.name}</p>
+			<p>{user.nickname}</p>
 			<div className={classes.icon}>
 				<i className='fa-solid fa-trophy'>: {user.wins}</i>
 				{/* <i className='fa-solid fa-bolt'>: {user.lose}</i> */}

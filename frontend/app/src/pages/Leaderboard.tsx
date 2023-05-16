@@ -37,7 +37,7 @@ export default function Leaderboard() {
 		filteredUser = sortU.unAlphaOrderNick(userCtx.userList);
 
 	const displayUsers: User[] = filteredUser.filter((user) => (
-		user.name.toLowerCase().slice(0, searchInput.length).includes(searchInput.toLowerCase())
+		user.nickname.toLowerCase().slice(0, searchInput.length).includes(searchInput.toLowerCase())
 	));
 
 	return (
@@ -51,7 +51,7 @@ export default function Leaderboard() {
 			<div className={classes.content}>
 				{
 					displayUsers.map((user) => (
-						<LeaderboardProfil key={user.name}user={user} />
+						<LeaderboardProfil key={user.nickname}user={user} />
 					))
 				}
 			</div>

@@ -7,7 +7,7 @@ const ProfilSettings: React.FC<{user: User}> = ( props ) => {
 
 	const userCtx = useContext(UserContext);
 	const [image, setImage] = useState<File>();
-	const [preview, setPreview] = useState<string>(props.user.avatar);
+	const [preview, setPreview] = useState<string>(props.user.profilePic);
 
 	const settingTextInput = useRef<HTMLInputElement>(null);
 
@@ -44,7 +44,7 @@ const ProfilSettings: React.FC<{user: User}> = ( props ) => {
 	return (
 		<form className={classes.container} onSubmit={submitHandler} autoComplete='off'>
 			<div className={classes.grid}>
-				<div className={classes.name}>
+				<div className={classes.nickname}>
 					<label htmlFor="text">Nickname</label>
 					<input type="text" id="text" ref={settingTextInput} placeholder='12char max'/>
 				</div>
