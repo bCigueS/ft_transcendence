@@ -6,11 +6,8 @@ export type PlayerInfo = {
 }
 
 export type BallInfo = {
-	// x: number;
-	// y: number;
 	dx: number;
 	dy: number;
-	// s: number;
 }
 
 export type AddPlayerResult = {
@@ -28,16 +25,26 @@ export type CallbackInfo = (message: string) => {
 	message: string;
 }
 
-export type GameInfo = {
-	// boardWidth: number;
-	// boardHeight: number;
-	// paddleWidth: number;
-	// paddleHeight: number;
-	// initialSpeed: number;
+// export type GameInfo = {
+// 	y?: number;
+// 	dx?: number;
+// 	r?: number;
+// 	playerY?: number;
+// 	paddleHeight?: number;
+// 	speed?: number;
+// 	initialDelta?: number;
+// 	level?: number;
+// }
+
+export type ServeInfo = {
 	initialDelta: number;
-	// playerX: number;
-	// opponentX: number;
-	// winnerScore: number;
 	level: number;
-	// side: number;
+}
+
+export type CollisionInfo = {
+	y: number;
+	r: number;
+	playerY: number;
+	paddleHeight: number;
+	speed: number;
 }
