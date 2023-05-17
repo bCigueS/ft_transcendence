@@ -1,11 +1,11 @@
 import React from 'react';
-import { User } from '../../store/users-contexte';
+import { User, UserAPI } from '../../store/users-contexte';
 import { NavigateOptions, useNavigate } from 'react-router-dom';
 import classes from '../../sass/components/Profile/ProfilIcon.module.scss';
 
 
 
-const ProfilIcon: React.FC<{user?: User; displayCo?: boolean; size?: string[]}> = ( { user, displayCo = true, size = []}) => {
+const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: string[]}> = ( { user, displayCo = true, size = []}) => {
 
 	const navigate = useNavigate();
 
@@ -22,7 +22,7 @@ const ProfilIcon: React.FC<{user?: User; displayCo?: boolean; size?: string[]}> 
 			replace: false,
 			state: { message: "Failed to submit form!"}
 		}
-		navigate(`/profile/${user?.nickname.toLowerCase()}`, option);
+		navigate(`/profile/${user?.name.toLowerCase()}`, option);
 	}
 
 
@@ -39,8 +39,8 @@ const ProfilIcon: React.FC<{user?: User; displayCo?: boolean; size?: string[]}> 
 				className={classes.picture}
 				style={size.length > 0 ? {width: size[0], height: size[1] } : {}}>
 				<img 
-					src={user?.profilePic} 
-					alt={user?.nickname} 
+					src={'http://localhost:3000/users/' + user?.id + '/avatar'} 
+					alt={user?.name} 
 				/>
 			</div>
 			{
