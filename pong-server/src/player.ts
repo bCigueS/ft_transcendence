@@ -67,24 +67,28 @@ const addPlayer = (user: PlayerInfo): AddPlayerResult => {
 
 const removePlayer = (playerId: string, gameId?: string): RemovePlayerResult => {
 	if (gameId) {
-		let players = games[gameId];
-		const index = players.findIndex((pl: Player) => pl.playerId === playerId);
-		
-		if (index !== -1) {
-			return {
-				player: players.splice(index, 1)[0],
-				message: 'Player successfully removed from ' + gameId,
-			}
-		}
-	} else {
-		for (const id in games) {
-			let players = games[id];
+		const players = games[gameId];
+		if (players) {
 			const index = players.findIndex((pl: Player) => pl.playerId === playerId);
 			
 			if (index !== -1) {
 				return {
 					player: players.splice(index, 1)[0],
-					message: 'Player successfully removed from ' + id,
+					message: 'Player successfully removed from ' + gameId,
+				}
+			}
+		}
+	} else {
+		for (const id in games) {
+			let players = games[id];
+			if (players) {
+				const index = players.findIndex((pl: Player) => pl.playerId === playerId);
+				
+				if (index !== -1) {
+					return {
+						player: players.splice(index, 1)[0],
+						message: 'Player successfully removed from ' + id,
+					}
 				}
 			}
 		}
