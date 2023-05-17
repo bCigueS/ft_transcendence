@@ -26,7 +26,16 @@ const router = createBrowserRouter([
 		loader: tokenLoader,
 		children: [
 			{index: true, element: <Homepage />},
-			{path: 'profile', element: <ProfilePage />},
+			{
+				path: 'profile',
+				element: <ProfilePage />,
+				loader: async () => {
+					const response = await fetch('http://localhost:3000/users/1');
+					const data = await response.json();
+					console.log('Loader');
+					return data.id;
+				}
+			},
 			{path: 'profile/:id', element: <ProfilePage />},
 			{path: 'privmessage', element: <PrivateMessagePage />},
 			{path: 'chat', element: <ChatPage />},

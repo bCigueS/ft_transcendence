@@ -21,11 +21,11 @@ const ProfilSettings: React.FC<{user: User}> = ( props ) => {
 
 		if (image !== null || !textInputEmpty(enteredText)) {
 			if (image !== null) {
-				userCtx.updateImage(preview);
+				// userCtx.updateImage(preview);
 				setPreview(preview);
 			}
 			if (!textInputEmpty(enteredText)) {
-				userCtx.changeNickname(enteredText);
+				// userCtx.changeNickname(enteredText);
 				settingTextInput.current!.value = '';
 			}
 		}
