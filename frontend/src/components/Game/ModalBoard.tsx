@@ -23,30 +23,30 @@ export default function ModalBoard({ onDifficulty, onTool, onPlayerMode, onStart
 
 	return (
 		<div className={classes.container}>
-			<div className={classes.content} onClick={onNextPage}>
+			<div className={classes.content}>
 				{(isStarting && page === 0) && (
-					<>
+					<div className={classes.subcontent} onClick={onNextPage}>
 						<h2>Ready to have fun?</h2>
 						<p>(click anywhere ...)</p>
-					</>
+					</div>
 				)}
 				{(isStarting && page === 1) && (
 					<>
-						<button onClick={() => {onDifficulty(0)}}>Beginner level</button>
-						<button onClick={() => {onDifficulty(1)}}>Medium level</button>
-						<button onClick={() => {onDifficulty(2)}}>Hard level</button>
+						<button onClick={() => {onDifficulty(0); onNextPage();}}>Beginner level</button>
+						<button onClick={() => {onDifficulty(1); onNextPage();}}>Medium level</button>
+						<button onClick={() => {onDifficulty(2); onNextPage();}}>Hard level</button>
 					</>
 				)}
 				{(isStarting && page === 2) && (
 					<>
-						<button onClick={() => {onTool("keyboard")}}>Play with keyboard</button>
-						<button onClick={() => {onTool("mouse")}}>Play with mouse</button>
+						<button onClick={() => {onTool("keyboard"); onNextPage();}}>Play with keyboard</button>
+						<button onClick={() => {onTool("mouse"); onNextPage();}}>Play with mouse</button>
 					</>
 				)}
 				{(isStarting && page === 3) && (
 					<>
-						<button onClick={() => {onPlayerMode("single")}}>1 player</button>
-						<button onClick={() => {onPlayerMode("double"); setIsDouble(true);}}>2 players</button>
+						<button onClick={() => {onPlayerMode("single"); onNextPage();}}>1 player</button>
+						<button onClick={() => {onPlayerMode("double"); setIsDouble(true); onNextPage();}}>2 players</button>
 					</>
 				)}
 				{(isStarting && page === 4 && !isDouble) && (
@@ -58,7 +58,14 @@ export default function ModalBoard({ onDifficulty, onTool, onPlayerMode, onStart
 				{!isStarting && (
 					<>
 						<h2>{text}</h2>
-						<button onClick={() => {setIsStarting(true); setPage(0); onPlayerMode("single");}}>{buttonText}</button>
+						<button onClick={() => {
+							setIsStarting(true);
+							setPage(1);
+							setIsDouble(false);
+							onPlayerMode("single");
+						}}>
+							{buttonText}
+						</button>
 					</>
 				)}
 			</div>

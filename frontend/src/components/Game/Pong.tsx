@@ -70,7 +70,7 @@ export default function Pong({username}: PongProps) {
 	const [frameCount, setFrameCount] = useState(0);
 	const [speed, setSpeed] = useState(0);
 	// ball info
-	const [ballRadius, setBallRadius] = useState(10);
+	const [ballRadius, setBallRadius] = useState(0);
 	const [ballX, setBallX] = useState(0);
 	const [ballY, setBallY] = useState(0);
 	// ball direction
@@ -79,7 +79,7 @@ export default function Pong({username}: PongProps) {
 	// paddle info
 	const [paddleUp, setPaddleUp] = useState(false);
 	const [paddleDown, setPaddleDown] = useState(false);
-	const [paddleHeight, setPaddleHeight] = useState(120);
+	const [paddleHeight, setPaddleHeight] = useState(0);
 	// players info
 	const [playerY, setPlayerY] = useState((info.boardHeight - paddleHeight) / 2);
 	const [opponentY, setOpponentY] = useState((info.boardHeight - paddleHeight) / 2);
@@ -115,11 +115,11 @@ export default function Pong({username}: PongProps) {
 			});
 			socket.on('opponentLeft', ({message}) => {
 				console.log({message});
-				setGameOver(true);
-				setWinner(PLAYER_WIN);
 			});
 			socket.on('stopGame', ({ message }) => {
 				console.log({ message });
+				setGameOver(true);
+				setWinner(PLAYER_WIN);
 				stopGame();
 			});
 		}
@@ -140,7 +140,7 @@ export default function Pong({username}: PongProps) {
 				setDeltaY(speed * Math.sin(angle));
 			} else if (playerMode === DOUBLE_MODE) {
 				socket.on('ballLaunch', ({dx, dy}) => {
-					console.log("opponent dx, dy: ", dx, dy);
+					// console.log("opponent dx, dy: ", dx, dy);
 					setDeltaX(dx);
 					setDeltaY(dy);
 				});
@@ -149,7 +149,7 @@ export default function Pong({username}: PongProps) {
 			setBallX(x => x -= ballRadius);
 			setSpeed(s => s += 0.5);
 
-			console.log("opponenet collision: ", deltaX, deltaY, ballX, speed, "playerMode: ", playerMode);
+			// console.log("opponenet collision: ", deltaX, deltaY, ballX, speed, "playerMode: ", playerMode);
 		}
 	}
 
@@ -177,7 +177,7 @@ export default function Pong({username}: PongProps) {
 				setDeltaY(speed * Math.sin(angle));
 			} else if (playerMode === DOUBLE_MODE) {
 				socket.on('ballLaunch', ({dx, dy}) => {
-					console.log("player dx, dy: ", dx, dy);
+					// console.log("player dx, dy: ", dx, dy);
 					setDeltaX(dx);
 					setDeltaY(dy);
 				});
@@ -186,7 +186,7 @@ export default function Pong({username}: PongProps) {
 			setBallX(x => x += ballRadius);
 			setSpeed(s => s += 0.5);
 
-			console.log("player collision: ", deltaX, deltaY, ballX, speed, "playerMode: ", playerMode);
+			// console.log("player collision: ", deltaX, deltaY, ballX, speed, "playerMode: ", playerMode);
 		}
 	}
 	
@@ -204,7 +204,7 @@ export default function Pong({username}: PongProps) {
 
 		} else if (playerMode === DOUBLE_MODE) {
 			socket.on('ballServe', ({dx, dy}) => {
-				// console.log(dx, dy);
+				// console.log("serve ball dx, dy: ", dx, dy);
 				setDeltaX(dx);
 				setDeltaY(dy);
 			});
@@ -212,19 +212,28 @@ export default function Pong({username}: PongProps) {
 
 		// console.log(ballX, ballY, deltaX, deltaY, speed);
 	}
-
+	
 	const startGame = (side: number) => {
-
 		if (!isRunning) {
+			switch (level) {
+				case BEGINNER_LEVEL:
+					setBallRadius(10);
+					setPaddleHeight(120);
+					break ;
+				case MEDIUM_LEVEL:
+					setBallRadius(10);
+					setPaddleHeight(80);
+					break ;
+				case HARD_LEVEL:
+					setBallRadius(6);
+					setPaddleHeight(40);
+					break ;
+			}
+			setPlayerY((info.boardHeight - paddleHeight) / 2);
+			setOpponentY((info.boardHeight - paddleHeight) / 2);
 			setPlayerScore(0);
 			setOpponentScore(0);
 			setGameOver(false);
-			if (level !== BEGINNER_LEVEL) {
-				setBallRadius(level === MEDIUM_LEVEL ? 10 : 6);
-				setPaddleHeight(level === MEDIUM_LEVEL ? 80 : 40);
-				setPlayerY((info.boardHeight - paddleHeight) / 2);
-				setOpponentY((info.boardHeight - paddleHeight) / 2);
-			}
 		}
 		
 		socket.emit('startBall', {
@@ -255,21 +264,21 @@ export default function Pong({username}: PongProps) {
 		// left collision
 		if (ballX <= 0)
 		{
-			setOpponentScore(o => o += 1);
-
 			socket.emit('startBall', {
 				gameInfo: {
 					initialDelta: info.initialDelta,
 					level: level,
 				}, gameId: gameId,
 			});
-			serve(PLAYER_SIDE);
+
+			setOpponentScore(o => o += 1);
+			serve(OPPONENT_SIDE);
 		}
 		//right collision
 		if (ballX >= info.boardWidth)
 		{
 			setPlayerScore(p => p += 1);
-			serve(OPPONENT_SIDE);	
+			serve(PLAYER_SIDE);	
 		}
 	}
 	
@@ -347,9 +356,11 @@ export default function Pong({username}: PongProps) {
 	const stopGame = () => {
 		setIsRunning(false);
 		if (playerMode === DOUBLE_MODE) {
-			socket.emit('leave', gameId, (message: string) => {
-				console.log(message);
-			});
+			setTimeout(() => {
+				socket.emit('leave', gameId, (message: string) => {
+					console.log(message);
+				});
+			}, 1000);
 		}
 	}
 
@@ -468,7 +479,7 @@ export default function Pong({username}: PongProps) {
 					start={() => {startGame(winner === PLAYER_WIN ? PLAYER_SIDE : OPPONENT_SIDE); setIsLive(false)}}
 				/>
 			)}
-			{((!isRunning && !isLive) || gameOver) && (
+			{((!isRunning || gameOver) && !isLive) && (
 				<ModalBoard 
 					onDifficulty={(level) => {setLevel(level)}}
 					onTool={(mode) => {setToolMode(mode)}}

@@ -54,15 +54,13 @@ io.on('connection', (socket: typeof Socket) => {
 	socket.on('startBall', ({gameInfo, gameId}: {gameInfo: ServeInfo, gameId: string}) => {
 		const {dx, dy} = serveBall(gameInfo);
 
-		let i = 0;
 		let room = io.sockets.adapter.rooms.get(gameId);
 		if (room) {
 			for (let id = room.values(), val = null; val = id.next().value; ) {
 				io.to(val).emit('ballServe', {
-					dx: (i === 0 ? dx : dx * -1),
+					dx: (val === socket.id ? dx : dx * -1),
 					dy: dy,
 				});
-				i++;
 			}
 		}
 	});
