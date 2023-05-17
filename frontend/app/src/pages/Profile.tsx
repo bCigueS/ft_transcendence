@@ -28,7 +28,7 @@ const Profile: React.FC = () => {
 			{/* { displayUser() !== undefined &&
 				<ProfileCardInfo user={displayUser()} />
 			} */}
-			{/* <ProfileContent user={userCtx.user} /> */}
+			<ProfileContent user={userCtx.user} />
 		</div>
 		
 	);
