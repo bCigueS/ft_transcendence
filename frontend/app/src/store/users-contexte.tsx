@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import OliviaPic from '../assets/images/owalsh.jpg';
 import FanyPic from '../assets/images/foctavia.jpg';
@@ -6,6 +6,7 @@ import YangPic from '../assets/images/ykuo.jpg';
 import SimonPic from '../assets/images/profile-pic.jpg';
 import Dummy1Pic from '../assets/images/Dog_Breeds.jpg';
 import Dummy2Pic from '../assets/images/corgi.jpeg';
+import { async } from 'q';
 
 export type UserMatch = {
 	opponent: User,
@@ -27,19 +28,19 @@ export type User = {
 	doubleAuth: boolean,
 }
 
-// export type User = {
-// 	id: number;
-// 	email: string;
-// 	name: string;
-// 	avatar: string;
-// 	doubleAuth: boolean;
-// 	wins: number;
-// 	gamesPlayed: number;
-// 	friends: User[],
-// 	block: User[],
-// 	matchs: UserMatch[],
-// 	connected: boolean,
-//   };
+export type UserAPI = {
+	id: number;
+	email: string;
+	name: string;
+	avatar: string;
+	doubleAuth: boolean;
+	wins: number;
+	gamesPlayed: number;
+	friends: UserAPI[],
+	block: UserAPI[],
+	matchs: UserMatch[],
+	connected: boolean,
+  };
 
 export type UserFunction = (user: User) => void;
 
@@ -156,23 +157,23 @@ const userList: User[] = [
 ]
 
 export const UserContext = React.createContext<{
-		user: User;
-		userList: User[];
-		blockUser: (user: User) => void;
-		unblockUser: (user: User) => void;
-		friendUser: (user: User) => void; 
-		unfriendUser: (user: User) => void;
-		changeNickname: (newNickname: string) => void;
-		updateImage: (newImage: string) => void;
+		user: UserAPI | null;
+		// userList: User[];
+		// blockUser: (user: User) => void;
+		// unblockUser: (user: User) => void;
+		// friendUser: (user: User) => void; 
+		// unfriendUser: (user: User) => void;
+		// changeNickname: (newNickname: string) => void;
+		// updateImage: (newImage: string) => void;
 	}>({
-	user: simonUser,
-	userList: userList,
-	blockUser: (user: User) => {},
-	unblockUser: (user: User) => {},
-	friendUser: (user: User) => {},
-	unfriendUser: (user: User) => {},
-	changeNickname: (newNickname: string) => {},
-	updateImage: (newImage: string) => {}
+	user: null,
+	// userList: userList,
+	// blockUser: (user: User) => {},
+	// unblockUser: (user: User) => {},
+	// friendUser: (user: User) => {},
+	// unfriendUser: (user: User) => {},
+	// changeNickname: (newNickname: string) => {},
+	// updateImage: (newImage: string) => {}
 });
 
 type Props = {
@@ -182,7 +183,56 @@ type Props = {
 	
 	const UsersContextProvider: React.FC<Props> = ( {children, className} ) => {
 		
-		const [user, setUser] = useState<User>(simonUser);
+		const [user, setUser] = useState<UserAPI | null>(null);
+		const [ error, setError ] = useState<string | null>(null);
+
+		console.log(user);
+
+		const fetchUser = useCallback(async () => {
+			setError(null);
+			try {
+				const response = await fetch('http://localhost:3000/users/1');
+				const data = await response.json();
+
+				if (!response.ok)
+					throw new Error('Failed to fetch User');
+
+				const dataUser: UserAPI = {
+					id: data.id,
+					name: data.name,
+					avatar: data.avatar,
+					email: data.email,
+					doubleAuth: data.doubleAuth,
+					wins: data.wins,
+					gamesPlayed: 0,
+					friends: [],
+					block: [],
+					matchs: [],
+					connected: true
+				}
+				setUser(dataUser);
+			}
+			catch ( error: any ) {
+				setError(error.message);
+			}
+		}, []);
+
+		const fetchUserFriends = useCallback(async () => {
+			setError(null);
+
+			const response = await fetch('http://localhost:3000/users/1/show-friends');
+			const data = await response.json();
+
+			console.log("Friends List: ", data);
+			return data;
+		}, []);
+
+		useEffect(() => {
+			fetchUser();
+			fetchUserFriends();
+		}, [fetchUser, fetchUserFriends]);
+
+
 		// const [userList, setUserList] = useState<User[]>([]);
 
 		// useEffect(() => {
@@ -194,62 +244,62 @@ type Props = {
 		// 	// .catch(error => console.error('Error:', error));
 		// }, []);
 	
-		const addBlockUser = (userToBlock: User) => {
-			setUser(prevState => ({
-				...prevState, 
-				block: [...prevState.block.includes(userToBlock) ? prevState.block : [...prevState.block, userToBlock]]
-			}));
-		};
+	// 	const addBlockUser = (userToBlock: User) => {
+	// 		setUser(prevState => ({
+	// 			...prevState, 
+	// 			block: [...prevState.block.includes(userToBlock) ? prevState.block : [...prevState.block, userToBlock]]
+	// 		}));
+	// 	};
 
-		const removeBlockUser = (userToUnblock: User) => {
-			setUser(prevState => ({
-				...prevState,
-				block: prevState.block.filter(friend => friend.nickname !== userToUnblock.nickname)
-			}));
-		};
+	// 	const removeBlockUser = (userToUnblock: User) => {
+	// 		setUser(prevState => ({
+	// 			...prevState,
+	// 			block: prevState.block.filter(friend => friend.nickname !== userToUnblock.nickname)
+	// 		}));
+	// 	};
 
-		const removeFriendUser = (userToUnfriend: User) => {
-			if (userToUnfriend === user)
-			return ;
+	// 	const removeFriendUser = (userToUnfriend: User) => {
+	// 		if (userToUnfriend === user)
+	// 		return ;
 
-			setUser(prevState => ({
-				...prevState,
-				friends: prevState.friends.filter(friend => friend.nickname !== userToUnfriend.nickname)
-			}));
-		};
+	// 		setUser(prevState => ({
+	// 			...prevState,
+	// 			friends: prevState.friends.filter(friend => friend.nickname !== userToUnfriend.nickname)
+	// 		}));
+	// 	};
 
-		const addFriendUser = (userToFriend: User) => {
-			if (userToFriend === user)
-				return ;
-			setUser(prevState => ({
-				...prevState,
-				friends: [...prevState.friends, userToFriend]
-			}))
-		}
+	// 	const addFriendUser = (userToFriend: User) => {
+	// 		if (userToFriend === user)
+	// 			return ;
+	// 		setUser(prevState => ({
+	// 			...prevState,
+	// 			friends: [...prevState.friends, userToFriend]
+	// 		}))
+	// 	}
 
-		const changeNickname = (newNickname: string) => {
-			setUser(prevState => ({
-				...prevState,
-				nickname: newNickname
-			}));
-		};
+	// 	const changeNickname = (newNickname: string) => {
+	// 		setUser(prevState => ({
+	// 			...prevState,
+	// 			nickname: newNickname
+	// 		}));
+	// 	};
 
-		const changeProfilPicture = (newImage: string) => {
-			setUser(prevState => ({
-				...prevState,
-				profilePic: newImage
-		}));
-	};
+	// 	const changeProfilPicture = (newImage: string) => {
+	// 		setUser(prevState => ({
+	// 			...prevState,
+	// 			profilePic: newImage
+	// 	}));
+	// };
 
 	const contextValue = {
 		user: user,
-		userList: userList,
-		blockUser: addBlockUser,
-		unblockUser: removeBlockUser,
-		friendUser: addFriendUser,
-		unfriendUser: removeFriendUser,
-		changeNickname: changeNickname,
-		updateImage: changeProfilPicture
+		// userList: userList,
+		// blockUser: addBlockUser,
+		// unblockUser: removeBlockUser,
+		// friendUser: addFriendUser,
+		// unfriendUser: removeFriendUser,
+		// changeNickname: changeNickname,
+		// updateImage: changeProfilPicture
 	};
 
 	return (
