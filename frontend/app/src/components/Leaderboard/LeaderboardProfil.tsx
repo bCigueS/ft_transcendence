@@ -24,7 +24,7 @@ const LeaderboardProfil: React.FC<{user: UserAPI}> = ( { user }) => {
 	};
 
 	const removeFriendHandler = (event: React.MouseEvent<HTMLIFrameElement, MouseEvent>) => {
-		userCtx.fetchDeleteUser(user);
+		userCtx.fetchRemoveFriend(user);
 	}
 
 	const addFriendHandler = (event: React.MouseEvent<HTMLIFrameElement, MouseEvent>) => {
