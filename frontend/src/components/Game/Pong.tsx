@@ -140,7 +140,7 @@ export default function Pong({username}: PongProps) {
 				setDeltaY(speed * Math.sin(angle));
 			} else if (playerMode === DOUBLE_MODE) {
 				socket.on('ballLaunch', ({dx, dy}) => {
-					console.log(dx, dy);
+					console.log("opponent dx, dy: ", dx, dy);
 					setDeltaX(dx);
 					setDeltaY(dy);
 				});
@@ -148,6 +148,8 @@ export default function Pong({username}: PongProps) {
 			
 			setBallX(x => x -= ballRadius);
 			setSpeed(s => s += 0.5);
+
+			console.log("opponenet collision: ", deltaX, deltaY, ballX, speed, "playerMode: ", playerMode);
 		}
 	}
 
@@ -175,7 +177,7 @@ export default function Pong({username}: PongProps) {
 				setDeltaY(speed * Math.sin(angle));
 			} else if (playerMode === DOUBLE_MODE) {
 				socket.on('ballLaunch', ({dx, dy}) => {
-					console.log(dx, dy);
+					console.log("player dx, dy: ", dx, dy);
 					setDeltaX(dx);
 					setDeltaY(dy);
 				});
@@ -183,6 +185,8 @@ export default function Pong({username}: PongProps) {
 			
 			setBallX(x => x += ballRadius);
 			setSpeed(s => s += 0.5);
+
+			console.log("player collision: ", deltaX, deltaY, ballX, speed, "playerMode: ", playerMode);
 		}
 	}
 	

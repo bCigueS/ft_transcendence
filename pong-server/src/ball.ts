@@ -7,7 +7,7 @@ const serveBall = (info: ServeInfo): BallInfo => {
 	dx = (info.initialDelta + info.level);
 	dy = 5 * (Math.random() * 2 - 1);
 	
-	console.log("result of serve ball: ", dx, dy);
+	// console.log("result of serve ball: ", dx, dy);
 	return {dx, dy}
 }
 
