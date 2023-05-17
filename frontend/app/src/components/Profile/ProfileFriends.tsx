@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 
-import { User, UserAPI, UserContext } from '../../store/users-contexte';
+import { UserAPI, UserContext } from '../../store/users-contexte';
 import classes from '../../sass/components/Profile/ProfileFriends.module.scss';
 import ProfilIcon from './ProfilIcon';
 
