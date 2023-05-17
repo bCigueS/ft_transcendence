@@ -1,6 +1,6 @@
-import { game, addPlayer, removePlayer } from './game';
+import { game, addPlayer, removePlayer } from './player';
 import { CallbackInfo, ServeInfo, CollisionInfo } from './types';
-import { serveBall, playerCollision, opponentCollision } from './ball';
+import { serveBall, ballCollision } from './ball';
 
 const http = require ('http');
 const { Server, Socket } = require('socket.io');
@@ -68,7 +68,7 @@ io.on('connection', (socket: typeof Socket) => {
 	});
 	
 	socket.on('ballCollision', ({gameInfo, gameId}: {gameInfo: CollisionInfo, gameId: string}) => {
-		let {dx, dy} = playerCollision(gameInfo);
+		let {dx, dy} = ballCollision(gameInfo);
 
 		let room = io.sockets.adapter.rooms.get(gameId);
 		if (room) {
@@ -77,17 +77,11 @@ io.on('connection', (socket: typeof Socket) => {
 					dx: (val === socket.id ? dx : dx * -1),
 					dy: dy,
 				});
-
-				// if (val === socket.id) {
-				// 	io.to(val).emit('ballLaunch', playerCollision(gameInfo));
-				// } else {
-				// 	io.to(val).emit('ballLaunch', opponentCollision(gameInfo));
-				// }
 			}
 		}
 	})
 		
-	socket.on('move', ({ y, gameId }: {y: number, gameId: string}) => {
+	socket.on('moveInput', ({ y, gameId }: {y: number, gameId: string}) => {
 		socket.broadcast.to(gameId).emit('paddleMove', { y });
 	});
 
