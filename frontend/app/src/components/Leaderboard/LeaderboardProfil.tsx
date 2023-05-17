@@ -10,24 +10,66 @@ const LeaderboardProfil: React.FC<{user: UserAPI}> = ( { user }) => {
 
 	const userCtx = useContext(UserContext);
 
+	const fetchAddFriend = async () => {
+		const friendId = {
+			friendId: user.id
+		};
+		const response = await fetch('http://localhost:3000/users/' + userCtx.user?.id + '/add-friend', {
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(friendId)
+		});
+		userCtx.fetchUser();
+	};
+
+	const fetchDeleteUser = async () => {
+		const friendId = {
+			friendId: user.id
+		};
+		const response = await fetch('http://localhost:3000/users/' + userCtx.user?.id + '/remove-friend', {
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(friendId)
+		});
+		userCtx.fetchUser();
+	}
+
 	const removeFriendHandler = (event: React.MouseEvent<HTMLIFrameElement, MouseEvent>) => {
+		fetchDeleteUser();
 	}
 
 	const addFriendHandler = (event: React.MouseEvent<HTMLIFrameElement, MouseEvent>) => {
+		fetchAddFriend();
 	}
 
-	const friendIconDisplay = (user: User) => {
-		if (userCtx.user.friends.includes(user)) {
+	const isFriend = () => {
+		return userCtx.user?.friends.some(friend => user.id === friend.id) || false;
+	}
+
+	const isSelf = () => {
+		return userCtx.user?.id === user.id;
+	}
+	  
+
+	const friendIconDisplay = () => {
+		if (!isFriend() && !isSelf()) {
 			return (<i 
 						className='fa-solid fa-user-minus'
 						onClick={removeFriendHandler}
 					></i>);
 		}
-		else if (!userCtx.user.friends.includes(user) && user !== userCtx.user) {
+		else if (isFriend()) {
 			return (<i 
 						className='fa-solid fa-user-plus'
 						onClick={addFriendHandler}
 					></i>);
+		}
+		else if (isSelf()) {
+			return (<i className='fa-solid fa-user' style={{color: 'gray'}}></i>);	
 		}
 	}
 
@@ -37,10 +79,15 @@ const LeaderboardProfil: React.FC<{user: UserAPI}> = ( { user }) => {
 			<p>{user.name}</p>
 			<div className={classes.icon}>
 				<i className='fa-solid fa-trophy'>: {user.wins}</i>
-				{/* <i className='fa-solid fa-bolt'>: {user.lose}</i> */}
-				<i className='fa-solid fa-message'></i>
-				<i className='fa-solid fa-user-plus' onClick={addFriendHandler}></i> 
-				<i className='fa-solid fa-table-tennis-paddle-ball'></i>
+				<i 
+					className='fa-solid fa-message'
+					style={ isSelf() ? {color: 'gray'} : {}} 
+				></i>
+				{ friendIconDisplay() }
+				<i 
+					className='fa-solid fa-table-tennis-paddle-ball'
+					style={ isSelf() ? {color: 'gray'} : {}} 
+				></i>
 			</div>
 		</div>
 	)

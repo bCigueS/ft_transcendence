@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { User, UserAPI } from '../../store/users-contexte';
 import { NavigateOptions, useNavigate } from 'react-router-dom';
 import classes from '../../sass/components/Profile/ProfilIcon.module.scss';
@@ -7,6 +7,8 @@ import classes from '../../sass/components/Profile/ProfilIcon.module.scss';
 
 const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: string[]}> = ( { user, displayCo = true, size = []}) => {
 
+	const [ avatar, setAvatar ] = useState('');
+	
 	const navigate = useNavigate();
 
 	const stylePicture: React.CSSProperties = {
@@ -25,6 +27,19 @@ const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: s
 		navigate(`/profile/${user?.name.toLowerCase()}`, option);
 	}
 
+	// const fetchAvatar = useCallback(async() => {
+	// 	// const response = await fetch('http://localhost:3000/users/' + user?.id + '/avatar');
+	// 	const response = await fetch('http://localhost:3000/users/1' + '/avatar');
+	// 	const data = await response.json();
+
+	// 	setAvatar(data);
+	// 	// console.log("fetched avatar is: ", avatar);
+	// 	// return data;
+	// }, []);
+
+	// useEffect(() => {
+	// 	fetchAvatar();
+	// }, [fetchAvatar]);
 
 	return (
 		<div 
@@ -40,7 +55,8 @@ const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: s
 				style={size.length > 0 ? {width: size[0], height: size[1] } : {}}>
 				<img 
 					src={'http://localhost:3000/users/' + user?.id + '/avatar'} 
-					alt={user?.name}
+					// src={avatar} 
+					alt={user?.name} 
 				/>
 			</div>
 			{

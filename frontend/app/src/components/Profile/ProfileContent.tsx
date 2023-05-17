@@ -18,14 +18,16 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 		setContentDisplay(display);
 	};
 
-	const isFriend = (user: User) => {
-		return userCtx.user.friends.includes(user);
-	}
+	// const isFriend = (user: User) => {
+	// 	return userCtx.user.friends.includes(user);
+	// }
 
-	const isBlock = (user: User) => {
-		return userCtx.user.block.includes(user);
-	}
+	// const isBlock = (user: User) => {
+	// 	return userCtx.user.block.includes(user);
+	// }
 
+
+	console.log("List of friends inside component: ", userCtx.user?.friends);
 	useEffect(() => {
 		setContentDisplay('Friends');
 	}, [user?.name])
@@ -66,7 +68,6 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 
 			{/* Content */}
 			{/* {
-			{/* {
 				contentDisplay === 'Matchs' &&
 				<div className={classes.tabContent}>
 					<div className={classes.listContent}>
@@ -78,20 +79,19 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 					</div>
 				</div>
 			} */}
-			} */}
 			
 			{
 				(contentDisplay === 'Friends' && user === userCtx.user) &&
 				<div className={classes.tabContent}>
 					<div className={classes.listContent}>
 						{
-							userCtx.user.friends && 
+							userCtx.user?.friends && 
 							userCtx.user.friends.map((friend) => (
-								!isBlock(friend) && <ProfileFriends 
-									key={friend.nickname} 
+									<ProfileFriends 
+									key={friend.name} 
 									user={friend} 
-									block={isBlock(friend)}
-									friend={isFriend(friend)} />
+									block={false}
+									friend={true} />
 							))
 						}
 					</div>

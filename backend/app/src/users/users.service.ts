@@ -103,8 +103,8 @@ export class UsersService {
    
     const existingFriendship = await this.prisma.friendship.findFirst({
       where: {
-        followingId: id,
-        followerId: followerId,
+		followingId: followerId,
+		followerId: id,
       },
     });
   
