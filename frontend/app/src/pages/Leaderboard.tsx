@@ -2,7 +2,7 @@ import { useCallback, useContext, useEffect, useState } from 'react';
 import LeaderboardProfil from '../components/Leaderboard/LeaderboardProfil';
 import Searchbar from '../components/Leaderboard/Searchbar';
 import classes from '../sass/pages/Leaderboard.module.scss';
-import { User, UserAPI, UserContext } from '../store/users-contexte';
+import { UserAPI, UserContext } from '../store/users-contexte';
 import FilterSearch from '../components/Leaderboard/FilterSearch';
 import * as sortU from '../typescript/sortUsers';
 

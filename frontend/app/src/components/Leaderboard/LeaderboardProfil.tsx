@@ -2,8 +2,7 @@ import React, { useContext } from 'react';
 
 import classes from '../../sass/components/Leaderboard/LeaderboardProfil.module.scss';
 import ProfilIcon from '../Profile/ProfilIcon';
-import { User, UserAPI, UserContext } from '../../store/users-contexte';
-import { async } from 'q';
+import { UserAPI, UserContext } from '../../store/users-contexte';
 
 const LeaderboardProfil: React.FC<{user: UserAPI}> = ( { user }) => {
 	
@@ -24,22 +23,8 @@ const LeaderboardProfil: React.FC<{user: UserAPI}> = ( { user }) => {
 		userCtx.fetchUser();
 	};
 
-	const fetchDeleteUser = async () => {
-		const friendId = {
-			friendId: user.id
-		};
-		const response = await fetch('http://localhost:3000/users/' + userCtx.user?.id + '/remove-friend', {
-			method: 'PATCH',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(friendId)
-		});
-		userCtx.fetchUser();
-	}
-
 	const removeFriendHandler = (event: React.MouseEvent<HTMLIFrameElement, MouseEvent>) => {
-		fetchDeleteUser();
+		userCtx.fetchDeleteUser(user);
 	}
 
 	const addFriendHandler = (event: React.MouseEvent<HTMLIFrameElement, MouseEvent>) => {
@@ -54,22 +39,21 @@ const LeaderboardProfil: React.FC<{user: UserAPI}> = ( { user }) => {
 		return userCtx.user?.id === user.id;
 	}
 	  
-
 	const friendIconDisplay = () => {
-		if (!isFriend() && !isSelf()) {
+		if (isSelf()) {
+			return (<i className='fa-solid fa-user' style={{color: 'gray'}}></i>);	
+		}
+		else if (isFriend()) {
 			return (<i 
 						className='fa-solid fa-user-minus'
 						onClick={removeFriendHandler}
 					></i>);
 		}
-		else if (isFriend()) {
+		else if (!isFriend()) {
 			return (<i 
 						className='fa-solid fa-user-plus'
 						onClick={addFriendHandler}
 					></i>);
-		}
-		else if (isSelf()) {
-			return (<i className='fa-solid fa-user' style={{color: 'gray'}}></i>);	
 		}
 	}
 
