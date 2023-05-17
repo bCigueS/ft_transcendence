@@ -44,116 +44,116 @@ export type UserAPI = {
 
 export type UserFunction = (user: User) => void;
 
-const oliviaUser: User = {
-		login: 'OWalsh',
-		nickname: 'Oliv',
-		password: 'simon',
-		wins: 2,
-		lose: 3,
-		profilePic: OliviaPic,
-		friends: [],
-		block: [],
-		matchs: [],
-		connected: true,
-		doubleAuth: false
-}
+// const oliviaUser: User = {
+// 		login: 'OWalsh',
+// 		nickname: 'Oliv',
+// 		password: 'simon',
+// 		wins: 2,
+// 		lose: 3,
+// 		profilePic: OliviaPic,
+// 		friends: [],
+// 		block: [],
+// 		matchs: [],
+// 		connected: true,
+// 		doubleAuth: false
+// }
 
-const fanyUser: User = {
-	login: 'FOctavia',
-	password: 'simon',
-	nickname: 'Faaaaany',
-	wins: 0,
-	lose: 2,
-	profilePic: FanyPic,
-	friends: [],
-	block: [],
-	matchs: [],
-	connected: false,
-	doubleAuth: false
+// const fanyUser: User = {
+// 	login: 'FOctavia',
+// 	password: 'simon',
+// 	nickname: 'Faaaaany',
+// 	wins: 0,
+// 	lose: 2,
+// 	profilePic: FanyPic,
+// 	friends: [],
+// 	block: [],
+// 	matchs: [],
+// 	connected: false,
+// 	doubleAuth: false
 
-}
+// }
 
-const ychiUser: User = {
-	login: 'Ykuo',
-	password: 'simon',
-	nickname: 'Yang',
-	wins: 2,
-	lose: 0,
-	profilePic: YangPic,
-	friends: [],
-	block: [],
-	matchs: [],
-	connected: false,
-	doubleAuth: false
-}
+// const ychiUser: User = {
+// 	login: 'Ykuo',
+// 	password: 'simon',
+// 	nickname: 'Yang',
+// 	wins: 2,
+// 	lose: 0,
+// 	profilePic: YangPic,
+// 	friends: [],
+// 	block: [],
+// 	matchs: [],
+// 	connected: false,
+// 	doubleAuth: false
+// }
 
-const dummy1: User = {
-	login: 'Dummy',
-	password: 'simon',
-	nickname: 'Dum1',
-	wins: 0,
-	lose: 99,
-	profilePic: Dummy1Pic,
-	friends: [],
-	block: [],
-	matchs: [],
-	connected: false,
-	doubleAuth: false
-}
+// const dummy1: User = {
+// 	login: 'Dummy',
+// 	password: 'simon',
+// 	nickname: 'Dum1',
+// 	wins: 0,
+// 	lose: 99,
+// 	profilePic: Dummy1Pic,
+// 	friends: [],
+// 	block: [],
+// 	matchs: [],
+// 	connected: false,
+// 	doubleAuth: false
+// }
 
-const match3: UserMatch = {
-	opponent: dummy1,
-	playerScore: 99,
-	opponentScore: 0
-}
+// const match3: UserMatch = {
+// 	opponent: dummy1,
+// 	playerScore: 99,
+// 	opponentScore: 0
+// }
 
-const dummy2: User = {
-	login: 'Corgi',
-	password: 'simon',
-	nickname: 'Corg',
-	wins: 99,
-	lose: 0,
-	profilePic: Dummy2Pic,
-	friends: [],
-	block: [],
-	matchs: [match3],
-	connected: false,
-	doubleAuth: false
-}
+// const dummy2: User = {
+// 	login: 'Corgi',
+// 	password: 'simon',
+// 	nickname: 'Corg',
+// 	wins: 99,
+// 	lose: 0,
+// 	profilePic: Dummy2Pic,
+// 	friends: [],
+// 	block: [],
+// 	matchs: [match3],
+// 	connected: false,
+// 	doubleAuth: false
+// }
 
-const match1: UserMatch = {
-	opponent: fanyUser,
-	playerScore: 2,
-	opponentScore: 4
-}
+// const match1: UserMatch = {
+// 	opponent: fanyUser,
+// 	playerScore: 2,
+// 	opponentScore: 4
+// }
 
-const match2: UserMatch = {
-	opponent: oliviaUser,
-	playerScore: 1,
-	opponentScore: 4
-}
+// const match2: UserMatch = {
+// 	opponent: oliviaUser,
+// 	playerScore: 1,
+// 	opponentScore: 4
+// }
 
 const simonUser: User = {
-	login: 'Sbeylot',
-	nickname: 'SimSim',
-	password: 'simon',
+	id: 1,
+	name: 'simon',
+	email: 'sbeylot@student.42.fr',
+	avatar: 'sbeylot.jpg',
 	wins: 3,
-	lose: 2,
-	profilePic: SimonPic,
-	friends: [oliviaUser, fanyUser, ychiUser],
+	gamesPlayed: 5,
+	friends: [],
 	block: [],
-	matchs: [match1, match2],
+	matchs: [],
 	connected: true,
 	doubleAuth: false
 }
 
 const userList: User[] = [
 	simonUser,
-	fanyUser,
-	oliviaUser,
-	ychiUser,
-	dummy1,
-	dummy2
+	// fanyUser,
+	// oliviaUser,
+	// ychiUser,
+	// dummy1,
+	// dummy2
 ]
 
 export const UserContext = React.createContext<{

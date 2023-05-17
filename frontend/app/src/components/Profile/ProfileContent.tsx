@@ -66,6 +66,7 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 
 			{/* Content */}
 			{/* {
+			{/* {
 				contentDisplay === 'Matchs' &&
 				<div className={classes.tabContent}>
 					<div className={classes.listContent}>
@@ -77,12 +78,14 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 					</div>
 				</div>
 			} */}
+			} */}
 			
 			{
 				(contentDisplay === 'Friends' && user === userCtx.user) &&
 				<div className={classes.tabContent}>
 					<div className={classes.listContent}>
 						{
+							userCtx.user.friends && 
 							userCtx.user.friends.map((friend) => (
 								!isBlock(friend) && <ProfileFriends 
 									key={friend.nickname} 
@@ -100,6 +103,7 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 				<div className={classes.tabContent}>
 					<div className={classes.listContent}>
 						{
+							userCtx.user.block && 
 							userCtx.user.block.map((block) => (
 								<ProfileFriends 
 									key={block.nickname} 

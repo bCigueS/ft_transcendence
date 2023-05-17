@@ -10,5 +10,7 @@ done
 npx prisma migrate dev
 npx prisma db seed
 
+npx prisma db seed
+
 # Start the application
 exec "$@"
