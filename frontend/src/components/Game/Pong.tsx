@@ -300,13 +300,13 @@ export default function Pong({username}: PongProps) {
 			if (paddleUp && nextPostUp >= 0) {
 				setPlayerY(nextPostUp);
 				if (playerMode === DOUBLE_MODE) {
-					socket.emit('move', {y: nextPostUp, gameId: gameId});
+					socket.emit('moveInput', {y: nextPostUp, gameId: gameId});
 				}
 			}
 			if (paddleDown && nextPostDown <= info.boardHeight) {
 				setPlayerY(nextPostDown - paddleHeight);
 				if (playerMode === DOUBLE_MODE) {
-					socket.emit('move', {y: nextPostDown - paddleHeight, gameId: gameId});
+					socket.emit('moveInput', {y: nextPostDown - paddleHeight, gameId: gameId});
 				}
 			}
 		}
@@ -441,17 +441,17 @@ export default function Pong({username}: PongProps) {
 				if ( nextPost >= 0 && nextPost + paddleHeight <= info.boardHeight) {
 						setPlayerY(nextPost);
 						if (playerMode === DOUBLE_MODE) {
-							socket.emit('move', {y: nextPost, gameId: gameId});
+							socket.emit('moveInput', {y: nextPost, gameId: gameId});
 						}
 				} else if (nextPost < 0) {
 					setPlayerY(0);
 					if (playerMode === DOUBLE_MODE) {
-						socket.emit('move', {y: 0, gameId: gameId});
+						socket.emit('moveInput', {y: 0, gameId: gameId});
 					}
 				} else if (nextPost + paddleHeight > info.boardHeight) {
 					setPlayerY(info.boardHeight - paddleHeight);
 					if (playerMode === DOUBLE_MODE) {
-						socket.emit('move', {y: info.boardHeight - paddleHeight, gameId: gameId})
+						socket.emit('moveInput', {y: info.boardHeight - paddleHeight, gameId: gameId})
 					}
 				}
 			}
