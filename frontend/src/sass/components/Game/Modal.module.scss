@@ -28,6 +28,15 @@
 		margin: 10px;
 	
 		@include text-body();
+
+		.subcontent {
+			height: 100%;
+			width: 100%;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+		}
 	}
 	
 	button {
