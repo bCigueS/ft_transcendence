@@ -27,7 +27,6 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 	// }
 
 
-	console.log("List of friends inside component: ", userCtx.user?.friends);
 	useEffect(() => {
 		setContentDisplay('Friends');
 	}, [user?.name])
@@ -98,24 +97,24 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 				</div>
 			}
 
-			{/* {
+			{
 				(contentDisplay === 'Block' && user === userCtx.user) &&
 				<div className={classes.tabContent}>
 					<div className={classes.listContent}>
 						{
-							userCtx.user.block && 
-							userCtx.user.block.map((block) => (
+							userCtx.user?.block && 
+							userCtx.user?.block.map((block) => (
 								<ProfileFriends 
-									key={block.nickname} 
-									user={block} 
-									block={isBlock(block)} 
-									friend={isFriend(block)}/>
+									key={block.name} 
+									user={block}
+									block={true}
+									friend={false}/>
 							))
 						}
 					</div>
 				</div>
 			}
-			{
+			{/* {
 				(contentDisplay === 'Settings' && user === userCtx.user) &&
 				<div className={classes.tabContent}>
 					<ProfilSettings user={userCtx.user}/>
