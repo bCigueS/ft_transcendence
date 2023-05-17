@@ -3,7 +3,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import classes from '../../sass/components/Profile/ProfileContent.module.scss';
 import MatchSummary from './Matches/MatchSummary';
 import ProfileFriends from './ProfileFriends';
-import { User, UserAPI, UserContext } from '../../store/users-contexte';
+import { UserAPI, UserContext } from '../../store/users-contexte';
 import ProfilSettings from './ProfilSettings';
 // import { useParams } from 'react-router-dom';
 

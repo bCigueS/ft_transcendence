@@ -1,7 +1,7 @@
 import React from 'react';
 
 import classes from '../../../sass/components/Profile/Matches/MatchSummary.module.scss'
-import { UserMatch, User, UserAPI } from '../../../store/users-contexte';
+import { UserMatch, UserAPI } from '../../../store/users-contexte';
 import ProfilIcon from '../ProfilIcon';
 
 
