@@ -74,7 +74,7 @@ io.on('connection', (socket: typeof Socket) => {
 		if (room) {
 			for (let id = room.values(), val = null; val = id.next().value; ) {
 				io.to(val).emit('ballLaunch', {
-					dx: dx,
+					dx: (val === socket.id ? dx : dx * -1),
 					dy: dy,
 				});
 

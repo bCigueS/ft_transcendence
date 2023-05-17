@@ -25,17 +25,6 @@ export type CallbackInfo = (message: string) => {
 	message: string;
 }
 
-// export type GameInfo = {
-// 	y?: number;
-// 	dx?: number;
-// 	r?: number;
-// 	playerY?: number;
-// 	paddleHeight?: number;
-// 	speed?: number;
-// 	initialDelta?: number;
-// 	level?: number;
-// }
-
 export type ServeInfo = {
 	initialDelta: number;
 	level: number;
