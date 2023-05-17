@@ -13,20 +13,22 @@ const Profile: React.FC = () => {
 
 	console.log(params.id);
 
-	const displayUser = (() => {
-		if (params.id === undefined)
-			return (userCtx.user);
-		else {
-			return (userCtx.userList.find(user => user.nickname.toLowerCase() === params.id?.toLowerCase()))
-		}
-	});
+	// FOR DISPLAYING CORRECT PROFIL PAGE
+	// const displayUser = (() => {
+	// 	if (params.id === undefined)
+	// 		return (userCtx.user);
+	// 	else {
+	// 		return (userCtx.userList.find(user => user.nickname.toLowerCase() === params.id?.toLowerCase()))
+	// 	}
+	// });
 
 	return (
 		<div className={classes.profilPage}>
-			{ displayUser() !== undefined &&
+			<ProfileCardInfo user={userCtx.user} />
+			{/* { displayUser() !== undefined &&
 				<ProfileCardInfo user={displayUser()} />
-			}
-			<ProfileContent user={displayUser()}/>
+			} */}
+			{/* <ProfileContent user={userCtx.user} /> */}
 		</div>
 		
 	);

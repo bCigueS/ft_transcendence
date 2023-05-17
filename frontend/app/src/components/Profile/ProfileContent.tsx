@@ -3,15 +3,15 @@ import React, { useState, useContext, useEffect } from 'react';
 import classes from '../../sass/components/Profile/ProfileContent.module.scss';
 import MatchSummary from './Matches/MatchSummary';
 import ProfileFriends from './ProfileFriends';
-import { User, UserContext } from '../../store/users-contexte';
+import { User, UserAPI, UserContext } from '../../store/users-contexte';
 import ProfilSettings from './ProfilSettings';
 // import { useParams } from 'react-router-dom';
 
 
-const ProfileContent: React.FC<{ user?: User }> = ({ user }) => {
+const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 
 	const userCtx = useContext(UserContext);
-	const [contentDisplay, setContentDisplay] = useState<string>('Matchs');
+	const [contentDisplay, setContentDisplay] = useState<string>('Friends');
 
 	const tabHandler = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		const display: string = event.currentTarget.textContent || '';
@@ -27,19 +27,19 @@ const ProfileContent: React.FC<{ user?: User }> = ({ user }) => {
 	}
 
 	useEffect(() => {
-		setContentDisplay('Matchs');
-	}, [user?.nickname])
+		setContentDisplay('Friends');
+	}, [user?.name])
 
 	return (
 		<div className={classes.container}>
 
 			{/* Tabs content */}
 			<div className={classes.tab}>
-				<button 
+				{/* <button 
 					className={`${classes.btn} ${contentDisplay === 'Matchs' ? classes.active : ''}`}
 					onClick={tabHandler}>
 						Matchs
-				</button>
+				</button> */}
 				{	user === userCtx.user &&
 					<button 
 						className={`${classes.btn} ${contentDisplay === 'Friends' ? classes.active : ''}`} 
@@ -65,7 +65,7 @@ const ProfileContent: React.FC<{ user?: User }> = ({ user }) => {
 			</div>
 
 			{/* Content */}
-			{
+			{/* {
 				contentDisplay === 'Matchs' &&
 				<div className={classes.tabContent}>
 					<div className={classes.listContent}>
@@ -76,7 +76,7 @@ const ProfileContent: React.FC<{ user?: User }> = ({ user }) => {
 						}
 					</div>
 				</div>
-			}
+			} */}
 			
 			{
 				(contentDisplay === 'Friends' && user === userCtx.user) &&
@@ -95,7 +95,7 @@ const ProfileContent: React.FC<{ user?: User }> = ({ user }) => {
 				</div>
 			}
 
-			{
+			{/* {
 				(contentDisplay === 'Block' && user === userCtx.user) &&
 				<div className={classes.tabContent}>
 					<div className={classes.listContent}>
@@ -116,7 +116,7 @@ const ProfileContent: React.FC<{ user?: User }> = ({ user }) => {
 				<div className={classes.tabContent}>
 					<ProfilSettings user={userCtx.user}/>
 				</div>
-			}
+			} */}
 		</div>
 	);
 };
