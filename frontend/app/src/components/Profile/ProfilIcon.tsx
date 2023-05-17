@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { User, UserAPI } from '../../store/users-contexte';
+import { UserAPI } from '../../store/users-contexte';
 import { NavigateOptions, useNavigate } from 'react-router-dom';
 import classes from '../../sass/components/Profile/ProfilIcon.module.scss';
 

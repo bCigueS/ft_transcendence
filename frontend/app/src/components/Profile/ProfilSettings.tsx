@@ -1,13 +1,13 @@
 import React, { useRef, useContext, useState } from 'react';
-import { User, UserContext } from '../../store/users-contexte';
+import { UserAPI, UserContext } from '../../store/users-contexte';
 import classes from '../../sass/components/Profile/ProfilSettings.module.scss';
 
 
-const ProfilSettings: React.FC<{user: User}> = ( props ) => {
+const ProfilSettings: React.FC<{user: UserAPI}> = ( props ) => {
 
 	const userCtx = useContext(UserContext);
 	const [image, setImage] = useState<File>();
-	const [preview, setPreview] = useState<string>(props.user.profilePic);
+	const [preview, setPreview] = useState<string>(props.user.avatar);
 
 	const settingTextInput = useRef<HTMLInputElement>(null);
 

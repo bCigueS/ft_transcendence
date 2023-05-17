@@ -24,10 +24,12 @@ export const UserContext = React.createContext<{
 		user: UserAPI | null;
 		fetchUserFriends: (id: number) => void;
 		fetchUser: () => void;
+		fetchDeleteUser: (targetUser: UserAPI) => void;
 	}>({
 	user: null,
 	fetchUserFriends: (id: number) => {},
-	fetchUser: () => {}
+	fetchUser: () => {},
+	fetchDeleteUser: (targetUser: UserAPI) => {}
 	});
 
 type Props = {
@@ -41,7 +43,20 @@ type Props = {
 		const [ loading, setLoading ] = useState<boolean>(true);
 		const [ error, setError ] = useState<string | null>(null);
 
-		console.log(user);
+
+		const fetchDeleteUser = async (targetUser: UserAPI) => {
+			const friendId = {
+				friendId: targetUser.id
+			};
+			const response = await fetch('http://localhost:3000/users/' + user?.id + '/remove-friend', {
+				method: 'PATCH',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(friendId)
+			});
+			fetchUser();
+		}
 
 		const fetchUserFriends = useCallback(async (id: number) => {
 			setError(null);
@@ -117,7 +132,8 @@ type Props = {
 	const contextValue = {
 		user: user,
 		fetchUserFriends: fetchUserFriends,
-		fetchUser: fetchUser
+		fetchUser: fetchUser,
+		fetchDeleteUser: fetchDeleteUser
 	};
 
 	return (
