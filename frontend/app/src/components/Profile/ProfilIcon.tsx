@@ -40,7 +40,7 @@ const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: s
 				style={size.length > 0 ? {width: size[0], height: size[1] } : {}}>
 				<img 
 					src={'http://localhost:3000/users/' + user?.id + '/avatar'} 
-					alt={user?.name} 
+					alt={user?.name}
 				/>
 			</div>
 			{
