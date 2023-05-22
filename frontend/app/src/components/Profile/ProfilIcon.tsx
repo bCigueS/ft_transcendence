@@ -5,7 +5,7 @@ import classes from '../../sass/components/Profile/ProfilIcon.module.scss';
 
 
 
-const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: string[]}> = ( { user, displayCo = true, size = []}) => {
+const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: string[]; border?: boolean}> = ( { user, displayCo = true, size = [], border = false }) => {
 
 	const [ avatar, setAvatar ] = useState('');
 	
@@ -47,7 +47,7 @@ const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: s
 			onClick={navHandler} 
 			style={size.length > 0 ? {width: size[0], height: size[1]} : {}}>
 			
-			{ size.length > 0 &&
+			{ border &&
 				<div style={stylePicture}></div>
 			}
 			<div 

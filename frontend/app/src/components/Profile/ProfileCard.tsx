@@ -9,7 +9,7 @@ const ProfileCard: React.FC<{ user?: UserAPI | null}> = ( { user } ) => {
 
 	return (
 		<div className={classes.container}>
-			<ProfilIcon user={user} displayCo={false} size={['15rem', '15rem']}/>
+			<ProfilIcon user={user} displayCo={false} size={['15rem', '15rem']} border={true}/>
 			<div className={classes.user}>
 				<h1>{user?.name}</h1>
 				<p>{user?.email}</p>
