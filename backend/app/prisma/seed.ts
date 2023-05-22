@@ -12,6 +12,16 @@ async function main() {
     },
   })
   const fany = await prisma.user.upsert({
+    where: { name: 'Alex' },
+    update: {},
+    create: {
+      email: 'achane-l@student.42.fr',
+      name: 'Alex',
+      password: 'lolilolilol',
+      avatar: 'achane-l.jpg'
+    },
+  })
+  const alex = await prisma.user.upsert({
     where: { name: 'Faaaany' },
     update: {},
     create: {
