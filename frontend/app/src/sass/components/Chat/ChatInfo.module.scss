@@ -4,29 +4,42 @@
 .container {
     // background-color: blue;
 
-    height: 4rem;
+    height: 5.5rem;
     width: 100%;
 
-    border-bottom: 0.1rem solid $gunmetal;
+    // border-bottom: 0.1rem solid $gunmetal;
 
     display: grid;
     grid-template-columns: 4rem 2fr;
     grid-template-rows: 1fr;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.1s ease-in-out;
+ 
 
-    padding-bottom: 5rem;
+    // background-color: red;
+    
+    &:hover {
+        background-color: $silver-light;
+    }
+    
+    .picture {
+        width: 4rem;
+        margin: 0 1rem;
+    }
 
     .info {
         
-        margin-left: 1rem;
-        width: 100%;
-        height: 100%;
+        margin-left: 2rem;
+        // width: 100%;
+        // height: 100%;
 
 
         .name {
             // color: palevioletred;
             font-weight: bold;
             overflow: hidden;
-            width: 70rem;
+            width: 10rem;
             white-space: nowrap;
             text-overflow: ellipsis;
         }

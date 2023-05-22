@@ -13,11 +13,11 @@ export type UserAPI = {
 	avatar: string;
 	doubleAuth: boolean;
 	wins: number;
-	gamesPlayed: number;
-	friends: UserAPI[],
-	block: UserAPI[],
-	matchs: UserMatch[],
-	connected: boolean,
+	gamesPlayed?: number;
+	friends?: UserAPI[],
+	block?: UserAPI[],
+	matchs?: UserMatch[],
+	connected?: boolean,
   };
 
 export const UserContext = React.createContext<{
@@ -28,6 +28,7 @@ export const UserContext = React.createContext<{
 		fetchRemoveFriend: (targetUser: UserAPI) => void;
 		fetchBlockUser: (targetUser: UserAPI) => void;
 		fetchUnblockUser: (targetUser: UserAPI) => void;
+		fetchUserById: (userId: number) => void;
 	}>({
 	user: null,
 	fetchUserFriends: (id: number) => {},
@@ -35,7 +36,8 @@ export const UserContext = React.createContext<{
 	fetchUser: () => {},
 	fetchRemoveFriend: (targetUser: UserAPI) => {},
 	fetchBlockUser: (targetUser: UserAPI) => {},
-	fetchUnblockUser: (targetUser: UserAPI) => {}
+	fetchUnblockUser: (targetUser: UserAPI) => {},
+	fetchUserById: (userId: number) => {},
 	});
 
 type Props = {
@@ -91,6 +93,34 @@ type Props = {
 			});
 			fetchUser();
 		}
+
+		const fetchUserById = useCallback(async (userId: number) => {
+			setError(null);
+
+			let userFound: UserAPI | null = null;
+
+			try {
+				const response = await fetch('http://localhost:3000/users/' + userId);
+				const data = await response.json();
+
+				if (!response.ok)
+					throw new Error('Failed to fetch user with id ' + userId);
+				
+				userFound = {
+					id: data.id,
+					email: data.email,
+					name: data.name,
+					avatar: data.avatar,
+					doubleAuth: data.doubleAuth,
+					wins: data.wins
+				}
+			}
+			catch (error: any) {
+				setError( error.message );
+			}
+			return userFound;
+			
+		}, [])
 
 		const fetchUserFriends = useCallback(async (id: number) => {
 			setError(null);
@@ -199,7 +229,8 @@ type Props = {
 		fetchUser: fetchUser,
 		fetchRemoveFriend: fetchRemoveFriend,
 		fetchBlockUser: fetchBlockUser,
-		fetchUnblockUser: fetchUnblockUser
+		fetchUnblockUser: fetchUnblockUser,
+		fetchUserById: fetchUserById,
 	};
 
 	return (
