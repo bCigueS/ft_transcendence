@@ -17,6 +17,7 @@ export default function ModalBoard({ onDifficulty, onTool, onPlayerMode, onStart
 	const [page, setPage] = useState(0);
 	const [isDouble, setIsDouble] = useState(false);
 
+	// function to change the page number, thus triggering a new display of the page
 	const onNextPage = () => {
 		setPage(p => p += 1);
 	}

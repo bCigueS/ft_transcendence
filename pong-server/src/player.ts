@@ -1,5 +1,6 @@
 import { AddPlayerResult, RemovePlayerResult, PlayerInfo } from './types';
 
+// creating a starting room rumber for different game level
 let beginnerLvl = 1;
 let mediumLvl = 2;
 let hardLvl = 3;
@@ -18,11 +19,13 @@ class Player {
 	}
 };
 
+// an empty array of games to store all the game available
 const games: Record<string, Player[]> = {};
 
 const game = (id: string): Player[] => { return games[id] };
 
 const addPlayer = (user: PlayerInfo): AddPlayerResult => {
+	// give a gameId depending on the level of the player
 	if (user.level === 0) {
 		user.gameId += beginnerLvl;
 	} else if (user.level === 1) {
@@ -31,6 +34,7 @@ const addPlayer = (user: PlayerInfo): AddPlayerResult => {
 		user.gameId += hardLvl;
 	}
 	
+	// if the gameId is already full (2 players per gameId) then assigned it to the next gameId that is a multiplication of 3, so that each level will not overlap
 	if (games[user.gameId] && games[user.gameId].length >= 2) {
 		user.gameId = 'pong';
 		if (user.level === 0) {
@@ -45,6 +49,7 @@ const addPlayer = (user: PlayerInfo): AddPlayerResult => {
 		}
 	}
 
+	// if the gameId is not used yet, create a new player and store it in the games array
 	if (!games[user.gameId]) {
 		const player = new Player(user);
 		games[user.gameId] = [player];
@@ -55,6 +60,7 @@ const addPlayer = (user: PlayerInfo): AddPlayerResult => {
 		};
 	}
 
+	// if the gameId is exist but not full yet, proceed by store a new player (second player) in this gameId, and assign first player as its opponent
 	const opponent = games[user.gameId][0];
 	const player = new Player(user);
 	games[user.gameId].push(player);
@@ -66,27 +72,28 @@ const addPlayer = (user: PlayerInfo): AddPlayerResult => {
 };
 
 const removePlayer = (playerId: string, gameId?: string): RemovePlayerResult => {
+	// if a gameId is provided in the parameter, then proceed by searching the player to be removed in this gameId
 	if (gameId) {
-		const players = games[gameId];
-		if (players) {
-			const index = players.findIndex((pl: Player) => pl.playerId === playerId);
+		if (games[gameId]) {
+			const index = games[gameId].findIndex((pl: Player) => pl.playerId === playerId);
 			
 			if (index !== -1) {
+				// removed this player from the games array and return the address of this player
 				return {
-					player: players.splice(index, 1)[0],
+					player: games[gameId].splice(index, 1)[0],
 					message: 'Player successfully removed from ' + gameId,
 				}
 			}
 		}
 	} else {
+		// if a gameId is not provided then loop through the games array to search for the specific player
 		for (const id in games) {
-			let players = games[id];
-			if (players) {
-				const index = players.findIndex((pl: Player) => pl.playerId === playerId);
+			if (games[id]) {
+				const index = games[id].findIndex((pl: Player) => pl.playerId === playerId);
 				
 				if (index !== -1) {
 					return {
-						player: players.splice(index, 1)[0],
+						player: games[id].splice(index, 1)[0],
 						message: 'Player successfully removed from ' + id,
 					}
 				}
