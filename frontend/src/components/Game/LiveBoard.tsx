@@ -19,6 +19,7 @@ export default function LiveBoard({ isReady, username, opponentName, start }: Li
 		seconds: 3,
 	});
 
+	// set a countdown of 3 seconds
 	useEffect(() => {
 		if (isReady) {
 			setTimeout(() => {
@@ -32,6 +33,7 @@ export default function LiveBoard({ isReady, username, opponentName, start }: Li
 				});
 			}, 1000);
 		}
+		// when the countdown finished, trigger the animation of the game to start
 		if (state.seconds === 0) {
 			start();
 		}
