@@ -16,6 +16,7 @@ import { tokenLoader } from './typescript/auth';
 import './sass/main.scss';
 import UsersContextProvider from './store/users-contexte';
 import AuthenticationPage, { action as authAction} from './pages/Authentication';
+import { action as settingAction } from './pages/Profile';
 
 const router = createBrowserRouter([
 	{
@@ -26,17 +27,22 @@ const router = createBrowserRouter([
 		loader: tokenLoader,
 		children: [
 			{index: true, element: <Homepage />},
+			// {
+			// 	path: 'profile/me',
+			// 	element: <ProfilePage />,
+			// 	loader: async () => {
+			// 		const response = await fetch('http://localhost:3000/users/1');
+			// 		const data = await response.json();
+			// 		console.log('Loader');
+			// 		return data.id;
+			// 	},
+			// 	// action: settingAction
+			// },
 			{
-				path: 'profile',
+				path: 'profile/:id',
 				element: <ProfilePage />,
-				loader: async () => {
-					const response = await fetch('http://localhost:3000/users/1');
-					const data = await response.json();
-					console.log('Loader');
-					return data.id;
-				}
+				action: settingAction
 			},
-			{path: 'profile/:id', element: <ProfilePage />},
 			{path: 'privmessage', element: <PrivateMessagePage />},
 			{path: 'chat', element: <ChatPage />},
 			{path: 'pong', element: <Game />},
