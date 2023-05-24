@@ -1,0 +1,102 @@
+@import '../../abstracts/mixin.scss';
+@import '../../abstracts/variables.scss';
+
+.myBubble {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    max-width: 30rem;
+    border-radius: 2rem;
+    background-color: $gunmetal-light;
+    position: relative;
+    align-self: flex-end;
+    margin-top: 1rem;
+
+    .myMessage {
+        top: 0.5rem;
+        color: white;
+        margin-left: 1rem;
+        margin-right: 1rem;
+        text-align: right;
+    }
+
+}
+
+.myLastBubble {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    max-width: 30rem;
+    border-radius: 2rem;
+    background-color: $gunmetal-light;
+    position: relative;
+    align-self: flex-end;
+    margin-top: 1rem;
+
+    .myMessage {
+        top: 0.5rem;
+        margin-left: 1rem;
+        margin-right: 1rem;
+        color: white;
+        text-align: right;
+    }
+
+    ::after {
+        content: ' ';
+        position: absolute;
+        bottom: -1rem;
+        right: 1.8rem;
+        border-right: 0.5rem solid $gunmetal-light;
+        border-left: 0.5rem solid transparent;
+        border-top: 0.5rem solid $gunmetal-light;
+        border-bottom: 0.5rem solid transparent;
+        border-style: solid;
+    }
+
+}
+
+.yourBubble {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    max-width: 30rem;
+    border-radius: 2rem;
+    background-color: $light-vermillon;
+    position: relative;
+    align-self: flex-start;
+
+    .yourMessage {
+        top: 0.5rem;
+        margin-left: 1rem;
+        margin-right: 1rem;
+        color: white;
+    }
+
+}
+
+.yourLastBubble {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    max-width: 30rem;
+    border-radius: 2rem;
+    background-color: $light-vermillon;
+    position: relative;
+    align-self: flex-start;
+
+    .yourMessage {
+        top: 0.5rem;
+        margin-left: 1rem;
+        margin-right: 1rem;
+        color: white;
+    }
+
+    ::after {
+        content: ' ';
+        position: absolute;
+        bottom: -1rem;
+        left: 1.8rem;
+        border-left: 0.5rem solid $light-vermillon;
+        border-right: 0.5rem solid transparent;
+        border-top: 0.5rem solid $light-vermillon;
+        border-bottom: 0.5rem solid transparent;
+        border-style: solid;
+    }
+
+}

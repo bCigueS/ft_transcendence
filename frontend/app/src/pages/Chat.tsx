@@ -2,6 +2,8 @@ import { useState } from 'react';
 import ChatInfo from '../components/Chat/ChatInfo';
 import classes from '../sass/pages/Chat.module.scss';
 import { UserAPI } from '../store/users-contexte';
+import Message from '../components/Chat/Message';
+import NoConvo from '../components/Chat/NoConvo';
 
 export interface Message {
 	id: number,
@@ -72,11 +74,27 @@ export default function Chat() {
 		return chatList[selectedConversation - 1].lastMessage;
 	}
 
+	const displayConvo2 = (chatList: ChatAPI[], channelId: number) => {
+		if (selectedConversation === 0)
+			return <NoConvo/>;
+		return (
+			<div className={classes.message}>
+				<Message isMine={false} isLast={false} message={displayConvo(chatList, selectedConversation)}/>
+				<Message isMine={false} isLast={false} message={displayConvo(chatList, selectedConversation)}/>
+				<Message isMine={false} isLast={true} message={displayConvo(chatList, selectedConversation)}/>
+				<Message isMine={true} isLast={true} message={displayConvo(chatList, selectedConversation)}/>
+				<form>
+					<input className={classes.sendInput} type="text" placeholder='type here...' />
+					{/* <button> */}
+						{/* <i className='fa-sharp fa-solid fa-paper-plane'></i> */}
+					{/* </button> */}
+				</form>
+			</div>
+		);
+	}
+
 	return (
 		<div className={classes.page}>
-			{/* <div className={classes.searchbar}>
-				lol
-			</div> */}
 			<div className={classes.conversations}>
 				{
 					chats.map((chat) => (
@@ -84,11 +102,22 @@ export default function Chat() {
 				 	))
 				}
 			</div>
-			<div className={classes.message}>
-				{
-					displayConvo(chatList, selectedConversation)
-				}
-			</div>
+
+			{
+				displayConvo2(chatList, selectedConversation)
+			}
+			{/* <div className={classes.message}> */}
+				{/* <Message isMine={false} isLast={false} message={displayConvo(chatList, selectedConversation)}/> */}
+				{/* <Message isMine={false} isLast={false} message={displayConvo(chatList, selectedConversation)}/> */}
+				{/* <Message isMine={false} isLast={true} message={displayConvo(chatList, selectedConversation)}/> */}
+				{/* <Message isMine={true} isLast={true} message={displayConvo(chatList, selectedConversation)}/> */}
+				{/* <form> */}
+					{/* <input className={classes.sendInput} type="text" placeholder='type here...' /> */}
+					{/* <button> */}
+						{/* <i className='fa-sharp fa-solid fa-paper-plane'></i> */}
+					{/* </button> */}
+				{/* </form> */}
+			{/* </div> */}
 		</div>
 	)
 }
