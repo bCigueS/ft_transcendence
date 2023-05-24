@@ -1,0 +1,83 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x", "debian-openssl-3.0.x", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://postgres:123@postgres:5432/postgres?schema=public"
+}
+
+model User {
+  id          Int          @id @default(autoincrement())
+  email       String
+  name        String       @unique
+  password    String
+  avatar      String?      @default("default.jpg")
+  doubleAuth  Boolean      @default(false)
+  wins        Int          @default(0)
+  games       UserGame[]
+  haters      Block[]      @relation("haters")
+  blocked     Block[]      @relation("blocked")
+  following   Friendship[] @relation("followers")
+  followers   Friendship[] @relation("following")
+  winnerGames Game[]       @relation("WinnerGames")
+
+  @@map("users")
+}
+
+model Friendship {
+  id          Int  @id @default(autoincrement())
+  followerId  Int
+  followingId Int
+  followers   User @relation("followers", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@map("following")
+}
+
+model Block {
+  id        Int  @id @default(autoincrement())
+  MyId      Int
+  blockedId Int
+  haters    User @relation("haters", fields: [MyId], references: [id], onDelete: Cascade)
+  blocked   User @relation("blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  @@map("blocked")
+}
+
+model Game {
+  id        Int        @id @default(autoincrement())
+  createdAt DateTime   @default(now())
+  type      GameType
+  level     Int
+  winnerId  Int?
+  duration  Int?
+  players   UserGame[]
+  winner    User?      @relation("WinnerGames", fields: [winnerId], references: [id], onDelete: Cascade)
+
+  @@map("games")
+}
+
+model UserGame {
+  createdAt   DateTime @default(now())
+  userId      Int
+  gameId      Int
+  playerIndex Int      @default(1)
+  score       Int      @default(0)
+  game        Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, gameId])
+}
+
+enum GameType {
+  PLAYER
+  COMPUTER
+}
+
+enum GameState {
+  PENDING
+  PLAYING
+  FINISHED
+}
