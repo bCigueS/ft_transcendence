@@ -22,7 +22,8 @@ const Nav: React.FC = () => {
 		{text: "Home", link:"/"},
 		{text: "PingPong", link:"/pong"},
 		{text: "Chat", link: '/chat'},
-		{text: "Leaderbord", link: "/leaderboard"}
+		{text: "Leaderbord", link: "/leaderboard"},
+		{text: "Authentication", link: "/auth"}
 		// {text: "Rules", link: "/rules"},
 		// {text: "About-us", link: "/about-us"}
 	]

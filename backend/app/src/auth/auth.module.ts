@@ -10,6 +10,7 @@ import { HttpModule } from '@nestjs/axios';
 import { OAuth42Strategy } from './strategy/passport.strategy'; // import OAuth42Strategy
 import { UseGuards } from '@nestjs/common';
 
+
 export const jwtSecret = 'zjP9h6ZI5LoSKCRj';
 
 @Module({
