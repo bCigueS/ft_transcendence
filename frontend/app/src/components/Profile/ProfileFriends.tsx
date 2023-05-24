@@ -1,23 +1,23 @@
 import React, { useContext } from 'react';
 
-import { User, UserContext } from '../../store/users-contexte';
+import { UserAPI, UserContext } from '../../store/users-contexte';
 import classes from '../../sass/components/Profile/ProfileFriends.module.scss';
 import ProfilIcon from './ProfilIcon';
 
-const ProfileFriends: React.FC<{user: User; block: boolean; friend: boolean}> = ( props ) => {
+const ProfileFriends: React.FC<{user: UserAPI; block: boolean; friend: boolean}> = ( props ) => {
 
 	const userCtx = useContext(UserContext);
 
 	const addBlockHandler = (event: React.MouseEvent<HTMLIFrameElement, MouseEvent>) => {
-		userCtx.blockUser(props.user);
+		userCtx.fetchBlockUser(props.user);
 	};
 
 	const removeBlockHandler = (event: React.MouseEvent<HTMLIFrameElement, MouseEvent>) => {
-		userCtx.unblockUser(props.user);
+		userCtx.fetchUnblockUser(props.user);
 	};
 
 	const removeFriendHandler = (event: React.MouseEvent<HTMLIFrameElement, MouseEvent>) => {
-		userCtx.unfriendUser(props.user);
+		userCtx.fetchRemoveFriend(props.user);
 	}
 
 	return (
@@ -26,7 +26,7 @@ const ProfileFriends: React.FC<{user: User; block: boolean; friend: boolean}> = 
 			<ProfilIcon user={props.user} />
 
 			<div className={classes.info}>
-				<h1>{props.user.nickname}</h1>
+				<h1>{props.user?.name}</h1>
 				<i 
 					title='Private Message'
 					className='fa-solid fa-message'>

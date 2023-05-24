@@ -1,34 +1,26 @@
 import React, { useState, useContext, useEffect } from 'react';
-
+import { json, redirect } from 'react-router-dom';
 import classes from '../../sass/components/Profile/ProfileContent.module.scss';
 import MatchSummary from './Matches/MatchSummary';
 import ProfileFriends from './ProfileFriends';
-import { User, UserContext } from '../../store/users-contexte';
+import { UserAPI, UserContext } from '../../store/users-contexte';
 import ProfilSettings from './ProfilSettings';
 import { useParams } from 'react-router-dom';
 
 
-const ProfileContent: React.FC<{ user?: User }> = ({ user }) => {
+const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 
 	const userCtx = useContext(UserContext);
-	const [contentDisplay, setContentDisplay] = useState<string>('Matchs');
+	const [contentDisplay, setContentDisplay] = useState<string>('Settings');
 
 	const tabHandler = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		const display: string = event.currentTarget.textContent || '';
 		setContentDisplay(display);
 	};
 
-	const isFriend = (user: User) => {
-		return userCtx.user.friends.includes(user);
-	}
-
-	const isBlock = (user: User) => {
-		return userCtx.user.block.includes(user);
-	}
-
 	useEffect(() => {
-		setContentDisplay('Matchs');
-	}, [user?.nickname])
+		setContentDisplay('Settings');
+	}, [user?.name])
 
 	return (
 		<div className={classes.container}>
@@ -83,12 +75,13 @@ const ProfileContent: React.FC<{ user?: User }> = ({ user }) => {
 				<div className={classes.tabContent}>
 					<div className={classes.listContent}>
 						{
+							userCtx.user?.friends && 
 							userCtx.user.friends.map((friend) => (
-								!isBlock(friend) && <ProfileFriends 
-									key={friend.nickname} 
+									<ProfileFriends 
+									key={friend.name} 
 									user={friend} 
-									block={isBlock(friend)}
-									friend={isFriend(friend)} />
+									block={false}
+									friend={true} />
 							))
 						}
 					</div>
@@ -100,12 +93,13 @@ const ProfileContent: React.FC<{ user?: User }> = ({ user }) => {
 				<div className={classes.tabContent}>
 					<div className={classes.listContent}>
 						{
-							userCtx.user.block.map((block) => (
+							userCtx.user?.block && 
+							userCtx.user?.block.map((block) => (
 								<ProfileFriends 
-									key={block.nickname} 
-									user={block} 
-									block={isBlock(block)} 
-									friend={isFriend(block)}/>
+									key={block.name} 
+									user={block}
+									block={true}
+									friend={false}/>
 							))
 						}
 					</div>
@@ -122,3 +116,4 @@ const ProfileContent: React.FC<{ user?: User }> = ({ user }) => {
 };
 
 export default ProfileContent;
+

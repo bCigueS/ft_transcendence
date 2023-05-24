@@ -9,6 +9,9 @@
 sleep 5
 
 # Run Prisma migrations
+
+# npx prisma db seed
+
 npx prisma migrate dev
 
 # Start the application

@@ -11,25 +11,44 @@ import Game from './pages/Game';
 import Leaderboard from './pages/Leaderboard';
 import AboutUs from './pages/AboutUs';
 
+import { tokenLoader } from './typescript/auth';
+
 import './sass/main.scss';
 import UsersContextProvider from './store/users-contexte';
-import AuthenticationPage from './pages/Authentication';
+import AuthenticationPage, { action as authAction} from './pages/Authentication';
+import { action as settingAction } from './pages/Profile';
 
 const router = createBrowserRouter([
 	{
 		path: '/',
 		element: <RootLayout />,
 		errorElement: <ErrorPage />,
+		id: 'root',
+		loader: tokenLoader,
 		children: [
 			{index: true, element: <Homepage />},
-			{path: 'profile', element: <ProfilePage />},
-			{path: 'profile/:id', element: <ProfilePage />},
+			// {
+			// 	path: 'profile/me',
+			// 	element: <ProfilePage />,
+			// 	loader: async () => {
+			// 		const response = await fetch('http://localhost:3000/users/1');
+			// 		const data = await response.json();
+			// 		console.log('Loader');
+			// 		return data.id;
+			// 	},
+			// 	// action: settingAction
+			// },
+			{
+				path: 'profile/:id',
+				element: <ProfilePage />,
+				action: settingAction
+			},
 			{path: 'privmessage', element: <PrivateMessagePage />},
 			{path: 'chat', element: <ChatPage />},
 			{path: 'pong', element: <Game />},
 			{path: 'leaderboard', element: <Leaderboard />},
 			{path: 'about-us', element: <AboutUs />},
-			{path: 'auth', element: <AuthenticationPage />}
+			{path: 'auth', element: <AuthenticationPage />, action: authAction},
 		]
 	}
 ])
