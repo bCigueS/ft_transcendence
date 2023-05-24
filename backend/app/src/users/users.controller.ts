@@ -12,6 +12,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { Express } from 'express'
 import { toSafeUser } from './user.utils';
+import { Observable } from 'rxjs';
+import { fileURLToPath } from 'url';
 
 @Controller('users') @ApiTags('users')
 export class UsersController {

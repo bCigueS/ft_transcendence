@@ -11,6 +11,7 @@ html, body {
 	// width: 120rem;
 	font-family: 'Inter', sans-serif;
 	font-size: 62.5%;
+	overflow: hidden;
 }
 
 /* Body */
@@ -45,7 +46,7 @@ button {
 
 main {
 	height: 50rem;
-	// min-width: 100%;
+	max-width: 110rem;
 	display: flex;
 	justify-content: center;
 	align-items: center;

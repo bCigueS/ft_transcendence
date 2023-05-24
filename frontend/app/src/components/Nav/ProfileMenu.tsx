@@ -1,5 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { UserContext } from "../../store/users-contexte";
+// import { UserContext } from "../../store/users-contexte";
 
 interface menuOption {
 	icon1: string,
@@ -9,6 +11,7 @@ interface menuOption {
 }
 
 const ProfilIcon: React.FC = () => {
+	const userCtx = useContext(UserContext);
 	const [menuOpen, setMenuOpen] = useState(false);
 	const menuRef = useRef<HTMLDivElement>(null);
 
@@ -26,7 +29,7 @@ const ProfilIcon: React.FC = () => {
 	}, [menuRef]);
 
 	const menuOptions: menuOption[] = [
-		{icon1: 'fa-solid fa-user', icon2: 'fa-solid fa-chevron-right', text: 'Profile', link: '/profile'},
+		{icon1: 'fa-solid fa-user', icon2: 'fa-solid fa-chevron-right', text: 'Profile', link: '/profile/' + userCtx.user?.name},
 		{icon1: 'fa-solid fa-message', icon2: 'fa-solid fa-chevron-right', text: 'Message', link: '/privmessage'},
 		{icon1: 'fa-solid fa-right-from-bracket', icon2: 'fa-solid fa-chevron-right', text: 'Log out', link: '/'}
 	]
@@ -37,14 +40,13 @@ const ProfilIcon: React.FC = () => {
 				className="profile-menu__picture"
 				onClick={() => setMenuOpen((prev) => !prev)}>
 			</div>
-
 			{ menuOpen && (
 				<div className="profile-menu__items">
 
-					<div className="header">
+					{/* <div className="header">
 						<div className="profile-menu__picture"></div>
 						<h1>Profile Name</h1>
-					</div>
+					</div> */}
 					{
 						menuOptions.map(items => {
 							return (
