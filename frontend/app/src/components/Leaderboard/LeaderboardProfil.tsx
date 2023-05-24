@@ -32,7 +32,7 @@ const LeaderboardProfil: React.FC<{user: UserAPI}> = ( { user }) => {
 	}
 
 	const isFriend = () => {
-		return userCtx.user?.friends.some(friend => user.id === friend.id) || false;
+		return userCtx.user?.friends?.some(friend => user.id === friend.id) || false;
 	}
 
 	const isSelf = () => {

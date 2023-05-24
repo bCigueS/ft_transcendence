@@ -27,7 +27,6 @@
 		flex-direction: column;
 		gap: 1rem;
 		padding-top: 1rem;
-		// padding: 0.5rem;
 		
         @include shadowBox();
 
@@ -36,12 +35,29 @@
     .message {
         grid-column: 2 / 3;
 		grid-row: 1 / 2;
+		width: 100%;
+		padding: 1rem;
 		background-color: $almost-white;
 		border: 0.2rem solid black;
 		overflow: scroll !important;
 		overflow-x: hidden !important;
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-end;
+
         @include shadowBox();
+		font-size: small;
 
     }
+
+	.sendInput {
+		margin-top: 1rem;
+		width: 100%;
+		padding: 0.5rem;
+
+		&:focus {
+			outline: none;
+		}
+	}
 	
 }
