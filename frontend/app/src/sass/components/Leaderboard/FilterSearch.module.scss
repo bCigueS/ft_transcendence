@@ -1,0 +1,35 @@
+@import '../../abstracts/mixin.scss';
+@import '../../abstracts/variables.scss';
+
+.container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin: auto;
+	position: relative;
+}
+
+.menu {
+	position: absolute;
+	// height: 12rem;
+	width: 15rem;
+	top: 4rem;
+	right: -1.5rem;
+	@include flexBox();
+
+	z-index: 5;
+
+	ul {
+		width: auto;
+		// margin: auto;
+		// margin-left: 1rem;
+		@include flexBox($align: flex-start);
+		
+		li {
+			border: 0.2rem solid black;
+			width: 100%;
+			background-color: $almost-white;
+			font-size: 1.4rem;
+		}
+	}
+}
