@@ -28,7 +28,7 @@ export class UsersService {
         id 
       },
       include: {
-        friends: true,
+        following: true,
         followers: true
       }    
     });
@@ -48,23 +48,31 @@ export class UsersService {
 
   async remove(id: number) {
 
+    // await this.prisma.friendship.deleteMany({
+    //   where: {
+    //     OR: [
+    //       { followerId: id },
+    //       { followingId: id }
+    //     ]
+    //   }
+    // });
     const deletedUser = await this.prisma.user.delete({ where: { id } });
     return toSafeUser(deletedUser);
   }
 
-  async addFriend(id: number, friendId: number) {
+  async addFriend(id: number, followingId: number) {
 
-    if (id === friendId) {
+    if (id === followingId) {
       throw new BadRequestException('A user cannot be friends with themselves.');
     }
   
     const user = await this.prisma.user.findUnique({ where: { id: id } });
-    const friend = await this.prisma.user.findUnique({ where: { id: friendId } });
+    const friend = await this.prisma.user.findUnique({ where: { id: followingId } });
    
     const existingFriendship = await this.prisma.friendship.findFirst({
       where: {
-        MyId: id,
-        friendId: friendId,
+        followingId: followingId,
+        followerId: id,
       },
     });
   
@@ -74,29 +82,29 @@ export class UsersService {
 
     const friendship = await this.prisma.friendship.create({
       data: {
-        friendId: friend.id,
-        MyId : user.id,
+        followerId: user.id,
+        followingId : friend.id,
       },
       include: {
-        friends: true,
-        // followers: true
+        following: true,
+        followers: true
       }
     });
 
-    return toSafeUser(friendship.friends);
+    return toSafeUser(friendship.following);
 
   }
 
-  async removeFriend(id: number, friendId: number) {
+  async removeFriend(id: number, followerId: number) {
 
   
     const user = await this.prisma.user.findUnique({ where: { id: id } });
-    const friend = await this.prisma.user.findUnique({ where: { id: friendId } });
+    const friend = await this.prisma.user.findUnique({ where: { id: followerId } });
    
     const existingFriendship = await this.prisma.friendship.findFirst({
       where: {
-        MyId: id,
-        friendId: friendId,
+		followingId: followerId,
+		followerId: id,
       },
     });
   
@@ -120,15 +128,15 @@ export class UsersService {
 
     const existingFriendships = await this.prisma.friendship.findMany({
       where: {
-        MyId: id,
+        followerId: id,
       },
       include: {
-        friends: true,
+        following: true,
         // followers: true,
       },
     });
 
-    const friendsList = existingFriendships.map((friendship) => friendship.friends);
+    const friendsList = existingFriendships.map((friendship) => friendship.following);
 
     return friendsList.map(toSafeUser);
   }
@@ -144,8 +152,8 @@ export class UsersService {
    
     const existingFriendship = await this.prisma.friendship.findFirst({
       where: {
-        MyId: id,
-        friendId: blockId,
+        followerId: id,
+        followingId: blockId,
       },
     });
   
