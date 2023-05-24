@@ -1,7 +1,7 @@
-@import './abstracts/_variables';
-@import './abstracts/_mixin';
+@import './abstracts/variables';
+@import './abstracts/mixin';
 
-@import './base/_reset';
+@import './base/reset';
 
 @import './components/Nav/ProfileMenu.scss';
 @import './pages/Login.scss';
