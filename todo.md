@@ -51,7 +51,7 @@
         - [ ] friends list with status
         - [ ] game history / statistic (display)
     - [ ] **Game**
-        - [X] 2D display
+        - [ ] 2D / 3D display
         - [ ] default + custom option (different map / power ups / etc)
         - [ ] live game (socket)
         - [ ] timeout for unexpected disconnection
