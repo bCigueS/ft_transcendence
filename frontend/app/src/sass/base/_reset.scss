@@ -10,15 +10,20 @@ html, body {
 	height: 100%;
 	// width: 120rem;
 	font-family: 'Inter', sans-serif;
+<<<<<<< HEAD:frontend/app/src/sass/base/_reset.scss
 	font-size: 62.5%;
 	overflow: hidden;
+=======
+	// font-size: 85.5%;
+	font-size: 62.5%;
+>>>>>>> fany/frontend/socket:frontend/src/sass/base/_reset.scss
 }
 
 /* Body */
 body {
 	padding: 14.5rem 2rem;
 	background-color: $background-color;
-	@include flexBox($justify: center);
+	@include flexBox($justify:center, $align: center);
 }
 
 /* Selector */
@@ -34,7 +39,7 @@ a {
 
 .nav-link {
 	text-decoration: none !important;
-	color: black;
+	color: $line-color;
 	&:hover {
 		color: $light-vermillon;
 	}
@@ -45,14 +50,17 @@ button {
 }
 
 main {
+<<<<<<< HEAD:frontend/app/src/sass/base/_reset.scss
 	height: 50rem;
 	max-width: 110rem;
+=======
+	height: 70rem;
+>>>>>>> fany/frontend/socket:frontend/src/sass/base/_reset.scss
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	margin: 1rem 3rem;
-
-	border: 0.3rem black solid;
+	border: 0.3rem $line-color solid;
 
 	@include shadowBox();
 	// position: absolute;
