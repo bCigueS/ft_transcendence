@@ -10,10 +10,10 @@
     "@types/node": "^16.18.23",
     "@types/react": "^18.0.37",
     "@types/react-dom": "^18.0.11",
+    "dotenv": "^16.0.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1",
-    "socket.io-client": "^4.6.1",
+    "react-scripts": "^4.0.3",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },
@@ -42,7 +42,7 @@
     ]
   },
   "devDependencies": {
-    "react-router-dom": "^6.10.0",
+    "react-router-dom": "^6.11.1",
     "sass": "^1.62.0"
   }
 }
