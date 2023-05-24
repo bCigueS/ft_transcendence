@@ -32,7 +32,7 @@ export class AuthController {
 	@ApiOkResponse({ type: AuthEntity })
 	async fortyTwoCallback(
 		@Query('code') code: string,
-		@Res() res: Response,
+		// @Res() res: Response,
 	): Promise<any> {
 		const url = 'https://api.intra.42.fr/oauth/token';
 		const data = {
@@ -43,8 +43,9 @@ export class AuthController {
 		  redirect_uri: "http://127.0.0.1:3000/auth/forty-two/callback",
 		};
 		const response = await this.httpService.post(url, data).toPromise();
-		console.log(response.data);
+		// console.log(response.data);
 		return (response.data);
+		// return "code";
 		// const redirectUrl = new URL(`http://127.0.0.1:3000/`);
 		// return res.redirect(redirectUrl.toString());
 	  }
