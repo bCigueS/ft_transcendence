@@ -25,6 +25,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
+      - "5555:5555"
     env_file:
       - .env
     volumes:
@@ -69,7 +70,6 @@ volumes:
       type: 'none'
       o: 'bind' 
       device: '~/data/reactapp'
-
 
 networks:
   transendance:

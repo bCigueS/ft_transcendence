@@ -1,0 +1,49 @@
+@import '../../abstracts/mixin.scss';
+@import '../../abstracts/variables.scss';
+
+.container {
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	grid-template-rows: 1fr;
+	grid-column-start: 1;
+	grid-row-start: 1;
+	height: 100%;
+	max-width: 110rem;
+	min-width: 70rem;
+	align-items: center;
+	justify-content: center;
+	z-index: 1;
+	
+	.divider_line {
+		margin: auto;
+		width: 100%;
+		height: 100%;
+		background-image: linear-gradient(#2E3840 70%, rgba(255,255,255,0) 0%);
+		background-position: center;
+		background-size: 5px 25px;
+		background-repeat: repeat-y;
+		align-items: center;
+		justify-content: center;
+		grid-column-start: 2;
+		grid-column-end: 3;
+		grid-row-start: 1;
+		z-index: 2;
+	}
+	
+	.playground {
+		margin: auto;
+		width: 646px;
+		height: 486px;
+		align-items: center;
+		justify-content: center;
+		border: 3px solid #2E3840;
+		grid-column-start: 2;
+		grid-column-end: 3;
+		grid-row-start: 1;
+		z-index: 1;
+	
+		@include shadowBox();
+	}
+}
+
+
