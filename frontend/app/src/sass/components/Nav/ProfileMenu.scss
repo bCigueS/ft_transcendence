@@ -3,51 +3,87 @@
 
 	@include flexBox($justify: space-around);
 
-	&__picture {
-		height: 5rem;
-		width: 5rem;
+	transition: all 0.3s ease-in-out;
 
-		// border-radius: 50%;
-		border: 0.2rem $line-color solid;
+	&:hover {
+		// transform: scale(1.2);
+	}
+
+	&__picture {
+		height: 5.5rem;
+		width: 5.5rem;
+
+		border-radius: 50%;
+		border: 0.2rem black solid;
 		background-repeat: no-repeat;
 		background-position: center center;
 		background-size: cover;
 
 		background-image: $profile-pic2;
+		cursor: pointer;
 	}
 
 	#{&}__items {
 		position: absolute;
-		min-width: 25rem;
-		right: -1.5rem;
-		top: 9rem;
+		min-width: 20rem;
+		right: 0.8rem;
+		top: 5.5rem;
 		z-index: 10;
 
-		background-color: $almost-white;
-		border: 0.3rem black solid;
+		// background-color: $almost-white;
+		// border: 0.3rem black solid;
 		// border-radius: 0.5rem;
 
-		@include flexBox($align: left);
+		@include flexBox($align: center);
 		@include text-body();
 		gap: 1rem;
 		padding: 1rem;
 
-		.header {
-			width: 100%;
-			@include flexBox($direction: row, $justify:left);
-			gap: 2rem;
+		// .header {
+		// 	width: 100%;
+		// 	@include flexBox($direction: row, $justify:left);
+		// 	gap: 2rem;
 
-			padding: 1rem 0;
-			border-bottom: 0.2rem black solid;
-			.profile-menu__picture {
-				height: 6.5rem;
-				width: 6.5rem;
-			}
-		}
+		// 	padding: 1rem 0;
+		// 	border-bottom: 0.2rem black solid;
+		// 	.profile-menu__picture {
+		// 		height: 6.5rem;
+		// 		width: 6.5rem;
+		// 	}
+		// }
 
 		.option {
 			@include flexBox($direction: row);
-			width: 100%;
+			width: 80%;
+			color: black;
+			background-color: $almost-white;
+			border: 0.2rem solid black;
+			padding: 0.5rem 1rem;
+			position: relative;
+
+			&::before {
+				content: '';
+				position: absolute;
+				height: 100%;
+				width: 100%;
+				border: 0.1rem solid $light-vermillon;
+				background: $light-vermillon-gradient;
+				transform: translateZ(-0.1rem);
+				z-index: -1;
+				bottom: -0.2rem;
+				left: -0.2rem;
+				transition: all 0.3s;
+				opacity: 0;
+			}
+
+			&:hover {
+				color: $light-vermillon;
+			}
+			&:hover::before {
+				bottom: -0.8rem;
+				left: -0.8rem;
+				opacity: 1;
+			}
 		}
 	}
 }

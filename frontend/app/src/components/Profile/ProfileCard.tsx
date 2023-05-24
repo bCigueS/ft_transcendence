@@ -1,37 +1,28 @@
 import React, { useContext } from 'react';
 
-import { UserContext } from '../../store/users-contexte';
+import { UserAPI } from '../../store/users-contexte';
 
 import classes from '../../sass/components/Profile/ProfileCardInfo.module.scss';
 import ProfilIcon from './ProfilIcon';
 
-const ProfileCard: React.FC = () => {
-
-	const userCtx = useContext(UserContext);
+const ProfileCard: React.FC<{ user?: UserAPI | null}> = ( { user } ) => {
 
 	return (
 		<div className={classes.container}>
-			<ProfilIcon user={userCtx.user} displayCo={false} size={['15rem', '15rem']}/>
+			<ProfilIcon user={user} displayCo={false} size={['15rem', '15rem']}/>
 			<div className={classes.user}>
-				<h1>{userCtx.user.nickname}</h1>
-				<p>{userCtx.user.login}</p>
+				<h1>{user?.name}</h1>
+				<p>{user?.email}</p>
 			</div>
 			<div className={classes.stat}>
 				<div className={classes.info}>
 					<i className="fa-solid fa-trophy"></i>
-					<p>{userCtx.user.wins}</p>
+					<p>{user?.wins}</p>
 				</div>
-				<div className={classes.info}>
-					<i className="fa-solid fa-bolt"></i>
-					<p>{userCtx.user.lose}</p>
-				</div>
+
 				<div className={classes.info}>
 					<i className="fa-sharp fa-solid fa-chart-simple"></i>
-					<p>
-						{
-							`${userCtx.user.wins / (userCtx.user.wins + userCtx.user.lose) * 100}%`
-						}
-					</p>
+					<p>{ user?.gamesPlayed }</p>
 				</div>
 			</div>
 		</div>
