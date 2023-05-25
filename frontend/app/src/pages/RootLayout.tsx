@@ -1,5 +1,4 @@
 import { Outlet, useRouteLoaderData } from 'react-router-dom';
-import ErrorPage from '../pages/Error';
 import Nav from '../components/Nav/Nav';
 
 export default function RootLayout() {

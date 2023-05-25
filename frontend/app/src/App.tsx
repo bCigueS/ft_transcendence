@@ -11,8 +11,6 @@ import Game from './pages/Game';
 import Leaderboard from './pages/Leaderboard';
 import AboutUs from './pages/AboutUs';
 
-import { tokenLoader } from './typescript/auth';
-
 import './sass/main.scss';
 import UsersContextProvider from './store/users-contexte';
 import AuthenticationPage, { action as authAction} from './pages/Authentication';
@@ -24,7 +22,6 @@ const router = createBrowserRouter([
 		element: <RootLayout />,
 		errorElement: <ErrorPage />,
 		id: 'root',
-		loader: tokenLoader,
 		children: [
 			{index: true, element: <Homepage />},
 			// {

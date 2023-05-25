@@ -1,15 +1,14 @@
 import React, { useContext } from 'react';
-import { json, redirect, useParams } from 'react-router-dom';
+import { json, redirect } from 'react-router-dom';
 import ProfileCardInfo from '../components/Profile/ProfileCard';
 import ProfileContent from '../components/Profile/ProfileContent';
 
 import classes from '../sass/pages/Profile.module.scss';
-import { UserAPI, UserContext } from '../store/users-contexte';
+import { UserContext } from '../store/users-contexte';
 
 const Profile: React.FC = () => {
 
 	const userCtx = useContext(UserContext);
-	const params = useParams();
 
 	// console.log(params.id);
 

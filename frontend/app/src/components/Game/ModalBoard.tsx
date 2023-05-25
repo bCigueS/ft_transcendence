@@ -27,8 +27,8 @@ export default function ModalBoard({ onDifficulty, onTool, onPlayerMode, onStart
 			<div className={classes.content}>
 				{(isStarting && page === 0) && (
 					<div className={classes.subcontent} onClick={onNextPage}>
-						<h2>Ready to have fun?</h2>
-						<p>(click anywhere ...)</p>
+						<h2>Let's Pong!</h2>
+						<i className='fa-solid fa-table-tennis-paddle-ball'></i>
 					</div>
 				)}
 				{(isStarting && page === 1) && (
