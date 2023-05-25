@@ -1,70 +1,60 @@
-import React, { useEffect } from 'react';
-import { Form, useActionData, useNavigation } from 'react-router-dom';
+import React, { useCallback, useEffect, useState } from 'react';
 
-type ActionData = {
-	error: string,
-	message: string,
-	statusCode: number
-}
 
 const AuthForm = () => {
 
-	const data = useActionData() as ActionData;
-	const navigation = useNavigation();
-
-	const isSubmitting = navigation.state === 'submitting';
-
-	const mode: string = "42log";
-
-	const fetchToken = async () => {
-		const response = await fetch('http://localhost:3000/auth/forty-two');
-		const data = await response.json();
-
-		return data;
-	}
-
+	const [ logCode, setLogCode ] = useState<string>("");
+	const [ token, setToken ] = useState<string>("");
+	
+	useEffect(() => {
+		if (window.location.href.includes("code="))
+			setLogCode(window.location.href.split("code=")[1])
+	}, [])
 
 	useEffect(() => {
-		if (data) {
-			console.log(data);
+		if (logCode !== "") {
+			const fetchToken = async () => {
+				const response = await fetch("http://localhost:3000/auth/me", {
+					method: "POST",
+					headers: {
+					"Content-Type": "application/json"
+					},
+					body: JSON.stringify({code: logCode}),
+				});
+				if (response.ok) {
+					const data = await response.json();
+					setToken(data.token.access_token);
+				}
+			}
+			fetchToken()
 		}
-	}, [data]);
+	}, [logCode])
+
+	// useEffect(() => {
+	// 	if (token !== "") {
+	// 		console.log("Token: ", token);
+	// 		const fetch42UserMe = async () => {
+	// 			const response = await fetch('https://api.intra.42.fr/v2/me', {
+	// 				headers: {
+	// 					"Authorization": "Bearer " + token,
+	// 				}
+	// 			});
+	// 			const data = await response.json();
+	// 			console.log(data);
+	// 		}
+
+	// 		fetch42UserMe();
+	// 	}
+	// }, [token]);
 
 	return (
 		<div>
-			{	mode !== "42log" &&
-				<Form method='post' >
-					<h1>Log in</h1>
-					<div>
-					<label htmlFor="username">Username</label>
-					<input type="text" id='username' name='username' placeholder='username' required/>
-					</div>
-					<div>
-					<label htmlFor="password">Password</label>
-					<input type="password" id='password' name='password' placeholder='password' required/>
-					</div>
-
-					<p>
-					{
-						data && data.message && 
-						data.message
-					}
-					</p>	{data && data.error && <ul>
-						{Object.values(data.error).map(err => <li></li>)}
-						</ul>}
-						
-						<button disabled={isSubmitting}>{isSubmitting ? 'Submitting...' : 'LogIn' }</button>
-				</Form>
-			}
-			{
-				mode === "42log" &&
-				<div>
-					<p>Log with 42 API</p>
-					<a href={`http://127.0.0.1:3000/auth/forty-two`}>
-						<button>Log in with 42</button>
-					</a>
-				</div>
-			}
+			<div>
+				<p>Log with 42 API</p>
+				<a href={`http://127.0.0.1:3000/auth/forty-two`}>
+					<button>Log in with 42</button>
+				</a>
+			</div>
 		</div>
 	)
 }
@@ -72,4 +62,11 @@ const AuthForm = () => {
 export default AuthForm;
 
 
-// https://api.intra.42.fr/oauth/authorize?client_id=your_very_long_client_id&redirect_uri=http%3A%2F%2Flocalhost%3A1919%2Fusers%2Fauth%2Fft%2Fcallback&response_type=code&scope=public&state=a_very_long_random_string_witchmust_be_unguessable'
+	// const fetchUserMe = useCallback( async () => {
+	// 	const response = await fetch("https://api.intra.42.fr/v2/me", {
+	// 		method: "GET",
+	// 		headers: {
+	// 			"Authorization": 'Bearer ' +  
+	// 		}
+	// 	})
+	// }, [])
