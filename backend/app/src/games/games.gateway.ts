@@ -1,26 +1,23 @@
-import { Logger } from '@nestjs/common';
-import {
-  OnGatewayInit,
-  WebSocketGateway,
-  OnGatewayConnection,
-  OnGatewayDisconnect,
-  WebSocketServer,
-  SubscribeMessage,
-  MessageBody,
-  ConnectedSocket,
-} from '@nestjs/websockets';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, NotFoundException, Logger } from '@nestjs/common';
+import { OnGatewayInit, WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect, WebSocketServer } from '@nestjs/websockets';
 import { Socket, Server, Namespace } from 'socket.io';
-import { GamesService } from './games.service';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
-import { game, addPlayer, removePlayer } from './player';
-import { CallbackInfo, ServeInfo, CollisionInfo } from './types';
-import { serveBall, ballCollision } from './ball';
+import { GamesService } from './games.service';
+import { CreateGameDto } from './dto/create-game.dto';
+import { UpdateGameDto } from './dto/update-game.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { GameEntity } from './entities/game.entity';
+
+import { game, addPlayer, removePlayer } from './utils/player';
+import { CallbackInfo, ServeInfo, CollisionInfo } from './utils/types';
+import { serveBall, ballCollision } from './utils/ball';
 
 @WebSocketGateway({ namespace: '/pong' })
 export class GamesGateway implements OnGatewayInit, OnGatewayConnection {
   private readonly logger = new Logger(GamesGateway.name);
 
-  constructor(private readonly gamesService: GamesService) {}
+  constructor(private readonly gamesService: GamesService, private prisma: PrismaService) {}
 
   @WebSocketServer() io: Namespace;
   @WebSocketServer() server: Server
@@ -40,6 +37,10 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection {
 			gameId: 'pong',
 		});
 
+		const data = {
+			"type": "double"
+		};
+
 		// joining a game room that the room id is the gameId of the player
 		client.join(player.gameId);
 		// send a callback message informing the successfull join process
@@ -51,7 +52,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection {
 			opponent,
 			gameId: player.gameId,
 		});
-		
+
 		// tell first player that second player has joined the game
 		client.broadcast.to(player.gameId).emit('opponentJoin', {
 			message: `${player.name} has joined the game`,
