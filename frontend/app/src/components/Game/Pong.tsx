@@ -4,7 +4,10 @@ import LiveBoard from './LiveBoard';
 import classes from '../../sass/components/Game/Pong.module.scss';
 import io from 'socket.io-client';
 
-const socket = io('http://localhost:3001');
+const socket = io('http://localhost:3000/pong', {
+		transports: ["websocket"],
+		}
+	);
 
 // Modal's element
 const BEGINNER_LEVEL = 0;
