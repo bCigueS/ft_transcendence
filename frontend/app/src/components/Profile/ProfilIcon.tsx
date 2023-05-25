@@ -52,7 +52,8 @@ const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: s
 
 	useEffect(() => {
 		fetchAvatar();
-	}, [fetchAvatar]);
+		console.log("Error in ProfilIcon need to be change", error);
+	}, [fetchAvatar, error]);
 
 	return (
 		<div 
