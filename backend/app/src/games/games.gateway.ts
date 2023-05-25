@@ -37,10 +37,6 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection {
 			gameId: 'pong',
 		});
 
-		const data = {
-			"type": "double"
-		};
-
 		// joining a game room that the room id is the gameId of the player
 		client.join(player.gameId);
 		// send a callback message informing the successfull join process
@@ -112,7 +108,18 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection {
 	});
 
 	// receiving a leave request, so that the player can be removed from the games array and room
-	client.on('leave', (gameId: string, callback: CallbackInfo) => {
+	client.on('leave', async ({gameId, status}: {gameId: string, status: string}, callback: CallbackInfo) => {
+		const rooms = await this.io.in(gameId).fetchSockets();
+
+		if (rooms) {
+			rooms.forEach((room) => {
+				let winnerId;
+				if (room.id !== client.id) {
+					winnerId: (status === "win" ? client.id : room.id);
+				}
+			})
+		}
+
 		// removing a player with removePlayer function and return the address of the deleted player
 		const {player, message} = removePlayer(client.id, gameId);
   
