@@ -388,7 +388,10 @@ export default function Pong({username}: PongProps) {
 		setIsRunning(false);
 		if (playerMode === DOUBLE_MODE) {
 			setTimeout(() => {
-				socket.emit('leave', gameId, (message: string) => {
+				socket.emit('leave', {
+					gameId: gameId,
+					status: (winner === PLAYER_WIN ? "win" : "lose")
+				}, (message: string) => {
 					console.log(message);
 				});
 			}, 1000);
