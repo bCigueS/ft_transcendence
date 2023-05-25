@@ -23,6 +23,9 @@ model User {
   followers   Friendship[] @relation("following")
   winnerGames Game[]       @relation("WinnerGames")
 
+  messages    Message[]
+  channel     ChannelMembership[]
+
   @@map("users")
 }
 
@@ -80,4 +83,33 @@ enum GameState {
   PENDING
   PLAYING
   FINISHED
+}
+
+model Message {
+  createdAt DateTime    @default(now())
+  id        Int         @id @default(autoincrement())
+  senderId  Int       
+  sender    User        @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  
+  content   String
+
+  channelId Int
+  channel   Channel     @relation(fields: [channelId], references: [id])
+}
+
+model Channel {
+  id        Int         @id @default(autoincrement())
+  name      String      @default("private")
+  messages  Message[]
+  members   ChannelMembership[]
+}
+
+model ChannelMembership {
+  id        Int      @id @default(autoincrement())
+  channelId Int
+  userId    Int
+  channel   Channel @relation(fields: [channelId], references: [id])
+  user      User    @relation(fields: [userId], references: [id])
+
+  @@unique([channelId, userId])
 }
