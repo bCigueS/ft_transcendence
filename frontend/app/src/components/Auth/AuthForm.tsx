@@ -15,8 +15,19 @@ const AuthForm = () => {
 	const isSubmitting = navigation.state === 'submitting';
 
 	const mode: string = "42log";
+
+	const fetchToken = async () => {
+		const response = await fetch('http://localhost:3000/auth/forty-two');
+		const data = await response.json();
+
+		return data;
+	}
+
+
 	useEffect(() => {
-		console.log(data);
+		if (data) {
+			console.log(data);
+		}
 	}, [data]);
 
 	return (
@@ -49,9 +60,10 @@ const AuthForm = () => {
 				mode === "42log" &&
 				<div>
 					<p>Log with 42 API</p>
-					<a href={`https://api.intra.42.fr/oauth/authorize?client_id=${process.env.REACT_APP_CLIENT_ID}&redirect_uri=${process.env.REACT_APP_REDIRECT_URI}&response_type=code&scope=public`}>
-						<button>Log in with 42</button>
-					</a>
+					<button onClick={fetchToken}> Click </button>
+					{/* <a href={`https://api.intra.42.fr/oauth/authorize?client_id=${process.env.REACT_APP_CLIENT_ID}&redirect_uri=${process.env.REACT_APP_REDIRECT_URI}&response_type=code&scope=public`}>
+						<button >Log in with 42</button>
+					</a> */}
 				</div>
 			}
 		</div>
