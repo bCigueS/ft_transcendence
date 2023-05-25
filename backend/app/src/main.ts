@@ -5,13 +5,17 @@ import { ValidationPipe } from '@nestjs/common';
 import { PrismaClientExceptionFilter } from './prisma-client-exception/prisma-client-exception.filter';
 import { config } from 'dotenv';
 
+import { SocketIOAdapter } from './socket-io-adapter';
+import { ConfigService } from '@nestjs/config';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    // origin: 'http://localhost:3000'
+    origin: '*'
   });
 
+  app.useWebSocketAdapter(new SocketIOAdapter(app, app.get(ConfigService)));
   app.useGlobalPipes(new ValidationPipe());
 
   const config = new DocumentBuilder()
