@@ -22,6 +22,7 @@ export type UserAPI = {
 
 export const UserContext = React.createContext<{
 		user: UserAPI | null;
+		error: string | null;
 		fetchUserFriends: (id: number) => void;
 		fetchUserBlockings: (id: number) => void;
 		fetchUser: () => void;
@@ -30,6 +31,7 @@ export const UserContext = React.createContext<{
 		fetchUnblockUser: (targetUser: UserAPI) => void;
 	}>({
 	user: null,
+	error: null,
 	fetchUserFriends: (id: number) => {},
 	fetchUserBlockings: (id: number) => {},
 	fetchUser: () => {},
@@ -45,51 +47,82 @@ type Props = {
 	
 	const UsersContextProvider: React.FC<Props> = ( {children, className} ) => {
 		
-		const [user, setUser] = useState<UserAPI | null>(null);
+		const [ user, setUser] = useState<UserAPI | null>(null);
 		const [ loading, setLoading ] = useState<boolean>(true);
 		const [ error, setError ] = useState<string | null>(null);
 
 
 		const fetchRemoveFriend = async (targetUser: UserAPI) => {
+			setError(null);
+
 			const friendId = {
 				friendId: targetUser.id
 			};
-			const response = await fetch('http://localhost:3000/users/' + user?.id + '/remove-friend', {
-				method: 'PATCH',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(friendId)
-			});
-			fetchUser();
+			try {
+				const response = await fetch('http://localhost:3000/users/' + user?.id + '/remove-friend', {
+					method: 'PATCH',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify(friendId)
+				});
+
+				if (!response.ok) {
+					throw new Error('fetchRemoveFriend Failed');
+				}
+				fetchUser();
+			} catch (error: any) {
+				setError(error.message);
+			}
 		}
 
 		const fetchBlockUser = async (targetUser: UserAPI) => {
+			setError(null);
+
 			const blockedId = {
 				blockedId: targetUser.id
 			};
-			const response = await fetch('http://localhost:3000/users/' + user?.id + '/block-user', {
-				method: 'PATCH',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(blockedId)
-			});
-			fetchUser();
+			try {
+				const response = await fetch('http://localhost:3000/users/' + user?.id + '/block-user', {
+					method: 'PATCH',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify(blockedId)
+				});
+
+				if (!response.ok) {
+					throw new Error("Failed to fetch block User");
+				}
+				fetchUser();
+			} catch (error: any) {
+				setError(error.message);
+			}
 		}
 
 		const fetchUnblockUser = async (targetUser: UserAPI) => {
+			setError(null);
+
 			const blockedId = {
 				blockedId: targetUser.id
 			};
-			const response = await fetch('http://localhost:3000/users/' + user?.id + '/unblock-user', {
-				method: 'PATCH',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(blockedId)
-			});
-			fetchUser();
+			try {
+
+				const response = await fetch('http://localhost:3000/users/' + user?.id + '/unblock-user', {
+					method: 'PATCH',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify(blockedId)
+				});
+
+				if (!response.ok) {
+					throw new Error('Failed to fetch Unblock user');
+				}
+				fetchUser();
+			} catch (error: any) {
+				setError(error.message);
+			}
 		}
 
 		const fetchUserFriends = useCallback(async (id: number) => {
@@ -194,6 +227,7 @@ type Props = {
 
 	const contextValue = {
 		user: user,
+		error: error,
 		fetchUserFriends: fetchUserFriends,
 		fetchUserBlockings: fetchUserBlockings,
 		fetchUser: fetchUser,
