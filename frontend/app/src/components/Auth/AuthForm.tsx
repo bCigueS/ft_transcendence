@@ -60,10 +60,9 @@ const AuthForm = () => {
 				mode === "42log" &&
 				<div>
 					<p>Log with 42 API</p>
-					<button onClick={fetchToken}> Click </button>
-					{/* <a href={`https://api.intra.42.fr/oauth/authorize?client_id=${process.env.REACT_APP_CLIENT_ID}&redirect_uri=${process.env.REACT_APP_REDIRECT_URI}&response_type=code&scope=public`}>
-						<button >Log in with 42</button>
-					</a> */}
+					<a href={`http://127.0.0.1:3000/auth/forty-two`}>
+						<button>Log in with 42</button>
+					</a>
 				</div>
 			}
 		</div>
