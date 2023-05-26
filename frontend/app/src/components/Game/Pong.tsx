@@ -40,7 +40,8 @@ type PongInfo = {
 }
 
 type PongProps = {
-	username: string;
+	userId: number;
+	userName: string;
 }
 
 // initial data for the game
@@ -56,7 +57,7 @@ const info: PongInfo = {
 }
 
 
-export default function Pong({username}: PongProps) {
+export default function Pong({userId, userName}: PongProps) {
 	// game play
 	const [isRunning, setIsRunning] = useState(false);
 	const [isPaused, setIsPaused] = useState(false);
@@ -96,7 +97,7 @@ export default function Pong({username}: PongProps) {
 	useEffect(() => {
 		if (playerMode === DOUBLE_MODE) {
 			// if the game is for 2 players mode, start by sending a join request to the server
-			socket.emit('join', { name: username, level: level }, (message: string) => {
+			socket.emit('join', { id: userId, lvl: level }, (message: string) => {
 				console.log(message);
 			});
 			// receive a welcome message from server informing that you are in a specific game room, and trigger a liveBoard
@@ -509,7 +510,7 @@ export default function Pong({username}: PongProps) {
 			{(!isRunning && isLive) && (
 				<LiveBoard
 					isReady={isReady}
-					username={username}
+					userName={userName}
 					opponentName={opponentName}
 					start={() => {startGame(winner === PLAYER_WIN ? PLAYER_SIDE : OPPONENT_SIDE); setIsLive(false)}}
 				/>

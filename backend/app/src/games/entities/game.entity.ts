@@ -1,4 +1,4 @@
-import { Game, GameType } from '@prisma/client';
+import { Game } from '@prisma/client';
 
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { UserEntity } from '../../users/entities/user.entity';
@@ -12,7 +12,7 @@ export class GameEntity implements Game {
 	createdAt: Date;
 
 	@ApiProperty()
-	type: GameType;
+	state: number;
 
 	@ApiProperty()
 	level: number;
