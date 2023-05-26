@@ -1,34 +1,25 @@
 import React, { useState, useContext, useEffect } from 'react';
-
+import { json, redirect } from 'react-router-dom';
 import classes from '../../sass/components/Profile/ProfileContent.module.scss';
 import MatchSummary from './Matches/MatchSummary';
 import ProfileFriends from './ProfileFriends';
 import { UserAPI, UserContext } from '../../store/users-contexte';
 import ProfilSettings from './ProfilSettings';
-// import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 
 const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 
 	const userCtx = useContext(UserContext);
-	const [contentDisplay, setContentDisplay] = useState<string>('Friends');
+	const [contentDisplay, setContentDisplay] = useState<string>('Settings');
 
 	const tabHandler = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		const display: string = event.currentTarget.textContent || '';
 		setContentDisplay(display);
 	};
 
-	// const isFriend = (user: User) => {
-	// 	return userCtx.user.friends.includes(user);
-	// }
-
-	// const isBlock = (user: User) => {
-	// 	return userCtx.user.block.includes(user);
-	// }
-
-
 	useEffect(() => {
-		setContentDisplay('Friends');
+		setContentDisplay('Settings');
 	}, [user?.name])
 
 	return (
@@ -36,11 +27,11 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 
 			{/* Tabs content */}
 			<div className={classes.tab}>
-				{/* <button 
+				<button 
 					className={`${classes.btn} ${contentDisplay === 'Matchs' ? classes.active : ''}`}
 					onClick={tabHandler}>
 						Matchs
-				</button> */}
+				</button>
 				{	user === userCtx.user &&
 					<button 
 						className={`${classes.btn} ${contentDisplay === 'Friends' ? classes.active : ''}`} 
@@ -66,18 +57,18 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 			</div>
 
 			{/* Content */}
-			{/* {
+			{
 				contentDisplay === 'Matchs' &&
 				<div className={classes.tabContent}>
 					<div className={classes.listContent}>
 						{
-							user?.matchs.map((match, index) => (
+							user?.matchs?.map((match, index) => (
 								<MatchSummary key={index} summary={match} user={user} />
 							))
 						}
 					</div>
 				</div>
-			} */}
+			}
 			
 			{
 				(contentDisplay === 'Friends' && user === userCtx.user) &&
@@ -114,14 +105,15 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 					</div>
 				</div>
 			}
-			{/* {
+			{
 				(contentDisplay === 'Settings' && user === userCtx.user) &&
 				<div className={classes.tabContent}>
 					<ProfilSettings user={userCtx.user}/>
 				</div>
-			} */}
+			}
 		</div>
 	);
 };
 
 export default ProfileContent;
+

@@ -99,7 +99,7 @@ model Message {
 
 model Channel {
   id        Int         @id @default(autoincrement())
-  name      String      @default("private")
+  name      String?     @default("private")
   messages  Message[]
   members   ChannelMembership[]
 }

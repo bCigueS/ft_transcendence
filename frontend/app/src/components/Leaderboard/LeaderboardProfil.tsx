@@ -20,6 +20,8 @@ const LeaderboardProfil: React.FC<{user: UserAPI}> = ( { user }) => {
 			},
 			body: JSON.stringify(friendId)
 		});
+		if (!response.ok)
+			return ;
 		userCtx.fetchUser();
 	};
 
