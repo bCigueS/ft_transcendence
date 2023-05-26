@@ -48,16 +48,9 @@ export class UsersService {
 
   async remove(id: number) {
 
-    // await this.prisma.friendship.deleteMany({
-    //   where: {
-    //     OR: [
-    //       { followerId: id },
-    //       { followingId: id }
-    //     ]
-    //   }
-    // });
     const deletedUser = await this.prisma.user.delete({ where: { id } });
     return toSafeUser(deletedUser);
+    
   }
 
   async addFriend(id: number, followingId: number) {

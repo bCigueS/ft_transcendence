@@ -1,30 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 async function main() {
-  // const chan = await prisma.channel.upsert({
-  //   where: { },
-  //   update: {},
-  //   create: {
-  //     messages: 'sbeylot@student.42.fr',
-  //     members: 'Simon',
-  //   },
-  // })
-  // const chanMembership = await prisma.channelMembership.upsert({
-  //   where: { },
-  //   update: {},
-  //   create: {
-  //     messages: 'sbeylot@student.42.fr',
-  //     members: 'Simon',
-  //   },
-  // })
-  // const chan = await prisma.channel.upsert({
-  //   where: { },
-  //   update: {},
-  //   create: {
-  //     messages: 'sbeylot@student.42.fr',
-  //     members: 'Simon',
-  //   },
-  // })
   const simon = await prisma.user.upsert({
     where: { name: 'Simon' },
     update: {},
