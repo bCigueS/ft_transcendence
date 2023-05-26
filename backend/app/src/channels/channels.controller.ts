@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, NotFoundException } from '@nestjs/common';
 import { ChannelsService } from './channels.service';
 import { CreateChannelDto } from './dto/create-channel.dto';
 import { UpdateChannelDto } from './dto/update-channel.dto';
@@ -19,18 +19,34 @@ export class ChannelsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.channelsService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    const chan = this.channelsService.findOne(id);
+
+    if (!chan)
+      throw new NotFoundException(`Channel with ${id} does not exist.`);
+    
+    return chan;
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateChannelDto: UpdateChannelDto) {
-    return this.channelsService.update(+id, updateChannelDto);
+  update(@Param('id', ParseIntPipe) id: number, @Body() updateChannelDto: UpdateChannelDto) {
+    const chan = this.channelsService.findOne(id);
+
+    if (!chan)
+      throw new NotFoundException(`Channel with ${id} does not exist.`);
+
+    return this.channelsService.update(id, updateChannelDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.channelsService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+
+    const chan = this.channelsService.findOne(id);
+
+    if (!chan)
+      throw new NotFoundException(`Channel with ${id} does not exist.`);
+
+    return this.channelsService.remove(id);
   }
 
   
