@@ -49,7 +49,7 @@ model Block {
 model Game {
   id        Int        @id @default(autoincrement())
   createdAt DateTime   @default(now())
-  type      GameType
+  state		number     @default(0)
   level     Int
   winnerId  Int?
   duration  Int?
@@ -69,11 +69,6 @@ model UserGame {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, gameId])
-}
-
-enum GameType {
-  PLAYER
-  COMPUTER
 }
 
 enum GameState {

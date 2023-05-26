@@ -10,17 +10,15 @@ export class GamesService {
   /* CRUD */
   async create(data: CreateGameDto) {
 
-    const { type, level, players, winnerId } = data;
+    const { level, players, winnerId } = data;
 
     return this.prisma.game.create({
         data: {
-            type,
             level,
             winnerId,
             players: {
                 create: players.map(player => ({
-                    userId: player.userId,
-                    playerIndex: player.playerIndex
+                    userId: player.userId
                 }))
             }
         }
@@ -29,7 +27,12 @@ export class GamesService {
   }
 
   async findAll() {
-    const games = await this.prisma.game.findMany();
+    const games = await this.prisma.game.findMany({
+		where: {
+			state,
+			level
+		}
+	});
 
     return games;
   }
@@ -46,15 +49,15 @@ export class GamesService {
     return game;
   }
 
-  // async update(id: number, updateGameDto: UpdateGameDto) {
+  async update(id: number, updateGameDto: UpdateGameDto) {
     
-  //   const updatedGame = await this.prisma.game.update({
-  //     where: { id },
-  //     data: updateGameDto,
-  //   });
+    const updatedGame = await this.prisma.game.update({
+      where: { id },
+      data: updateGameDto,
+    });
 
-  //   return updatedGame;
-  // }
+    return updatedGame;
+  }
 
   async remove(id: number) {
 

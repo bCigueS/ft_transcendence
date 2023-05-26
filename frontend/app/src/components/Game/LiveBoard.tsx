@@ -3,7 +3,7 @@ import classes from '../../sass/components/Game/Liveboard.module.scss';
 
 type LiveBoardProps = {
 	isReady: boolean;
-	username: string;
+	userName: string;
 	opponentName: string;
 	start(): void;
 }
@@ -13,7 +13,7 @@ interface State {
 	seconds: number;
 }
 
-export default function LiveBoard({ isReady, username, opponentName, start }: LiveBoardProps) {
+export default function LiveBoard({ isReady, userName, opponentName, start }: LiveBoardProps) {
 	const [state, setState] = useState<State>({
 		time: 3,
 		seconds: 3,
@@ -50,7 +50,7 @@ export default function LiveBoard({ isReady, username, opponentName, start }: Li
 				)}
 				{isReady && (
 					<>
-						<h1>{username} VS {opponentName}</h1>
+						<h1>{userName} VS {opponentName}</h1>
 						<h2>{state.seconds}</h2>
 					</>
 				)}
