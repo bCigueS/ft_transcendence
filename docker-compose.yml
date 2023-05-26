@@ -12,46 +12,46 @@ services:
     networks:
       - transendance
     healthcheck:
-      test: PGPASSWORD=123 psql -h "database" -U "postgres" -d "postgres" -c '\q'
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 1s
       retries: 20
       start_period: 5s
   
-  # nestjs:
-  #   container_name: nestapp
-  #   build:
-  #     context: ./backend
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "3000:3000"
-  #     - "5555:5555"
-  #   env_file:
-  #     - .env
-  #   volumes:
-  #     - ./backend/app:/usr/src/app
-  #   networks:
-  #     - transendance
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
+  nestjs:
+    container_name: nestapp
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+      - "5555:5555"
+    env_file:
+      - .env
+    volumes:
+      - ./backend/app:/usr/src/app
+    networks:
+      - transendance
+    depends_on:
+      postgres:
+        condition: service_healthy
 
-  # reactjs:
-  #   container_name: reactapp
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "8000:3000"
-  #   env_file:
-  #     - .env
-  #   volumes:
-  #     - ./frontend/app:/usr/src/app
-  #   networks:
-  #     - transendance
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
+  reactjs:
+    container_name: reactapp
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:3000"
+    env_file:
+      - .env
+    volumes:
+      - ./frontend/app:/usr/src/app
+    networks:
+      - transendance
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   postgres:
