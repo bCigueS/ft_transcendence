@@ -9,6 +9,9 @@ const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: s
 
 	const [ avatar, setAvatar ] = useState('');
 	
+	const [ imageUrl, setImageUrl ] = useState<string>('');
+	const [ loading , setLoading ] = useState<boolean>(false);
+	const [ error, setError ] = useState<string | null>(null);
 	const navigate = useNavigate();
 
 	const stylePicture: React.CSSProperties = {
@@ -19,27 +22,39 @@ const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: s
 		borderRadius: '50%'
 	};
 
-	const navHandler = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+	const navHandler = () => {
 		const option: NavigateOptions = {
 			replace: false,
 			state: { message: "Failed to submit form!"}
 		}
+
 		navigate(`/profile/${user?.name.toLowerCase()}`, option);
 	}
 
-	// const fetchAvatar = useCallback(async() => {
-	// 	// const response = await fetch('http://localhost:3000/users/' + user?.id + '/avatar');
-	// 	const response = await fetch('http://localhost:3000/users/1' + '/avatar');
-	// 	const data = await response.json();
+	const fetchAvatar = useCallback(async() => {
+		setLoading(true);
+		setError(null);
 
-	// 	setAvatar(data);
-	// 	// console.log("fetched avatar is: ", avatar);
-	// 	// return data;
-	// }, []);
+		try {
+			const response = await fetch('http://localhost:3000/users/' + user?.id + '/avatar');
+			if (response.ok) {
+				const blob = await response.blob();
+				const url = URL.createObjectURL(blob);
 
-	// useEffect(() => {
-	// 	fetchAvatar();
-	// }, [fetchAvatar]);
+				setImageUrl(url);
+				setLoading(false);
+			} else {
+				throw new Error("Error in fetching avatar!");				
+			}
+		} catch (error: any) {
+			setError(error.message);
+			setLoading(false);
+		}
+	}, [user?.id]);
+
+	useEffect(() => {
+		fetchAvatar();
+	}, [fetchAvatar]);
 
 	return (
 		<div 
@@ -54,8 +69,7 @@ const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: s
 				className={classes.picture}
 				style={size.length > 0 ? {width: size[0], height: size[1] } : {}}>
 				<img 
-					src={'http://localhost:3000/users/' + user?.id + '/avatar'} 
-					// src={avatar} 
+					src={!loading ? imageUrl : ''} 
 					alt={user?.name} 
 				/>
 			</div>
