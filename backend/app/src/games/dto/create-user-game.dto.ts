@@ -7,19 +7,19 @@ export class CreateUserGameDto {
     @ApiProperty()
     userId: number;
 
-    @IsNotEmpty()
-    @IsInt()
-    @ApiProperty()
-    gameId: number;
+    // @IsNotEmpty()
+    // @IsInt()
+    // @ApiProperty()
+    // gameId: number;
 
-    @IsNotEmpty()
-    @IsInt()
-    @ApiProperty()
-    playerIndex: number;
+    // @IsNotEmpty()
+    // @IsInt()
+    // @ApiProperty()
+    // playerIndex: number;
 
-    @IsNotEmpty()
-    @IsInt()
-    @ApiProperty()
-    score: number;
+    // @IsNotEmpty()
+    // @IsInt()
+    // @ApiProperty()
+    // score?: number;
 
 }

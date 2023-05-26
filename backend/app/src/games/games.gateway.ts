@@ -28,17 +28,57 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection {
   }
 
   async handleConnection(client: Socket) {
-	client.on('join', ({ name, level }: { name: string, level: number }, callback: CallbackInfo) => {
+	client.on('join', async({ id, lvl }: { id: number, lvl: number }, callback: CallbackInfo) => {
 		// creating a player with addPlayer function that put this new player inside a games array
-		const {player, opponent, message} = addPlayer({
-			name,
-			playerId: client.id,
-			level,
-			gameId: 'pong',
-		});
+		// const {player, opponent, message} = addPlayer({
+		// 	name,
+		// 	playerId: client.id,
+		// 	level,
+		// 	gameId: 'pong',
+		// });
+
+		let game, player, opponent, message;
 
 		// joining a game room that the room id is the gameId of the player
-		client.join(player.gameId);
+		// find all existing games with state "PENDING" and level === lvl
+		const matchingGames = await this.prisma.game.findMany({
+			where: {
+			  state: 0, // PENDING
+			  level: lvl,
+			},
+		});
+
+		// update this game by adding a new UserGame with id of user sent
+		// change state playing
+		if (matchingGames)
+		{
+			const updatedGameDto: UpdateGameDto = {
+				state: 1, // PLAYING
+				players: [
+					{
+						userId: id,
+					},
+				],
+			};
+
+			game = await this.gamesService.update(matchingGames[0].id, updatedGameDto);
+		}
+
+	
+		// if no player in pending game state with same level has been found
+		// we create a new game
+		const createGameDto: CreateGameDto = {
+			level: lvl,
+			players: [
+				{
+					userId: id,
+				},
+			],
+		};
+	
+		game =  await this.gamesService.create(createGameDto);
+
+		client.join(game.id);
 		// send a callback message informing the successfull join process
 		callback(message);
 
@@ -50,17 +90,19 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection {
 		});
 
 		// tell first player that second player has joined the game
-		client.broadcast.to(player.gameId).emit('opponentJoin', {
+		client.broadcast.to(game.id).emit('opponentJoin', {
 			message: `${player.name} has joined the game`,
 			opponent: player,
 		});
 		
 		// when the room already has 2 players, send a message to both players that they can start the game
-		if (game(player.gameId).length >= 2) {
+		if (game(game.id).length >= 2) {
 			this.io.to(player.gameId).emit('startGame', {
 				message: `Let's start the game!`,
 			});
 		}
+
+
 	});
 
 	// receiving a startBall request to inform the server to start a calculation for the direction of the ball to the players
