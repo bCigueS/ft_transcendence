@@ -5,7 +5,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://postgres:123@postgres:5432/postgres?schema=public"
+  url      = "postgresql://postgres:123@localhost:5432/postgres?schema=public"
 }
 
 model User {
@@ -108,8 +108,8 @@ model ChannelMembership {
   id        Int      @id @default(autoincrement())
   channelId Int
   userId    Int
-  channel   Channel @relation(fields: [channelId], references: [id])
-  user      User    @relation(fields: [userId], references: [id])
+  channel   Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([channelId, userId])
 }

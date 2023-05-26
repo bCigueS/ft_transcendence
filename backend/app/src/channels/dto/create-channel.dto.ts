@@ -7,8 +7,8 @@ export class CreateChannelDto {
     @ApiProperty({ description: 'The name of the channel', default: 'private' })
     name?: string;
 
-    @ApiProperty({ description: 'The initial messages for the channel', type: [CreateMessageDto] })
-    messages: CreateMessageDto[];
+    @ApiProperty({ description: 'The first message sent creating a channel', type: [CreateMessageDto] })
+    messages: CreateMessageDto[]; 
 
     @ApiProperty({ description: 'The initial members of the channel', type: [CreateChannelMembershipDto] })
     members: CreateChannelMembershipDto[];
