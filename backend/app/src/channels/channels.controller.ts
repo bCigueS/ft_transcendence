@@ -32,4 +32,6 @@ export class ChannelsController {
   remove(@Param('id') id: string) {
     return this.channelsService.remove(+id);
   }
+
+  
 }
