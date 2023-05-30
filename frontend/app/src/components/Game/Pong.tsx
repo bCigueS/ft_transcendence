@@ -97,9 +97,7 @@ export default function Pong({userId, userName}: PongProps) {
 	useEffect(() => {
 		if (playerMode === DOUBLE_MODE) {
 			// if the game is for 2 players mode, start by sending a join request to the server
-			socket.emit('join', { id: userId, lvl: level }, (message: string) => {
-				console.log(message);
-			});
+			socket.emit('join', { id: userId, lvl: level });
 			// receive a welcome message from server informing that you are in a specific game room, and trigger a liveBoard
 			socket.on('welcome', ({ message, opponent, gameId }) => {
 				console.log({ message, opponent, gameId });
@@ -389,9 +387,11 @@ export default function Pong({userId, userName}: PongProps) {
 		setIsRunning(false);
 		if (playerMode === DOUBLE_MODE) {
 			setTimeout(() => {
-				socket.emit('leave', {
+				socket.emit('gameOver', {
 					gameId: gameId,
-					status: (winner === PLAYER_WIN ? "win" : "lose")
+					status: (winner === PLAYER_WIN ? "win" : "lose"),
+					playerScore: playerScore,
+					opponentScore: opponentScore,
 				}, (message: string) => {
 					console.log(message);
 				});

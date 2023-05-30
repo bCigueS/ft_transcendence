@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { GameState, Prisma } from '@prisma/client';
 
 @Injectable()
 export class GamesService {
@@ -9,11 +10,11 @@ export class GamesService {
 
   /* CRUD */
   async create(data: CreateGameDto) {
-
-    const { level, players, winnerId } = data;
+    const { state, level, players, winnerId } = data;
 
     return this.prisma.game.create({
         data: {
+			state,
             level,
             winnerId,
             players: {
@@ -26,13 +27,26 @@ export class GamesService {
 
   }
 
-  async findAll() {
-    const games = await this.prisma.game.findMany({
-		where: {
-			state,
-			level
+  async update(id: number, updateGameDto: UpdateGameDto) {
+	const { state, players } = updateGameDto;
+
+	const updatedGame = await this.prisma.game.update({
+	  where: { id },
+	  data: {
+		state,
+		players: {
+			create: players.map(player => ({
+				userId: player.userId
+			}))
 		}
+	  },
 	});
+
+	return updatedGame;
+  }
+
+  async findAll() {
+    const games = await this.prisma.game.findMany();
 
     return games;
   }
@@ -49,15 +63,15 @@ export class GamesService {
     return game;
   }
 
-  async update(id: number, updateGameDto: UpdateGameDto) {
-    
-    const updatedGame = await this.prisma.game.update({
-      where: { id },
-      data: updateGameDto,
-    });
-
-    return updatedGame;
-  }
+	// async update(id: number, updateGameDto: UpdateGameDto) {
+	// 	const updatedGame = await this.prisma.game.update({
+	// 	where: { id },
+	// 	...updateGameDto,
+	// 	});
+	
+	// 	return updatedGame;
+	// }
+  
 
   async remove(id: number) {
 
