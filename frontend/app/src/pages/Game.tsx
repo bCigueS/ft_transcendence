@@ -5,13 +5,14 @@ import classes from '../sass/pages/Game.module.scss';
 
 export default function Game() {
 	// player info
-	const [username, setUserName] = useState('Fany');
-	const [gameId, setGameId] = useState('19');
+	const [userId, setUserId] = useState(1);
+	const [userName, setUserName] = useState('Fany');
 
 	return (
 		<div className={classes.gamePage}>
-			<Pong 
-				username={username}
+			<Pong
+				userId={userId}
+				userName={userName}
 			/>
 		</div>
 	)
