@@ -3,6 +3,7 @@ import { json, redirect } from 'react-router-dom';
 import AuthForm from '../components/Auth/AuthForm';
 
 const AuthenticationPage = () => {
+	
 	return (
 		<AuthForm />
 	)
@@ -37,6 +38,28 @@ export async function action({request}: { request: Request }) : Promise<Response
 	const token = resData.accessoken;
 
 	localStorage.setItem('token', token);
+
+
+	// const searchParams = new URL(request.url).searchParams;
+
+	// if (code) {
+	// 	console.log("Ya un code");
+	// 	const response = await fetch('http://localhost:3000/auth/me', {
+	// 		method: "POST",
+	// 		headers: {
+	// 			"Content-Type": "application/json"
+	// 		},
+	// 		body: JSON.stringify({code: code}),
+	// 	});
+
+	// 	if (response.ok) {
+	// 		const data = await response.json();
+	// 		console.log("Token: ", data.token.access_token);
+	// 		console.log("User42: ", data.user);
+	// 	}
+	// }
+	// else
+	// 	console.log("Ya pas de code");
 
 	return redirect('/');
 }

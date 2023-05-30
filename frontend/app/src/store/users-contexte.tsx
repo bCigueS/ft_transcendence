@@ -23,6 +23,9 @@ export type UserAPI = {
 export const UserContext = React.createContext<{
 		user: UserAPI | null;
 		error: string | null;
+		token?: string;
+		saveToken: (token: string) => void,
+		deleteToken: () => void,
 		fetchUserFriends: (id: number) => void;
 		fetchUserBlockings: (id: number) => void;
 		fetchUser: () => void;
@@ -32,6 +35,9 @@ export const UserContext = React.createContext<{
 	}>({
 	user: null,
 	error: null,
+	token: undefined,
+	saveToken: (token: string) => {},
+	deleteToken: () => {},
 	fetchUserFriends: (id: number) => {},
 	fetchUserBlockings: (id: number) => {},
 	fetchUser: () => {},
@@ -48,9 +54,17 @@ type Props = {
 	const UsersContextProvider: React.FC<Props> = ( {children, className} ) => {
 		
 		const [ user, setUser] = useState<UserAPI | null>(null);
+		const [ token, setToken ] = useState<string | undefined>(undefined);
 		const [ loading, setLoading ] = useState<boolean>(true);
 		const [ error, setError ] = useState<string | null>(null);
 
+		const saveToken = (token: string) => {
+			setToken(token);
+		}
+
+		const deleteToken = () => {
+			setToken(undefined);
+		}
 
 		const fetchRemoveFriend = async (targetUser: UserAPI) => {
 			setError(null);
@@ -218,7 +232,11 @@ type Props = {
 		  
 		useEffect(() => {
 			fetchUser();
-		  }, [fetchUser]);
+			if (token)
+				console.log("User Context, token: ", token);
+			else 
+				console.log("User Context, no token");
+		  }, [fetchUser, token]);
 	
 
 		if (loading) {
@@ -228,6 +246,9 @@ type Props = {
 	const contextValue = {
 		user: user,
 		error: error,
+		token: undefined,
+		saveToken: saveToken,
+		deleteToken: deleteToken,
 		fetchUserFriends: fetchUserFriends,
 		fetchUserBlockings: fetchUserBlockings,
 		fetchUser: fetchUser,

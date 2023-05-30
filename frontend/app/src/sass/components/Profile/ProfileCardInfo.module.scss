@@ -5,6 +5,7 @@
 	padding: 2rem;
 	border: 0.2rem black solid;
 	background-color: $almost-white;
+	
 	@include shadowBox();
 
 	@include flexBox($justify: top, $align: left);
