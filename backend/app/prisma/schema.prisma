@@ -49,7 +49,7 @@ model Block {
 model Game {
   id        Int        @id @default(autoincrement())
   createdAt DateTime   @default(now())
-  state		number     @default(0)
+  state		GameState  @default(PENDING)
   level     Int
   winnerId  Int?
   duration  Int?
