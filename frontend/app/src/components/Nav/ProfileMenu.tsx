@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Form, Link } from "react-router-dom";
 import { UserContext } from "../../store/users-contexte";
 // import { UserContext } from "../../store/users-contexte";
 
@@ -14,6 +14,11 @@ const ProfilIcon: React.FC = () => {
 	const userCtx = useContext(UserContext);
 	const [menuOpen, setMenuOpen] = useState(false);
 	const menuRef = useRef<HTMLDivElement>(null);
+
+	const logoutHandler = () => {
+		userCtx.deleteToken();
+		console.log(userCtx.token);
+	}
 
 	useEffect(() => {
 		const handleOutsideClick = (event: MouseEvent) => {
@@ -31,7 +36,6 @@ const ProfilIcon: React.FC = () => {
 	const menuOptions: menuOption[] = [
 		{icon1: 'fa-solid fa-user', icon2: 'fa-solid fa-chevron-right', text: 'Profile', link: '/profile/' + userCtx.user?.name},
 		{icon1: 'fa-solid fa-message', icon2: 'fa-solid fa-chevron-right', text: 'Message', link: '/privmessage'},
-		{icon1: 'fa-solid fa-right-from-bracket', icon2: 'fa-solid fa-chevron-right', text: 'Log out', link: '/'}
 	]
 
 	return (
@@ -42,11 +46,6 @@ const ProfilIcon: React.FC = () => {
 			</div>
 			{ menuOpen && (
 				<div className="profile-menu__items">
-
-					{/* <div className="header">
-						<div className="profile-menu__picture"></div>
-						<h1>Profile Name</h1>
-					</div> */}
 					{
 						menuOptions.map(items => {
 							return (
@@ -58,6 +57,11 @@ const ProfilIcon: React.FC = () => {
 							)
 						})
 					}
+					<Form action='/logout' method="post" className="option">
+						<i className="fa-solid fa-right-from-bracket"></i>
+						<button onClick={logoutHandler}>Logout</button>
+						<i className="fa-solid fa-chevron-right"></i>
+					</Form>
 				</div>
 			)}
 		</div>

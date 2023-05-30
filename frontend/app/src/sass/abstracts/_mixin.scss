@@ -59,3 +59,35 @@
 	background-position: center center;
 	background-size: cover;
 }
+
+@mixin buttonMixin($fontSize: 2rem) {
+	padding: 0.5rem 1rem;
+	font-size: $fontSize;
+	font-weight: 800;
+
+	border: 0.2rem solid black;
+	border-radius: none;
+
+	position:relative;
+	transform-style: preserve-3d;
+
+	&::before {
+		content: '';
+		position: absolute;
+		height: 100%;
+		width: 100%;
+		transform: translateZ(-0.1rem);
+		z-index: -1;
+		bottom: -0.2rem;
+		left: -0.2rem;
+		background-color: $light-vermillon;
+		opacity: 1;
+		transition: all 0.3s;
+	}
+
+	&:hover::before {
+		bottom: -0.8rem;
+		left: -0.8rem;
+		opacity: 1;
+	}
+}
