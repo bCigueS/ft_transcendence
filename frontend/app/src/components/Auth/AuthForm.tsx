@@ -1,8 +1,22 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { Form, redirect, useSearchParams } from 'react-router-dom';
+import { setTokenAuth } from '../../typescript/Auth';
+import { UserContext } from '../../store/users-contexte';
 
+import classes from '../../sass/components/Auth/AuthForm.module.scss';
+
+
+/* 
+*	Component for User connection throught 42 API
+*/
+
+
+//	PREVIOUS VERSION
 
 const AuthForm = () => {
 
+	const userCtx = useContext(UserContext);
+	const [ isLogged, setIsLogged ] = useState<boolean>(false);
 	const [ logCode, setLogCode ] = useState<string>("");
 	const [ token, setToken ] = useState<string>("");
 	
@@ -30,43 +44,45 @@ const AuthForm = () => {
 		}
 	}, [logCode])
 
-	// useEffect(() => {
-	// 	if (token !== "") {
-	// 		console.log("Token: ", token);
-	// 		const fetch42UserMe = async () => {
-	// 			const response = await fetch('https://api.intra.42.fr/v2/me', {
-	// 				headers: {
-	// 					"Authorization": "Bearer " + token,
-	// 				}
-	// 			});
-	// 			const data = await response.json();
-	// 			console.log(data);
-	// 		}
-
-	// 		fetch42UserMe();
-	// 	}
-	// }, [token]);
+	useEffect(() => {
+		if (token) {
+			userCtx.saveToken(token);
+			setTokenAuth(token);
+			setIsLogged(true);
+		}
+	}, [token, isLogged])
 
 	return (
-		<div>
-			<div>
-				<p>Log with 42 API</p>
-				<a href={`http://127.0.0.1:3000/auth/forty-two`}>
-					<button>Log in with 42</button>
-				</a>
-			</div>
-		</div>
+		<>
+			{	!isLogged &&
+				<div className={classes.loggin}>
+					<a  href={`http://127.0.0.1:3000/auth/forty-two`}>
+					<button className = {classes.button}>Log in with 42</button>
+					</a>
+				</div>
+			}
+
+			{
+				isLogged &&
+				<Form method='patch' className={classes.container}>
+					<h1>User Information</h1>
+					<div className={classes.label}>
+						<label htmlFor="name">User Name</label>
+						<input type="text" id="name" name='name' />
+					</div>
+					<div className={classes.label}>
+						<label htmlFor="switch">Double Authentication</label>
+						<input type="checkbox" id="switch" name='auth' />
+					</div>
+					<div className={classes.label}>
+						<label htmlFor="avatar">Avatar</label>
+						<input type="file" id="avatar" name='avatar' />
+					</div>
+					<button>Confirm</button>
+				</Form>
+			}
+		</>
 	)
 }
 
 export default AuthForm;
-
-
-	// const fetchUserMe = useCallback( async () => {
-	// 	const response = await fetch("https://api.intra.42.fr/v2/me", {
-	// 		method: "GET",
-	// 		headers: {
-	// 			"Authorization": 'Bearer ' +  
-	// 		}
-	// 	})
-	// }, [])

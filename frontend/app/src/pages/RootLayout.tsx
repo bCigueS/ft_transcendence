@@ -5,7 +5,6 @@ export default function RootLayout() {
 
 	const token = useRouteLoaderData('root');
 
-	console.log("Data " + token);
 	return (
 		<>
 			<Nav />
