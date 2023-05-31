@@ -9,14 +9,13 @@ export class GamesService {
   constructor(private prisma: PrismaService) { }
 
   /* CRUD */
-  async create(data: CreateGameDto) {
-    const { state, level, players, winnerId } = data;
+  async create(createGameDto: CreateGameDto) {
+    const { state, level, players } = createGameDto;
 
-    return this.prisma.game.create({
+    const newGame = await this.prisma.game.create({
         data: {
 			state,
             level,
-            winnerId,
             players: {
                 create: players.map(player => ({
                     userId: player.userId
@@ -25,6 +24,7 @@ export class GamesService {
         }
     });
 
+	return newGame;
   }
 
   async update(id: number, updateGameDto: UpdateGameDto) {
@@ -71,14 +71,60 @@ export class GamesService {
 	
 	// 	return updatedGame;
 	// }
-  
-
+	
+	
   async remove(id: number) {
-
-    const deletedGame = await this.findOne(id);
-    
-    await this.prisma.game.delete({ where: { id } });
-    return this.findAll();
+		
+		const deletedGame = await this.findOne(id);
+		
+		await this.prisma.game.delete({ where: { id } });
+		return this.findAll();
   }
+
+  async addPlayer(id: number, updateGameDto: UpdateGameDto) {
+	const { state, players } = updateGameDto;
+
+	const updatedGame = await this.prisma.game.update({
+	  where: { id },
+	  data: {
+		state,
+		players: {
+			create: players.map(player => ({
+				userId: player.userId
+			}))
+		}
+	  },
+	});
+
+	return updatedGame;
+  }
+	
+  async assignRoom(id: number, room: string) {
+	  const updatedGame = await this.prisma.game.update({
+		  where: { id },
+		  data: { room: room },
+		});
+	
+		return updatedGame;
+  }
+
+  async gameOver(id: number, state: GameState) {
+	const updatedGame = await this.prisma.game.update({
+		where: { id },
+		data: { state: state },
+	});
+
+	return updatedGame;
+  }
+
+  async assignWinner(id: number, winnerId: number) {
+	const updatedGame = await this.prisma.game.update({
+		where: { id },
+		data: { winnerId: winnerId },
+	  });
+  
+	  return updatedGame;
+  }
+
 
 }
