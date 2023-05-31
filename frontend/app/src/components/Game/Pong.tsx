@@ -65,7 +65,7 @@ export default function Pong({userId, userName}: PongProps) {
 	const [isReady, setIsReady] = useState(false);
 	const [gameOver, setGameOver] = useState(false);
 	const [winner, setWinner] = useState(0);
-	const [gameId, setGameId] = useState(0);
+	const [gameRoom, setGameId] = useState(0);
 	// game mode
 	const [toolMode, setToolMode] = useState(MOUSE_MODE);
 	const [level, setLevel] = useState(BEGINNER_LEVEL);
@@ -99,9 +99,9 @@ export default function Pong({userId, userName}: PongProps) {
 			// if the game is for 2 players mode, start by sending a join request to the server
 			socket.emit('join', { id: userId, lvl: level });
 			// receive a welcome message from server informing that you are in a specific game room, and trigger a liveBoard
-			socket.on('welcome', ({ message, opponent, gameId }) => {
-				console.log({ message, opponent, gameId });
-				setGameId(gameId);
+			socket.on('welcome', ({ message, opponent, gameRoom }) => {
+				console.log({ message, opponent, gameRoom });
+				setGameId(gameRoom);
 				setIsLive(true);
 				setIsReady(false);
 				if (opponent) {
@@ -175,7 +175,7 @@ export default function Pong({userId, userName}: PongProps) {
 					playerY: playerY,
 					paddleHeight: paddleHeight,
 					speed: speed,
-				}, gameId: gameId,
+				}, gameRoom: gameRoom,
 			});
 			// if the game is against computer, the calculation for the new direction is directly in the front
 			if (playerMode === SINGLE_MODE) {
@@ -256,7 +256,7 @@ export default function Pong({userId, userName}: PongProps) {
 			gameInfo: {
 				initialDelta: info.initialDelta,
 				level: level,
-			}, gameId: gameId,
+			}, gameRoom: gameRoom,
 		});
 		
 		// call serve function to set the ball values
@@ -288,17 +288,17 @@ export default function Pong({userId, userName}: PongProps) {
 				gameInfo: {
 					initialDelta: info.initialDelta,
 					level: level,
-				}, gameId: gameId,
+				}, gameRoom: gameRoom,
 			});
 
 			setOpponentScore(o => o += 1);
-			serve(OPPONENT_SIDE);
+			setTimeout(() => { serve(OPPONENT_SIDE); }, 1000);
 		}
 		//right collision / ball passing the opponent's paddle, so player gains a point
 		if (ballX >= info.boardWidth)
 		{
 			setPlayerScore(p => p += 1);
-			serve(PLAYER_SIDE);	
+			setTimeout(() => { serve(PLAYER_SIDE); }, 1000);
 		}
 	}
 	
@@ -335,14 +335,14 @@ export default function Pong({userId, userName}: PongProps) {
 				setPlayerY(nextPostUp);
 				if (playerMode === DOUBLE_MODE) {
 					// send the new position to server to be forwarded to other player
-					socket.emit('moveInput', {y: nextPostUp, gameId: gameId});
+					socket.emit('moveInput', {y: nextPostUp, gameRoom: gameRoom});
 				}
 			}
 			if (paddleDown && nextPostDown <= info.boardHeight) {
 				setPlayerY(nextPostDown - paddleHeight);
 				if (playerMode === DOUBLE_MODE) {
 					// send the new position to server to be forwarded to other player
-					socket.emit('moveInput', {y: nextPostDown - paddleHeight, gameId: gameId});
+					socket.emit('moveInput', {y: nextPostDown - paddleHeight, gameRoom: gameRoom});
 				}
 			}
 		}
@@ -388,12 +388,12 @@ export default function Pong({userId, userName}: PongProps) {
 		if (playerMode === DOUBLE_MODE) {
 			setTimeout(() => {
 				socket.emit('gameOver', {
-					gameId: gameId,
-					status: (winner === PLAYER_WIN ? "win" : "lose"),
-					playerScore: playerScore,
-					opponentScore: opponentScore,
-				}, (message: string) => {
-					console.log(message);
+					gameInfo: {
+						playerId: userId,
+						playerStatus: (winner === PLAYER_WIN ? "win" : "lose"),
+						playerScore: playerScore,
+						opponentScore: opponentScore,
+					}, gameRoom: gameRoom,
 				});
 			}, 1000);
 		}
@@ -488,17 +488,17 @@ export default function Pong({userId, userName}: PongProps) {
 				if ( nextPost >= 0 && nextPost + paddleHeight <= info.boardHeight) {
 						setPlayerY(nextPost);
 						if (playerMode === DOUBLE_MODE) {
-							socket.emit('moveInput', {y: nextPost, gameId: gameId});
+							socket.emit('moveInput', {y: nextPost, gameRoom: gameRoom});
 						}
 				} else if (nextPost < 0) {
 					setPlayerY(0);
 					if (playerMode === DOUBLE_MODE) {
-						socket.emit('moveInput', {y: 0, gameId: gameId});
+						socket.emit('moveInput', {y: 0, gameRoom: gameRoom});
 					}
 				} else if (nextPost + paddleHeight > info.boardHeight) {
 					setPlayerY(info.boardHeight - paddleHeight);
 					if (playerMode === DOUBLE_MODE) {
-						socket.emit('moveInput', {y: info.boardHeight - paddleHeight, gameId: gameId})
+						socket.emit('moveInput', {y: info.boardHeight - paddleHeight, gameRoom: gameRoom})
 					}
 				}
 			}

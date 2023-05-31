@@ -8,6 +8,9 @@ export class GameEntity implements Game {
     @ApiProperty()
 	id: number;
 
+	@ApiProperty()
+	room: string;
+
     @ApiProperty()
 	createdAt: Date;
 
@@ -22,8 +25,4 @@ export class GameEntity implements Game {
 
 	@ApiProperty()
 	winner: UserEntity;
-
-	@ApiProperty()
-	duration: number;
-
 }

@@ -5,9 +5,13 @@ import { CreateUserGameDto } from "./create-user-game.dto";
 import { GameState } from "@prisma/client";
 
 export class CreateGameDto {
-	@IsInt()
+	@IsString()
 	@ApiProperty({ required: false })
-	state?: GameState;
+	room?: string;
+
+	@IsInt()
+	@ApiProperty()
+	state: GameState;
 
     @IsNotEmpty()
     @IsInt()
