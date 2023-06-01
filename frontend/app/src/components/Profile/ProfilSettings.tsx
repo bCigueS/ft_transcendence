@@ -2,6 +2,7 @@ import React from 'react';
 import { UserAPI } from '../../store/users-contexte';
 import classes from '../../sass/components/Profile/ProfilSettings.module.scss';
 import { Form } from 'react-router-dom';
+import ProfilPatch from './ProfilPatch';
 
 
 const ProfilSettings: React.FC<{user: UserAPI | null}> = ( { user } ) => {
@@ -69,17 +70,19 @@ const ProfilSettings: React.FC<{user: UserAPI | null}> = ( { user } ) => {
 		// 	</div>
 		// </form>
 		
-		<Form method='patch' className={classes.container}>
-			<div className={classes.grid}>
-				<div className={classes.name}>
-					<label htmlFor="text">Name</label>
-					<input id="name" type="text" name="name" />
-				</div>
-				<div className={classes.submit}>
-					<button>Save Change</button>
-				</div>
-			</div>
-		</Form>
+		// <Form method='patch' className={classes.container}>
+		// 	<div className={classes.grid}>
+		// 		<div className={classes.name}>
+		// 			<label htmlFor="text">Name</label>
+		// 			<input id="name" type="text" name="name" />
+		// 		</div>
+		// 		<div className={classes.submit}>
+		// 			<button>Save Change</button>
+		// 		</div>
+		// 	</div>
+		// </Form>
+
+		<ProfilPatch />
 	)
 }
 
