@@ -24,7 +24,7 @@ export const UserContext = React.createContext<{
 		user: UserAPI | null;
 		error: string | null;
 		token?: string;
-		saveToken: (token: string) => void,
+		saveToken: (token: string, userIdInput: number) => void,
 		deleteToken: () => void,
 		fetchUserFriends: (id: number) => void;
 		fetchUserBlockings: (id: number) => void;
@@ -36,7 +36,7 @@ export const UserContext = React.createContext<{
 	user: null,
 	error: null,
 	token: undefined,
-	saveToken: (token: string) => {},
+	saveToken: (token: string, userIdInput: number) => {},
 	deleteToken: () => {},
 	fetchUserFriends: (id: number) => {},
 	fetchUserBlockings: (id: number) => {},
@@ -53,16 +53,19 @@ type Props = {
 	
 	const UsersContextProvider: React.FC<Props> = ( {children, className} ) => {
 		
-		const [ user, setUser] = useState<UserAPI | null>(null);
+		const [ user, setUser ] = useState<UserAPI | null>(null);
+		const [ userId, setUserId ] = useState<number>(1);
 		const [ token, setToken ] = useState<string | undefined>(undefined);
 		const [ loading, setLoading ] = useState<boolean>(true);
 		const [ error, setError ] = useState<string | null>(null);
 
-		const saveToken = (token: string) => {
+		const saveToken = (token: string,  userIdInput: number) => {
+			setUserId(userIdInput);
 			setToken(token);
 		}
 
 		const deleteToken = () => {
+			setUserId(1);
 			setToken(undefined);
 		}
 
@@ -197,8 +200,10 @@ type Props = {
 
 		const fetchUser = useCallback(async () => {
 			setError(null);
+			const storedUserId = localStorage.getItem('userId');
+			const idToFetch = storedUserId ? Number(storedUserId) : userId
 			try {
-				const response = await fetch('http://localhost:3000/users/1');
+				const response = await fetch('http://localhost:3000/users/' + idToFetch);
 				const data = await response.json();
 			
 				if (!response.ok)
@@ -228,16 +233,15 @@ type Props = {
 			finally {
 				setLoading(false);
 			}
-		  }, [fetchUserFriends, fetchUserBlockings]);
+		  }, [fetchUserFriends, fetchUserBlockings, userId]);
 		  
 		useEffect(() => {
 			fetchUser();
-			if (token)
-				console.log("User Context, token: ", token);
-			else 
-				console.log("User Context, no token");
-		  }, [fetchUser, token]);
-	
+			console.log("User Context, User is: ", user?.name);
+			console.log("User id is: ", userId);
+
+		  }, [fetchUser, userId]);
+
 
 		if (loading) {
 			return <div>Loading...</div>
