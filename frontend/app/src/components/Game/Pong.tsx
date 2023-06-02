@@ -131,6 +131,23 @@ export default function Pong({userId, userName}: PongProps) {
 			});
 		}
 	}, [playerMode])
+
+	// function to stop the animation by toggling the isRunning bool, and send a leave request to the server after 1 second
+	const stopGame = () => {
+		setIsRunning(false);
+		if (playerMode === DOUBLE_MODE) {
+			setTimeout(() => {
+				socket.emit('gameOver', {
+					gameInfo: {
+						playerId: userId,
+						playerStatus: (winner === PLAYER_WIN ? "win" : "lose"),
+						playerScore: playerScore,
+						opponentScore: opponentScore,
+					}, gameRoom: gameRoom,
+				});
+			}, 1000);
+		}
+	}
 	
 	// function to detect when a ball hit the paddle of the opponent side
 	const detectOpponentCollision = () => {
@@ -380,23 +397,6 @@ export default function Pong({userId, userName}: PongProps) {
 		context.arc(ballX, ballY, ballRadius, 0, 2 * Math.PI);
 		context.fill();
 		context.stroke();
-	}
-
-	// function to stop the animation by toggling the isRunning bool, and send a leave request to the server after 1 second
-	const stopGame = () => {
-		setIsRunning(false);
-		if (playerMode === DOUBLE_MODE) {
-			setTimeout(() => {
-				socket.emit('gameOver', {
-					gameInfo: {
-						playerId: userId,
-						playerStatus: (winner === PLAYER_WIN ? "win" : "lose"),
-						playerScore: playerScore,
-						opponentScore: opponentScore,
-					}, gameRoom: gameRoom,
-				});
-			}, 1000);
-		}
 	}
 
 	// render the game

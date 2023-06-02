@@ -21,6 +21,9 @@ export class GameEntity implements Game {
 	level: number;
 
 	@ApiProperty()
+	socketIds: string[];
+
+	@ApiProperty()
 	winnerId: number;
 
 	@ApiProperty()
