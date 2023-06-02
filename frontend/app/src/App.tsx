@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 import RootLayout from './pages/RootLayout';
@@ -9,11 +9,10 @@ import PrivateMessagePage from './pages/PrivateMessagePage';
 import ChatPage from './pages/Chat';
 import Game from './pages/Game';
 import Leaderboard from './pages/Leaderboard';
-import AboutUs from './pages/AboutUs';
 
 import './sass/main.scss';
 import UsersContextProvider from './store/users-contexte';
-import AuthenticationPage, { action as authAction } from './pages/Authentication';
+import AuthenticationPage from './pages/Authentication';
 import { action as settingAction } from './pages/Profile';
 import { checkAuthLoader, checkTokenLoader, action as logoutAction, tokenLoader} from './typescript/Auth';
 
@@ -59,7 +58,7 @@ const router = createBrowserRouter([
 			{
 				path: 'auth',
 				element: <AuthenticationPage />,
-				// loader: checkTokenLoader,
+				// action: authAction,
 			},
 			{
 				path: 'logout',
@@ -69,7 +68,15 @@ const router = createBrowserRouter([
 	},
 ]);
 
+
 const App: React.FC = () => {
+
+	useEffect(() => {
+		if (localStorage.getItem('tokenDebug')) {
+			console.log("J'ai le token");
+		}
+	}, [localStorage.getItem('tokenDebug')])
+
 	return (
 		<UsersContextProvider className="App">
 			<RouterProvider router={router} />
