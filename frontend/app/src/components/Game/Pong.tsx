@@ -143,6 +143,7 @@ export default function Pong({userId, userName}: PongProps) {
 						playerStatus: (winner === PLAYER_WIN ? "win" : "lose"),
 						playerScore: playerScore,
 						opponentScore: opponentScore,
+						winnerScore: info.winnerScore,
 					}, gameRoom: gameRoom,
 				});
 			}, 1000);

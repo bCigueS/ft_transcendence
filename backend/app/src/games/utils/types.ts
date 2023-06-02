@@ -16,6 +16,7 @@ export type GameOverInfo = {
 	playerStatus: string;
 	playerScore: number;
 	opponentScore: number;
+	winnerScore: number;
 }
 
 export type CallbackInfo = (message: string) => {
