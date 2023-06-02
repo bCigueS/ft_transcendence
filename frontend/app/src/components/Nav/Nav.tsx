@@ -1,8 +1,10 @@
-import { Link, NavLink } from "react-router-dom"
+import { Link, NavLink, useRouteLoaderData } from "react-router-dom"
 import classes from '../../sass/components/Nav/Nav.module.scss';
 
 
 import ProfileMenu from "./ProfileMenu";
+import { useContext, useEffect } from "react";
+import { UserContext } from "../../store/users-contexte";
 
 interface navItem {
 	text: string,
@@ -11,47 +13,42 @@ interface navItem {
 
 const Nav: React.FC = () => {
 
-	// const styleNav: React.CSSProperties = {
-	// 	content: '',
-	// 	opacity: 1,
-	// 	bottom: '-0.8rem',
-	// 	left: '-0.8rem',
-	// }
+	const token: string = useRouteLoaderData('root') as string;
 
 	const navItems: navItem[] = [
 		{text: "Home", link:"/"},
 		{text: "PingPong", link:"/pong"},
 		{text: "Chat", link: '/chat'},
 		{text: "Leaderbord", link: "/leaderboard"},
-		{text: "Authentication", link: "/auth"}
-		// {text: "Rules", link: "/rules"},
-		// {text: "About-us", link: "/about-us"}
 	]
-
+	
 	return (
 		<header>
 			<nav className={classes.nav}>
 				<Link to='/'>
 					<p>LOGO</p>
 				</Link>
-
-				{/* Navigation Menu */}
-				<ul className={classes.menu}>
-					{
+					<ul className={classes.menu}>
+					{ token ? 
 						navItems.map(items => {
 							return (
 								<NavLink 
-									to={ items.link } 
-									key={items.text}
-									// className={classes.item}
-									className={({isActive}) => isActive ? classes.item + " " + classes.active : classes.item }
-									>
+								to={ items.link } 
+								key={items.text}
+								className={
+									({isActive}) => isActive 
+									? classes.item + " " + classes.active 
+									: classes.item }
+								>
 									<span className="nav-item_text">{ items.text }</span>
 								</NavLink>
 							)
 						})
+						: <NavLink to="/auth" className={({isActive}) => isActive ? classes.item + " " + classes.active : classes.item}>
+								<span className="nav-item_text">Authentication</span>
+						</NavLink>
 					}
-				</ul>
+					</ul>
 				<ProfileMenu />
 			</nav>
 		</header>

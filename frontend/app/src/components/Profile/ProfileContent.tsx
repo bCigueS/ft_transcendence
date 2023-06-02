@@ -1,11 +1,9 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { json, redirect } from 'react-router-dom';
 import classes from '../../sass/components/Profile/ProfileContent.module.scss';
 import MatchSummary from './Matches/MatchSummary';
 import ProfileFriends from './ProfileFriends';
 import { UserAPI, UserContext } from '../../store/users-contexte';
 import ProfilSettings from './ProfilSettings';
-import { useParams } from 'react-router-dom';
 
 
 const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {

@@ -7,7 +7,7 @@ import { AuthEntity } from './entity/auth.entity';
 export class AuthService {
 constructor(private prisma: PrismaService, private jwtService: JwtService) {}
 
-async login(name: string, password: string): Promise<AuthEntity> {
+async login(name: string, password: string): Promise<{}> {
 	const user = await this.prisma.user.findUnique({ where: { name: name } });
 
 	if (!user) {
@@ -22,6 +22,7 @@ async login(name: string, password: string): Promise<AuthEntity> {
 
 	return {
 		accessToken: this.jwtService.sign({ userId: user.id }),
+		userId: user.id
 	};
 }
 

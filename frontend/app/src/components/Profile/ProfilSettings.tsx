@@ -1,49 +1,46 @@
-import React, { useContext, useRef, useState } from 'react';
-import { UserAPI, UserContext } from '../../store/users-contexte';
+import React from 'react';
+import { UserAPI } from '../../store/users-contexte';
 import classes from '../../sass/components/Profile/ProfilSettings.module.scss';
-import { Form, useParams } from 'react-router-dom';
+import { Form } from 'react-router-dom';
+import ProfilPatch from './ProfilPatch';
 
 
 const ProfilSettings: React.FC<{user: UserAPI | null}> = ( { user } ) => {
 
-	const userCtx = useContext(UserContext);
-	const params = useParams();
-	const [image, setImage] = useState<File>();
-	const [preview, setPreview] = useState<string | null>(user?.avatar || null);
+	// const [image, setImage] = useState<File>();
+	// const [preview, setPreview] = useState<string | null>(user?.avatar || null);
 
-	const settingTextInput = useRef<HTMLInputElement>(null);
+	// const settingTextInput = useRef<HTMLInputElement>(null);
 
-	const textInputEmpty = (input: string) => {
-		return input.trim().length === 0;
-	}
+	// const textInputEmpty = (input: string) => {
+	// 	return input.trim().length === 0;
+	// }
 
-	const submitHandler = (event: React.FormEvent) => {
-		event.preventDefault();
-		const enteredText = settingTextInput.current!.value;
+	// const submitHandler = (event: React.FormEvent) => {
+	// 	event.preventDefault();
+	// 	const enteredText = settingTextInput.current!.value;
 
-		if (image !== null || !textInputEmpty(enteredText)) {
-			if (image !== null) {
-				// userCtx.updateImage(preview);
-				setPreview(preview);
-			}
-			if (!textInputEmpty(enteredText)) {
-				// userCtx.changeNickname(enteredText);
-				settingTextInput.current!.value = '';
-			}
-		}
-		if (enteredText.trim().length === 0 || enteredText.trim().length > 12) {
-			settingTextInput.current!.value = '';
-			return ;
-		}
-	}
+	// 	if (image !== null || !textInputEmpty(enteredText)) {
+	// 		if (image !== null) {
+	// 			// userCtx.updateImage(preview);
+	// 			setPreview(preview);
+	// 		}
+	// 		if (!textInputEmpty(enteredText)) {
+	// 			// userCtx.changeNickname(enteredText);
+	// 			settingTextInput.current!.value = '';
+	// 		}
+	// 	}
+	// 	if (enteredText.trim().length === 0 || enteredText.trim().length > 12) {
+	// 		settingTextInput.current!.value = '';
+	// 		return ;
+	// 	}
+	// }
 
-	const imageChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const selectedFiles = event.target.files as FileList;
-		setImage(selectedFiles?.[0]);
-		setPreview(URL.createObjectURL(selectedFiles?.[0]));
-	}
-
-	console.log("Params", params);
+	// const imageChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
+	// 	const selectedFiles = event.target.files as FileList;
+	// 	setImage(selectedFiles?.[0]);
+	// 	setPreview(URL.createObjectURL(selectedFiles?.[0]));
+	// }
 
 	return (
 		// <form className={classes.container} onSubmit={submitHandler} autoComplete='off'>
@@ -73,17 +70,19 @@ const ProfilSettings: React.FC<{user: UserAPI | null}> = ( { user } ) => {
 		// 	</div>
 		// </form>
 		
-		<Form method='patch' className={classes.container}>
-			<div className={classes.grid}>
-				<div className={classes.name}>
-					<label htmlFor="text">Name</label>
-					<input id="name" type="text" name="name" />
-				</div>
-				<div className={classes.submit}>
-					<button>Save Change</button>
-				</div>
-			</div>
-		</Form>
+		// <Form method='patch' className={classes.container}>
+		// 	<div className={classes.grid}>
+		// 		<div className={classes.name}>
+		// 			<label htmlFor="text">Name</label>
+		// 			<input id="name" type="text" name="name" />
+		// 		</div>
+		// 		<div className={classes.submit}>
+		// 			<button>Save Change</button>
+		// 		</div>
+		// 	</div>
+		// </Form>
+
+		<ProfilPatch />
 	)
 }
 
