@@ -1,15 +1,14 @@
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import LeaderboardProfil from '../components/Leaderboard/LeaderboardProfil';
 import Searchbar from '../components/Leaderboard/Searchbar';
 import classes from '../sass/pages/Leaderboard.module.scss';
-import { UserAPI, UserContext } from '../store/users-contexte';
+import { UserAPI } from '../store/users-contexte';
 import FilterSearch from '../components/Leaderboard/FilterSearch';
 import * as sortU from '../typescript/sortUsers';
 
 
 export default function Leaderboard() {
 
-	const userCtx = useContext(UserContext);
 	const [searchInput, setSearchInput] = useState('');
 	const [filterOption, setFilterOption] = useState('');
 	const [ usersList, setUserList ] = useState<UserAPI[]>([]);
@@ -75,6 +74,9 @@ export default function Leaderboard() {
 	const displayUsers: UserAPI[] = filteredUser.filter((user) => (
 		user.name.toLowerCase().slice(0, searchInput.length).includes(searchInput.toLowerCase())
 	));
+
+	// Replace this error handling with a nicer one 
+	console.log("Error in Leaderboard.tsx (need to be changed)", error);
 
 	return (
 		<div className={classes.page}>

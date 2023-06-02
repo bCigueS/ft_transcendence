@@ -5,10 +5,6 @@
 
 	transition: all 0.3s ease-in-out;
 
-	&:hover {
-		// transform: scale(1.2);
-	}
-
 	&__picture {
 		height: 5.5rem;
 		width: 5.5rem;
@@ -30,27 +26,10 @@
 		top: 5.5rem;
 		z-index: 10;
 
-		// background-color: $almost-white;
-		// border: 0.3rem black solid;
-		// border-radius: 0.5rem;
-
 		@include flexBox($align: center);
 		@include text-body();
 		gap: 1rem;
 		padding: 1rem;
-
-		// .header {
-		// 	width: 100%;
-		// 	@include flexBox($direction: row, $justify:left);
-		// 	gap: 2rem;
-
-		// 	padding: 1rem 0;
-		// 	border-bottom: 0.2rem black solid;
-		// 	.profile-menu__picture {
-		// 		height: 6.5rem;
-		// 		width: 6.5rem;
-		// 	}
-		// }
 
 		.option {
 			@include flexBox($direction: row);

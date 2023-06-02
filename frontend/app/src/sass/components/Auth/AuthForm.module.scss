@@ -1,0 +1,16 @@
+@import '../../abstracts/mixin.scss';
+@import '../../abstracts/variables.scss';
+
+.loggin {
+
+	@include flexBox($justify: center);
+	gap: 5rem;
+
+	.button {
+		@include buttonMixin();
+		span {
+			font-size: 3rem;
+		}
+	}
+}
+

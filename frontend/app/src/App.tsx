@@ -1,5 +1,5 @@
-import React from 'react';
-import { createBrowserRouter, RouterProvider} from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 import RootLayout from './pages/RootLayout';
 import ErrorPage from './pages/Error';
@@ -9,14 +9,12 @@ import PrivateMessagePage from './pages/PrivateMessagePage';
 import ChatPage from './pages/Chat';
 import Game from './pages/Game';
 import Leaderboard from './pages/Leaderboard';
-import AboutUs from './pages/AboutUs';
-
-import { tokenLoader } from './typescript/auth';
 
 import './sass/main.scss';
 import UsersContextProvider from './store/users-contexte';
-import AuthenticationPage, { action as authAction} from './pages/Authentication';
+import AuthenticationPage from './pages/Authentication';
 import { action as settingAction } from './pages/Profile';
+import { checkAuthLoader, checkTokenLoader, action as logoutAction, tokenLoader} from './typescript/Auth';
 
 const router = createBrowserRouter([
 	{
@@ -26,41 +24,64 @@ const router = createBrowserRouter([
 		id: 'root',
 		loader: tokenLoader,
 		children: [
-			{index: true, element: <Homepage />},
-			// {
-			// 	path: 'profile/me',
-			// 	element: <ProfilePage />,
-			// 	loader: async () => {
-			// 		const response = await fetch('http://localhost:3000/users/1');
-			// 		const data = await response.json();
-			// 		console.log('Loader');
-			// 		return data.id;
-			// 	},
-			// 	// action: settingAction
-			// },
+			{
+				index: true,
+				element: <Homepage />,
+				loader: checkAuthLoader,
+			},
 			{
 				path: 'profile/:id',
 				element: <ProfilePage />,
-				action: settingAction
+				action: settingAction,
+				loader: checkAuthLoader,
 			},
-			{path: 'privmessage', element: <PrivateMessagePage />},
-			{path: 'chat', element: <ChatPage />},
-			{path: 'pong', element: <Game />},
-			{path: 'leaderboard', element: <Leaderboard />},
-			{path: 'about-us', element: <AboutUs />},
-			{path: 'auth', element: <AuthenticationPage />, action: authAction},
-		]
-	}
-])
+			{
+				path: 'privmessage',
+				element: <PrivateMessagePage />,
+				loader: checkAuthLoader,
+			},
+			{
+				path: 'chat',
+				element: <ChatPage />,
+				loader: checkAuthLoader,
+			},
+			{
+				path: 'pong',
+				element: <Game />,
+				loader: checkAuthLoader,
+			},
+			{
+				path: 'leaderboard',
+				element: <Leaderboard />,
+				loader: checkAuthLoader,
+			},
+			{
+				path: 'auth',
+				element: <AuthenticationPage />,
+				// action: authAction,
+			},
+			{
+				path: 'logout',
+				action: logoutAction,
+			},
+		],
+	},
+]);
 
 
 const App: React.FC = () => {
 
+	useEffect(() => {
+		if (localStorage.getItem('tokenDebug')) {
+			console.log("J'ai le token");
+		}
+	}, [localStorage.getItem('tokenDebug')])
+
 	return (
 		<UsersContextProvider className="App">
-			<RouterProvider router={ router } />
+			<RouterProvider router={router} />
 		</UsersContextProvider>
 	);
-}
+};
 
 export default App;
