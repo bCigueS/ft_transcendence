@@ -2,13 +2,17 @@
 @import '../../abstracts/variables.scss';
 
 .container {
+	
 	padding: 2rem;
 	border: 0.2rem black solid;
 	background-color: $almost-white;
+	margin-top: 6rem;
+	
 	@include shadowBox();
 
 	@include flexBox($justify: top, $align: left);
 	gap: 1rem;
+	max-height: 40rem;
 
 	.user {
 		padding: 0.5rem 0;
