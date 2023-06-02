@@ -8,12 +8,16 @@ export default function Game() {
 
 	// Import the userContext Api (from React)
 	const userCtx = useContext(UserContext);
-	// player info
-	const [userId, setUserId] = useState(1);
-	const [userName, setUserName] = useState('Fany');
 
-	// Acces the user id 
-	console.log('Game Page userId: ', userCtx.user?.id);
+	// player info
+	const userId = userCtx.user?.id;
+	const userName = userCtx.user?.name;
+
+	if (!userId || !userName) {
+		return (
+			<></>
+		);
+	}
 
 	return (
 		<div className={classes.gamePage}>
