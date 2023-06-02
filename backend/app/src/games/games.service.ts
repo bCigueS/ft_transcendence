@@ -10,7 +10,7 @@ export class GamesService {
 
   /* CRUD */
   async create(createGameDto: CreateGameDto) {
-    const { state, level, players } = createGameDto;
+    const { state, level, players, socketIds } = createGameDto;
 
     const newGame = await this.prisma.game.create({
         data: {
@@ -20,7 +20,8 @@ export class GamesService {
                 create: players.map(player => ({
                     userId: player.userId
                 }))
-            }
+            },
+			socketIds,
         }
     });
 
@@ -44,6 +45,16 @@ export class GamesService {
 
 	return updatedGame;
   }
+
+// async update(id: number, updateGameDto: UpdateGameDto) {
+
+// 	const updatedGame = await this.prisma.game.update({
+// 	  where: { id },
+// 	  data: updateGameDto,
+// 	});
+
+// 	return updatedGame;
+//   }
 
   async findAll() {
     const games = await this.prisma.game.findMany();

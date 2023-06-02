@@ -53,6 +53,7 @@ model Game {
   state		GameState  @default(PENDING)
   level     Int
   players   UserGame[]
+  socketIds	String[]
   winnerId  Int?
   winner    User?      @relation("winnerGames", fields: [winnerId], references: [id], onDelete: Cascade)
 
