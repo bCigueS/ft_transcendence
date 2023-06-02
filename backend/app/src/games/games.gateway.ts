@@ -383,7 +383,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 			console.log('received the disconnect signal');
 
 			let game = await this.prisma.game.findUnique({
-				where: { room: gameRoom }
+				where: { room: gameRoom },
 			});
 
 			// change status of the game
@@ -395,10 +395,45 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 			}
 
 			// update the userGame with the score
+			const playerUser = await this.prisma.userGame.update({
+				where: { userId_gameId: {
+					userId: gameInfo.playerId, gameId: game.id
+				}},
+				data: { score: gameInfo.playerScore },
+			});
 
-			// send message to the opponnent that player is leaving the gameRoom
+			if (gameInfo.playerStatus === "win" && gameInfo.winnerScore !== gameInfo.playerScore) {
+					const currentGame = await this.prisma.game.findUnique({
+					where: { room: gameRoom },
+					include: { players: true }
+				});
+	
+				let opponentId: number | undefined;
+				if ((currentGame.players ?? []).length === 2) {
+					opponentId = currentGame.players.find(p => p.userId !== gameInfo.playerId)?.userId;
+				}
 
-			// leave the gameRoom
+				if (opponentId) {
+					const opponentUser = await this.prisma.userGame.update({
+						where: { userId_gameId: {
+							userId: opponentId, gameId: game.id
+						}},
+						data: { score: gameInfo.opponentScore },
+					});
+				}
+			}
+
+			// send message to the other player in the room (if any) that a player just left
+			client.broadcast.to(game.room).emit('opponentLeft', {
+				message: `your opponent has left the game`,
+			});
+
+			// send an additional message to all player in the room to stop the game and make the player that still in the room as a winner of the recent game
+			this.io.to(game.room).emit('stopGame', {
+				message: `Game has ended!`,
+			});
+
+			client.leave(game.room);
 	}
 
 	@SubscribeMessage('disconnect')
@@ -415,18 +450,27 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 				}
 			});
 
-			game = await this.gamesService.update(game.id, {state: GameState.FINISHED});
+			if (game) {
+				// send message to the other player in the room (if any) that a player just left
+				client.broadcast.to(game.room).emit('opponentLeft', {
+					message: `your opponent has left the game`,
+				});
+				
+				// send an additional message to all player in the room to stop the game and make the player that still in the room as a winner of the recent game
+				this.io.to(game.room).emit('stopGame', {
+					message: `Game has ended, you won!`,
+				});
+				
+				client.leave(game.room);
 
-			// send message to the other player in the room (if any) that a player just left
-			client.broadcast.to(game.room).emit('opponentLeft', {
-				message: `your opponent has left the game`,
-			});
+				if (game.state === GameState.PLAYING) {
+					// change status of the game
+					game = await this.gamesService.gameOver(game.id, GameState.FINISHED);
+				} else {
+					// if game.state is still PENDING, delete the game from database
+					await this.gamesService.remove(game.id);
+				}
+			}
 
-			// send an additional message to all player in the room to stop the game and make the player that still in the room as a winner of the recent game
-			this.io.to(game.room).emit('stopGame', {
-				message: `Game has ended, you won!`,
-			});
-
-			client.leave(game.room);
 	}
 }
