@@ -55,6 +55,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ onAuthenticate }) => {
 
 	return (
 		<>
+
+		{/* Authentication */}
 			<form method='post' onSubmit={handleSubmit}>
 				<h1>Connect Debug</h1>
 				<p>Password is 'lolilolilol'</p>
