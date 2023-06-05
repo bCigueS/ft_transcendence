@@ -178,7 +178,7 @@ export class UsersController {
 		@UploadedFile(
 			new ParseFilePipeBuilder()
 				.addFileTypeValidator({
-				fileType: 'jpeg',
+				fileType: /\.(jpg|png|jpeg)$/i,
 				})
 				.build({
 				errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY

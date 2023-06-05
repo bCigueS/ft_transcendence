@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from 'react';
-import { json, redirect } from 'react-router-dom';
+import { json } from 'react-router-dom';
 import AuthForm from '../components/Auth/AuthForm';
 import { UserContext } from '../store/users-contexte';
 
@@ -37,8 +37,8 @@ const AuthenticationPage = () => {
 		userCtx.saveToken(token, userId);
 		
 		userCtx.fetchUser();
+		window.location.reload();
 	}
-
 
 	return (
 		<AuthForm onAuthenticate={handleAuthentication}/>

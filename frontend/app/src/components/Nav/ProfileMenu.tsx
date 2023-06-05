@@ -10,7 +10,7 @@ interface menuOption {
 	link: string
 }
 
-const ProfilIcon: React.FC = () => {
+const ProfilMenu: React.FC = () => {
 	const userCtx = useContext(UserContext);
 	const [menuOpen, setMenuOpen] = useState(false);
 	const menuRef = useRef<HTMLDivElement>(null);
@@ -68,4 +68,4 @@ const ProfilIcon: React.FC = () => {
 	);
 }
 
-export default ProfilIcon;
+export default ProfilMenu;
