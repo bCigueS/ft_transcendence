@@ -23,9 +23,6 @@ export const action = () => {
 
 export const checkAuthLoader = () => {
 	const token = getAuthToken();
-	console.log("Inside checkAuthLoader")
-
-
 	if (!token)
 		return redirect('/auth');
 	return null;
@@ -33,13 +30,8 @@ export const checkAuthLoader = () => {
 
 export const checkTokenLoader = () => {
 	const token = getAuthToken();
-	console.log("Inside checkTokenLoader")
 	if (token) {
-		console.log("Inside checkTokenLoader return redirect")
-
 		return redirect('/');
 	}
-	console.log("Inside checkTokenLoader return null")
-
 	return null;
 }
