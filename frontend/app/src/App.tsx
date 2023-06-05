@@ -58,6 +58,7 @@ const router = createBrowserRouter([
 			{
 				path: 'auth',
 				element: <AuthenticationPage />,
+				loader: checkTokenLoader,
 				// action: authAction,
 			},
 			{
@@ -71,11 +72,13 @@ const router = createBrowserRouter([
 
 const App: React.FC = () => {
 
+	const tokenDebug = localStorage.getItem('tokenDebug');
+
 	useEffect(() => {
-		if (localStorage.getItem('tokenDebug')) {
+		if (tokenDebug) {
 			console.log("J'ai le token");
 		}
-	}, [localStorage.getItem('tokenDebug')])
+	}, [tokenDebug])
 
 	return (
 		<UsersContextProvider className="App">

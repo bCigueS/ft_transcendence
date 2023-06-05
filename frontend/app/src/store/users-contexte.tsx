@@ -71,12 +71,14 @@ type Props = {
 
 		const fetchRemoveFriend = async (targetUser: UserAPI) => {
 			setError(null);
+			const storedUserId = localStorage.getItem('userId');
+			const idToFetch = storedUserId ? Number(storedUserId) : userId
 
 			const friendId = {
 				friendId: targetUser.id
 			};
 			try {
-				const response = await fetch('http://localhost:3000/users/' + user?.id + '/remove-friend', {
+				const response = await fetch('http://localhost:3000/users/' + idToFetch + '/remove-friend', {
 					method: 'PATCH',
 					headers: {
 						'Content-Type': 'application/json'
@@ -95,12 +97,14 @@ type Props = {
 
 		const fetchBlockUser = async (targetUser: UserAPI) => {
 			setError(null);
+			const storedUserId = localStorage.getItem('userId');
+			const idToFetch = storedUserId ? Number(storedUserId) : userId
 
 			const blockedId = {
 				blockedId: targetUser.id
 			};
 			try {
-				const response = await fetch('http://localhost:3000/users/' + user?.id + '/block-user', {
+				const response = await fetch('http://localhost:3000/users/' + idToFetch + '/block-user', {
 					method: 'PATCH',
 					headers: {
 						'Content-Type': 'application/json'
@@ -119,13 +123,15 @@ type Props = {
 
 		const fetchUnblockUser = async (targetUser: UserAPI) => {
 			setError(null);
+			const storedUserId = localStorage.getItem('userId');
+			const idToFetch = storedUserId ? Number(storedUserId) : userId
 
 			const blockedId = {
 				blockedId: targetUser.id
 			};
 			try {
 
-				const response = await fetch('http://localhost:3000/users/' + user?.id + '/unblock-user', {
+				const response = await fetch('http://localhost:3000/users/' + idToFetch + '/unblock-user', {
 					method: 'PATCH',
 					headers: {
 						'Content-Type': 'application/json'
@@ -144,11 +150,13 @@ type Props = {
 
 		const fetchUserFriends = useCallback(async (id: number) => {
 			setError(null);
+			const storedUserId = localStorage.getItem('userId');
+			const idToFetch = storedUserId ? Number(storedUserId) : userId
 
 			let userFriends: UserAPI[] = [];
 
 			try {
-				const response = await fetch('http://localhost:3000/users/1/show-friends');
+				const response = await fetch('http://localhost:3000/users/'+ idToFetch + '/show-friends');
 				const data = await response.json();
 
 				if (!response.ok)
@@ -172,11 +180,12 @@ type Props = {
 
 		const fetchUserBlockings = useCallback(async (id: number) => {
 			setError(null);
-
+			const storedUserId = localStorage.getItem('userId');
+			const idToFetch = storedUserId ? Number(storedUserId) : userId
 			let userBlockings: UserAPI[] = [];
 
 			try {
-				const response = await fetch('http://localhost:3000/users/1/show-blocked-users');
+				const response = await fetch('http://localhost:3000/users/' + idToFetch + '/show-blocked-users');
 				const data = await response.json();
 
 				if (!response.ok)
@@ -240,7 +249,7 @@ type Props = {
 			console.log("User Context, User is: ", user?.name);
 			console.log("User id is: ", userId);
 
-		  }, [fetchUser, userId]);
+		  }, [fetchUser, userId, user?.name]);
 
 
 		if (loading) {

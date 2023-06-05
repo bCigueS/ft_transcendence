@@ -1,10 +1,5 @@
-import React, { useContext, useState, FormEvent } from 'react';
-import { Form } from 'react-router-dom';
-import { UserContext } from '../../store/users-contexte';
-
+import React, { FormEvent } from 'react';
 import classes from '../../sass/components/Auth/AuthForm.module.scss';
-import ProfilPatch from '../Profile/ProfilPatch';
-import DoubleAuthPannel from './DoubleAuthPannel';
 
 interface AuthFormProps {
 	onAuthenticate: (formData: FormData) => Promise<void | Response>;
@@ -55,15 +50,15 @@ const AuthForm: React.FC<AuthFormProps> = ({ onAuthenticate }) => {
 
 	return (
 		<>
-			<form method='post' onSubmit={handleSubmit}>
+			<form className={classes.logginForm} method='post' onSubmit={handleSubmit}>
 				<h1>Connect Debug</h1>
 				<p>Password is 'lolilolilol'</p>
-				<div>
+				<div className={classes.label}>
 					<label htmlFor="name">Username</label>
 					<input type="text" name="name" id="name" />
 				</div>
 
-				<div>
+				<div className={classes.label}>
 					<label htmlFor="password">Password</label>
 					<input type="password" name="password" id="password" />
 				</div>
