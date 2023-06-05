@@ -1,15 +1,24 @@
-import React, { useContext } from 'react';
-import { Form } from 'react-router-dom';
+import React, { FormEvent, useContext } from 'react';
 import classes from '../../sass/components/Profile/ProfilPatch.module.scss';
 import ProfilIcon from './ProfilIcon';
 import { UserContext } from '../../store/users-contexte';
 
-const PatchForm: React.FC = () => {
+interface PatchUser {
+	onPatchUser: (formData: FormData) => Promise<void | Response>;
+}
+
+const PatchForm: React.FC<PatchUser> = ({ onPatchUser }) => {
 
 	const userCtx = useContext(UserContext);
 
+	const handleSubmit = async(event: FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		const formData = new FormData(event.currentTarget);
+		await onPatchUser(formData);
+	}
+
 	return (
-		<Form method='patch' className={classes.container}>
+		<form method='patch' className={classes.container} onSubmit={handleSubmit}>
 			<h1>User Information</h1>
 			<div className={classes.label}>
 				<label htmlFor="name">User name</label>
@@ -33,8 +42,8 @@ const PatchForm: React.FC = () => {
 					className={classes.file}
 				/>
 			</div>
-			<button>Confirm</button>
-		</Form>
+			<button type="submit">Confirm</button>
+		</form>
 	)
 }
 

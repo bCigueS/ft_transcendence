@@ -1,10 +1,7 @@
 import { Link, NavLink, useRouteLoaderData } from "react-router-dom"
 import classes from '../../sass/components/Nav/Nav.module.scss';
-
-
+import LogoPong from '../../assets/logo/pong2.svg';
 import ProfileMenu from "./ProfileMenu";
-import { useContext, useEffect } from "react";
-import { UserContext } from "../../store/users-contexte";
 
 interface navItem {
 	text: string,
@@ -26,7 +23,7 @@ const Nav: React.FC = () => {
 		<header>
 			<nav className={classes.nav}>
 				<Link to='/'>
-					<p>LOGO</p>
+					<img src={LogoPong} alt="LogoPong" />
 				</Link>
 					<ul className={classes.menu}>
 					{ token ? 
@@ -49,7 +46,10 @@ const Nav: React.FC = () => {
 						</NavLink>
 					}
 					</ul>
-				<ProfileMenu />
+				
+				{ token &&
+					<ProfileMenu />
+				}
 			</nav>
 		</header>
 	);

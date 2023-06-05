@@ -20,6 +20,17 @@
 	@include shadowBox();
 
 	border: 0.3rem black solid;
+
+	img {
+		height: 6rem;
+		border: 0.3rem black solid;
+		position: relative;
+		transform-style: preserve-3d;
+
+		@include shadowBox();
+	}
+
+
 	.menu {
 		@include flexBox($direction: row, $justify: center);
 		max-width: 50rem;
