@@ -9,7 +9,6 @@
     background-color: $gunmetal-light;
     position: relative;
     align-self: flex-end;
-    margin-top: 1rem;
 
     .myMessage {
         top: 0.5rem;
@@ -27,16 +26,16 @@
     margin-bottom: 1rem;
     padding: 0.5rem;
     max-width: 30rem;
+    // min-width: 6rem;
     border-radius: 2rem;
     background-color: $gunmetal-light;
     position: relative;
     align-self: flex-end;
-    margin-top: 1rem;
 
     .myMessage {
         top: 0.5rem;
 
-        margin-left: 0rem;
+        margin-left: 1rem;
         margin-right: 0.5rem;
         margin-top: 0.7rem;
         margin-bottom: 0.7rem;
@@ -46,14 +45,14 @@
     }
 
     ::after {
-        content: ' ';
+        content: '';
         position: absolute;
-        bottom: -1rem;
-        right: 1.8rem;
-        border-right: 0.5rem solid $gunmetal-light;
-        border-left: 0.5rem solid transparent;
-        border-top: 0.5rem solid $gunmetal-light;
-        border-bottom: 0.5rem solid transparent;
+        bottom: -0.7rem;
+        right: 1.4rem;
+        border-right: 0.4rem solid $gunmetal-light;
+        border-left: 0.4rem solid transparent;
+        border-top: 0.4rem solid $gunmetal-light;
+        border-bottom: 0.4rem solid transparent;
         border-style: solid;
     }
 
@@ -100,12 +99,12 @@
     ::after {
         content: ' ';
         position: absolute;
-        bottom: -1rem;
-        left: 1.8rem;
-        border-left: 0.5rem solid $light-vermillon;
-        border-right: 0.5rem solid transparent;
-        border-top: 0.5rem solid $light-vermillon;
-        border-bottom: 0.5rem solid transparent;
+        bottom: -0.7rem;
+        left: 1.4rem;
+        border-left: 0.4rem solid $light-vermillon;
+        border-right: 0.4rem solid transparent;
+        border-top: 0.4rem solid $light-vermillon;
+        border-bottom: 0.4rem solid transparent;
         border-style: solid;
     }
 
