@@ -8,46 +8,55 @@ import { ApiTags } from '@nestjs/swagger';
 export class ChannelsController {
   constructor(private readonly channelsService: ChannelsService) {}
 
-  @Post()
-  create(@Body() createChannelDto: CreateChannelDto) {
-    return this.channelsService.create(createChannelDto);
-  }
+	@Post()
+	create(@Body() createChannelDto: CreateChannelDto) {
+		return this.channelsService.create(createChannelDto);
+	}
 
-  @Get()
-  findAll() {
-    return this.channelsService.findAll();
-  }
+	@Get()
+	findAll() {
+		return this.channelsService.findAll();
+	}
 
-  @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    const chan = this.channelsService.findOne(id);
+	@Get(':id')
+	findOne(@Param('id', ParseIntPipe) id: number) {
+		const chan = this.channelsService.findOne(id);
 
-    if (!chan)
-      throw new NotFoundException(`Channel with ${id} does not exist.`);
-    
-    return chan;
-  }
+		if (!chan)
+		throw new NotFoundException(`Channel with ${id} does not exist.`);
+		
+		return chan;
+	}
 
-  @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateChannelDto: UpdateChannelDto) {
-    const chan = this.channelsService.findOne(id);
+	@Patch(':id')
+	update(@Param('id', ParseIntPipe) id: number, @Body() updateChannelDto: UpdateChannelDto) {
+		const chan = this.channelsService.findOne(id);
+		
+		if (!chan)
+		throw new NotFoundException(`Channel with ${id} does not exist.`);
+		
+		return this.channelsService.update(id, updateChannelDto);
+	}
 
-    if (!chan)
-      throw new NotFoundException(`Channel with ${id} does not exist.`);
+	@Delete(':id')
+	remove(@Param('id', ParseIntPipe) id: number) {
+		
+		const chan = this.channelsService.findOne(id);
+		
+		if (!chan)
+		throw new NotFoundException(`Channel with ${id} does not exist.`);
+		
+		return this.channelsService.remove(id);
+	}
 
-    return this.channelsService.update(id, updateChannelDto);
-  }
+	@Get('/userId/:id')
+	findUserChannels(@Param('id', ParseIntPipe) id: number) {
+	const chan = this.channelsService.findUserChannels(id);
 
-  @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
+	if (!chan)
+		throw new NotFoundException(`User with ${id} is not part of any channel.`);
+	
+	return chan;
+	}
 
-    const chan = this.channelsService.findOne(id);
-
-    if (!chan)
-      throw new NotFoundException(`Channel with ${id} does not exist.`);
-
-    return this.channelsService.remove(id);
-  }
-
-  
 }

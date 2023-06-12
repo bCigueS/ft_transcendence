@@ -1,10 +1,40 @@
-import { useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import ChatInfo from '../components/Chat/ChatInfo';
 import classes from '../sass/pages/Chat.module.scss';
-import { UserAPI } from '../store/users-contexte';
+import { UserAPI, UserContext } from '../store/users-contexte';
 import Message from '../components/Chat/Message';
 import NoConvo from '../components/Chat/NoConvo';
 import io from 'socket.io-client';
+
+
+// GET http://localhost:3000/channels/userId/1
+// [
+//     {
+//         "id": 1,
+//         "name": "private",
+//         "messages": [
+//             {
+//                 "createdAt": "2023-06-12T09:16:21.758Z",
+//                 "id": 1,
+//                 "senderId": 1,
+//                 "content": "Hey girl",
+//                 "channelId": 1
+//             }
+//         ],
+//         "members": [
+//             {
+//                 "id": 1,
+//                 "channelId": 1,
+//                 "userId": 1
+//             },
+//             {
+//                 "id": 2,
+//                 "channelId": 1,
+//                 "userId": 2
+//             }
+//         ]
+//     }
+// ]
 
 const socket = io('http://localhost:3000/chat', {
 		transports: ["websocket"],
@@ -14,20 +44,15 @@ const socket = io('http://localhost:3000/chat', {
 export interface Message {
 	createdAt: Date,
 	id: number,
-
 	senderId: number,
-	sender: UserAPI,
-
+	// sender: UserAPI,
 	content: string,
-
 	channelId: number,
-	channel: Channel
 }
 
 export interface Channel {
 	id: number,
 	name: string,
-
 	messages: Message[],
 	members: UserAPI[],
 
@@ -49,53 +74,53 @@ export interface Message {
 
 export default function Chat() {
 	
-	const [ selectedConversation, setSelectedConversation ] = useState<number>(0);
+	const [ selectedConversationId, setSelectedConversationId ] = useState<number>(0);
+	const [ selectedConversation, setSelectedConversation ] = useState<Channel | null>();
 	const messageInput = useRef<HTMLInputElement>(null);
+	const userCtx = useContext(UserContext);
+	const [chats, setChats] = useState<Channel[]>([]);
+
+    useEffect(() => {
+        fetch('http://localhost:3000/channels/userId/1')
+            .then(response => response.json())
+            .then(data => {
+                data.forEach((channel: Channel) => {
+                    channel.messages.forEach(message => {
+                        message.createdAt = new Date(message.createdAt);
+                    });
+                });
+
+                setChats(data);
+            })
+            .catch(err => console.error('An error occurred:', err));
+    }, []);
+
 
 	const onSaveConversation = (channelId: number) => {
-		setSelectedConversation(channelId);
-	}
+		setSelectedConversationId(channelId);
 
-	const chatWithFany: ChatAPI = {
-		id: 1,
-		senderId: 2,
-
-		lastMessage: 'btw what do you think about this?'
+		let selectedChannel = chats.find(chat => chat.id === channelId);
+		setSelectedConversation(selectedChannel);
 	}
 	
-	const chatWithFlo: ChatAPI = {
-		id: 2,
-		senderId: 3,
-		lastMessage: 'haha '
-	}
-	
-	const chatWithPasca: ChatAPI = {
-		id: 3,
-		senderId: 4,
-		lastMessage: "J'ecris le brouillon et je te le montre avant d'envoyer."
-	}
-	
-	const chatList: ChatAPI[] = [
-		chatWithFany,
-		chatWithFlo,
-		chatWithPasca,
-	]
+	const displayConvo = (chatList: Channel[], channelId: number) => {
 
-	// const [ chatList, setChatList ] = useState<Chat[]>([]);
-	
-	const chats: ChatAPI[] = chatList;
+		const isMessageMine = (message: Message) => {
+			if (message.senderId === userCtx.user?.id)
+				return true;
+			return false;
+		}
 
-	const displayConvo = (chatList: ChatAPI[], channelId: number) => {
-		if (selectedConversation === 0)
-			return "no convo selected";
-		return chatList[selectedConversation - 1].lastMessage;
-	}
+		const isMessageLast = (message: Message, messages: Message[]) => {
+			
+			const messageIndex = messages.findIndex(m => m.id === message.id);
 
-	
-	const displayConvo2 = (chatList: ChatAPI[], channelId: number) => {
-		
-		// const [ message, setMessage ] = useState('');
-		
+			if (messageIndex === messages.length - 1
+				|| messages[messageIndex + 1].senderId !== message.senderId)
+				return true;
+			return false;
+		}
+			
 		
 		const handleSubmit = (event: { preventDefault: () => void; }) => {
 			
@@ -110,28 +135,27 @@ export default function Chat() {
 			socket.emit('send', {content: enteredText});
 
 			console.log('message input: ', enteredText);
-			
+	
 			messageInput.current!.value = '';
 		  }
 
-		  if (selectedConversation === 0)
+		if (selectedConversationId === 0)
 			return <NoConvo/>;
 		return (
 			<div className={classes.message}>
-				<Message isMine={false} isLast={false} message={displayConvo(chatList, selectedConversation)}/>
-				<Message isMine={false} isLast={false} message={displayConvo(chatList, selectedConversation)}/>
-				<Message isMine={false} isLast={true} message={displayConvo(chatList, selectedConversation)}/>
-				<Message isMine={true} isLast={true} message={displayConvo(chatList, selectedConversation)}/>
+				{
+					selectedConversation?.messages.map((message) => 
+						<Message key={message.id}
+								isMine={isMessageMine(message)}
+								isLast={isMessageLast(message, selectedConversation?.messages)} 
+								message={message.content}/>)
+				}
+
 				<form onSubmit={handleSubmit}>
 					<input className={classes.sendInput} type="text" ref={messageInput} placeholder='type here...' />
-					{/* <button> */}
-						{/* <i className='fa-sharp fa-solid fa-paper-plane'></i> */}
-					{/* </button> */}
 				</form>
 			</div>
 		);
-
-
 	}
 
 	return (
@@ -143,22 +167,9 @@ export default function Chat() {
 				 	))
 				}
 			</div>
-
 			{
-				displayConvo2(chatList, selectedConversation)
+				displayConvo(chats, selectedConversationId)
 			}
-			{/* <div className={classes.message}> */}
-				{/* <Message isMine={false} isLast={false} message={displayConvo(chatList, selectedConversation)}/> */}
-				{/* <Message isMine={false} isLast={false} message={displayConvo(chatList, selectedConversation)}/> */}
-				{/* <Message isMine={false} isLast={true} message={displayConvo(chatList, selectedConversation)}/> */}
-				{/* <Message isMine={true} isLast={true} message={displayConvo(chatList, selectedConversation)}/> */}
-				{/* <form> */}
-					{/* <input className={classes.sendInput} type="text" placeholder='type here...' /> */}
-					{/* <button> */}
-						{/* <i className='fa-sharp fa-solid fa-paper-plane'></i> */}
-					{/* </button> */}
-				{/* </form> */}
-			{/* </div> */}
 		</div>
 	)
 }

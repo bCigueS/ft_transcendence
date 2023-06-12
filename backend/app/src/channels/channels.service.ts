@@ -22,7 +22,8 @@ export class ChannelsService {
     for (const msg of messages) {
       const messageDto: CreateMessageDto = { 
         content: msg.content, 
-        senderId: msg.senderId
+        senderId: msg.senderId,
+		channelId: channel.id
       };
 
       console.log("message content: ", messageDto.content);
@@ -30,7 +31,6 @@ export class ChannelsService {
       await this.prisma.message.create({
         data: {
           ...messageDto,
-          channelId: channel.id,
         },
       });
     }
@@ -89,7 +89,8 @@ export class ChannelsService {
       for (const msg of messages) {
         const messageDto: CreateMessageDto = { 
           content: msg.content, 
-          senderId: msg.senderId
+          senderId: msg.senderId,
+		  channelId: channel.id
         };
         await this.prisma.message.create({
           data: {
@@ -113,12 +114,50 @@ export class ChannelsService {
     }
       
     return channel;
-    return `This action updates a #${id} channel`;
   }
 
   async remove(id: number) {
 
     const deletedChannel = await this.prisma.channel.delete({ where: { id }})
     return this.findAll();
+  }
+
+  async findUserChannels(id: number) {
+
+	const userChannels = await this.prisma.channel.findMany({
+		where: {
+			members: {
+			  some: {
+				userId: id,
+			  },
+			},
+		  },
+		  include: {
+			members: {
+			  select: {
+				user: {
+				  select: {
+					id: true,
+					email: true,
+					name: true,
+					avatar: true,
+					doubleAuth: true,
+					wins: true,
+				  }
+				}
+			  }
+			},
+			messages: true,
+		  },
+		});
+
+	const reformattedChannels = userChannels.map(channel => {
+		return {
+		...channel,
+		members: channel.members.map(member => member.user)
+		}
+	});
+	
+	return reformattedChannels;
   }
 }

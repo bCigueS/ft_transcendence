@@ -6,6 +6,9 @@ export class CreateMessageDto {
 
     @ApiProperty()
     content: string;
+
+	@ApiProperty()
+    channelId: number;
 }
 
 export class CreateChannelMembershipDto {
