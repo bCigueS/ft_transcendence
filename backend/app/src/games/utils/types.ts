@@ -6,8 +6,8 @@ export type ServeInfo = {
 export type CollisionInfo = {
 	y: number;
 	r: number;
-	playerY: number;
-	paddleHeight: number;
+	squareY: number;
+	squareHeight: number;
 	speed: number;
 }
 

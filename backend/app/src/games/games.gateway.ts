@@ -161,8 +161,8 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 			// creating a new direction of the ball after it hit a player paddle with ballCollision function
 
 			// the area of the paddle where the ball hits (top/middle/bottom) affect the calculation of the new direction
-			let collisionPoint = (gameInfo.y + (gameInfo.r / 2)) - (gameInfo.playerY + (gameInfo.paddleHeight / 2));
-			collisionPoint = collisionPoint / (gameInfo.paddleHeight / 2);
+			let collisionPoint = (gameInfo.y + (gameInfo.r / 2)) - (gameInfo.squareY + (gameInfo.squareHeight / 2));
+			collisionPoint = collisionPoint / (gameInfo.squareHeight / 2);
 
 			const angle = (Math.PI / 4) * collisionPoint;
 
