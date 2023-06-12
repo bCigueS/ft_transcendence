@@ -1,68 +1,64 @@
 import { useContext, useEffect, useState } from "react";
-import { ChatAPI as Chat } from "../../pages/Chat";
+import { Channel, Message } from "../../pages/Chat";
 import classes from '../../sass/components/Chat/ChatInfo.module.scss';
 import ProfilIcon from "../Profile/ProfilIcon";
 import { UserAPI, UserContext } from "../../store/users-contexte";
 
 // const Searchbar: React.FC<{onSaveSearch: (input: string) => void}> = ( props ) => {
 
-const ChatInfo: React.FC<{chat: Chat, onSaveConversation: (channelId: number) => void}> = ( props ) => {
+const ChatInfo: React.FC<{chat: Channel, onSaveConversation: (channelId: number) => void}> = ( props ) => {
 
-	const [loading, setLoading] = useState<boolean>(false);
 	const [sender, setSender] = useState<UserAPI | null>(null);
+	const [lastMessage, setLastMessage] = useState<Message | null>(null);
 	const [ conversation, setConversation ] = useState<number>(0);
 	const userCtx = useContext(UserContext);
 
 	const conversationHandler = () => {
 		setConversation(props.chat.id)
+		props.onSaveConversation(props.chat.id);
+
 	}
 
-	const fetchSender = async() => {
-
-		setLoading(true);
-		const response = await fetch('http://localhost:3000/users/' + props.chat.senderId);
-		const data = await response.json();
-
-		if (!response.ok)
-			throw new Error('Failed to fetch user with id ' + props.chat.senderId);
-		
-		const userFound = {
-			id: data.id,
-			email: data.email,
-			name: data.name,
-			avatar: data.avatar,
-			doubleAuth: data.doubleAuth,
-			wins: data.wins
+	const getSender = () => {
+		if (props.chat.name === "private")
+		{
+			props.chat.members.forEach((member) => {
+				if (member.id != userCtx.user?.id)
+					setSender(member);
+			})
 		}
-		setSender(userFound);
-		setLoading(false);
-		
 	}
+
+	const getLastMessage = () => {
+
+		const messages = props.chat.messages;
+		let latestMessage = null;
+		if (messages.length > 0) {
+			latestMessage = messages.reduce((latest, current) => {
+				return new Date(latest.createdAt) > new Date(current.createdAt) ? latest : current;
+			}, messages[0]);
+
+		}
+		setLastMessage(latestMessage);
+	}
+
 	useEffect(() => {
-		// const user: UserAPI | null = userCtx.fetchUserById(props.chat.senderId);
-		// setSender(user);
-		fetchSender();
+		getSender();
+		getLastMessage();
 		props.onSaveConversation(conversation);
 	}, [conversation]);
 	
-	if (!loading)
-		console.log(sender);
-	console.log('convo id: ', conversation);
-
-
 	return (
 		<div className={classes.container}>
 			<div className={classes.picture}>
-
 			<ProfilIcon user={sender} displayCo={false} size={["4rem", "4rem"]} />
 			</div>
 			<div className={classes.info} onClick={conversationHandler}>
 				<p className={classes.name}>
-					{/* {props.chat.senderId}	 */}
-					{ !loading && sender?.name}
+					{ sender?.name}
 				</p>
 				<p className={classes.lastMessage}>
-					{props.chat.lastMessage}
+					{lastMessage?.content}
 				</p> 
 			</div>
 		</div>
