@@ -16,9 +16,6 @@ export class MessagesService {
 		});
 
 		return newMessage;
-
-
-		return 'This action adds a new message';
 	}
 
 	findAll() {
@@ -33,7 +30,7 @@ export class MessagesService {
 		return `This action updates a #${id} message`;
 	}
 
-	remove(id: number) {
-		return `This action removes a #${id} message`;
+	async remove(id: number) {
+		return await this.prisma.message.delete({ where: { id } });
 	}
 }

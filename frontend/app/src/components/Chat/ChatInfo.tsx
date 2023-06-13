@@ -1,15 +1,16 @@
 import { useContext, useEffect, useState } from "react";
-import { Channel, Message } from "../../pages/Chat";
+import { Channel, MessageAPI } from "../../pages/Chat";
 import classes from '../../sass/components/Chat/ChatInfo.module.scss';
 import ProfilIcon from "../Profile/ProfilIcon";
 import { UserAPI, UserContext } from "../../store/users-contexte";
 
 // const Searchbar: React.FC<{onSaveSearch: (input: string) => void}> = ( props ) => {
 
-const ChatInfo: React.FC<{chat: Channel, onSaveConversation: (channelId: number) => void}> = ( props ) => {
+const ChatInfo: React.FC<{chat: Channel, onSaveConversation: (channelId: number) => void}> 
+	= ( props ) => {
 
 	const [sender, setSender] = useState<UserAPI | null>(null);
-	const [lastMessage, setLastMessage] = useState<Message | null>(null);
+	const [lastMessage, setLastMessage] = useState<MessageAPI | null>(null);
 	const [ conversation, setConversation ] = useState<number>(0);
 	const userCtx = useContext(UserContext);
 
