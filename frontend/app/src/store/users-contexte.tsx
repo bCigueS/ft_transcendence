@@ -13,11 +13,11 @@ export type UserAPI = {
 	avatar: string;
 	doubleAuth: boolean;
 	wins: number;
-	gamesPlayed: number;
-	friends: UserAPI[],
-	block: UserAPI[],
-	matchs: UserMatch[],
-	connected: boolean,
+	gamesPlayed?: number;
+	friends?: UserAPI[],
+	block?: UserAPI[],
+	matchs?: UserMatch[],
+	connected?: boolean,
   };
 
 export const UserContext = React.createContext<{

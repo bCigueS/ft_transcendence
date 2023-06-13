@@ -75,10 +75,21 @@ export class UsersService {
         followerId: id,
       },
     });
+
+	const existingBlock = await this.prisma.block.findFirst({
+		where: {
+			MyId: id,
+			blockedId: followingId,
+		},
+	});
   
     if (existingFriendship) {
       throw new BadRequestException('Friendship already exists.');
     }
+
+	if (existingBlock) {
+		throw new BadRequestException('User is block, can\'t add as friend!');
+	}
 
     const friendship = await this.prisma.friendship.create({
       data: {

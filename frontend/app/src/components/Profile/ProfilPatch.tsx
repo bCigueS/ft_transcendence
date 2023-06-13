@@ -1,4 +1,4 @@
-import React, { FormEvent, useContext } from 'react';
+import React, { FormEvent, useContext, useEffect, useState } from 'react';
 import classes from '../../sass/components/Profile/ProfilPatch.module.scss';
 import ProfilIcon from './ProfilIcon';
 import { UserContext } from '../../store/users-contexte';
@@ -10,11 +10,39 @@ interface PatchUser {
 const PatchForm: React.FC<PatchUser> = ({ onPatchUser }) => {
 
 	const userCtx = useContext(UserContext);
+	const [ enteredText, setEnteredText ] = useState<string>(''); 
+	const [ isChecked, setIsChecked ] = useState<boolean>(false);
+	const [ placeholder, setPlaceholder ] = useState<string>('');
+
+	useEffect(() => {
+		if (userCtx.user?.doubleAuth === true)
+			setIsChecked(true);
+	}, []);
+
+	const doubleAuthHandler = () => {
+		setIsChecked(!isChecked);
+	}
 
 	const handleSubmit = async(event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		const formData = new FormData(event.currentTarget);
-		await onPatchUser(formData);
+		formData.append('auth', String(isChecked));
+		const response = await onPatchUser(formData);
+		setEnteredText('');
+		
+		if (response?.status === 409) {
+			setPlaceholder("Already Exist!");
+			console.log("Error");
+		}
+		
+		if (response?.status === 400) {
+			console.log('response: ', response);
+			setPlaceholder("Name too short!")
+		}
+	}
+
+	const nameHandler = (event: any) => {
+		setEnteredText(event.target.value);
 	}
 
 	return (
@@ -22,12 +50,19 @@ const PatchForm: React.FC<PatchUser> = ({ onPatchUser }) => {
 			<h1>User Information</h1>
 			<div className={classes.label}>
 				<label htmlFor="name">User name</label>
-				<input type="text" id='name' name='name' placeholder='new username' maxLength={12}/>
+				<input 
+					type="text" 
+					id='name' 
+					name='name' 
+					value={enteredText} 
+					onChange={nameHandler}
+					placeholder={placeholder} 
+					maxLength={12}/>
 			</div>
 			<div className={classes.label}>
 				<h2>Double Authentication</h2>
 				<label htmlFor="switch" className={classes.switch}>
-					<input type="checkbox" id='switch' name='auth'/>
+					<input type="checkbox" id='switch' name='auth' checked={isChecked} onChange={doubleAuthHandler} value={isChecked ? 'true' : 'false'}/>
 					<span className={classes.slider}></span>
 				</label>
 			</div>
