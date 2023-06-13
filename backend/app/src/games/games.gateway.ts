@@ -48,7 +48,6 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 						level: lvl,
 					},
 				});
-
 				// update this game by adding a new UserGame with id of user sent change state playing
 				if (matchingGames && matchingGames[0])
 				{
@@ -59,27 +58,29 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 								userId: id,
 							},
 						],
+						socketIds: matchingGames[0].socketIds,
 					};
 					updatedGameDto.socketIds.push(client.id);
-
+					
 					game = await this.gamesService.addPlayer(matchingGames[0].id, updatedGameDto);
+
+				} else {
+					// if no player in pending game state with same level has been found, we create a new game
+					const createGameDto: CreateGameDto = {
+						state: GameState.PENDING,
+						level: lvl,
+						players: [
+							{
+								userId: id,
+							},
+						],
+						socketIds: [client.id],
+					};
+					
+					game = await this.gamesService.create(createGameDto);
+					game = await this.gamesService.assignRoom(game.id, 'pong' + game.id);
+
 				}
-
-				// if no player in pending game state with same level has been found, we create a new game
-				const createGameDto: CreateGameDto = {
-					state: GameState.PENDING,
-					level: lvl,
-					players: [
-						{
-							userId: id,
-						},
-					],
-					socketIds: [client.id],
-				};
-			
-				game = await this.gamesService.create(createGameDto);
-				game = await this.gamesService.assignRoom(game.id, 'pong' + game.id);
-
 			} else {
 				// if gameRoom is provided, then find the game based on the gameRoom
 				game = await this.prisma.game.findUnique({
@@ -100,28 +101,41 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 			}
 			// join a gameRoom
 			client.join(game.room);
-
-			console.log('Succeed joining the room');
+			console.log('Succeed joining the room ' + game.room);
 
 			player = await this.prisma.user.findUnique({
 				where: { id: id },
-			  });
+			});
+
+			// get the game to access the data of the player
+			const currentGame = await this.prisma.game.findUnique({
+				where: { room: game.room },
+				include: { players: true }
+			});
+
+			// get the opponent if opponent is exist
+			let opponentId: number | undefined;
+			if (currentGame && currentGame.state === GameState.PLAYING) {
+				opponentId = currentGame.players.find(p => p.userId !== id)?.userId;
+				opponent = await this.prisma.user.findUnique({
+					where: { id: opponentId },
+				});
+			}
 
 			// send welcome message to player, and also send the opponent player's data (if any)
 			client.emit('welcome', {
 				message: `Hello ${player.name}, Welcome to the game`,
-				opponent,
+				opponent: opponent,
 				gameRoom: game.room,
 			});
-		
-			// tell first player that second player has joined the game
-			client.broadcast.to(game.room).emit('opponentJoin', {
-				message: `${player.name} has joined the game`,
-				opponent: player,
-			});
-
+			
 			// when the room already has 2 players, send a message to both players that they can start the game
-			if ((game.players ?? []).length >= 2) {
+			if (game.state === GameState.PLAYING) {
+				// tell first player that second player has joined the game
+				client.broadcast.to(game.room).emit('opponentJoin', {
+					message: `${player.name} has joined the game`,
+					opponent: player,
+				});
 				this.io.to(game.room).emit('startGame', {
 					message: `Let's start the game!`,
 				});
@@ -198,7 +212,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 		@MessageBody() { gameInfo, gameRoom }: { gameInfo: GameOverInfo, gameRoom: string },
 		@ConnectedSocket() client: Socket,
 		) {
-			console.log('received the disconnect signal');
+			console.log('received the disconnect signal from ' + client.id);
 
 			let game = await this.prisma.game.findUnique({
 				where: { room: gameRoom },
@@ -207,12 +221,10 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 			// change status of the game to FINISHED
 			game = await this.gamesService.gameOver(game.id, GameState.FINISHED);
 
-			// assign the winnerId in the game
-			if (gameInfo.playerStatus === "win") {
-				game = await this.gamesService.assignWinner(game.id, gameInfo.playerId);
-			}
+			// assign playerId as the winnerId in the game
+			game = await this.gamesService.assignWinner(game.id, gameInfo.playerId);
 
-			// update the userGame with the score
+			// update the userGame with the score of the winner
 			const playerUser = await this.prisma.userGame.update({
 				where: { userId_gameId: {
 					userId: gameInfo.playerId, gameId: game.id
@@ -220,40 +232,38 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 				data: { score: gameInfo.playerScore },
 			});
 
-			// if the game is ended because of disconnection of one party, the other party store the score of the opponent as well
-			if (gameInfo.playerStatus === "win" && gameInfo.winnerScore !== gameInfo.playerScore) {
-					const currentGame = await this.prisma.game.findUnique({
-					where: { room: gameRoom },
-					include: { players: true }
-				});
-	
-				let opponentId: number | undefined;
-				if ((currentGame.players ?? []).length === 2) {
-					opponentId = currentGame.players.find(p => p.userId !== gameInfo.playerId)?.userId;
-				}
+			// update the userGame with the score of the opponent
+			const currentGame = await this.prisma.game.findUnique({
+				where: { room: gameRoom },
+				include: { players: true }
+			});
 
-				if (opponentId) {
-					const opponentUser = await this.prisma.userGame.update({
-						where: { userId_gameId: {
-							userId: opponentId, gameId: game.id
-						}},
-						data: { score: gameInfo.opponentScore },
-					});
-				}
+			const opponentId = currentGame.players.find(p => p.userId !== gameInfo.playerId)?.userId;
+
+			if (opponentId) {
+				await this.prisma.userGame.update({
+					where: { userId_gameId: {
+						userId: opponentId, gameId: game.id
+					}},
+					data: { score: gameInfo.opponentScore },
+				});
 			}
 
 			// send message to the other player in the room (if any) that a player just left
 			client.broadcast.to(game.room).emit('opponentLeft', {
-				message: `your opponent has left the game`,
-			});
-
-			// send an additional message to all player in the room to stop the game and make the player that still in the room as a winner of the recent game
-			this.io.to(game.room).emit('stopGame', {
-				message: `Game has ended!`,
+				message: `Your opponent has left the game`,
 			});
 
 			// leave the gameRoom
 			client.leave(game.room);
+	}
+
+	@SubscribeMessage('leaveGameRoom')
+	async handleLeaveGameRoomEvent(
+		@MessageBody() { gameRoom }: {gameRoom: string },
+		@ConnectedSocket() client: Socket,
+		) {
+		client.leave(gameRoom);
 	}
 
 	// receiving a disconnect request, when a connection of a player disrupted
@@ -276,13 +286,8 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 			});
 
 			// if the player is already inside a game
-			if (currentGame) {
-				// send message to the other player in the room (if any) that a player just left
-				client.broadcast.to(currentGame.room).emit('opponentLeft', {
-					message: `your opponent has left the game`,
-				});
-				
-				// send an additional message to all player in the room to stop the game and make the player that still in the room as a winner of the recent game
+			if (currentGame) {		
+				// send a message to all player in the room to stop the game and make the player that still in the room as a winner of the recent game
 				this.io.to(currentGame.room).emit('stopGame', {
 					message: `Game has ended, you won!`,
 				});

@@ -53,7 +53,7 @@ const info: PongInfo = {
 	initialDelta: 3,
 	playerX: 10,
 	opponentX: 620, // boardWidth - paddleWidth - 10,
-	winnerScore: 11,
+	winnerScore: 3,
 }
 
 
@@ -65,7 +65,7 @@ export default function Pong({userId, userName}: PongProps) {
 	const [isReady, setIsReady] = useState(false);
 	const [gameOver, setGameOver] = useState(false);
 	const [winner, setWinner] = useState(0);
-	const [gameRoom, setGameId] = useState(0);
+	const [gameRoom, setGameRoom] = useState(0);
 	// game mode
 	const [toolMode, setToolMode] = useState(MOUSE_MODE);
 	const [level, setLevel] = useState(BEGINNER_LEVEL);
@@ -101,12 +101,12 @@ export default function Pong({userId, userName}: PongProps) {
 			// receive a welcome message from server informing that you are in a specific game room, and trigger a liveBoard
 			socket.on('welcome', ({ message, opponent, gameRoom }) => {
 				console.log({ message, opponent, gameRoom });
-				setGameId(gameRoom);
-				setIsLive(true);
-				setIsReady(false);
 				if (opponent) {
 					setOpponentName(opponent.name);
 				}
+				setGameRoom(gameRoom);
+				setIsLive(true);
+				setIsReady(false);
 			});
 			// receive an information about the opponent from server
 			socket.on('opponentJoin', ({ message, opponent }) => {
@@ -121,6 +121,7 @@ export default function Pong({userId, userName}: PongProps) {
 			// receive a message from a server that an opponent just left the game
 			socket.on('opponentLeft', ({message}) => {
 				console.log({message});
+				socket.emit('leaveGameRoom', {gameRoom: gameRoom});
 			});
 			// receive a message from server to stop the game, and trigger the modalBoard
 			socket.on('stopGame', ({ message }) => {
@@ -135,18 +136,16 @@ export default function Pong({userId, userName}: PongProps) {
 	// function to stop the animation by toggling the isRunning bool, and send a leave request to the server after 1 second
 	const stopGame = () => {
 		setIsRunning(false);
-		if (playerMode === DOUBLE_MODE) {
-			setTimeout(() => {
-				socket.emit('gameOver', {
-					gameInfo: {
-						playerId: userId,
-						playerStatus: (winner === PLAYER_WIN ? "win" : "lose"),
-						playerScore: playerScore,
-						opponentScore: opponentScore,
-						winnerScore: info.winnerScore,
-					}, gameRoom: gameRoom,
-				});
-			}, 1000);
+		if (playerMode === DOUBLE_MODE && playerScore > info.winnerScore) {
+
+			socket.emit('gameOver', {
+				gameInfo: {
+					playerId: userId,
+					playerScore: playerScore,
+					opponentScore: opponentScore,
+				}, 
+				gameRoom: gameRoom,
+			});
 		}
 	}
 	
@@ -310,13 +309,13 @@ export default function Pong({userId, userName}: PongProps) {
 			});
 
 			setOpponentScore(o => o += 1);
-			setTimeout(() => { serve(OPPONENT_SIDE); }, 1000);
+			serve(OPPONENT_SIDE);
 		}
 		//right collision / ball passing the opponent's paddle, so player gains a point
 		if (ballX >= info.boardWidth)
 		{
 			setPlayerScore(p => p += 1);
-			setTimeout(() => { serve(PLAYER_SIDE); }, 1000);
+			serve(PLAYER_SIDE);
 		}
 	}
 	
@@ -478,7 +477,7 @@ export default function Pong({userId, userName}: PongProps) {
 			}
 		}
 
-	}, [toolMode]);
+	}, [toolMode, isRunning]);
 	
 	// mouse event handler
 	useEffect(() => {
@@ -504,7 +503,7 @@ export default function Pong({userId, userName}: PongProps) {
 				}
 			}
 		}
-	}, [toolMode])
+	}, [toolMode, isRunning, gameRoom, paddleHeight, playerMode])
 
 	return (
 		<>
