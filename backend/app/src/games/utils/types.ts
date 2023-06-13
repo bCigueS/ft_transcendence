@@ -13,8 +13,6 @@ export type CollisionInfo = {
 
 export type GameOverInfo = {
 	playerId: number;
-	playerStatus: string;
 	playerScore: number;
 	opponentScore: number;
-	winnerScore: number;
 }
