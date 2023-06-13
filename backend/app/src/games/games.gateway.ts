@@ -175,13 +175,14 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 			// creating a new direction of the ball after it hit a player paddle with ballCollision function
 
 			// the area of the paddle where the ball hits (top/middle/bottom) affect the calculation of the new direction
-			let collisionPoint = (gameInfo.y + (gameInfo.r / 2)) - (gameInfo.playerY + (gameInfo.paddleHeight / 2));
-			collisionPoint = collisionPoint / (gameInfo.paddleHeight / 2);
+			let collisionPoint = (gameInfo.y + (gameInfo.r / 2)) - (gameInfo.squareY + (gameInfo.squareHeight / 2));
+			collisionPoint = collisionPoint / (gameInfo.squareHeight / 2);
 
 			const angle = (Math.PI / 4) * collisionPoint;
 
 			const dx = gameInfo.speed * Math.cos(angle);
 			const dy = gameInfo.speed * Math.sin(angle);
+			const s = gameInfo.speed + 0.5;
 
 			// get the players in the room and send the ball direction to both players (horizontal direction is in reverse/mirror)
 			const rooms = await this.io.in(gameRoom).fetchSockets();
@@ -192,6 +193,9 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 					this.io.to(room.id).emit('ballLaunch', {
 						dx: (room.id === client.id ? dx : dx * -1),
 						dy: dy,
+						x: (room.id === client.id ? gameInfo.x + gameInfo.r : gameInfo.x - gameInfo.r),
+						y: gameInfo.y,
+						s: s,
 					});
 				});
 			}
