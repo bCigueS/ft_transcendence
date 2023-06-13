@@ -1,5 +1,5 @@
 // Basic Inports
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 //	Components Inports
@@ -14,7 +14,7 @@ import Leaderboard, { loader as usersLoader} from './pages/Leaderboard';
 import AuthenticationPage, { action as logginAction } from './pages/Authentication';
 
 import './sass/main.scss';
-import UsersContextProvider from './store/users-contexte';
+import UsersContextProvider, { UserContext } from './store/users-contexte';
 import { checkAuthLoader, checkTokenLoader, action as logoutAction, tokenLoader} from './typescript/Auth';
 
 const router = createBrowserRouter([
