@@ -15,6 +15,7 @@
 }
 
 .logginForm {
+	width: 28rem;
 	@include flexBox();
 	gap: 2rem;
 	@include text-body();
@@ -45,6 +46,36 @@
 			padding: 0 0.8rem ;
 		}
 	
+		&::before {
+			content: '';
+			position: absolute;
+			height: 100%;
+			width: 100%;
+			transform: translateZ(-0.1rem);
+			background: $light-vermillon;
+			z-index: -2;
+			bottom: -0.8rem;
+			left: -0.8rem;
+			transition: all 0.3s;
+			opacity: 1;
+		}
+	}
+
+	.error {
+		position: relative;
+		width: 100%;
+		border: 0.2rem solid black;
+		padding: 1.5rem 1rem;
+		@include flexBox($direction: column, $align: flex-start);
+		position:relative;
+		transform-style: preserve-3d;
+		background-color: $almost-white;
+
+		span {
+			font-weight: 800;
+			font-size: 1.6rem;
+		}
+
 		&::before {
 			content: '';
 			position: absolute;
