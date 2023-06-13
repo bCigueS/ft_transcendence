@@ -22,6 +22,8 @@
     &:hover {
         background-color: $silver-light;
     }
+
+
     
     .picture {
         width: 4rem;
@@ -56,4 +58,8 @@
     }
 
 
+}
+
+.selected {
+	background-color: $silver-light;
 }

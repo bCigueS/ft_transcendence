@@ -12,7 +12,6 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 	const [ isHovering, setIsHovering ] = useState(false);
 	const [ isDeleted, setIsDeleted ] = useState(false);
 
-
 	const whichBubble = () => {
 		if (isMine && isLast)
 			return classes.myLastBubble;
