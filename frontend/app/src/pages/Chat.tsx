@@ -6,21 +6,19 @@ import Message from '../components/Chat/Message';
 import NoConvo from '../components/Chat/NoConvo';
 import io, { Socket } from 'socket.io-client';
 
-export interface Message {
-	createdAt: Date,
-	id: number,
-	senderId: number,
-	// sender: UserAPI,
-	content: string,
-	channelId: number,
-}
-
 export interface Channel {
 	id: number,
 	name: string,
-	messages: Message[],
+	messages: MessageAPI[],
 	members: UserAPI[],
+}
 
+export interface MessageAPI {
+	createdAt: Date,
+	id: number,
+	senderId: number | undefined,
+	content: string,
+	channelId: number,
 }
 
 export default function Chat() {
@@ -29,7 +27,7 @@ export default function Chat() {
 	const [ selectedConversation, setSelectedConversation ] = useState<Channel | null>();
 	const [ chats, setChats ] = useState<Channel[]>([]);
 	const [ socket, setSocket ] = useState<Socket>();
-	const [ messages, setMessages ] = useState<Message[] >([]);
+	const [ messages, setMessages ] = useState<MessageAPI[] >([]);
 
 	const messageInput = useRef<HTMLInputElement>(null);
 	const userCtx = useContext(UserContext);
@@ -43,7 +41,6 @@ export default function Chat() {
 		};
 	  
 		socket?.emit("message", message);
-
 	}
 
 	useEffect(() => {
@@ -55,7 +52,7 @@ export default function Chat() {
 		const newMessage = {
 			id: Math.random(),
 			createdAt: new Date(),
-            senderId: 1,
+            senderId: userCtx.user?.id,
             content: message,
             channelId: selectedConversationId,
         };
@@ -93,40 +90,23 @@ export default function Chat() {
 		if (selectedChannel)
 			setMessages(selectedChannel.messages);
 	}
+
+	const handleDeleteMessage = (message: MessageAPI) => {
+		console.log('about to delete: ', message.content);
+		socket?.emit('')
+
+	}
 	
 	const displayConvo = (chatList: Channel[], channelId: number) => {
 
-		const isMessageMine = (message: Message) => {
-			if (message.senderId === userCtx.user?.id)
-				return true;
-			return false;
-		}
-
-		const isMessageLast = (message: Message, messages: Message[]) => {
-			
-			const messageIndex = messages.findIndex(m => m.id === message.id);
-
-			if (messageIndex === messages.length - 1
-				|| messages[messageIndex + 1].senderId !== message.senderId)
-				return true;
-			return false;
-		}
-			
-		
 		const handleSubmit = (event: { preventDefault: () => void; }) => {
-			
 			event.preventDefault();
-			
 			const enteredText = messageInput.current!.value;
 	
 			if (enteredText.trim().length === 0) {
 				return ;
 			}
-			
 			send(enteredText, selectedConversationId);
-
-			console.log('message input: ', enteredText);
-	
 			messageInput.current!.value = '';
 		  }
 
@@ -137,9 +117,9 @@ export default function Chat() {
 				{
 					messages.map((message) => 
 						<Message key={message.id}
-								isMine={isMessageMine(message)}
-								isLast={isMessageLast(message, messages)} 
-								message={message.content}/>)
+								message={message}
+								messages={messages}
+								onDelete={handleDeleteMessage}/>)
 				}
 
 				<form onSubmit={handleSubmit}>
@@ -157,7 +137,9 @@ export default function Chat() {
 			<div className={classes.conversations}>
 				{
 					chats.map((chat) => (
-					<ChatInfo key={chat.id} chat={chat} onSaveConversation={onSaveConversation}/>
+					<ChatInfo key={chat.id} 
+							chat={chat} 
+							onSaveConversation={onSaveConversation}/>
 				 	))
 				}
 			</div>

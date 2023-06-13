@@ -109,3 +109,28 @@
     }
 
 }
+
+.info {
+	font-size: 1rem;
+	display: flex;
+  	justify-content: space-between;
+	margin-top: 0.5rem;
+
+	.hour {
+
+	}
+
+
+	.delete:hover {
+		stroke: white;
+		stroke-width: 1;
+	}
+}
+
+.date {
+	display: flex;
+    align-items: center;
+    justify-content: center;
+	color: $gunmetal-dark;
+}
+
