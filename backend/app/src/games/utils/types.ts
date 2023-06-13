@@ -4,10 +4,11 @@ export type ServeInfo = {
 }
 
 export type CollisionInfo = {
+	x: number;
 	y: number;
 	r: number;
-	playerY: number;
-	paddleHeight: number;
+	squareY: number;
+	squareHeight: number;
 	speed: number;
 }
 
