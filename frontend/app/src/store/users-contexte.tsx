@@ -246,7 +246,7 @@ type Props = {
 		  
 		useEffect(() => {
 			fetchUser();
-		  }, [fetchUser, userId, user?.name]);
+		  }, [fetchUser, setUserId, userId, user?.name]);
 
 
 		if (loading) {
