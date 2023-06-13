@@ -5,7 +5,6 @@ import ProfilIcon from '../Profile/ProfilIcon';
 import { UserAPI, UserContext } from '../../store/users-contexte';
 
 const LeaderboardProfil: React.FC<{user: UserAPI}> = ( { user }) => {
-	
 
 	const userCtx = useContext(UserContext);
 
@@ -13,16 +12,27 @@ const LeaderboardProfil: React.FC<{user: UserAPI}> = ( { user }) => {
 		const friendId = {
 			friendId: user.id
 		};
-		const response = await fetch('http://localhost:3000/users/' + userCtx.user?.id + '/add-friend', {
-			method: 'PATCH',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(friendId)
-		});
-		if (!response.ok)
-			return ;
-		userCtx.fetchUser();
+
+		try {
+			const response = await fetch('http://localhost:3000/users/' + userCtx.user?.id + '/add-friend', {
+				method: 'PATCH',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(friendId)
+			});
+		
+			if (response.status === 400) {
+				throw new Error("Failed to add friend!") ;
+			}
+
+			if (!response.ok)
+				throw new Error("Failed to add friend!") ;
+			
+			userCtx.fetchUser();
+		} catch (error: any) {
+			console.log(error.message);
+		}
 	};
 
 	const removeFriendHandler = (event: React.MouseEvent<HTMLIFrameElement, MouseEvent>) => {
@@ -34,7 +44,7 @@ const LeaderboardProfil: React.FC<{user: UserAPI}> = ( { user }) => {
 	}
 
 	const isFriend = () => {
-		return userCtx.user?.friends.some(friend => user.id === friend.id) || false;
+		return userCtx.user?.friends?.some(friend => user.id === friend.id) || false;
 	}
 
 	const isSelf = () => {

@@ -180,8 +180,11 @@ export class UsersController {
 				.addFileTypeValidator({
 				fileType: /\.(jpg|png|jpeg)$/i,
 				})
+				.addMaxSizeValidator({
+					maxSize: 589450
+				})
 				.build({
-				errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
+					errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
 			}),
 		) file: Express.Multer.File) {
 		

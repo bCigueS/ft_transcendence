@@ -27,13 +27,14 @@ const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: s
 			state: { message: "Failed to submit form!"}
 		}
 
-		navigate(`/profile/${user?.name.toLowerCase()}`, option);
+		navigate(`/profile/${user?.id}`, option);
 	}
 
 	const fetchAvatar = useCallback(async() => {
 		setLoading(true);
 		setError(null);
-
+		if (user?.id === undefined)
+			return ;
 		try {
 			const response = await fetch('http://localhost:3000/users/' + user?.id + '/avatar');
 			if (response.ok) {
@@ -53,7 +54,6 @@ const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: s
 
 	useEffect(() => {
 		fetchAvatar();
-		console.log("Error in ProfilIcon need to be change", error);
 	}, [fetchAvatar, error]);
 
 	return (

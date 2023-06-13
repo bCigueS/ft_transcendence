@@ -2,7 +2,6 @@ import React, { useContext } from 'react';
 import { UserAPI, UserContext } from '../../store/users-contexte';
 import ProfilPatch from './ProfilPatch';
 import { json } from 'react-router-dom';
-import path from 'path';
 
 
 const ProfilSettings: React.FC<{user: UserAPI | null}> = ( { user } ) => {
@@ -10,26 +9,33 @@ const ProfilSettings: React.FC<{user: UserAPI | null}> = ( { user } ) => {
 	const userCtx = useContext(UserContext);
 
 	const handlePatchUser = async(FormData: any) => {
+
 		const patchData = {
-			name: FormData.get('name'),	
+			name: FormData.get('name') === '' ? userCtx.user?.name : FormData.get('name'),
+			doubleAuth: FormData.get('auth') === 'true' ? true : false,
+			
 		}
 
 		const avatarData = {
 			avatar: FormData.get('avatar'),
 		}
 
-		if (avatarData.avatar) {
+		if (avatarData.avatar.name) {
 			console.log(avatarData.avatar);
 			const avatarResponse = await fetch('http://localhost:3000/users/' + userCtx.user?.id + '/upload-avatar', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: FormData
+				body: avatarData.avatar
 			})
+
+			if (!avatarResponse.ok) {
+				throw new Error("Failed to upload Avatar");
+			}
 		}
 
-		if (patchData.name) {
+		if (patchData) {
 			const response = await fetch('http://localhost:3000/users/' + userCtx.user?.id, {
 				method: 'PATCH',
 				headers: {
@@ -38,7 +44,7 @@ const ProfilSettings: React.FC<{user: UserAPI | null}> = ( { user } ) => {
 				body: JSON.stringify(patchData)
 			});
 			
-			if (response.status === 400) {
+			if (response.status === 409 || response.status === 400) {
 				return response;
 			}
 			
@@ -47,6 +53,7 @@ const ProfilSettings: React.FC<{user: UserAPI | null}> = ( { user } ) => {
 			}
 		}
 
+		window.location.reload();
 		userCtx.fetchUser();
 	}
 
@@ -57,3 +64,12 @@ const ProfilSettings: React.FC<{user: UserAPI | null}> = ( { user } ) => {
 }
 
 export default ProfilSettings;
+
+// export const action = async({ request }: { request: Request }) => {
+// 	const data = await request.formData();
+
+// 	const patchData = {
+// 		name: 
+// 	}
+
+// }
