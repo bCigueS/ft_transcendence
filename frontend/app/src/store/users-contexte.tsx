@@ -246,9 +246,6 @@ type Props = {
 		  
 		useEffect(() => {
 			fetchUser();
-			console.log("User Context, User is: ", user?.name);
-			console.log("User id is: ", userId);
-
 		  }, [fetchUser, userId, user?.name]);
 
 

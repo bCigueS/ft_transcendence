@@ -1,6 +1,8 @@
+// Basic Inports
 import React, { useEffect } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
+//	Components Inports
 import RootLayout from './pages/RootLayout';
 import ErrorPage from './pages/Error';
 import Homepage from './pages/Homepage';
@@ -8,12 +10,11 @@ import ProfilePage from './pages/Profile';
 import PrivateMessagePage from './pages/PrivateMessagePage';
 import ChatPage from './pages/Chat';
 import Game from './pages/Game';
-import Leaderboard from './pages/Leaderboard';
+import Leaderboard, { loader as usersLoader} from './pages/Leaderboard';
+import AuthenticationPage, { action as logginAction } from './pages/Authentication';
 
 import './sass/main.scss';
 import UsersContextProvider from './store/users-contexte';
-import AuthenticationPage from './pages/Authentication';
-import { action as settingAction } from './pages/Profile';
 import { checkAuthLoader, checkTokenLoader, action as logoutAction, tokenLoader} from './typescript/Auth';
 
 const router = createBrowserRouter([
@@ -27,39 +28,27 @@ const router = createBrowserRouter([
 			{
 				index: true,
 				element: <Homepage />,
-				loader: checkAuthLoader,
 			},
 			{
 				path: 'profile/:id',
 				element: <ProfilePage />,
-				action: settingAction,
-				loader: checkAuthLoader,
 			},
 			{
 				path: 'privmessage',
 				element: <PrivateMessagePage />,
-				loader: checkAuthLoader,
 			},
 			{
 				path: 'chat',
 				element: <ChatPage />,
-				loader: checkAuthLoader,
 			},
 			{
 				path: 'pong',
 				element: <Game />,
-				loader: checkAuthLoader,
 			},
 			{
 				path: 'leaderboard',
 				element: <Leaderboard />,
-				loader: checkAuthLoader,
-			},
-			{
-				path: 'auth',
-				element: <AuthenticationPage />,
-				loader: checkTokenLoader,
-				// action: authAction,
+				loader: usersLoader,
 			},
 			{
 				path: 'logout',
@@ -67,18 +56,16 @@ const router = createBrowserRouter([
 			},
 		],
 	},
+	{
+		path: '/auth',
+		element: <AuthenticationPage />,
+		loader: checkTokenLoader,
+		action: logginAction
+	},
 ]);
 
 
 const App: React.FC = () => {
-
-	const tokenDebug = localStorage.getItem('tokenDebug');
-
-	useEffect(() => {
-		if (tokenDebug) {
-			console.log("J'ai le token");
-		}
-	}, [tokenDebug])
 
 	return (
 		<UsersContextProvider className="App">

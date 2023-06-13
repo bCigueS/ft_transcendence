@@ -1,20 +1,32 @@
 import React, { FormEvent } from 'react';
 import classes from '../../sass/components/Auth/AuthForm.module.scss';
+import { Form, useActionData } from 'react-router-dom';
 
 interface AuthFormProps {
 	onAuthenticate: (formData: FormData) => Promise<void | Response>;
 }
 
+interface DataError {
+	statusCode?: number,
+	errors?: string,
+	message?: string,
+}
+
 
 //	PREVIOUS VERSION
 
-const AuthForm: React.FC<AuthFormProps> = ({ onAuthenticate }) => {
+// const AuthForm: React.FC<AuthFormProps> = ({ onAuthenticate }) => {
+const AuthForm: React.FC = () => {
 
-	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-		event.preventDefault();
-		const formData = new FormData(event.currentTarget);
-		await onAuthenticate(formData);
-	}	
+	const data: DataError = useActionData() as DataError;
+
+	// const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+	// 	event.preventDefault();
+	// 	const formData = new FormData(event.currentTarget);
+	// 	await onAuthenticate(formData);
+	// }	
+
+
 	// useEffect(() => {
 	// 	if (window.location.href.includes("code="))
 	// 		setLogCode(window.location.href.split("code=")[1])
@@ -47,10 +59,11 @@ const AuthForm: React.FC<AuthFormProps> = ({ onAuthenticate }) => {
 	// 	}
 	// }, [token, isLogged])
 
-
+	console.log(data);
 	return (
 		<>
-			<form className={classes.logginForm} method='post' onSubmit={handleSubmit}>
+			{/* <Form className={classes.logginForm} method='post' onSubmit={handleSubmit}> */}
+			<Form className={classes.logginForm} method='post'>
 				<h1>Connect Debug</h1>
 				<p>Password is 'lolilolilol'</p>
 				<div className={classes.label}>
@@ -62,8 +75,11 @@ const AuthForm: React.FC<AuthFormProps> = ({ onAuthenticate }) => {
 					<label htmlFor="password">Password</label>
 					<input type="password" name="password" id="password" />
 				</div>
-				<button type="submit">Connect</button>
-			</form>
+				<button>Connect</button>
+				{ data && data.message &&
+					<p className={classes.error}><span>Error {data.statusCode}</span>{data.message}</p>
+				}
+			</Form>
 						
 			{/* {	!isLogged &&
 				<div className={classes.loggin}>
