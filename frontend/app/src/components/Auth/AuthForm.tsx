@@ -1,60 +1,104 @@
-import React, { useEffect } from 'react';
-import { Form, useActionData, useNavigation } from 'react-router-dom';
+import React, { FormEvent } from 'react';
+import classes from '../../sass/components/Auth/AuthForm.module.scss';
+import { Form, useActionData } from 'react-router-dom';
 
-type ActionData = {
-	error: string,
-	message: string,
-	statusCode: number
+interface AuthFormProps {
+	onAuthenticate: (formData: FormData) => Promise<void | Response>;
 }
 
-const AuthForm = () => {
+interface DataError {
+	statusCode?: number,
+	errors?: string,
+	message?: string,
+}
 
-	const data = useActionData() as ActionData;
-	const navigation = useNavigation();
 
-	const isSubmitting = navigation.state === 'submitting';
+//	PREVIOUS VERSION
 
-	const mode: string = "42log";
-	useEffect(() => {
-		console.log(data);
-	}, [data]);
+// const AuthForm: React.FC<AuthFormProps> = ({ onAuthenticate }) => {
+const AuthForm: React.FC = () => {
 
+	const data: DataError = useActionData() as DataError;
+
+	// const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+	// 	event.preventDefault();
+	// 	const formData = new FormData(event.currentTarget);
+	// 	await onAuthenticate(formData);
+	// }	
+
+
+	// useEffect(() => {
+	// 	if (window.location.href.includes("code="))
+	// 		setLogCode(window.location.href.split("code=")[1])
+	// }, [])
+
+	// useEffect(() => {
+	// 	if (logCode !== "") {
+	// 		const fetchToken = async () => {
+	// 			const response = await fetch("http://localhost:3000/auth/me", {
+	// 				method: "POST",
+	// 				headers: {
+	// 				"Content-Type": "application/json"
+	// 				},
+	// 				body: JSON.stringify({code: logCode}),
+	// 			});
+	// 			if (response.ok) {
+	// 				const data = await response.json();
+	// 				setToken(data.token.access_token);
+	// 			}
+	// 		}
+	// 		fetchToken()
+	// 	}
+	// }, [logCode])
+
+	// useEffect(() => {
+	// 	if (token) {
+	// 		userCtx.saveToken(token);
+	// 		setTokenAuth(token);
+	// 		setIsLogged(true);
+	// 	}
+	// }, [token, isLogged])
+
+	console.log(data);
 	return (
-		<div>
-			{	mode !== "42log" &&
-				<Form method='post' >
-					<h1>Log in</h1>
-					<div>
-					<label htmlFor="username">Username</label>
-					<input type="text" id='username' name='username' placeholder='username' required/>
-					</div>
-					<div>
-					<label htmlFor="password">Password</label>
-					<input type="password" id='password' name='password' placeholder='password' required/>
-					</div>
+		<>
+			{/* <Form className={classes.logginForm} method='post' onSubmit={handleSubmit}> */}
+			<Form className={classes.logginForm} method='post'>
+				<h1>Connect Debug</h1>
+				<p>Password is 'lolilolilolilol'</p>
+				<div className={classes.label}>
+					<label htmlFor="name">Username</label>
+					<input type="text" name="name" id="name" />
+				</div>
 
-					<p>
-					{
-						data && data.message && 
-						data.message
-					}
-					</p>	{data && data.error && <ul>
-						{Object.values(data.error).map(err => <li></li>)}
-						</ul>}
+				<div className={classes.label}>
+					<label htmlFor="password">Password</label>
+					<input type="password" name="password" id="password" />
+				</div>
+				<button>Connect</button>
+				{ data && data.message &&
+					<p className={classes.error}><span>Error {data.statusCode}</span>{data.message}</p>
+				}
+			</Form>
 						
-						<button disabled={isSubmitting}>{isSubmitting ? 'Submitting...' : 'LogIn' }</button>
-				</Form>
-			}
-			{
-				mode === "42log" &&
-				<div>
-					<p>Log with 42 API</p>
-					<a href={`http://127.0.0.1:3000/auth/forty-two`}>
-						<button>Log in with 42</button>
+			{/* {	!isLogged &&
+				<div className={classes.loggin}>
+					<a  href={`http://127.0.0.1:3000/auth/forty-two`}>
+					<button 
+						className = {classes.button}>
+							Log in with<br/>
+							<span>42</span>
+					</button>
 					</a>
 				</div>
 			}
-		</div>
+
+			{
+				isLogged &&
+				<ProfilPatch/>
+				// <DoubleAuthPannel />
+			} */}
+		</>
 	)
 }
 

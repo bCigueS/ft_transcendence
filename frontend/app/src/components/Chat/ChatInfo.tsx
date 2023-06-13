@@ -46,7 +46,7 @@ const ChatInfo: React.FC<{chat: Channel, onSaveConversation: (channelId: number)
 	useEffect(() => {
 		getSender();
 		getLastMessage();
-		props.onSaveConversation(conversation);
+		// props.onSaveConversation(conversation);
 	}, [conversation]);
 	
 	return (

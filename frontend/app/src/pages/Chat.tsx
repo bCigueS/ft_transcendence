@@ -32,6 +32,7 @@ export default function Chat() {
 	const messageInput = useRef<HTMLInputElement>(null);
 	const userCtx = useContext(UserContext);
 
+
 	const send = (content: string, selectedConversation: number) => {
 
 		const message = {
@@ -39,27 +40,41 @@ export default function Chat() {
 		  channelId: selectedConversation,
 		  senderId: userCtx.user?.id
 		};
+
+		console.log('sending message: ', content);
+		console.log('message sender: ', message.senderId);
 	  
 		socket?.emit("message", message);
 	}
 
 	useEffect(() => {
+		console.log('in useEffect to connect with socket gateway');
+
 		const newSocket = io("http://localhost:3000/chat");
 		setSocket(newSocket);
 	}, [setSocket])
 
-	const messageListener = (message: string) => {
+	const messageListener = (message: {
+				senderId: number,
+				content: string,
+				channelId: number
+			}) => {
+		console.log('in messageListner with message object: ', message);
 		const newMessage = {
 			id: Math.random(),
 			createdAt: new Date(),
-            senderId: userCtx.user?.id,
-            content: message,
-            channelId: selectedConversationId,
+            senderId: message.senderId,
+            content: message.content,
+            channelId: message.channelId,
         };
 		setMessages([...messages, newMessage]);
+		console.log('new message: ', newMessage.content);
+		console.log(isMine(newMessage) ? 'just sent this new message' : 'I just received a new message.');
 	}
 
 	useEffect(() => {
+		console.log('in useEffect socket for instant message');
+
 		socket?.on("message", messageListener);
 		return () => {
 			socket?.off("message", messageListener);
@@ -67,7 +82,8 @@ export default function Chat() {
 	}, [messageListener])
 
     useEffect(() => {
-        fetch('http://localhost:3000/channels/userId/1')
+		console.log('in useEffect to fetch user channels');
+        fetch('http://localhost:3000/channels/userId/' + userCtx.user?.id)
             .then(response => response.json())
             .then(data => {
                 data.forEach((channel: Channel) => {
@@ -81,12 +97,41 @@ export default function Chat() {
             .catch(err => console.error('An error occurred:', err));
     }, []);
 
+	const isMine = (message: MessageAPI) => {
+		// console.log('message: ', message.content);
+		// if (isMine(message))
+		// 	console.log('message is mine.');
+		// else
+		// 	console.log('message is NOT mine.');
+
+		if (message.senderId === userCtx.user?.id)
+			return (true);
+		return false;
+	}
+
+	const isLast = (message: MessageAPI) => {
+
+		const messageIndex = messages.findIndex(m => m.id === message.id);
+		if (messageIndex === messages.length - 1
+			|| messages[messageIndex + 1].senderId !== message.senderId)
+			return (true);
+		return false;
+	}
+
+	const displayDay = (message: MessageAPI) => {
+		const messageIndex = messages.findIndex(m => m.id === message.id);
+		if (messageIndex === 0
+			|| messages[messageIndex - 1].createdAt.toDateString() !== message.createdAt.toDateString())
+			return (true);
+		return false;
+	}
 
 	const onSaveConversation = (channelId: number) => {
 		setSelectedConversationId(channelId);
 
 		let selectedChannel = chats.find(chat => chat.id === channelId);
 		setSelectedConversation(selectedChannel);
+
 		if (selectedChannel)
 			setMessages(selectedChannel.messages);
 	}
@@ -97,7 +142,7 @@ export default function Chat() {
 
 	}
 	
-	const displayConvo = (chatList: Channel[], channelId: number) => {
+	const displayConvo = () => {
 
 		const handleSubmit = (event: { preventDefault: () => void; }) => {
 			event.preventDefault();
@@ -117,6 +162,9 @@ export default function Chat() {
 				{
 					messages.map((message) => 
 						<Message key={message.id}
+								isMine={isMine(message)}
+								isLast={isLast(message)}
+								displayDay={displayDay(message)}
 								message={message}
 								messages={messages}
 								onDelete={handleDeleteMessage}/>)
@@ -144,7 +192,7 @@ export default function Chat() {
 				}
 			</div>
 			{
-				displayConvo(chats, selectedConversationId)
+				displayConvo()
 			}
 		</div>
 	)

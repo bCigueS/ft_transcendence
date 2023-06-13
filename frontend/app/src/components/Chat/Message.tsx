@@ -5,29 +5,13 @@ import { UserContext } from '../../store/users-contexte';
 import { MessageAPI } from '../../pages/Chat';
 
 
-const Message: React.FC<{ message: MessageAPI, messages: MessageAPI[], onDelete: (message: MessageAPI) => void }> = ( { message, messages, onDelete } ) => {
+const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean, 
+					message: MessageAPI, messages: MessageAPI[], 
+					onDelete: (message: MessageAPI) => void }> = ( { isMine, isLast, displayDay, message, messages, onDelete } ) => {
 
-	const [ isMine, setIsMine ] = useState(false);
-	const [ isLast, setIsLast ] = useState(false);
 	const [ isHovering, setIsHovering ] = useState(false);
-	const [ displayDay, setDisplayDay ] = useState(false);
 	const [ isDeleted, setIsDeleted ] = useState(false);
-	const userCtx = useContext(UserContext);
 
-
-	useEffect(() => {
-		if (message.senderId === userCtx.user?.id)
-			setIsMine(true);
-
-		const messageIndex = messages.findIndex(m => m.id === message.id);
-		if (messageIndex === messages.length - 1
-			|| messages[messageIndex + 1].senderId !== message.senderId)
-			setIsLast(true);
-
-		if (messageIndex === 0
-			|| messages[messageIndex - 1].createdAt.toDateString() !== message.createdAt.toDateString())
-			setDisplayDay(true);
-	}, [message])
 
 	const whichBubble = () => {
 		if (isMine && isLast)

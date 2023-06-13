@@ -42,22 +42,27 @@ export class AuthController {
 			code: code,
 			redirect_uri: `${process.env.REDIRECT_URL}`,
 		};
-		console.log(data_token);
 		try 
 		{
-			const t = await this.httpService.post(url_token, data_token).toPromise();
-			response['token'] = t.data;
+			const token_data = await this.httpService.post(url_token, data_token).toPromise();
+			response['token'] = token_data.data;
 		} catch (error) { 
 			error.response.data.status = 403;
 			throw new HttpException(error.response.data , HttpStatus.FORBIDDEN, { cause: error });
 		}
-		// if (response['token']['access_token'])
-		// {
-		// 	const url_data = 'https://api.intra.42.fr/oauth/token/info';
-		// 	const headersRequest = { 'Authorization': `Bearer ${response['token_response']['access_token']}`};
-		// 	const data_response = await this.httpService.post(url_data, {},  {headers: headersRequest}).toPromise();
-		// 	response['token'] = data_response.data;
-		// }
+		if (response['token']['access_token'])
+		{
+			const url_data = 'https://api.intra.42.fr/v2/me';
+			const headersRequest = { 'Authorization': `Bearer ${response['token']['access_token']}`};
+			try 
+			{
+				const data_response = await this.httpService.get(url_data,  {headers: headersRequest}).toPromise();
+				response['user'] = data_response.data;
+			} catch (error) { 
+				error.status = 403;
+				throw new HttpException(error.response.data , HttpStatus.FORBIDDEN, { cause: error });
+			}	
+		}
 		return (response);
 	}
 }
