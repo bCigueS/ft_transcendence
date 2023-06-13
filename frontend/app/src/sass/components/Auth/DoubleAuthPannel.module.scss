@@ -1,0 +1,37 @@
+@import '../../abstracts/mixin.scss';
+@import '../../abstracts/variables.scss';
+
+
+.container {
+	width: 35rem;
+	height: 50rem;
+	padding: 3rem 5rem;
+
+	border: 0.2rem solid black;
+	position: relative;
+	transform-style: preserve-3d;
+	@include flexBox();
+	@include shadowBox();
+
+	@include text-body();
+
+	h1 {
+		@include titleh1();
+	}
+
+	p {
+		text-align: center;
+		span {
+			font-weight: 800;
+			color: $light-vermillon;
+		}
+	}
+
+	img {
+		width: 25rem;
+		height: 25rem;
+		padding: 2.5rem;
+		border: 0.2rem solid black;
+		@include shadowBox();
+	}
+}

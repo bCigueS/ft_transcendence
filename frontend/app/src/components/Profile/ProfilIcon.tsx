@@ -3,15 +3,12 @@ import { UserAPI } from '../../store/users-contexte';
 import { NavigateOptions, useNavigate } from 'react-router-dom';
 import classes from '../../sass/components/Profile/ProfilIcon.module.scss';
 
-
-
-const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: string[]; border?: boolean}> = ( { user, displayCo = true, size = [], border = false }) => {
-
-	const [ avatar, setAvatar ] = useState('');
+const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: string[]; border?: boolean}> = ( { user, displayCo = true, size = [], border = false}) => {
 	
 	const [ imageUrl, setImageUrl ] = useState<string>('');
 	const [ loading , setLoading ] = useState<boolean>(false);
 	const [ error, setError ] = useState<string | null>(null);
+	const [ inGame, setInGame ] = useState<boolean>(false);
 	const navigate = useNavigate();
 
 	const stylePicture: React.CSSProperties = {
@@ -54,7 +51,8 @@ const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: s
 
 	useEffect(() => {
 		fetchAvatar();
-	}, [fetchAvatar]);
+		console.log("Error in ProfilIcon need to be change", error);
+	}, [fetchAvatar, error]);
 
 	return (
 		<div 
@@ -76,7 +74,7 @@ const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: s
 			{
 				displayCo &&
 				<i 
-					className="fa-solid fa-circle" 
+					className={!inGame ? "fa-solid fa-circle" : "fa-solid fa-table-tennis-paddle-ball"} 
 					style={{color: user?.connected ? 'green' : 'red' }
 					}>
 				</i>
