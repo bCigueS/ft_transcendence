@@ -6,7 +6,7 @@ import { UserAPI, UserContext } from "../../store/users-contexte";
 
 // const Searchbar: React.FC<{onSaveSearch: (input: string) => void}> = ( props ) => {
 
-const ChatInfo: React.FC<{chat: Channel, onSaveConversation: (channelId: number) => void}> 
+const ChatInfo: React.FC<{chat: Channel, isSelected: boolean, onSaveConversation: (channelId: number) => void}> 
 	= ( props ) => {
 
 	const [sender, setSender] = useState<UserAPI | null>(null);
@@ -17,7 +17,6 @@ const ChatInfo: React.FC<{chat: Channel, onSaveConversation: (channelId: number)
 	const conversationHandler = () => {
 		setConversation(props.chat.id)
 		props.onSaveConversation(props.chat.id);
-
 	}
 
 	const getSender = () => {
@@ -46,11 +45,10 @@ const ChatInfo: React.FC<{chat: Channel, onSaveConversation: (channelId: number)
 	useEffect(() => {
 		getSender();
 		getLastMessage();
-		// props.onSaveConversation(conversation);
 	}, [conversation]);
 	
 	return (
-		<div className={classes.container}>
+		<div className={`${classes.container} ${props.isSelected ? classes.selected : ''}`}>
 			<div className={classes.picture}>
 			<ProfilIcon user={sender} displayCo={false} size={["4rem", "4rem"]} />
 			</div>
@@ -58,9 +56,16 @@ const ChatInfo: React.FC<{chat: Channel, onSaveConversation: (channelId: number)
 				<p className={classes.name}>
 					{ sender?.name}
 				</p>
-				<p className={classes.lastMessage}>
-					{lastMessage?.content}
-				</p> 
+				{
+					props.chat.messages.length > 0 ? 
+					<p className={classes.lastMessage}>
+						{lastMessage?.content}
+					</p> 
+					:
+					<p className={classes.lastMessage} style={{fontStyle: 'italic'}}>
+						draft...
+					</p>
+				}
 			</div>
 		</div>
 	)

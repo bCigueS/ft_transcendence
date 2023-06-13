@@ -38,9 +38,7 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 		}
 	});
 
-	
-
-	this.server.emit('message', message);
+	this.server.emit('message', newMessage);
   }
   
   async handleConnection(client: Socket) {
