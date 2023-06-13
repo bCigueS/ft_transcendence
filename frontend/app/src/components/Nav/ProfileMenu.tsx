@@ -35,7 +35,7 @@ const ProfilMenu: React.FC = () => {
 
 	const menuOptions: menuOption[] = [
 		{icon1: 'fa-solid fa-user', icon2: 'fa-solid fa-chevron-right', text: 'Profile', link: '/profile/' + userCtx.user?.id},
-		{icon1: 'fa-solid fa-message', icon2: 'fa-solid fa-chevron-right', text: 'Message', link: '/privmessage'},
+		{icon1: 'fa-solid fa-message', icon2: 'fa-solid fa-chevron-right', text: 'Message', link: '/chat'},
 	]
 
 	return (
