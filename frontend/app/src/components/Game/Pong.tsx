@@ -221,16 +221,6 @@ export default function Pong({userId, userName}: PongProps) {
 	const detectOpponentCollision = async () => {
 		if (ballX + ballRadius >= info.opponentX && ballY > opponentY && ballY < opponentY + paddleHeight) {
 			getNewBallDirection(opponentY, paddleHeight, false);
-			// if (playerMode === DOUBLE_MODE) {
-			// 	// receiving the new ball direction from server
-			// 	socket.on('ballLaunch', ({dx, dy, x, y, s}) => {
-			// 		setDeltaX(dx);
-			// 		setDeltaY(dy);
-			// 		setBallX(x);
-			// 		setBallY(y);
-			// 		setSpeed(s);
-			// 	});
-			// }
 		}
 	}
 
@@ -276,17 +266,6 @@ export default function Pong({userId, userName}: PongProps) {
 			});
 
 			getNewBallDirection(playerY, paddleHeight, true);
-
-			// if (playerMode === DOUBLE_MODE) {
-			// 	// receiving the new ball direction from server
-			// 	socket.on('ballLaunch', ({dx, dy, x, y, s}) => {
-			// 		setDeltaX(dx);
-			// 		setDeltaY(dy);
-			// 		setBallX(x);
-			// 		setBallY(y);
-			// 		setSpeed(s);
-			// 	});
-			// }
 		}
 	}
 	
