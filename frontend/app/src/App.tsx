@@ -1,6 +1,8 @@
-import React from 'react';
-import { createBrowserRouter, RouterProvider} from 'react-router-dom';
+// Basic Inports
+import React, { useContext, useEffect } from 'react';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
+//	Components Inports
 import RootLayout from './pages/RootLayout';
 import ErrorPage from './pages/Error';
 import Homepage from './pages/Homepage';
@@ -8,15 +10,12 @@ import ProfilePage from './pages/Profile';
 import PrivateMessagePage from './pages/PrivateMessagePage';
 import ChatPage from './pages/Chat';
 import Game from './pages/Game';
-import Leaderboard from './pages/Leaderboard';
-import AboutUs from './pages/AboutUs';
-
-import { tokenLoader } from './typescript/auth';
+import Leaderboard, { loader as usersLoader} from './pages/Leaderboard';
+import AuthenticationPage, { action as logginAction } from './pages/Authentication';
 
 import './sass/main.scss';
-import UsersContextProvider from './store/users-contexte';
-import AuthenticationPage, { action as authAction} from './pages/Authentication';
-import { action as settingAction } from './pages/Profile';
+import UsersContextProvider, { UserContext } from './store/users-contexte';
+import { checkAuthLoader, checkTokenLoader, action as logoutAction, tokenLoader} from './typescript/Auth';
 
 const router = createBrowserRouter([
 	{
@@ -26,41 +25,53 @@ const router = createBrowserRouter([
 		id: 'root',
 		loader: tokenLoader,
 		children: [
-			{index: true, element: <Homepage />},
-			// {
-			// 	path: 'profile/me',
-			// 	element: <ProfilePage />,
-			// 	loader: async () => {
-			// 		const response = await fetch('http://localhost:3000/users/1');
-			// 		const data = await response.json();
-			// 		console.log('Loader');
-			// 		return data.id;
-			// 	},
-			// 	// action: settingAction
-			// },
+			{
+				index: true,
+				element: <Homepage />,
+			},
 			{
 				path: 'profile/:id',
 				element: <ProfilePage />,
-				action: settingAction
 			},
-			{path: 'privmessage', element: <PrivateMessagePage />},
-			{path: 'chat', element: <ChatPage />},
-			{path: 'pong', element: <Game />},
-			{path: 'leaderboard', element: <Leaderboard />},
-			{path: 'about-us', element: <AboutUs />},
-			{path: 'auth', element: <AuthenticationPage />, action: authAction},
-		]
-	}
-])
+			{
+				path: 'privmessage',
+				element: <PrivateMessagePage />,
+			},
+			{
+				path: 'chat',
+				element: <ChatPage />,
+			},
+			{
+				path: 'pong',
+				element: <Game />,
+			},
+			{
+				path: 'leaderboard',
+				element: <Leaderboard />,
+				loader: usersLoader,
+			},
+			{
+				path: 'logout',
+				action: logoutAction,
+			},
+		],
+	},
+	{
+		path: '/auth',
+		element: <AuthenticationPage />,
+		loader: checkTokenLoader,
+		action: logginAction
+	},
+]);
 
 
 const App: React.FC = () => {
 
 	return (
 		<UsersContextProvider className="App">
-			<RouterProvider router={ router } />
+			<RouterProvider router={router} />
 		</UsersContextProvider>
 	);
-}
+};
 
 export default App;

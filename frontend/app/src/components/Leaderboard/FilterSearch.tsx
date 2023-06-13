@@ -55,7 +55,7 @@ const FilterSearch: React.FC<{onSaveFilter: (input: string) => void}> = ( props 
 				></i>
 			{
 				menuOpen && (
-					<div className={classes.menu}>
+					<div className={classes.item}>
 						<ul>
 							{
 								filterOption.map(item => (

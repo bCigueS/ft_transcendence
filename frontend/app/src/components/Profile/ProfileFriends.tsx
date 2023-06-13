@@ -45,6 +45,11 @@ const ProfileFriends: React.FC<{user: UserAPI; block: boolean; friend: boolean}>
 					onClick={removeFriendHandler}
 					className={props.friend ? 'fa-solid fa-user-minus' : 'fa-solid fa-user-plus'}>
 				</i>
+
+				<i
+					title='Game'
+					className='fa-solid fa-table-tennis-paddle-ball'>
+				</i>
 			</div>
 		</div>
 	)

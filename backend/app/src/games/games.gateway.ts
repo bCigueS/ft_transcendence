@@ -65,16 +65,6 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection {
 				message: `Let's start the game!`,
 			});
 		}
-
-		// const createGameDto: CreateGameDto = {
-		// 	type: "double",
-		// 	level: level,
-		// 	players: /* fill this */,
-		// };
-
-		// const newGame = await this.gamesService.create(createGameDto);
-
-
 	});
 
 	// receiving a startBall request to inform the server to start a calculation for the direction of the ball to the players

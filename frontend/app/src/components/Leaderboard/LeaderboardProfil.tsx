@@ -74,6 +74,7 @@ const LeaderboardProfil: React.FC<{user: UserAPI}> = ( { user }) => {
 					className='fa-solid fa-table-tennis-paddle-ball'
 					style={ isSelf() ? {color: 'gray'} : {}} 
 				></i>
+				
 			</div>
 		</div>
 	)
