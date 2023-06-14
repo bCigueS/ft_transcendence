@@ -6,7 +6,7 @@ import { UserAPI, UserContext } from "../../store/users-contexte";
 
 // const Searchbar: React.FC<{onSaveSearch: (input: string) => void}> = ( props ) => {
 
-const ChatInfo: React.FC<{chat: Channel, isSelected: boolean, onSaveConversation: (channelId: number) => void}> 
+const ChatInfo: React.FC<{chats: Channel[], chat: Channel, isSelected: boolean, onSaveConversation: (channel: Channel) => void}> 
 	= ( props ) => {
 
 	const [sender, setSender] = useState<UserAPI | null>(null);
@@ -16,7 +16,7 @@ const ChatInfo: React.FC<{chat: Channel, isSelected: boolean, onSaveConversation
 
 	const conversationHandler = () => {
 		setConversation(props.chat.id)
-		props.onSaveConversation(props.chat.id);
+		props.onSaveConversation(props.chat);
 	}
 
 	const getSender = () => {
@@ -45,7 +45,7 @@ const ChatInfo: React.FC<{chat: Channel, isSelected: boolean, onSaveConversation
 	useEffect(() => {
 		getSender();
 		getLastMessage();
-	}, [conversation]);
+	}, [conversation, props.chats]);
 	
 	return (
 		<div className={`${classes.container} ${props.isSelected ? classes.selected : ''}`}>
