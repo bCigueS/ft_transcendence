@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { LiveBoardProps, State } from './utils/types';
-import classes from '../../sass/components/Game/Liveboard.module.scss';
+import classes from '../../sass/components/Game/Board.module.scss';
 
 
 
