@@ -157,6 +157,18 @@ export class UsersController {
 		return this.usersService.showBlockedUsers(id);
 	}
 
+	@Get(':id/show-haters')
+	// @UseGuards(JwtAuthGuard)
+	// @ApiBearerAuth()
+	@ApiOkResponse({ type: UserEntity })
+	async seeHaters(@Param('id', ParseIntPipe) id: number) {
+		const user = await this.usersService.findOne(id);
+		if (!user)
+			throw new NotFoundException(`User with ${id} does not exist.`);
+
+		return this.usersService.showHaters(id);
+	}
+
 	@Get(':id/show-community')
 	// @UseGuards(JwtAuthGuard)
 	// @ApiBearerAuth()
@@ -180,8 +192,11 @@ export class UsersController {
 				.addFileTypeValidator({
 				fileType: /\.(jpg|png|jpeg)$/i,
 				})
+				.addMaxSizeValidator({
+					maxSize: 589450
+				})
 				.build({
-				errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
+					errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
 			}),
 		) file: Express.Multer.File) {
 		
