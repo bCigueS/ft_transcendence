@@ -62,7 +62,6 @@ const LeaderboardProfil: React.FC<{user: UserAPI}> = ( { user }) => {
 	}
 
 	const handleClickMessage = () => {
-		console.log('clicked on message');
 
 		navigate('/chat', {
 			state: {
