@@ -9,8 +9,9 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { GameEntity } from './entities/game.entity';
 import { UsersService } from '../users/users.service';
 
-import { ServeInfo, CollisionInfo, GameOverInfo } from './utils/types';
+import { ServeInfo, CollisionInfo, GameOverInfo, ScoreInfo } from './utils/types';
 import { GameState } from '@prisma/client';
+import { MiddlewareBuilder } from '@nestjs/core';
 
 @WebSocketGateway({ namespace: '/pong' })
 export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -166,6 +167,26 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 			}
 	}
 
+	// receiving a updateScore request to inform the server that one side gains one points
+	@SubscribeMessage('updateScore')
+	async handleUpdateScorelEvent(
+		@MessageBody() { gameInfo, gameRoom }: { gameInfo: ScoreInfo, gameRoom: string },
+		@ConnectedSocket() client: Socket,
+		) {
+			// get the players in the room and send the ball direction to both players (horizontal direction is in reverse/mirror)
+			const rooms = await this.io.in(gameRoom).fetchSockets();
+
+			if (rooms) {
+				rooms.forEach((room) => {
+					// Access the properties or perform operations on each socket
+					this.io.to(room.id).emit('newScore', {
+						pScore: (room.id === client.id ? gameInfo.playerScore : gameInfo.opponentScore + 1),
+						oScore: (room.id === client.id ? gameInfo.opponentScore + 1 : gameInfo.playerScore),
+					});
+				});
+			}
+	}
+
 	// receiving a ballCollision request to inform the server that the ball hit a paddle of the player and need a new ball direction
 	@SubscribeMessage('ballCollision')
 	async handleBallCollisionEvent(
@@ -184,6 +205,9 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 			const dy = gameInfo.speed * Math.sin(angle);
 			const s = gameInfo.speed + 0.5;
 
+			const dist = (gameInfo.x > gameInfo.middleBoard ? gameInfo.x - gameInfo.middleBoard : gameInfo.middleBoard - (gameInfo.x - gameInfo.r));
+			const opponentX = (gameInfo.x > gameInfo.middleBoard ? gameInfo.middleBoard - dist : gameInfo.middleBoard + dist);
+
 			// get the players in the room and send the ball direction to both players (horizontal direction is in reverse/mirror)
 			const rooms = await this.io.in(gameRoom).fetchSockets();
 
@@ -193,7 +217,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 					this.io.to(room.id).emit('ballLaunch', {
 						dx: (room.id === client.id ? dx : dx * -1),
 						dy: dy,
-						x: (room.id === client.id ? gameInfo.x + gameInfo.r : gameInfo.x - gameInfo.r),
+						x: (room.id === client.id ? gameInfo.x + gameInfo.r : opponentX - gameInfo.r),
 						y: gameInfo.y,
 						s: s,
 					});
