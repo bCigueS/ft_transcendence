@@ -5,7 +5,7 @@ import { UserAPI, UserContext } from '../store/users-contexte';
 import Message from '../components/Chat/Message';
 import NoConvo from '../components/Chat/NoConvo';
 import io, { Socket } from 'socket.io-client';
-import { useLocation } from 'react-router-dom';
+import { json, useLocation } from 'react-router-dom';
 
 export interface Channel {
 	id: number,
@@ -69,13 +69,64 @@ export default function Chat() {
 		const newSocket = io("http://localhost:3000/chat");
 		setSocket(newSocket);
 	}, [setSocket])
+
+	const createNewChannel = async () => {
+
+		let senderId;
+
+		const newChat = chats.find(chat =>
+			chat.id === -1);
+
+		newChat?.members.forEach((member) => {
+			if (member.id != userCtx.user?.id)
+				senderId = member.id;
+		})
+
+		const chanData = {
+			name: "private",
+			members: [
+			  {
+				userId: userCtx?.user?.id
+			  },
+			  {
+				userId: senderId
+			  }
+			]
+		}
+
+		const response = await fetch('http://localhost:3000/channels', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(chanData)
+		});
 	
-	const send = (content: string, selectedConversation: number) => {
+		if (response.status === 422 || response.status === 400 || response.status === 401 || response.status === 404) {
+			return response;
+		}
+	
+		if (!response.ok) {
+			throw json({message: "Could not create new channel."}, {status: 500});
+		}
+	
+		const resData = await response.json();
+		return resData;
+	}
+	
+	const send = async (content: string, selectedConversation: number) => {
 		const message = {
 		  content: content,
 		  channelId: selectedConversation,
 		  senderId: userCtx.user?.id
 		};
+
+		if (selectedConversation == -1)
+		{
+			const newChan = await createNewChannel();
+			message.channelId = newChan.id;
+		}
+
 		socket?.emit("message", message);
 	}
 

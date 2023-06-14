@@ -23,7 +23,7 @@ export class ChannelsController {
 		const chan = this.channelsService.findOne(id);
 
 		if (!chan)
-		throw new NotFoundException(`Channel with ${id} does not exist.`);
+			throw new NotFoundException(`Channel with ${id} does not exist.`);
 		
 		return chan;
 	}

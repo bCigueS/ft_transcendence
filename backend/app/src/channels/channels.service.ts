@@ -19,22 +19,23 @@ export class ChannelsService {
       data: { name },
     });
 
-    for (const msg of messages) {
-      const messageDto: CreateMessageDto = { 
-        content: msg.content, 
-        senderId: msg.senderId,
-		channelId: channel.id
-      };
-
-      console.log("message content: ", messageDto.content);
-      console.log("message senderId: ", messageDto.senderId);
-      await this.prisma.message.create({
-        data: {
-          ...messageDto,
-        },
-      });
+    if (messages && messages.length > 0)
+    {
+      for (const msg of messages) {
+        const messageDto: CreateMessageDto = { 
+          content: msg.content, 
+          senderId: msg.senderId,
+          channelId: channel.id
+        };
+    
+        await this.prisma.message.create({
+          data: {
+            ...messageDto,
+          },
+        });
+      }
     }
-
+      
     for (const member of members) {
       const memberDto: CreateChannelMembershipDto = { userId: member.userId };
       await this.prisma.channelMembership.create({
@@ -49,7 +50,12 @@ export class ChannelsService {
   }
 
   async findAll() {
-    return await this.prisma.channel.findMany();
+    return await this.prisma.channel.findMany({
+      include: {
+        messages: true,
+        members: true,
+      }
+    });
   }
 
   async findOne(id: number) {

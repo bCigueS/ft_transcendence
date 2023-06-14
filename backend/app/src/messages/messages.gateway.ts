@@ -28,7 +28,8 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 				channelId: number,
 				senderId: number }): Promise<void> {
 
-	console.log('message: ', message);
+	console.log('in message gateway, message: ', message);
+
 
 	const newMessage = await this.prisma.message.create({
 		data: {
