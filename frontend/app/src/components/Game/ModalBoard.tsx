@@ -1,16 +1,6 @@
 import { useState } from 'react';
+import { ModalProps } from './utils/types';
 import classes from  '../../sass/components/Game/Modal.module.scss';
-import '../../sass/components/Game/Modal.module.scss';
-
-
-type ModalProps = {
-	buttonText: string;
-	text: string;
-	onStartPage(): void;
-	onTool(mode: "keyboard" | "mouse"): void;
-	onDifficulty(level: 0 | 1 | 2 | 3): void;
-	onPlayerMode(mode: "single" | "double"): void;
-}
 
 export default function ModalBoard({ onDifficulty, onTool, onPlayerMode, onStartPage, buttonText, text }: ModalProps) {
 	const [isStarting, setIsStarting] = useState(buttonText === "Start playing" ? true : false);
