@@ -4,6 +4,8 @@ import ModalBoard from './ModalBoard';
 import LiveBoard from './LiveBoard';
 import classes from '../../sass/components/Game/Pong.module.scss';
 import io from 'socket.io-client';
+import PausedBoard from './PausedBoard';
+import DoubleAuthPannel from '../Auth/DoubleAuthPannel';
 
 
 const socket = io('http://localhost:3000/pong', {
@@ -216,18 +218,20 @@ export default function Pong({userId, userName}: PongProp) {
 		if (ballX <= info.obstacleX + info.obstacleWidth
 			&& ballX >= info.boardWidth / 2 && ballX < info.opponentX
 			&& ballY > obstacleY && ballY < obstacleY + info.obstacleHeight) {
-				// send a signal to server to start calculating a new direction of the ball
-				socket.emit('ballCollision', {
-					gameInfo: {
-						x: ballX,
-						y: ballY,
-						r: ballRadius,
-						squareY: obstacleY,
-						squareHeight: info.obstacleHeight,
-						speed: speed,
-						middleBoard: info.boardWidth / 2,
-					}, gameRoom: gameRoom,
-				})
+				if (playerMode === DOUBLE_MODE) {
+					// send a signal to server to start calculating a new direction of the ball
+					socket.emit('ballCollision', {
+						gameInfo: {
+							x: ballX,
+							y: ballY,
+							r: ballRadius,
+							squareY: obstacleY,
+							squareHeight: info.obstacleHeight,
+							speed: speed,
+							middleBoard: info.boardWidth / 2,
+						}, gameRoom: gameRoom,
+					});
+				}
 
 				// if the game is against computer, the calculation for the new direction is directly in the front
 				if (playerMode === SINGLE_MODE) {
@@ -253,18 +257,20 @@ export default function Pong({userId, userName}: PongProp) {
 	// function to detect when a ball hit the paddle of the player side
 	const detectPlayerCollision = async () => {
 		if (ballX - ballRadius <= info.playerX + info.paddleWidth && ballY > playerY && ballY < playerY + paddleHeight) {
-			// send a signal to server to start calculating a new direction of the ball
-			socket.emit('ballCollision', {
-				gameInfo: {
-					x: ballX,
-					y: ballY,
-					r: ballRadius,
-					squareY: playerY,
-					squareHeight: paddleHeight,
-					speed: speed,
-					middleBoard: info.boardWidth / 2,
-				}, gameRoom: gameRoom,
-			});
+			if (playerMode === DOUBLE_MODE) {
+				// send a signal to server to start calculating a new direction of the ball
+				socket.emit('ballCollision', {
+					gameInfo: {
+						x: ballX,
+						y: ballY,
+						r: ballRadius,
+						squareY: playerY,
+						squareHeight: paddleHeight,
+						speed: speed,
+						middleBoard: info.boardWidth / 2,
+					}, gameRoom: gameRoom,
+				});
+			}
 
 			// if the game is against computer, the calculation for the new direction is directly in the front
 			if (playerMode === SINGLE_MODE) {
@@ -336,13 +342,15 @@ export default function Pong({userId, userName}: PongProp) {
 			setGameOver(false);
 		}
 		
-		// send a signal to server to start a calculation of the ball direction to start the round
-		socket.emit('startBall', {
-			gameInfo: {
-				initialDelta: info.initialDelta,
-				level: level,
-			}, gameRoom: gameRoom,
-		});
+		if (playerMode === DOUBLE_MODE) {
+			// send a signal to server to start a calculation of the ball direction to start the round
+			socket.emit('startBall', {
+				gameInfo: {
+					initialDelta: info.initialDelta,
+					level: level,
+				}, gameRoom: gameRoom,
+			});
+		}
 		
 		// call serve function to set the ball values
 		serve(side);
@@ -367,20 +375,22 @@ export default function Pong({userId, userName}: PongProp) {
 		}
 		// left collision / ball passing the player's paddle, so opponent gains a point
 		if (ballX <= 0) {
-			// send signal to server to calculate the ball direction for a new round
-			socket.emit('startBall', {
-				gameInfo: {
-					initialDelta: info.initialDelta,
-					level: level,
-				}, gameRoom: gameRoom,
-			});
-
-			socket.emit('updateScore', {
-				gameInfo: {
-					playerScore: playerScore,
-					opponentScore: opponentScore,
-				}, gameRoom: gameRoom,
-			});
+			if (playerMode === DOUBLE_MODE) {
+				// send signal to server to calculate the ball direction for a new round
+				socket.emit('startBall', {
+					gameInfo: {
+						initialDelta: info.initialDelta,
+						level: level,
+					}, gameRoom: gameRoom,
+				});
+				// send signal to server to inform am update on the scores
+				socket.emit('updateScore', {
+					gameInfo: {
+						playerScore: playerScore,
+						opponentScore: opponentScore,
+					}, gameRoom: gameRoom,
+				});
+			}
 
 			if (playerMode === SINGLE_MODE) {
 				setOpponentScore(o => o += 1);
@@ -514,7 +524,7 @@ export default function Pong({userId, userName}: PongProp) {
 		
 		drawBoard(context);
 		// start animation
-		if (isRunning) {
+		if (isRunning && !isPaused) {
 			drawElement(context);
 			moveBall();
 			movePlayer();
@@ -537,45 +547,43 @@ export default function Pong({userId, userName}: PongProp) {
 	
 	// update the frameCount
 	useLayoutEffect(() => {
-		// set frame per second
 		const fps = 24;
 		let frameId: number;
-		if (!isPaused) {
-	
-			const render = () => {
-				setTimeout(() => {
-					setFrameCount(fc => fc + 1);
-					frameId = requestAnimationFrame(render);
-				}, 1000 / fps);
-			}
-	
-			render();
-			
-			return () => {window.cancelAnimationFrame(frameId);}
+
+		const render = () => {
+			setTimeout(() => {
+				setFrameCount(fc => fc + 1);
+				frameId = requestAnimationFrame(render);
+			}, 1000 / fps);
 		}
-	}, [isPaused]);
+
+		frameId = requestAnimationFrame(render);
+		
+		return () => {window.cancelAnimationFrame(frameId);}
+	}, []);
 
 	// keyboard event handler
 	useEffect(() => {
-
 		window.onkeydown = function(event) {
-			if (toolMode === KEYBOARD_MODE && isRunning)
-			{
-				if (event.code === "ArrowUp") {
-					setPaddleUp(true);
-				}
-				if (event.code === "ArrowDown") {
-					setPaddleDown(true);
+			if (isRunning) {
+				if (toolMode === KEYBOARD_MODE)
+				{
+					if (event.code === "ArrowUp") {
+						setPaddleUp(true);
+					}
+					if (event.code === "ArrowDown") {
+						setPaddleDown(true);
+					}
 				}
 				if (event.code === "Space") {
-					socket.emit('pressPause', gameRoom);
+					if (playerMode === DOUBLE_MODE) {
+						socket.emit('pressPause', gameRoom);
+					}
 	
 					setIsPaused(current => !current);
 				}
 			}
-
 		}
-
 		window.onkeyup = function(event) {
 			if (toolMode === KEYBOARD_MODE && isRunning)
 			{
@@ -614,7 +622,7 @@ export default function Pong({userId, userName}: PongProp) {
 				}
 			}
 		}
-	}, [toolMode, isRunning, gameRoom, paddleHeight, playerMode])
+	}, [toolMode, isRunning, gameRoom, paddleHeight, playerMode]);
 
 	return (
 		<>
@@ -635,6 +643,9 @@ export default function Pong({userId, userName}: PongProp) {
 					buttonText={gameOver ? "Play again" : "Start playing"}
 					text={winner === PLAYER_WIN ? "You wins!" : "You lose!"}
 				/>
+			)}
+			{(isPaused) && (
+				<PausedBoard/>
 			)}
 			<div className={classes.container}>
 				<div className={classes.divider_line}></div>
