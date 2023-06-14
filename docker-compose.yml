@@ -12,7 +12,7 @@ services:
     networks:
       - transendance
     healthcheck:
-      test: PGPASSWORD=123 psql -h "database" -U "postgres" -d "postgres" -c '\q'
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 1s
       retries: 20

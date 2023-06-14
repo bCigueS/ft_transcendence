@@ -64,12 +64,3 @@ const ProfilSettings: React.FC<{user: UserAPI | null}> = ( { user } ) => {
 }
 
 export default ProfilSettings;
-
-// export const action = async({ request }: { request: Request }) => {
-// 	const data = await request.formData();
-
-// 	const patchData = {
-// 		name: 
-// 	}
-
-// }

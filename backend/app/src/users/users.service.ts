@@ -33,6 +33,9 @@ export class UsersService {
       }    
     });
 
+    if (!user)
+      return null;
+
     return toSafeUser(user);
   }
 
@@ -48,16 +51,9 @@ export class UsersService {
 
   async remove(id: number) {
 
-    // await this.prisma.friendship.deleteMany({
-    //   where: {
-    //     OR: [
-    //       { followerId: id },
-    //       { followingId: id }
-    //     ]
-    //   }
-    // });
     const deletedUser = await this.prisma.user.delete({ where: { id } });
     return toSafeUser(deletedUser);
+    
   }
 
   async addFriend(id: number, followingId: number) {
@@ -179,7 +175,7 @@ export class UsersService {
       },
       include: {
         blocked: true,
-        // followers: true
+        // haters: true
       }
     });
 
@@ -215,8 +211,6 @@ export class UsersService {
 
   async showBlockedUsers(id: number) {
   
-    const user = await this.prisma.user.findUnique({ where: { id: id } });
-
     const blockings = await this.prisma.block.findMany({
       where: {
         MyId: id,
@@ -232,6 +226,23 @@ export class UsersService {
     return blockedUsers.map(toSafeUser);
   }
 
+  async showHaters(id: number) {
+  
+    const blockings = await this.prisma.block.findMany({
+      where: {
+        blockedId: id,
+      },
+      include: {
+        // blocked: true,
+        haters: true,
+      },
+    });
+
+    const haters = blockings.map((hater) => hater.haters);
+
+    return haters.map(toSafeUser);
+  }
+
   async showCommunity(id: number) {
   
     const user = await this.prisma.user.findMany({ 
@@ -239,8 +250,10 @@ export class UsersService {
     });
 
     const blocked = await this.showBlockedUsers(id);
+	const haters = await this.showHaters(id);
 
     const blockedUserIds = blocked.map((block) => block.id);
+	const hatersUserIds = haters
 
     const community = await this.prisma.user.findMany({
       where: {
