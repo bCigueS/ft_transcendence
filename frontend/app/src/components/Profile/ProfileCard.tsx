@@ -1,11 +1,13 @@
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 
-import { UserAPI } from '../../store/users-contexte';
+import { UserAPI, UserContext } from '../../store/users-contexte';
 
 import classes from '../../sass/components/Profile/ProfileCardInfo.module.scss';
 import ProfilIcon from './ProfilIcon';
 
 const ProfileCard: React.FC<{ user?: UserAPI | null}> = ( { user } ) => {
+
+	const userCtx = useContext(UserContext);
 
 	return (
 		<div className={classes.container}>
