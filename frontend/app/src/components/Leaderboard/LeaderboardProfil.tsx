@@ -3,10 +3,12 @@ import React, { useContext } from 'react';
 import classes from '../../sass/components/Leaderboard/LeaderboardProfil.module.scss';
 import ProfilIcon from '../Profile/ProfilIcon';
 import { UserAPI, UserContext } from '../../store/users-contexte';
+import { useNavigate } from 'react-router-dom';
 
 const LeaderboardProfil: React.FC<{user: UserAPI}> = ( { user }) => {
 
 	const userCtx = useContext(UserContext);
+	const navigate = useNavigate();
 
 	const fetchAddFriend = async () => {
 		const friendId = {
@@ -69,13 +71,23 @@ const LeaderboardProfil: React.FC<{user: UserAPI}> = ( { user }) => {
 		}
 	}
 
+	const handleClickMessage = () => {
+
+		navigate('/chat', {
+			state: {
+				newChat: user
+			}
+		});
+		
+	}
+
 	return (
 		<div className={classes.container}>
 			<ProfilIcon user={user}/>
 			<p>{user.name}</p>
 			<div className={classes.icon}>
 				<i className='fa-solid fa-trophy'>: {user.wins}</i>
-				<i 
+				<i onClick={handleClickMessage}
 					className='fa-solid fa-message'
 					style={ isSelf() ? {color: 'gray'} : {}} 
 				></i>

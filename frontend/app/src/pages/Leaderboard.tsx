@@ -50,6 +50,10 @@ export default function Leaderboard() {
 		user.name.toLowerCase().slice(0, searchInput.length).includes(searchInput.toLowerCase())
 	));
 
+	const fetchBlockUser = async() => {
+		
+	}
+
 	return (
 		<div className={classes.page}>
 			<div className={classes.searchbar}>
