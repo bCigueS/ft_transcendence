@@ -1,19 +1,10 @@
 import { useState, useEffect } from 'react';
+import { LiveBoardProps, State } from './utils/types';
 import classes from '../../sass/components/Game/Liveboard.module.scss';
 
-type LiveBoardProps = {
-	isReady: boolean;
-	userName: string;
-	opponentName: string;
-	start(): void;
-}
 
-interface State {
-	time: number;
-	seconds: number;
-}
 
-export default function LiveBoard({ isReady, userName, opponentName, start }: LiveBoardProps) {
+export default function LiveBoard({ isReady, playerName, opponentName, start }: LiveBoardProps) {
 	const [state, setState] = useState<State>({
 		time: 3,
 		seconds: 3,
@@ -50,7 +41,7 @@ export default function LiveBoard({ isReady, userName, opponentName, start }: Li
 				)}
 				{isReady && (
 					<>
-						<h1>{userName} VS {opponentName}</h1>
+						<h1>{playerName} VS {opponentName}</h1>
 						<h2>{state.seconds}</h2>
 					</>
 				)}
