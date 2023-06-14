@@ -10,6 +10,12 @@ export type CollisionInfo = {
 	squareY: number;
 	squareHeight: number;
 	speed: number;
+	middleBoard: number;
+}
+
+export type ScoreInfo = {
+	playerScore: number;
+	opponentScore: number;
 }
 
 export type GameOverInfo = {

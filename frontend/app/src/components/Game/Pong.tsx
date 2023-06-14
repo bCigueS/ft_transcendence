@@ -72,7 +72,7 @@ const info: PongInfo = {
 	paddleWidth: 10,
 	obstacleWidth: 20,
 	obstacleHeight: 150,
-	obstacleSpeed: 15,
+	obstacleSpeed: 12,
 	initialSpeed: 5,
 	initialDelta: 3,
 	playerX: 10,
@@ -194,33 +194,28 @@ export default function Pong({userId, userName}: PongProps) {
 
 		return {dx, dy, x, s};
 	}
-
-	const getNewBallDirection = async (squareY: number, squareHeight: number, add: boolean) => {
-		// if the game is against computer, the calculation for the new direction is directly in the front
-		if (playerMode === SINGLE_MODE) {
-			const {dx, dy, x, s} = await ballCollision(squareY, squareHeight, add);
-			
-			add === true ? setDeltaX(dx) : setDeltaX(dx * -1);
-			setDeltaY(dy);
-			setBallX(x);
-			setSpeed(s);
-		// if the game is against other player, calculation will be done by server
-		} else if (playerMode === DOUBLE_MODE) {
-			// receiving the new ball direction from server
-			socket.on('ballLaunch', ({dx, dy, x, y, s}) => {
-				setDeltaX(dx);
-				setDeltaY(dy);
-				setBallX(x);
-				setBallY(y);
-				setSpeed(s);
-			});
-		}
-	}
 	
 	// function to detect when a ball hit the paddle of the opponent side
 	const detectOpponentCollision = async () => {
 		if (ballX + ballRadius >= info.opponentX && ballY > opponentY && ballY < opponentY + paddleHeight) {
-			getNewBallDirection(opponentY, paddleHeight, false);
+			// if the game is against computer, the calculation for the new direction is directly in the front
+			if (playerMode === SINGLE_MODE) {
+				const {dx, dy, x, s} = await ballCollision(opponentY, paddleHeight, false);
+				
+				setDeltaX(dx * -1);
+				setDeltaY(dy);
+				setBallX(x);
+				setSpeed(s);
+			} else if (playerMode === DOUBLE_MODE) {
+				// receiving the new ball direction from server
+				socket.on('ballLaunch', ({dx, dy, x, y, s}) => {
+					setDeltaX(dx);
+					setDeltaY(dy);
+					setBallX(x);
+					setBallY(y);
+					setSpeed(s);
+				});
+			}
 		}
 	}
 
@@ -229,7 +224,24 @@ export default function Pong({userId, userName}: PongProps) {
 		if (ballX + ballRadius >= info.obstacleX
 			&& ballX > info.playerX + info.paddleWidth && ballX <= info.boardWidth / 2
 			&& ballY > obstacleY && ballY < obstacleY + info.obstacleHeight) {
-				getNewBallDirection(obstacleY, info.obstacleHeight, false);
+				// if the game is against computer, the calculation for the new direction is directly in the front
+				if (playerMode === SINGLE_MODE) {
+					const {dx, dy, x, s} = await ballCollision(obstacleY, info.obstacleHeight, false);
+					
+					setDeltaX(dx * -1);
+					setDeltaY(dy);
+					setBallX(x);
+					setSpeed(s);
+				} else if (playerMode === DOUBLE_MODE) {
+					// receiving the new ball direction from server
+					socket.on('ballLaunch', ({dx, dy, x, y, s}) => {
+						setDeltaX(dx);
+						setDeltaY(dy);
+						setBallX(x);
+						setBallY(y);
+						setSpeed(s);
+					});
+				}
 		}
 		if (ballX <= info.obstacleX + info.obstacleWidth
 			&& ballX >= info.boardWidth / 2 && ballX < info.opponentX
@@ -243,10 +255,28 @@ export default function Pong({userId, userName}: PongProps) {
 						squareY: obstacleY,
 						squareHeight: info.obstacleHeight,
 						speed: speed,
+						middleBoard: info.boardWidth / 2,
 					}, gameRoom: gameRoom,
 				})
 
-				getNewBallDirection(obstacleY, info.obstacleHeight, true);
+				// if the game is against computer, the calculation for the new direction is directly in the front
+				if (playerMode === SINGLE_MODE) {
+					const {dx, dy, x, s} = await ballCollision(obstacleY, info.obstacleHeight, true);
+					
+					setDeltaX(dx);
+					setDeltaY(dy);
+					setBallX(x);
+					setSpeed(s);
+				} else if (playerMode === DOUBLE_MODE) {
+					// receiving the new ball direction from server
+					socket.on('ballLaunch', ({dx, dy, x, y, s}) => {
+						setDeltaX(dx);
+						setDeltaY(dy);
+						setBallX(x);
+						setBallY(y);
+						setSpeed(s);
+					});
+				}
 		}
 	}
 
@@ -262,25 +292,47 @@ export default function Pong({userId, userName}: PongProps) {
 					squareY: playerY,
 					squareHeight: paddleHeight,
 					speed: speed,
+					middleBoard: info.boardWidth / 2,
 				}, gameRoom: gameRoom,
 			});
 
-			getNewBallDirection(playerY, paddleHeight, true);
+			// if the game is against computer, the calculation for the new direction is directly in the front
+			if (playerMode === SINGLE_MODE) {
+				const {dx, dy, x, s} = await ballCollision(playerY, paddleHeight, true);
+				
+				setDeltaX(dx);
+				setDeltaY(dy);
+				setBallX(x);
+				setSpeed(s);
+			} else if (playerMode === DOUBLE_MODE) {
+				// receiving the new ball direction from server
+				socket.on('ballLaunch', ({dx, dy, x, y, s}) => {
+					setDeltaX(dx);
+					setDeltaY(dy);
+					setBallX(x);
+					setBallY(y);
+					setSpeed(s);
+				});
+			}
 		}
 	}
 	
 	// function to set an initial ball position and direction to start the round
 	const serve = (side: number) => {
 
-		setBallX(info.boardWidth / 2);
-		setBallY(info.boardHeight / 2);
+		// setBallX(info.boardWidth / 2);
+		// setBallY(info.boardHeight / 2);
 		
-		setSpeed(info.initialSpeed + level);
+		// setSpeed(info.initialSpeed + level);
 		
 		// if the game is against computer, the calculation for the ball direction is directly in the front
 		if (playerMode === SINGLE_MODE) {
 			setDeltaX((info.initialDelta + level) * side);
 			setDeltaY(5 * (Math.random() * 2 - 1));
+			setBallX(info.boardWidth / 2);
+			setBallY(info.boardHeight / 2);
+			
+			setSpeed(info.initialSpeed + level);
 		// if the game is against other player, calculation will be done by server
 		} else if (playerMode === DOUBLE_MODE) {
 			// receiving the ball direction from server
@@ -288,6 +340,9 @@ export default function Pong({userId, userName}: PongProps) {
 				// console.log("serve ball dx, dy: ", dx, dy);
 				setDeltaX(dx);
 				setDeltaY(dy);
+				setBallX(info.boardWidth / 2);
+				setBallY(info.boardHeight / 2);
+				setSpeed(info.initialSpeed + level);
 			});
 		}
 		// console.log(ballX, ballY, deltaX, deltaY, speed);
@@ -357,12 +412,33 @@ export default function Pong({userId, userName}: PongProps) {
 				}, gameRoom: gameRoom,
 			});
 
-			setOpponentScore(o => o += 1);
+			socket.emit('updateScore', {
+				gameInfo: {
+					playerScore: playerScore,
+					opponentScore: opponentScore,
+				}, gameRoom: gameRoom,
+			});
+
+			if (playerMode === SINGLE_MODE) {
+				setOpponentScore(o => o += 1);
+			} else if (playerMode === DOUBLE_MODE) {
+				socket.on('newScore', ({pScore, oScore}) => {
+					setPlayerScore(pScore);
+					setOpponentScore(oScore);
+				});
+			}
 			serve(OPPONENT_SIDE);
 		}
 		//right collision / ball passing the opponent's paddle, so player gains a point
 		if (ballX >= info.boardWidth) {
-			setPlayerScore(p => p += 1);
+			if (playerMode === SINGLE_MODE) {
+				setPlayerScore(p => p += 1);
+			} else if (playerMode === DOUBLE_MODE) {
+				socket.on('newScore', ({pScore, oScore}) => {
+					setPlayerScore(pScore);
+					setOpponentScore(oScore);
+				});
+			}
 			serve(PLAYER_SIDE);
 		}
 	}
