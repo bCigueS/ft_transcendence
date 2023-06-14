@@ -9,7 +9,7 @@ import ProfilSettings from './ProfilSettings';
 const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 
 	const userCtx = useContext(UserContext);
-	const [contentDisplay, setContentDisplay] = useState<string>('Settings');
+	const [contentDisplay, setContentDisplay] = useState<string>('Maths');
 
 	const tabHandler = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		const display: string = event.currentTarget.textContent || '';
@@ -17,7 +17,7 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 	};
 
 	useEffect(() => {
-		setContentDisplay('Settings');
+		setContentDisplay('Matchs');
 	}, [user?.name])
 
 	return (
@@ -30,14 +30,14 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 					onClick={tabHandler}>
 						Matchs
 				</button>
-				{	user === userCtx.user &&
+				{	user?.id === userCtx.user?.id &&
 					<button 
 						className={`${classes.btn} ${contentDisplay === 'Friends' ? classes.active : ''}`} 
 						onClick={tabHandler}>
 							Friends
 					</button>
 				}
-				{	user === userCtx.user &&
+				{	user?.id === userCtx.user?.id &&
 					<button 
 						className={`${classes.btn} ${contentDisplay === 'Block' ? classes.active : ''}`} 
 						onClick={tabHandler}>
@@ -45,7 +45,7 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 					</button>
 				}
 				{
-					user === userCtx.user &&
+					user?.id === userCtx.user?.id &&
 					<button 
 						className={`${classes.btn} ${contentDisplay === 'Settings' ? classes.active : ''}`} 
 						onClick={tabHandler}>
@@ -69,7 +69,7 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 			}
 			
 			{
-				(contentDisplay === 'Friends' && user === userCtx.user) &&
+				(contentDisplay === 'Friends' && user?.id === userCtx.user?.id) &&
 				<div className={classes.tabContent}>
 					<div className={classes.listContent}>
 						{
@@ -87,7 +87,7 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 			}
 
 			{
-				(contentDisplay === 'Block' && user === userCtx.user) &&
+				(contentDisplay === 'Block' && user?.id === userCtx.user?.id) &&
 				<div className={classes.tabContent}>
 					<div className={classes.listContent}>
 						{
@@ -104,7 +104,7 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 				</div>
 			}
 			{
-				(contentDisplay === 'Settings' && user === userCtx.user) &&
+				(contentDisplay === 'Settings' && user?.id === userCtx.user?.id) &&
 				<div className={classes.tabContent}>
 					<ProfilSettings user={userCtx.user}/>
 				</div>
