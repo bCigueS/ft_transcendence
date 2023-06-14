@@ -1,7 +1,6 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { json, redirect } from 'react-router-dom';
 import AuthForm from '../components/Auth/AuthForm';
-import { UserContext } from '../store/users-contexte';
 
 const AuthenticationPage = () => {
 

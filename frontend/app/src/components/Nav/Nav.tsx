@@ -13,7 +13,6 @@ const Nav: React.FC = () => {
 	const token: string = useRouteLoaderData('root') as string;
 
 	const navItems: navItem[] = [
-		{text: "Home", link:"/"},
 		{text: "PingPong", link:"/pong"},
 		{text: "Chat", link: '/chat'},
 		{text: "Leaderbord", link: "/leaderboard"},

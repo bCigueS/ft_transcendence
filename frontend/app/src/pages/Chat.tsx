@@ -1,6 +1,7 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import ChatInfo from '../components/Chat/ChatInfo';
 import classes from '../sass/pages/Chat.module.scss';
+import modalclasses from  '../sass/components/Game/Modal.module.scss';
 import { UserAPI, UserContext } from '../store/users-contexte';
 import Message from '../components/Chat/Message';
 import NoConvo from '../components/Chat/NoConvo';
@@ -25,14 +26,12 @@ export interface MessageAPI {
 
 export default function Chat() {
 	
-	// const [ selectedConversationId, setSelectedConversationId ] = useState<number>(0);
 	const [ selectedConversation, setSelectedConversation ] = useState<Channel>();
 
 	const [ chats, setChats ] = useState<Channel[]>([]);
 	const [ socket, setSocket ] = useState<Socket>();
 	const [ messages, setMessages ] = useState<MessageAPI[] >([]);
 
-	const messageInput = useRef<HTMLInputElement>(null);
 	const userCtx = useContext(UserContext);
 	const location = useLocation();
 
@@ -110,21 +109,47 @@ export default function Chat() {
 		senderId: number,
 		content: string,
 		channelId: number
-	}) => {
+	  }) => {
 		const newMessage = {
-			id: message.id,
-			createdAt: new Date(),
-            senderId: message.senderId,
-            content: message.content,
-            channelId: message.channelId,
-        };
-
+		  id: message.id,
+		  createdAt: new Date(),
+		  senderId: message.senderId,
+		  content: message.content,
+		  channelId: message.channelId,
+		};
+	  
 		const newChats = [...chats];
 		const chatIndex = newChats.findIndex(chat => chat.id === newMessage.channelId);
-		if (chatIndex !== -1)
-			newChats[chatIndex].messages = [...newChats[chatIndex].messages, newMessage];
-		setChats(newChats);
-	}
+	  
+		if (chatIndex !== -1) {
+		  newChats[chatIndex].messages = [...newChats[chatIndex].messages, newMessage];
+		  setChats(newChats);
+		} else {
+			const createNewChat = async () => {
+			const sender = await userCtx.fetchUserById(message.senderId);
+
+			if (sender !== null) {
+				throw new Error('Could not fetch sender');
+			}
+			
+			const user = userCtx.user;
+			if(!user) {
+				throw new Error('User not available');
+			}
+			
+			const newChat = {
+				id: message.channelId,
+				name: 'private',
+				messages: [newMessage],
+				members: [user, sender],
+			};
+			
+			setChats([...newChats, newChat]);
+			}
+			createNewChat();
+		}
+	  };
+	  
 	
 	useEffect(() => {
 
@@ -206,6 +231,7 @@ export default function Chat() {
 					messages: [],
 					members: [user, userCtx.user]
 				}
+
 				setChats([...chats, newChat]);
 				onSaveConversation(newChat);
 			}
@@ -214,16 +240,17 @@ export default function Chat() {
 
 	return (
 		<div className={classes.page}>
+
 			<div className={classes.conversations}>
 				{
 					chats.map((chat) => (
-					<ChatInfo key={chat.id}
-							chats={chats}
-							chat={chat}
-							isSelected={chat.id === selectedConversation?.id ? true : false}
-							onSaveConversation={onSaveConversation}/>
-				 	))
-				}
+						<ChatInfo key={chat.id}
+						chats={chats}
+						chat={chat}
+						isSelected={chat.id === selectedConversation?.id ? true : false}
+						onSaveConversation={onSaveConversation}/>
+						))
+					}
 			</div>
 			{
 				selectedConversation ? 
