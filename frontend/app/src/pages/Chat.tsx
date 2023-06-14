@@ -8,6 +8,7 @@ import NoConvo from '../components/Chat/NoConvo';
 import io, { Socket } from 'socket.io-client';
 import { json, useLocation } from 'react-router-dom';
 import MessageList from '../components/Chat/MessageList';
+import Modal from '../components/UI/Modal';
 
 export interface Channel {
 	id: number,
@@ -239,8 +240,9 @@ export default function Chat() {
 	}
 
 	return (
+		<div>
+		<Modal />
 		<div className={classes.page}>
-
 			<div className={classes.conversations}>
 				{
 					chats.map((chat) => (
@@ -257,6 +259,7 @@ export default function Chat() {
 				<MessageList send={send} chat={selectedConversation} chats={chats}/>
 				: <NoConvo/>
 			}
+		</div>
 		</div>
 	)
 }
