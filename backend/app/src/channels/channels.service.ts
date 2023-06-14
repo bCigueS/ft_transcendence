@@ -124,7 +124,35 @@ export class ChannelsService {
 
   async remove(id: number) {
 
-    const deletedChannel = await this.prisma.channel.delete({ where: { id }})
+    // const toDelete = await this.findOne( id );
+
+    // if (toDelete.messages && messages.length > 0)
+    // {
+    //   for (const msg of messages) {
+    //     const messageDto: CreateMessageDto = { 
+    //       content: msg.content, 
+    //       senderId: msg.senderId,
+    //       channelId: channel.id
+    //     };
+    
+    //     await this.prisma.message.create({
+    //       data: {
+    //         ...messageDto,
+    //       },
+    //     });
+    //   }
+    // }
+      
+    // for (const member of members) {
+    //   const memberDto: CreateChannelMembershipDto = { userId: member.userId };
+    //   await this.prisma.channelMembership.create({
+    //     data: {
+    //       ...memberDto,
+    //       channelId: channel.id,
+    //     },
+    //   });
+    // }
+
     return this.findAll();
   }
 

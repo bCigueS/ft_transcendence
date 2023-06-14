@@ -22,6 +22,14 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
     this.logger.log(`Websocket chat gateway initialized.`);
   }
 
+  @SubscribeMessage('join')
+  async handleJoin(client: Socket, channelId: number) {
+
+	console.log('client joined channel ', channelId);
+	client.join(channelId.toString());
+
+  }
+
   @SubscribeMessage('message')
   async handleMessage(client: Socket, message: { 
 				content: string,
@@ -39,8 +47,13 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 		}
 	});
 
-	this.server.emit('message', newMessage);
-  }
+	// this.server.emit('message', newMessage);
+	// client.emit('message', newMessage);
+
+	console.log('sending message: ', message.content, ' to all clients in room ', message.channelId);
+	this.io.in(message.channelId.toString()).emit('message', newMessage);
+
+}
   
   async handleConnection(client: Socket) {
 	client.on('send', ({ content }: {content: string}) => {

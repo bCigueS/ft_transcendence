@@ -121,7 +121,7 @@ export default function Chat() {
 		  senderId: userCtx.user?.id
 		};
 
-		if (selectedConversation == -1)
+		if (selectedConversation === -1)
 		{
 			const newChan = await createNewChannel();
 			message.channelId = newChan.id;
@@ -143,10 +143,12 @@ export default function Chat() {
             content: message.content,
             channelId: message.channelId,
         };
-		setMessages([...messages, newMessage]);
+		if (newMessage.channelId === selectedConversationId)
+			setMessages([...messages, newMessage]);
 	}
 	
 	useEffect(() => {
+
 		socket?.on("message", messageListener);
 		return () => {
 			socket?.off("message", messageListener);
@@ -188,6 +190,7 @@ export default function Chat() {
 
 	const onSaveConversation = (channelId: number) => {
 		setSelectedConversationId(channelId);
+		socket?.emit('join', channelId);
 	}
 
 	useEffect(() => {
