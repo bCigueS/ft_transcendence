@@ -2,7 +2,6 @@ import React, { FormEvent, useContext, useEffect, useState } from 'react';
 import classes from '../../sass/components/Profile/ProfilPatch.module.scss';
 import ProfilIcon from './ProfilIcon';
 import { UserContext } from '../../store/users-contexte';
-import { type } from 'os';
 
 interface PatchUser {
 	onPatchUser: (formData: FormData) => Promise<void | Response>;
