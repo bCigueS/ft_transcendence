@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, useLayoutEffect } from 'react';
+import { PongInfo, BallInfo, PongProp } from './utils/types';
 import ModalBoard from './ModalBoard';
 import LiveBoard from './LiveBoard';
 import classes from '../../sass/components/Game/Pong.module.scss';
 import io from 'socket.io-client';
-import { get } from 'http';
+
 
 const socket = io('http://localhost:3000/pong', {
 		transports: ["websocket"],
@@ -29,42 +30,6 @@ const OPPONENT_WIN = 1;
 const PLAYER_SIDE = -1;
 const OPPONENT_SIDE = 1;
 
-// type
-type PongInfo = {
-	boardWidth: number;
-	boardHeight: number;
-	paddleWidth: number;
-	obstacleWidth: number;
-	obstacleHeight: number;
-	obstacleSpeed: number;
-	initialSpeed: number;
-	initialDelta: number;
-	playerX: number;
-	opponentX: number;
-	obstacleX: number;
-	winnerScore: number;
-}
-
-type PongProps = {
-	userId: number;
-	userName: string;
-}
-
-type BallInfo = {
-	dx: number;
-	dy: number;
-	x: number;
-	s: number;
-}
-
-export type CollisionInfo = {
-	y: number;
-	r: number;
-	playerY: number;
-	paddleHeight: number;
-	speed: number;
-}
-
 // initial data for the game
 const info: PongInfo = {
 	boardWidth: 640,
@@ -82,7 +47,7 @@ const info: PongInfo = {
 }
 
 
-export default function Pong({userId, userName}: PongProps) {
+export default function Pong({userId, userName}: PongProp) {
 	// game play
 	const [isRunning, setIsRunning] = useState(false);
 	const [isPaused, setIsPaused] = useState(false);
@@ -146,6 +111,11 @@ export default function Pong({userId, userName}: PongProps) {
 				console.log({ message });
 				setIsReady(true);
 			});
+			// receive a pause signal
+			socket.on('makePause', ({ message }) => {
+				console.log({ message });
+				setIsPaused(current => !current);
+			})
 			// receive a message from a server that an opponent just left the game
 			socket.on('opponentLeft', ({message}) => {
 				console.log({message});
@@ -319,12 +289,6 @@ export default function Pong({userId, userName}: PongProps) {
 	
 	// function to set an initial ball position and direction to start the round
 	const serve = (side: number) => {
-
-		// setBallX(info.boardWidth / 2);
-		// setBallY(info.boardHeight / 2);
-		
-		// setSpeed(info.initialSpeed + level);
-		
 		// if the game is against computer, the calculation for the ball direction is directly in the front
 		if (playerMode === SINGLE_MODE) {
 			setDeltaX((info.initialDelta + level) * side);
@@ -345,7 +309,6 @@ export default function Pong({userId, userName}: PongProps) {
 				setSpeed(info.initialSpeed + level);
 			});
 		}
-		// console.log(ballX, ballY, deltaX, deltaY, speed);
 	}
 	
 	// function to set initial value to start the game
@@ -574,10 +537,10 @@ export default function Pong({userId, userName}: PongProps) {
 	
 	// update the frameCount
 	useLayoutEffect(() => {
+		// set frame per second
+		const fps = 24;
+		let frameId: number;
 		if (!isPaused) {
-			// set frame per second
-			const fps = 24;
-			let frameId: number;
 	
 			const render = () => {
 				setTimeout(() => {
@@ -605,9 +568,12 @@ export default function Pong({userId, userName}: PongProps) {
 					setPaddleDown(true);
 				}
 				if (event.code === "Space") {
+					socket.emit('pressPause', gameRoom);
+	
 					setIsPaused(current => !current);
 				}
 			}
+
 		}
 
 		window.onkeyup = function(event) {
@@ -655,7 +621,7 @@ export default function Pong({userId, userName}: PongProps) {
 			{(!isRunning && isLive) && (
 				<LiveBoard
 					isReady={isReady}
-					userName={userName}
+					playerName={userName}
 					opponentName={opponentName}
 					start={() => {startGame(winner === PLAYER_WIN ? PLAYER_SIDE : OPPONENT_SIDE); setIsLive(false)}}
 				/>

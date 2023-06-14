@@ -24,7 +24,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 
 	// Gateway initialized (provided in module and instantiated)
 	afterInit(): void {
-	this.logger.log(`Websocket Gateway initialized.`);
+		this.logger.log(`Websocket Gateway initialized.`);
 	}
 
 	// Receive connection from client
@@ -232,6 +232,18 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 		@ConnectedSocket() client: Socket,
 		) {
 			client.broadcast.to(gameRoom).emit('paddleMove', { y });
+	}
+
+	// receiving a request to pause the game
+	@SubscribeMessage('pressPause')
+	async handlePressPauseEvent(
+		@MessageBody() gameRoom: string,
+		@ConnectedSocket() client: Socket,
+		) {
+			console.log('receive pressPause event');
+			client.broadcast.to(gameRoom).emit('makePause', {
+				message: `Receive makePause event`,
+			});
 	}
 
 	// receiving a leave request, so that the player can be removed from the games array and room
