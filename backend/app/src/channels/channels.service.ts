@@ -47,7 +47,7 @@ export class ChannelsService {
       });
     }
 
-    return channel;
+    return this.findOne(channel.id);
   }
 
   async findAll() {
@@ -62,16 +62,27 @@ export class ChannelsService {
   async findOne(id: number) {
 
     const chan = await this.prisma.channel.findUnique({
-      where: { 
-        id
-      },
-      include: {
-        messages: true,
-        members: true,
-      }    
-    });
-
-    return chan;
+		where: { 
+			id
+			},
+			include: {
+			messages: true,
+			members: {
+				select: {
+				user: true
+				}
+			},
+			}
+		});
+		
+	if (chan) {
+		return {
+		...chan,
+		members: chan.members.map(member => member.user)
+		};
+	}
+		
+	return null;
   }
 
   async update(id: number, updateChannelDto: UpdateChannelDto) {

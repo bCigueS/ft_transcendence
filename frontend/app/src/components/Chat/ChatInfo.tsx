@@ -23,7 +23,7 @@ onDeleteChat: (channelId: number) => void}>
 	}
 
 	const getSender = () => {
-		if (props.chat.name === "private")
+		if (props.chat.members && props.chat.name === "private")
 		{
 			props.chat.members.forEach((member) => {
 				if (member.id !== userCtx.user?.id)
@@ -35,7 +35,7 @@ onDeleteChat: (channelId: number) => void}>
 	const getLastMessage = () => {
 		const messages = props.chat.messages;
 		let latestMessage = null;
-		if (messages.length > 0) {
+		if (messages && messages.length > 0) {
 			latestMessage = messages.reduce((latest, current) => {
 				return new Date(latest.createdAt) > new Date(current.createdAt) ? latest : current;
 			}, messages[0]);
@@ -103,9 +103,9 @@ onDeleteChat: (channelId: number) => void}>
 			</div>
 			<div className={classes.info} onClick={conversationHandler}>
 				<p className={classes.name}>
-					{ sender?.name}
+					{ sender && sender?.name}
 				</p>
-				{
+				{ props.chat.messages && 
 					props.chat.messages.length > 0 ? 
 					<p className={classes.lastMessage}>
 						{lastMessage?.content}

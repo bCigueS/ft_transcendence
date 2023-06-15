@@ -39,11 +39,6 @@ export default function Chat() {
 	/*
 		FUNCTIONS FOR MESSAGING
 	*/
-	
-	useEffect(() => {
-		const newSocket = io("http://localhost:3000/chat");
-		setSocket(newSocket);
-	}, [setSocket])
 
 	const createNewChannel = async () => {
 
@@ -101,6 +96,27 @@ export default function Chat() {
 		{
 			const newChan = await createNewChannel();
 			message.channelId = newChan.id;
+
+			const dummyChatIndex = chats.findIndex(chat => chat.id === -1);
+
+			if (dummyChatIndex !== -1) {
+			  const updatedChats = chats.filter((_, index) => index !== dummyChatIndex);
+			  setChats([...updatedChats, newChan]);
+			} else {
+			  setChats([...chats, newChan]);
+			}
+			
+			console.log('sending a message to newly created channel: ', newChan);
+			
+			console.log('chats: ', chats);
+
+			// console.log('calling onSave conversation to change selected chan and join correct new room ');
+			onSaveConversation(newChan);
+
+			// need to make receiver join channel
+
+
+
 		}
 		socket?.emit("message", message);
 	}
@@ -122,7 +138,8 @@ export default function Chat() {
 		const newChats = [...chats];
 		const chatIndex = newChats.findIndex(chat => chat.id === newMessage.channelId);
 	  
-		if (chatIndex !== -1) {
+
+		if (chatIndex !== -1 && newChats[chatIndex].messages) {
 		  newChats[chatIndex].messages = [...newChats[chatIndex].messages, newMessage];
 		  setChats(newChats);
 		} else {
@@ -150,15 +167,39 @@ export default function Chat() {
 			createNewChat();
 		}
 	  };
-	  
-	
-	useEffect(() => {
 
+
+	const joinListener = (channelId: string) => {
+		console.log('client joined channel ', channelId);
+		socket?.emit('join', parseInt(channelId, 10));
+		fetchChannels();
+	  }
+	  
+	useEffect(() => {
 		socket?.on("message", messageListener);
 		return () => {
-			socket?.off("message", messageListener);
+		  socket?.off("message", messageListener);
 		}
-	}, [messageListener])
+	}, [socket, messageListener]);
+	  
+	useEffect(() => {
+		socket?.on("join", joinListener);
+		return () => {
+		  socket?.off("join", joinListener);
+		}
+	}, [socket, joinListener]);
+	  
+	useEffect(() => {
+		const newSocket = io("http://localhost:3000/chat");
+		setSocket(newSocket);
+		newSocket.on('connect', () => {
+		  newSocket.emit('user_connected', userCtx.user?.id);
+		});
+	  
+		return () => {
+		  newSocket.removeAllListeners();
+		}
+	}, [setSocket]);
 
 	/*
 		FUNCTION TO DELETE MESSAGE
@@ -177,20 +218,33 @@ export default function Chat() {
 	/*
 		FETCH USER CURRENT CONVOS
 	*/
+
+	const fetchChannels = async() => {
+		try {
+			const response = await fetch('http://localhost:3000/channels/userId/' + userCtx.user?.id, {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+			});
+		
+			if (response.status === 400) {
+				throw new Error("Failed to fetch user channels!") ;
+			}
+
+			if (!response.ok)
+				throw new Error("Failed to fetch user channels!") ;
+
+			const data = await response.json();
+			setChats(data);
+			
+		} catch (error: any) {
+			console.log(error.message);
+		}
+	}
 	
     useEffect(() => {
-		fetch('http://localhost:3000/channels/userId/' + userCtx.user?.id)
-		.then(response => response.json())
-		.then(data => {
-			data.forEach((channel: Channel) => {
-				channel.messages.forEach(message => {
-					message.createdAt = new Date(message.createdAt);
-				});
-                });
-				
-                setChats(data);
-            })
-            .catch(err => console.error('An error occurred:', err));
+		fetchChannels();
 	}, []);
 
 	/*

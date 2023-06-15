@@ -60,7 +60,7 @@ const MessageList: React.FC<{send: (content: string, channelId: number) => {}, c
 				{/* here we should map through the list of chats
 					and render a MessageList component
 				 */}
-				{
+				{ messages && 
 					messages.map((message) => 
 						<Message key={message.id}
 								isMine={isMine(message)}
