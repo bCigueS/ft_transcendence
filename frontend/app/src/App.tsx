@@ -10,7 +10,7 @@ import ProfilePage from './pages/Profile';
 import PrivateMessagePage from './pages/PrivateMessagePage';
 import ChatPage from './pages/Chat';
 import Game from './pages/Game';
-import Leaderboard, { loader as usersLoader} from './pages/Leaderboard';
+import Leaderboard from './pages/Leaderboard';
 import AuthenticationPage, { action as logginAction } from './pages/Authentication';
 
 import './sass/main.scss';
@@ -48,7 +48,6 @@ const router = createBrowserRouter([
 			{
 				path: 'leaderboard',
 				element: <Leaderboard />,
-				loader: usersLoader,
 			},
 			{
 				path: 'logout',

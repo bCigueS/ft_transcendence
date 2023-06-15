@@ -253,11 +253,11 @@ export class UsersService {
 	const haters = await this.showHaters(id);
 
     const blockedUserIds = blocked.map((block) => block.id);
-	const hatersUserIds = haters
+	const hatersUserIds = haters.map((hater) => hater.id);
 
     const community = await this.prisma.user.findMany({
       where: {
-        id: { notIn: blockedUserIds.concat(id) },
+        id: { notIn: [...blockedUserIds, ...hatersUserIds, id] },
       },
     });
     

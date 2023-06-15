@@ -45,6 +45,10 @@ const LeaderboardProfil: React.FC<{user: UserAPI}> = ( { user }) => {
 		fetchAddFriend();
 	}
 
+	const addBlockHandler = (event: React.MouseEvent<HTMLIFrameElement, MouseEvent>) => {
+		userCtx.fetchBlockUser(user);
+	}
+
 	const isFriend = () => {
 		return userCtx.user?.friends?.some(friend => user.id === friend.id) || false;
 	}
@@ -71,6 +75,7 @@ const LeaderboardProfil: React.FC<{user: UserAPI}> = ( { user }) => {
 		}
 	}
 
+
 	const handleClickMessage = () => {
 
 		navigate('/chat', {
@@ -79,6 +84,17 @@ const LeaderboardProfil: React.FC<{user: UserAPI}> = ( { user }) => {
 			}
 		});
 		
+	}
+
+	/*
+		Naviagation to the game
+	*/
+	const handleClickGame = () => {
+		navigate('/pong', {
+			state: {
+				username: userCtx.user?.name
+			}
+		})
 	}
 
 	return (
@@ -92,7 +108,12 @@ const LeaderboardProfil: React.FC<{user: UserAPI}> = ( { user }) => {
 					style={ isSelf() ? {color: 'gray'} : {}} 
 				></i>
 				{ friendIconDisplay() }
+				<i
+					className='fa-solid fa-unlock'
+					onClick={addBlockHandler}
+				></i>
 				<i 
+					onClick={handleClickGame}
 					className='fa-solid fa-table-tennis-paddle-ball'
 					style={ isSelf() ? {color: 'gray'} : {}} 
 				></i>

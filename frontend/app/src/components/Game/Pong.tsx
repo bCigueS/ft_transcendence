@@ -52,7 +52,7 @@ const info: PongInfo = {
 	initialDelta: 3,
 	playerX: 10,
 	opponentX: 620, // boardWidth - paddleWidth - 10,
-	winnerScore: 11,
+	winnerScore: 1,
 }
 
 
