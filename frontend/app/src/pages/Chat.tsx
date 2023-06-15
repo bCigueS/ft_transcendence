@@ -240,8 +240,6 @@ export default function Chat() {
 	}
 
 	return (
-		<div>
-		<Modal />
 		<div className={classes.page}>
 			<div className={classes.conversations}>
 				{
@@ -259,7 +257,6 @@ export default function Chat() {
 				<MessageList send={send} chat={selectedConversation} chats={chats}/>
 				: <NoConvo/>
 			}
-		</div>
 		</div>
 	)
 }
