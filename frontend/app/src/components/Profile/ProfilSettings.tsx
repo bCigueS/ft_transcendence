@@ -8,27 +8,27 @@ const ProfilSettings: React.FC<{user: UserAPI | null}> = ( { user } ) => {
 
 	const userCtx = useContext(UserContext);
 
-	const handlePatchUser = async(FormData: any) => {
+	const handlePatchUser = async(DataForm: any) => {
 
 		const patchData = {
-			name: FormData.get('name') === '' ? userCtx.user?.name : FormData.get('name'),
-			doubleAuth: FormData.get('auth') === 'true' ? true : false,
+			name: DataForm.get('name') === '' ? userCtx.user?.name : DataForm.get('name'),
+			doubleAuth: DataForm.get('auth') === 'true' ? true : false,
 			
 		}
 
-		const avatarData = {
-			avatar: FormData.get('avatar'),
-		}
+		const avatarData = new FormData();
+		avatarData.append('file', DataForm.get('file'))
 
-		if (avatarData.avatar.name) {
-			console.log(avatarData.avatar);
+		if (DataForm.get('file').name) {
+			console.log(avatarData);
 			const avatarResponse = await fetch('http://localhost:3000/users/' + userCtx.user?.id + '/upload-avatar', {
 				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: avatarData.avatar
+				body: avatarData
 			})
+
+			if (avatarResponse.status === 422) {
+				return avatarResponse;
+			}
 
 			if (!avatarResponse.ok) {
 				throw new Error("Failed to upload Avatar");

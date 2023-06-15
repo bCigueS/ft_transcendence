@@ -21,8 +21,8 @@ const Nav: React.FC = () => {
 	return (
 		<header>
 			<nav className={classes.nav}>
-				<Link to='/'>
-					<img src={LogoPong} alt="LogoPong" />
+				<Link className={classes.logo} to='/'>
+					<img className={classes.imgLogo} src={LogoPong} alt="LogoPong" />
 				</Link>
 					<ul className={classes.menu}>
 					{ token ? 
