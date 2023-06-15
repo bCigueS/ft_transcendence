@@ -1,6 +1,27 @@
-.card {
+@import '../../abstracts/mixin.scss';
+@import '../../abstracts/variables.scss';
 
-    background: white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
-    border-radius: 3rem;
+.container {
+	width: 35rem;
+	height: 45rem;
+	padding: 2rem 3rem;
+
+	// background-color: $almost-white;
+	border: 0.2rem solid black;
+	position:relative;
+	transform-style: preserve-3d;
+	@include flexBox();
+	// @include shadowBox();
+
+
+
+	button {
+		@include buttonMixin();
+		
+	}
+}
+
+.error {
+	font-weight: 800;
+	font-size: 1.2rem;
 }
