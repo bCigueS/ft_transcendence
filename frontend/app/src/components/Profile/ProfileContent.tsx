@@ -17,7 +17,7 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 	};
 
 	useEffect(() => {
-		setContentDisplay('Matchs');
+		setContentDisplay('Settings');
 	}, [user?.name])
 
 	return (

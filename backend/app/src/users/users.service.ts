@@ -246,8 +246,10 @@ export class UsersService {
   async showCommunity(id: number) {
 
     const blocked = await this.showBlockedUsers(id);
+	const haters = await this.showHaters(id);
 
     const blockedUserIds = blocked.map((block) => block.id);
+	const hatersUserIds = haters
 
     const community = await this.prisma.user.findMany({
       where: {

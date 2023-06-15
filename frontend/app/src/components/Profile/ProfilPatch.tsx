@@ -13,6 +13,7 @@ const PatchForm: React.FC<PatchUser> = ({ onPatchUser }) => {
 	const [ enteredText, setEnteredText ] = useState<string>(''); 
 	const [ isChecked, setIsChecked ] = useState<boolean>(false);
 	const [ placeholder, setPlaceholder ] = useState<string>('');
+	const [ typeError, setTypeError ] = useState<string>('');
 
 	useEffect(() => {
 		if (userCtx.user?.doubleAuth === true)
@@ -38,6 +39,11 @@ const PatchForm: React.FC<PatchUser> = ({ onPatchUser }) => {
 		if (response?.status === 400) {
 			console.log('response: ', response);
 			setPlaceholder("Name too short!")
+		}
+
+		if (response?.status === 422) {
+			console.log('Response: ', response);
+			setTypeError('Not correct type (jpg/png/jpeg)');
 		}
 	}
 
@@ -66,16 +72,22 @@ const PatchForm: React.FC<PatchUser> = ({ onPatchUser }) => {
 					<span className={classes.slider}></span>
 				</label>
 			</div>
-			<div className={classes.label}>
-				<ProfilIcon user={userCtx.user} displayCo={false}/>
-				<label htmlFor="avatar" className={classes.fileLabel}>Change your avatar</label>
-				<input 
-					type="file" 
-					id='avatar'
-					name='avatar'
-					accept=".png, .jpg, .jpeg"
-					className={classes.file}
-				/>
+			<div className={classes.label} style={{flexDirection: 'column', gap:'1.5rem', justifyContent:'flex-start'}}>
+				<div style={{ width: '100%', display: 'flex' , flexDirection: "row", justifyContent: 'space-between', alignItems: 'center'}}>
+					<ProfilIcon user={userCtx.user} displayCo={false} />
+					<label htmlFor="avatar" className={classes.fileLabel}>Change your avatar</label>
+					<input 
+						type="file" 
+						id='avatar'
+						name='file'
+						accept=".png, .jpg, .jpeg"
+						className={classes.file}
+					/>
+				</div>
+				{
+					typeError &&
+					<p className={classes.error}>{typeError}</p>
+				}
 			</div>
 			<button type="submit">Confirm</button>
 		</form>

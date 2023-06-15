@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, NotFou
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { UserEntity } from './entities/user.entity';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -184,28 +184,42 @@ export class UsersController {
 	@Post(':id/upload-avatar')
 	// @UseGuards(JwtAuthGuard)
 	// @ApiBearerAuth()
+	@ApiConsumes('multipart/form-data')
+	@ApiBody({
+		schema: {
+			type: 'object',
+			properties: {
+				file: {
+					type: 'string',
+					format: 'binary',
+				},
+			},
+		},
+	})
 	@UseInterceptors(FileInterceptor('file'))
 	async uploadAvatar(
 		@Param('id', ParseIntPipe) id: number,
 		@UploadedFile(
 			new ParseFilePipeBuilder()
 				.addFileTypeValidator({
-				fileType: /\.(jpg|png|jpeg)$/i,
+					fileType: /(jpg|jpeg|png|gif)$/,
 				})
 				.addMaxSizeValidator({
-					maxSize: 589450
+					maxSize: 1000000
 				})
 				.build({
 					errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
 			}),
 		) file: Express.Multer.File) {
 		
-		console.log(file);
+		console.log("This is the file: ", file);
 
 		// const avatarPath = './uploads/' + file.filename;
 		const avatarPath = file.filename;
 
 		this.usersService.uploadAvatar(id, avatarPath);
+
+		return { message: 'Avatar uploaded successfully'};
 	}
 
 	@Get(':id/avatar')

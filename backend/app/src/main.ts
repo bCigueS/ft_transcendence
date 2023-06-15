@@ -31,8 +31,8 @@ async function bootstrap() {
   const { httpAdapter } = app.get(HttpAdapterHost);
   app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter));
 
-//   app.use(json({ limit: '50mb' }));
-//   app.use(urlencoded({ extended: true, limit: '50mb' }));
+  app.use(json({ limit: '50mb' }));
+  app.use(urlencoded({ extended: true, limit: '50mb' }));
 
   await app.listen(3000);
 }
