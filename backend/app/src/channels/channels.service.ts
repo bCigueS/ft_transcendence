@@ -3,6 +3,7 @@ import { CreateChannelDto } from './dto/create-channel.dto';
 import { UpdateChannelDto } from './dto/update-channel.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateChannelMembershipDto, CreateMessageDto } from 'src/messages/dto/create-message.dto';
+import { MessagesService } from 'src/messages/messages.service';
 
 @Injectable()
 export class ChannelsService {
@@ -124,34 +125,17 @@ export class ChannelsService {
 
   async remove(id: number) {
 
-    // const toDelete = await this.findOne( id );
-
-    // if (toDelete.messages && messages.length > 0)
-    // {
-    //   for (const msg of messages) {
-    //     const messageDto: CreateMessageDto = { 
-    //       content: msg.content, 
-    //       senderId: msg.senderId,
-    //       channelId: channel.id
-    //     };
-    
-    //     await this.prisma.message.create({
-    //       data: {
-    //         ...messageDto,
-    //       },
-    //     });
-    //   }
-    // }
-      
-    // for (const member of members) {
-    //   const memberDto: CreateChannelMembershipDto = { userId: member.userId };
-    //   await this.prisma.channelMembership.create({
-    //     data: {
-    //       ...memberDto,
-    //       channelId: channel.id,
-    //     },
-    //   });
-    // }
+	await this.prisma.message.deleteMany({
+		where: { channelId: id },
+	});
+	
+	await this.prisma.channelMembership.deleteMany({
+		where: { channelId: id },
+	});
+	
+	const deletedChannel = await this.prisma.channel.delete({
+	where: { id },
+	});
 
     return this.findAll();
   }

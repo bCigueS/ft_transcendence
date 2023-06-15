@@ -53,7 +53,7 @@ export default function Chat() {
 			chat.id === -1);
 
 		newChat?.members.forEach((member) => {
-			if (member.id != userCtx.user?.id)
+			if (member.id !== userCtx.user?.id)
 				senderId = member.id;
 		})
 
@@ -170,6 +170,10 @@ export default function Chat() {
 
 	}
 
+	const handleChatDeletion = (id: number) => {
+		setChats(chats => chats.filter(chat => chat.id !== id));
+	};
+
 	/*
 		FETCH USER CURRENT CONVOS
 	*/
@@ -248,7 +252,8 @@ export default function Chat() {
 						chats={chats}
 						chat={chat}
 						isSelected={chat.id === selectedConversation?.id ? true : false}
-						onSaveConversation={onSaveConversation}/>
+						onSaveConversation={onSaveConversation}
+						onDeleteChat={handleChatDeletion}/>
 						))
 					}
 			</div>

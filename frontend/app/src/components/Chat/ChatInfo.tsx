@@ -7,12 +7,13 @@ import Modal from "../UI/Modal";
 
 // const Searchbar: React.FC<{onSaveSearch: (input: string) => void}> = ( props ) => {
 
-const ChatInfo: React.FC<{chats: Channel[], chat: Channel, isSelected: boolean, onSaveConversation: (channel: Channel) => void}> 
+const ChatInfo: React.FC<{chats: Channel[], chat: Channel, isSelected: boolean, onSaveConversation: (channel: Channel) => void,
+onDeleteChat: (channelId: number) => void}> 
 	= ( props ) => {
 
 	const [sender, setSender] = useState<UserAPI | null>(null);
 	const [lastMessage, setLastMessage] = useState<MessageAPI | null>(null);
-	const [ confirm, setConfirm ] = useState(true);
+	const [ showModal, setShowModal ] = useState(false);
 	const [ conversation, setConversation ] = useState<number>(0);
 	const userCtx = useContext(UserContext);
 
@@ -25,46 +26,75 @@ const ChatInfo: React.FC<{chats: Channel[], chat: Channel, isSelected: boolean, 
 		if (props.chat.name === "private")
 		{
 			props.chat.members.forEach((member) => {
-				if (member.id != userCtx.user?.id)
+				if (member.id !== userCtx.user?.id)
 					setSender(member);
 			})
 		}
 	}
 
 	const getLastMessage = () => {
-
 		const messages = props.chat.messages;
 		let latestMessage = null;
 		if (messages.length > 0) {
 			latestMessage = messages.reduce((latest, current) => {
 				return new Date(latest.createdAt) > new Date(current.createdAt) ? latest : current;
 			}, messages[0]);
-
 		}
 		setLastMessage(latestMessage);
 	}
-
-	const handleClickDelete = () => {
-		setConfirm(false);
-		console.log('about to delete chat with id: ', props.chat.id)
-	}
-
+	
 	useEffect(() => {
 		getSender();
 		getLastMessage();
 	}, [conversation, props.chats]);
 
-	const handleUserConfirmation = () => {
-		setConfirm(true);
-	}
+	const deleteChat = async () => {
+		
+		try {
+			const response = await fetch('http://localhost:3000/channels/' + props.chat.id, {
+				method: 'DELETE',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+		
+			if (response.status === 400) {
+				throw new Error("Failed to delete chat!") ;
+			}
+
+			if (!response.ok)
+				throw new Error("Failed to delete chat!") ;
+
+			props.onDeleteChat(props.chat.id);
+			
+		} catch (error: any) {
+			console.log(error.message);
+		}
+
+
+	};
 	
+	const handleClickDelete = () => {
+		setShowModal(true);
+	}
+
+	const handleUserConfirmation = () => {
+		setShowModal(false);
+	}
+
+	const handleDeleteChat = () => {
+		deleteChat();
+		setShowModal(false);
+	}
+
 	return (
 		<Fragment>
-		{!confirm &&
+		{showModal &&
 			<Modal
 				title="About to delete chat"
-				message="are you sure you wish to delete this chat?"
+				message="Are you sure you wish to delete this chat?"
 				onCloseClick={handleUserConfirmation}
+				onDelete={handleDeleteChat}
 			/>
 		}
 		<div className={`${classes.container} ${props.isSelected ? classes.selected : ''}`}>
@@ -87,7 +117,7 @@ const ChatInfo: React.FC<{chats: Channel[], chat: Channel, isSelected: boolean, 
 				}
 			</div>
 			<div className={classes.delete} onClick={handleClickDelete}>
-				<svg width="1.2rem" height="1.2rem" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"> <path fillRule="evenodd" clipRule="evenodd" d="M12.8536 2.85355C13.0488 2.65829 13.0488 2.34171 12.8536 2.14645C12.6583 1.95118 12.3417 1.95118 12.1464 2.14645L7.5 6.79289L2.85355 2.14645C2.65829 1.95118 2.34171 1.95118 2.14645 2.14645C1.95118 2.34171 1.95118 2.65829 2.14645 2.85355L6.79289 7.5L2.14645 12.1464C1.95118 12.3417 1.95118 12.6583 2.14645 12.8536C2.34171 13.0488 2.65829 13.0488 2.85355 12.8536L7.5 8.20711L12.1464 12.8536C12.3417 13.0488 12.6583 13.0488 12.8536 12.8536C13.0488 12.6583 13.0488 12.3417 12.8536 12.1464L8.20711 7.5L12.8536 2.85355Z" fill="currentColor" /> </svg>
+				<svg width="10px" height="10px" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"> <path fillRule="evenodd" clipRule="evenodd" d="M12.8536 2.85355C13.0488 2.65829 13.0488 2.34171 12.8536 2.14645C12.6583 1.95118 12.3417 1.95118 12.1464 2.14645L7.5 6.79289L2.85355 2.14645C2.65829 1.95118 2.34171 1.95118 2.14645 2.14645C1.95118 2.34171 1.95118 2.65829 2.14645 2.85355L6.79289 7.5L2.14645 12.1464C1.95118 12.3417 1.95118 12.6583 2.14645 12.8536C2.34171 13.0488 2.65829 13.0488 2.85355 12.8536L7.5 8.20711L12.1464 12.8536C12.3417 13.0488 12.6583 13.0488 12.8536 12.8536C13.0488 12.6583 13.0488 12.3417 12.8536 12.1464L8.20711 7.5L12.8536 2.85355Z" fill="currentColor" /> </svg>
 			</div>
 		</div>
 		</Fragment>
