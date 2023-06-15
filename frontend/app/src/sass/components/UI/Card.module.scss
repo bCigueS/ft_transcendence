@@ -1,24 +1,32 @@
 @import '../../abstracts/mixin.scss';
 @import '../../abstracts/variables.scss';
 
-.container {
-	width: 35rem;
-	height: 45rem;
+.card {
+	// width: 35rem;
+	// height: 45rem;
 	padding: 2rem 3rem;
 
 	// background-color: $almost-white;
 	border: 0.2rem solid black;
-	position:relative;
+	// position:relative;
 	transform-style: preserve-3d;
 	@include flexBox();
 	// @include shadowBox();
 
 
 
-	button {
+	.button {
 		@include buttonMixin();
 		
 	}
+
+	.button-cancel {
+		@include buttonMixin($color: yellow);
+		
+	}
+
+	
+
 }
 
 .error {
