@@ -18,8 +18,26 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
   @WebSocketServer() io: Namespace;
   @WebSocketServer() server: Server
 
+  private onlineUsers: { [userId: number]: string } = {};
+
   afterInit(): void {
     this.logger.log(`Websocket chat gateway initialized.`);
+  }
+
+  async handleConnection(client: Socket) {
+
+    client.on('user_connected', (userId) => {
+      this.onlineUsers[userId] = client.id;
+      console.log('User connected: ', userId);
+    });
+
+    client.on('disconnect', () => {
+      const userToDisconnect = Object.keys(this.onlineUsers).find(key => this.onlineUsers[key] === client.id);
+      if (userToDisconnect) {
+        delete this.onlineUsers[userToDisconnect];
+        console.log('User disconnected: ', userToDisconnect);
+      }
+    });
   }
 
   @SubscribeMessage('join')
@@ -38,6 +56,13 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 
 	console.log('in message gateway, message: ', message);
 
+	const existingMessages = await this.prisma.message.findMany({
+		where: {
+			channelId: message.channelId
+		}
+	});
+
+	const isFirstMessage = existingMessages.length === 0;
 
 	const newMessage = await this.prisma.message.create({
 		data: {
@@ -47,22 +72,29 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 		}
 	});
 
-	// this.server.emit('message', newMessage);
-	// client.emit('message', newMessage);
+	if (isFirstMessage) {
+		console.log('this is the first message ever in this convo.');
+		const channelMembers = await this.prisma.channelMembership.findMany({
+			where: {
+				channelId: message.channelId
+			}
+		});
+
+		const receiver = channelMembers.find(member => member.userId !== message.senderId);
+		console.log('receive is: ', receiver.userId);
+
+		if (receiver) {
+			const receiverSocketId = this.onlineUsers[receiver.userId];
+			console.log('emitting join to user ', receiver.userId.toString());
+			this.io.to(receiverSocketId).emit('join', message.channelId.toString());
+		  }
+		  
+	}
 
 	console.log('sending message: ', message.content, ' to all clients in room ', message.channelId);
 	this.io.in(message.channelId.toString()).emit('message', newMessage);
 
-}
+	}
   
-  async handleConnection(client: Socket) {
-	client.on('send', ({ content }: {content: string}) => {
-		console.log('text: ', content);
-
-		this.server.emit('chat', content);
-		
-	})
-  }
-
 
 }
