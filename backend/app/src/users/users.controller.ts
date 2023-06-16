@@ -14,6 +14,7 @@ import { Express } from 'express'
 import { toSafeUser } from './user.utils';
 import { Observable } from 'rxjs';
 import { fileURLToPath } from 'url';
+import { unlink } from 'fs';
 
 @Controller('users') @ApiTags('users')
 export class UsersController {
@@ -202,7 +203,7 @@ export class UsersController {
 		@UploadedFile(
 			new ParseFilePipeBuilder()
 				.addFileTypeValidator({
-					fileType: /(jpg|jpeg|png|gif)$/,
+					fileType: /(jpg|jpeg|png)$/,
 				})
 				.addMaxSizeValidator({
 					maxSize: 1000000
@@ -211,8 +212,20 @@ export class UsersController {
 					errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
 			}),
 		) file: Express.Multer.File) {
-		
 		console.log("This is the file: ", file);
+
+		const validExtension = ['jpg', 'png', 'jpeg'];
+		const fileExtension = file.originalname.split('.').pop().toLowerCase();
+
+		console.log(validExtension);
+		console.log(fileExtension);
+
+		if (!validExtension.includes(fileExtension)) {
+			await unlink(file.path, (err) => {
+				if (err) throw err;
+				console.error(`${file.filename} delete`)
+			});
+		}
 
 		// const avatarPath = './uploads/' + file.filename;
 		const avatarPath = file.filename;
