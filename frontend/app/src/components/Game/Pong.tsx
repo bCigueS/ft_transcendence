@@ -117,7 +117,12 @@ export default function Pong({userId, userName}: PongProp) {
 			socket.on('makePause', ({ message }) => {
 				console.log({ message });
 				setIsPaused(current => !current);
-			})
+			});
+			// receive new score signal
+			socket.on('newScore', ({ pScore, oScore }) => {
+				setPlayerScore(pScore);
+				setOpponentScore(oScore);
+			});
 			// receive a message from a server that an opponent just left the game
 			socket.on('opponentLeft', ({message}) => {
 				console.log({message});
@@ -129,6 +134,23 @@ export default function Pong({userId, userName}: PongProp) {
 				setGameOver(true);
 				setWinner(PLAYER_WIN);
 				stopGame();
+			});
+			socket.on('updateGame', ({ socketId }) => {
+				socket.emit('lastUpdatedInfo', {
+					gameInfo: {
+						x: ballX,
+						y: ballY,
+						dx: deltaX,
+						dy: deltaY,
+						s: speed,
+						playerY: playerY,
+						opponentY: opponentY,
+						pScore: playerScore,
+						oScore: opponentScore,
+					}, 
+					socketId: socketId,
+					gameRoom: gameRoom,
+				});
 			});
 		}
 	}, [playerMode])
@@ -301,13 +323,11 @@ export default function Pong({userId, userName}: PongProp) {
 			setDeltaY(5 * (Math.random() * 2 - 1));
 			setBallX(info.boardWidth / 2);
 			setBallY(info.boardHeight / 2);
-			
 			setSpeed(info.initialSpeed + level);
 		// if the game is against other player, calculation will be done by server
 		} else if (playerMode === DOUBLE_MODE) {
 			// receiving the ball direction from server
-			socket.on('ballServe', ({dx, dy}) => {
-				// console.log("serve ball dx, dy: ", dx, dy);
+			socket.on('ballServe', ({ dx, dy }) => {
 				setDeltaX(dx);
 				setDeltaY(dy);
 				setBallX(info.boardWidth / 2);
@@ -375,7 +395,9 @@ export default function Pong({userId, userName}: PongProp) {
 		}
 		// left collision / ball passing the player's paddle, so opponent gains a point
 		if (ballX <= 0) {
-			if (playerMode === DOUBLE_MODE) {
+			if (playerMode === SINGLE_MODE) {
+				setOpponentScore(o => o += 1);
+			} else if (playerMode === DOUBLE_MODE) {
 				// send signal to server to calculate the ball direction for a new round
 				socket.emit('startBall', {
 					gameInfo: {
@@ -391,26 +413,12 @@ export default function Pong({userId, userName}: PongProp) {
 					}, gameRoom: gameRoom,
 				});
 			}
-
-			if (playerMode === SINGLE_MODE) {
-				setOpponentScore(o => o += 1);
-			} else if (playerMode === DOUBLE_MODE) {
-				socket.on('newScore', ({pScore, oScore}) => {
-					setPlayerScore(pScore);
-					setOpponentScore(oScore);
-				});
-			}
 			serve(OPPONENT_SIDE);
 		}
 		//right collision / ball passing the opponent's paddle, so player gains a point
 		if (ballX >= info.boardWidth) {
 			if (playerMode === SINGLE_MODE) {
 				setPlayerScore(p => p += 1);
-			} else if (playerMode === DOUBLE_MODE) {
-				socket.on('newScore', ({pScore, oScore}) => {
-					setPlayerScore(pScore);
-					setOpponentScore(oScore);
-				});
 			}
 			serve(PLAYER_SIDE);
 		}
@@ -631,6 +639,7 @@ export default function Pong({userId, userName}: PongProp) {
 					isReady={isReady}
 					playerName={userName}
 					opponentName={opponentName}
+					spectatorMode={false}
 					start={() => {startGame(winner === PLAYER_WIN ? PLAYER_SIDE : OPPONENT_SIDE); setIsLive(false)}}
 				/>
 			)}

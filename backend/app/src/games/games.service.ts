@@ -10,7 +10,7 @@ export class GamesService {
 
   /* CRUD */
   async create(createGameDto: CreateGameDto) {
-    const { state, level, players, socketIds } = createGameDto;
+    const { state, level, players, playerSocketIds, spectators, spectatorSocketIds } = createGameDto;
 
     const newGame = await this.prisma.game.create({
         data: {
@@ -21,15 +21,21 @@ export class GamesService {
                     userId: player.userId
                 }))
             },
-			socketIds,
-        }
-    });
+			playerSocketIds,
+			spectators: {
+				create: spectators?.map(spectator => ({
+					userId: spectator.userId
+				})) || []
+			},
+			spectatorSocketIds,
+		}
+	});
 
 	return newGame;
   }
 
   async update(id: number, updateGameDto: UpdateGameDto) {
-	const { state, players, socketIds } = updateGameDto;
+	const { state, players, playerSocketIds, spectators, spectatorSocketIds } = updateGameDto;
 
 	const updatedGame = await this.prisma.game.update({
 	  where: { id },
@@ -40,7 +46,13 @@ export class GamesService {
 				userId: player.userId
 			}))
 		},
-		socketIds,
+		playerSocketIds,
+		spectators: {
+			create: spectators?.map(spectator => ({
+				userId: spectator.userId
+			})) || []
+		},
+		spectatorSocketIds,
 	  },
 	});
 
@@ -94,7 +106,7 @@ export class GamesService {
   }
 
   async addPlayer(id: number, updateGameDto: UpdateGameDto) {
-	const { state, players, socketIds } = updateGameDto;
+	const { state, players, playerSocketIds } = updateGameDto;
 
 	const updatedGame = await this.prisma.game.update({
 	  where: { id },
@@ -105,7 +117,25 @@ export class GamesService {
 				userId: player.userId
 			}))
 		},
-		socketIds,
+		playerSocketIds,
+	  },
+	});
+
+	return updatedGame;
+  }
+
+  async addSpectator(id: number, updateGameDto: UpdateGameDto) {
+	const { spectators, spectatorSocketIds } = updateGameDto;
+
+	const updatedGame = await this.prisma.game.update({
+	  where: { id },
+	  data: {
+		spectators: {
+			create: spectators.map(spectators => ({
+				userId: spectators.userId
+			}))
+		},
+		spectatorSocketIds,
 	  },
 	});
 
