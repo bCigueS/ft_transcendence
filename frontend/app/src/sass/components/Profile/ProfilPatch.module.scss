@@ -54,6 +54,22 @@
 		transform-style: preserve-3d;
 		background-color: $almost-white;
 
+		.picture {
+			@include flexBox();
+			width: 6.5rem;
+			height: 6.5rem;
+			// border: 0.3rem solid black;
+			border-radius: 50%;
+			overflow: hidden;
+			
+			img {
+				width: auto;
+				overflow: hidden;
+				z-index: 2;
+			}
+		}
+	
+
 		input {
 			width: 16rem;
 			height: 3rem;
