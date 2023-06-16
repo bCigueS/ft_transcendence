@@ -19,10 +19,21 @@ export type PongProp = {
 }
 
 export type SpectatorProp = {
-	playerId: number;
-	playerName: string;
-	opponentId: number;
-	opponentName: string;
+	userId: number;
+	gameLevel: number;
+	gameRoom: string;
+}
+
+export type UpdatedInfo = {
+	x: number;
+	y: number;
+	dx: number;
+	dy:number;
+	s: number;
+	playerY: number;
+	opponentY: number;
+	pScore: number;
+	oScore: number;
 }
 
 export type BallInfo = {
@@ -44,6 +55,7 @@ export type LiveBoardProps = {
 	isReady: boolean;
 	playerName: string;
 	opponentName: string;
+	spectatorMode: boolean;
 	start(): void;
 }
 
