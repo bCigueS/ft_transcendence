@@ -33,7 +33,7 @@ const LeaderboardProfil: React.FC<{user: UserAPI}> = ( { user }) => {
 			
 			userCtx.fetchUser();
 		} catch (error: any) {
-			console.log(error.message);
+			console.error(error.message);
 		}
 	};
 
