@@ -23,3 +23,15 @@ export type GameOverInfo = {
 	playerScore: number;
 	opponentScore: number;
 }
+
+export type UpdatedInfo = {
+	x: number;
+	y: number;
+	dx: number;
+	dy:number;
+	s: number;
+	playerY: number;
+	opponentY: number;
+	pScore: number;
+	oScore: number;
+}

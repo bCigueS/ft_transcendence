@@ -17,6 +17,7 @@ model User {
   doubleAuth  Boolean      @default(false)
   wins        Int          @default(0)
   games       UserGame[]
+  spectators  SpectatorGame[]
   haters      Block[]      @relation("haters")
   blocked     Block[]      @relation("blocked")
   following   Friendship[] @relation("followers")
@@ -47,17 +48,29 @@ model Block {
 }
 
 model Game {
-  id        Int        @id @default(autoincrement())
-  room		String?    @unique
-  createdAt DateTime   @default(now())
-  state		GameState  @default(PENDING)
-  level     Int
-  players   UserGame[]
-  socketIds	String[]
-  winnerId  Int?
-  winner    User?      @relation("winnerGames", fields: [winnerId], references: [id], onDelete: Cascade)
+  id        			Int        @id @default(autoincrement())
+  room					String?    @unique
+  createdAt 			DateTime   @default(now())
+  state					GameState  @default(PENDING)
+  level     			Int
+  players   			UserGame[]
+  playerSocketIds		String[]
+  spectators			SpectatorGame[]
+  spectatorSocketIds	String[]
+  winnerId  			Int?
+  winner    			User?      @relation("winnerGames", fields: [winnerId], references: [id], onDelete: Cascade)
 
   @@map("games")
+}
+
+model SpectatorGame {
+  createdAt   DateTime @default(now())
+  userId      Int
+  gameId      Int
+  game        Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, gameId])
 }
 
 model UserGame {

@@ -9,9 +9,8 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { GameEntity } from './entities/game.entity';
 import { UsersService } from '../users/users.service';
 
-import { ServeInfo, CollisionInfo, GameOverInfo, ScoreInfo } from './utils/types';
+import { ServeInfo, CollisionInfo, GameOverInfo, ScoreInfo, UpdatedInfo } from './utils/types';
 import { GameState } from '@prisma/client';
-import { MiddlewareBuilder } from '@nestjs/core';
 
 @WebSocketGateway({ namespace: '/pong' })
 export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -59,9 +58,11 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 								userId: id,
 							},
 						],
-						socketIds: matchingGames[0].socketIds,
+						playerSocketIds: matchingGames[0].playerSocketIds,
+						spectators: [],
+						spectatorSocketIds: [],
 					};
-					updatedGameDto.socketIds.push(client.id);
+					updatedGameDto.playerSocketIds.push(client.id);
 					
 					game = await this.gamesService.addPlayer(matchingGames[0].id, updatedGameDto);
 
@@ -75,7 +76,9 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 								userId: id,
 							},
 						],
-						socketIds: [client.id],
+						playerSocketIds: [client.id],
+						spectators: [],
+						spectatorSocketIds: [],
 					};
 					
 					game = await this.gamesService.create(createGameDto);
@@ -95,8 +98,11 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 							userId: id,
 						},
 					],
+					playerSocketIds: game.playerSocketIds,
+					spectators: [],
+					spectatorSocketIds: [],
 				};
-				updatedGameDto.socketIds.push(client.id);
+				updatedGameDto.playerSocketIds.push(client.id);
 
 				game = await this.gamesService.addPlayer(game.id, updatedGameDto);
 			}
@@ -125,7 +131,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 
 			// send welcome message to player, and also send the opponent player's data (if any)
 			client.emit('welcome', {
-				message: `Hello ${player.name}, Welcome to the game`,
+				message: `Hello ${player.name}, welcome to the game`,
 				opponent: opponent,
 				gameRoom: game.room,
 			});
@@ -154,13 +160,29 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 			const dy = 5 * (Math.random() * 2 - 1);
 
 			// get the players in the room and send the ball direction to both players (horizontal direction is in reverse/mirror)
-			const rooms = await this.io.in(gameRoom).fetchSockets();
+			const game = await this.prisma.game.findUnique({
+				where: { room: gameRoom },
+				include: { players: true }
+			});
 
-			if (rooms) {
-				rooms.forEach((room) => {
-					// Access the properties or perform operations on each socket
-					this.io.to(room.id).emit('ballServe', {
-						dx: (room.id === client.id ? dx : dx * -1),
+			let player, opponent;
+			if (game) {
+				[player, opponent] = game.players;
+			}
+
+			if (game && game.playerSocketIds) {
+				game.playerSocketIds.forEach((socketId) => {
+					this.io.to(socketId).emit('ballServe', {
+						dx: (socketId === client.id ? dx : dx * -1),
+						dy: dy,
+					});
+				});
+			}
+
+			if (game && game.spectatorSocketIds && player && player.id) {
+				game.spectatorSocketIds.forEach((socketId) => {
+					this.io.to(socketId).emit('ballServe', {
+						dx: (player.id === client.id ? dx : dx * -1),
 						dy: dy,
 					});
 				});
@@ -173,15 +195,30 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 		@MessageBody() { gameInfo, gameRoom }: { gameInfo: ScoreInfo, gameRoom: string },
 		@ConnectedSocket() client: Socket,
 		) {
-			// get the players in the room and send the ball direction to both players (horizontal direction is in reverse/mirror)
-			const rooms = await this.io.in(gameRoom).fetchSockets();
+			const game = await this.prisma.game.findUnique({
+				where: { room: gameRoom },
+				include: { players: true },
+			});
 
-			if (rooms) {
-				rooms.forEach((room) => {
-					// Access the properties or perform operations on each socket
-					this.io.to(room.id).emit('newScore', {
-						pScore: (room.id === client.id ? gameInfo.playerScore : gameInfo.opponentScore + 1),
-						oScore: (room.id === client.id ? gameInfo.opponentScore + 1 : gameInfo.playerScore),
+			let player, opponent;
+			if (game) {
+				[player, opponent] = game.players;
+			}
+
+			if (game && game.playerSocketIds) {
+				game.playerSocketIds.forEach((socketId) => {
+					this.io.to(socketId).emit('newScore', {
+						pScore: (socketId === client.id ? gameInfo.playerScore : gameInfo.opponentScore + 1),
+						oScore: (socketId === client.id ? gameInfo.opponentScore + 1 : gameInfo.playerScore),
+					});
+				});
+			}
+
+			if (game && game.spectatorSocketIds && player && player.id) {
+				game.playerSocketIds.forEach((socketId) => {
+					this.io.to(socketId).emit('newScore', {
+						pScore: (player.id === client.id ? gameInfo.playerScore : gameInfo.opponentScore + 1),
+						oScore: (player.id === client.id ? gameInfo.opponentScore + 1 : gameInfo.playerScore),
 					});
 				});
 			}
@@ -209,15 +246,34 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 			const opponentX = (gameInfo.x > gameInfo.middleBoard ? gameInfo.middleBoard - dist : gameInfo.middleBoard + dist);
 
 			// get the players in the room and send the ball direction to both players (horizontal direction is in reverse/mirror)
-			const rooms = await this.io.in(gameRoom).fetchSockets();
+			const game = await this.prisma.game.findUnique({
+				where: { room: gameRoom },
+				include: { players: true }
+			});
 
-			if (rooms) {
-				rooms.forEach((room) => {
-					// Access the properties or perform operations on each socket
-					this.io.to(room.id).emit('ballLaunch', {
-						dx: (room.id === client.id ? dx : dx * -1),
+			let player, opponent;
+			if (game) {
+				[player, opponent] = game.players;
+			}
+
+			if (game && game.playerSocketIds) {
+				game.playerSocketIds.forEach((socketId) => {
+					this.io.to(socketId).emit('ballLaunch', {
+						dx: (socketId === client.id ? dx : dx * -1),
 						dy: dy,
-						x: (room.id === client.id ? gameInfo.x + gameInfo.r : opponentX - gameInfo.r),
+						x: (socketId === client.id ? gameInfo.x + gameInfo.r : opponentX - gameInfo.r),
+						y: gameInfo.y,
+						s: s,
+					});
+				});
+			}
+
+			if (game && game.spectatorSocketIds && player && player.id) {
+				game.spectatorSocketIds.forEach((socketId) => {
+					this.io.to(socketId).emit('ballLaunch', {
+						dx: (player.id === client.id ? dx : dx * -1),
+						dy: dy,
+						x: (player.id === client.id ? gameInfo.x + gameInfo.r : opponentX - gameInfo.r),
 						y: gameInfo.y,
 						s: s,
 					});
@@ -298,6 +354,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 			client.leave(game.room);
 	}
 
+	// receiving a leave gameRoom request from remaining player in the room
 	@SubscribeMessage('leaveGameRoom')
 	async handleLeaveGameRoomEvent(
 		@MessageBody() { gameRoom }: {gameRoom: string },
@@ -306,6 +363,91 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 		client.leave(gameRoom);
 	}
 
+	/* -----> Spectator Mode <----- */
+
+	@SubscribeMessage('spectatorJoin')
+	async handleSpectatorJoinEvent(
+		@MessageBody() { userId, gameRoom }: { userId: number, gameRoom: string },
+		@ConnectedSocket() client: Socket,
+		) {
+		let game = await this.prisma.game.findUnique({
+			where: { room: gameRoom }
+		});
+
+		const isSpectator = await this.prisma.spectatorGame.findFirst({
+		  where: {
+			gameId: game.id,
+			userId: userId,
+		  },
+		});
+		
+		if (!isSpectator) {
+			const updatedGameDto: UpdateGameDto = {
+				spectators: [
+					{
+						userId: userId,
+					}
+				],
+				spectatorSocketIds: game.spectatorSocketIds,
+			};
+			updatedGameDto.spectatorSocketIds.push(client.id);
+	
+			game = await this.gamesService.addSpectator(game.id, updatedGameDto);
+		}
+
+		client.join(game.room);
+
+		const spectator = await this.prisma.user.findUnique({
+			where: { id: userId },
+		});
+
+		// get the game to access the data of the player
+		const currentGame = await this.prisma.game.findUnique({
+			where: { room: game.room },
+			include: { players: true }
+		});
+
+		let player, opponent;
+		if (currentGame) {
+			[player, opponent] = currentGame.players;
+		}
+
+		client.emit('welcomeSpectator', {
+			message: `Hello ${spectator.name}, welcome to the game`,
+			player: player,
+			opponent: opponent,
+		});
+
+		if (game && game.playerSocketIds && game.playerSocketIds[0] && player) {
+			this.io.to(game.playerSocketIds[0]).emit('updateGame', { socketId: client.id });
+		}
+	}
+
+	@SubscribeMessage('lastUpdatedInfo')
+	async handleLastUpdatedInfoEvent(
+		@MessageBody() { gameInfo, socketId, gameRoom }: { gameInfo: UpdatedInfo, socketId: string, gameRoom: string },
+		@ConnectedSocket() client: Socket,
+		) {
+			const game = await this.prisma.game.findUnique({
+				where: { room: gameRoom }
+			});
+
+			this.io.to(socketId).emit('currentGameInfo', {
+				gameInfo: gameInfo,
+			})
+
+			if (game.state === GameState.PLAYING) {
+				this.io.to(socketId).emit('startWatch', {
+					message: `Everything's ready. Enjoy the match!`,
+				});
+			// } else if (game.state === GameState.FINISHED) {
+			// 	this.io.to(socketId).emit('StopWatch', {
+			// 		message: `Game has finished. Sorry you're too late :(`
+			// 	});
+			// 	client.leave(game.room);
+			}
+		}
+
 	// receiving a disconnect request, when a connection of a player disrupted
 	@SubscribeMessage('disconnect')
 	async handleDisconnect(
@@ -313,13 +455,13 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 		) {
 			console.log('a player is disconnected');
 
-			// get the the game that is not FINISHED and has the same socketIds with the client
+			// get the the game that is not FINISHED and has the same playerSocketIds with the client
 			let currentGame = await this.prisma.game.findFirst({
 				where: {
 					state: {
 						in: [GameState.PENDING, GameState.PLAYING],
 					},
-					socketIds: {
+					playerSocketIds: {
 						has: client.id,
 					}
 				}
