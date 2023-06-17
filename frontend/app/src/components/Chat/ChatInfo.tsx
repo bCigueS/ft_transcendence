@@ -1,9 +1,9 @@
 import { Fragment, useContext, useEffect, useState } from "react";
-import { Channel, MessageAPI } from "../../pages/Chat";
 import classes from '../../sass/components/Chat/ChatInfo.module.scss';
 import ProfilIcon from "../Profile/ProfilIcon";
 import { UserAPI, UserContext } from "../../store/users-contexte";
 import Modal from "../UI/Modal";
+import { Channel, MessageAPI, deleteChat } from "./chatUtils";
 
 // const Searchbar: React.FC<{onSaveSearch: (input: string) => void}> = ( props ) => {
 
@@ -48,39 +48,18 @@ onDeleteChat: (channelId: number) => void}>
 		getLastMessage();
 	}, [conversation, props.chats]);
 
-	const deleteChat = async () => {
-		try {
-			const response = await fetch('http://localhost:3000/channels/' + props.chat.id, {
-				method: 'DELETE',
-				headers: {
-					'Content-Type': 'application/json'
-				}
-			});
 		
-			if (response.status === 400) {
-				throw new Error("Failed to delete chat!") ;
-			}
-
-			if (!response.ok)
-				throw new Error("Failed to delete chat!") ;
-
-			props.onDeleteChat(props.chat.id);
-			
-		} catch (error: any) {
-			console.log(error.message);
-		}
-	};
-	
 	const handleClickDelete = () => {
 		setShowModal(true);
 	}
-
+	
 	const handleUserConfirmation = () => {
 		setShowModal(false);
 	}
-
+	
 	const handleDeleteChat = () => {
-		deleteChat();
+		deleteChat(props.chat);
+		props.onDeleteChat(props.chat.id);
 		setShowModal(false);
 	}
 
@@ -89,7 +68,7 @@ onDeleteChat: (channelId: number) => void}>
 		{showModal &&
 			<Modal
 				title="About to delete chat"
-				message="Are you sure you wish to delete this chat?"
+				message="Do you really wish to delete this chat?"
 				onCloseClick={handleUserConfirmation}
 				onDelete={handleDeleteChat}
 			/>

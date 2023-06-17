@@ -18,8 +18,8 @@ export class MessagesService {
 		return newMessage;
 	}
 
-	findAll() {
-		return `This action returns all messages`;
+	async findAll () {
+		return await this.prisma.message.findMany();
 	}
 
 	findOne(id: number) {

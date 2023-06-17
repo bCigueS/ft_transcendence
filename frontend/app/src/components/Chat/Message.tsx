@@ -2,7 +2,8 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import classes from '../../sass/components/Chat/Message.module.scss';
 import { UserContext } from '../../store/users-contexte';
-import { MessageAPI } from '../../pages/Chat';
+import Modal from '../UI/Modal';
+import { MessageAPI } from './chatUtils';
 
 
 const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean, 
@@ -10,7 +11,7 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 					onDelete: (message: MessageAPI) => void }> = ( { isMine, isLast, displayDay, message, messages, onDelete } ) => {
 
 	const [ isHovering, setIsHovering ] = useState(false);
-	const [ isDeleted, setIsDeleted ] = useState(false);
+	const [ showModal, setShowModal ] = useState(false);
 
 	const date = new Date(message.createdAt);
 
@@ -35,14 +36,58 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 		setIsHovering(false);
 	}
 
-	const handleClickDelete = () => 
+	const deleteMessage = async () => {
+		try {
+			const response = await fetch('http://localhost:3000/messages/' + message.id, {
+				method: 'DELETE',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+		
+			if (response.status === 400) {
+				throw new Error("Failed to delete message!") ;
+			}
+
+			if (!response.ok)
+				throw new Error("Failed to delete message!") ;
+
+			
+		} catch (error: any) {
+			console.log(error.message);
+		}
+
+		// if last message delete channel
+		
+	};
+
+	const handleDeletion = () => 
 	{
+		deleteMessage();
 		onDelete(message);
+		setShowModal(false);
 	}
+
+	const handleClickDelete = () => {
+		setShowModal(true);
+	}
+
+	const handleUserConfirmation = () => {
+		setShowModal(false);
+	}
+
 
 	return (
 		
 		<>
+		{showModal &&
+			<Modal
+				title="About to delete message"
+				message="Do you really wish to delete this message?"
+				onCloseClick={handleUserConfirmation}
+				onDelete={handleDeletion}
+			/>
+		}
 		{ displayDay && <div className={classes.date}>{message && date.toDateString()}</div> }
 		<div className={whichBubble()} 
 			onMouseOver={handleMouseOver}

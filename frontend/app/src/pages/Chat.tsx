@@ -1,29 +1,13 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import ChatInfo from '../components/Chat/ChatInfo';
 import classes from '../sass/pages/Chat.module.scss';
-import modalclasses from  '../sass/components/Game/Modal.module.scss';
-import { UserAPI, UserContext } from '../store/users-contexte';
-import Message from '../components/Chat/Message';
+import { UserContext } from '../store/users-contexte';
 import NoConvo from '../components/Chat/NoConvo';
 import io, { Socket } from 'socket.io-client';
 import { json, useLocation } from 'react-router-dom';
 import MessageList from '../components/Chat/MessageList';
-import Modal from '../components/UI/Modal';
+import { Channel, MessageAPI, deleteChat } from '../components/Chat/chatUtils';
 
-export interface Channel {
-	id: number,
-	name: string,
-	messages: MessageAPI[],
-	members: UserAPI[],
-}
-
-export interface MessageAPI {
-	createdAt: Date,
-	id: number,
-	senderId: number | undefined,
-	content: string,
-	channelId: number,
-}
 
 export default function Chat() {
 	
@@ -105,18 +89,7 @@ export default function Chat() {
 			} else {
 			  setChats([...chats, newChan]);
 			}
-			
-			console.log('sending a message to newly created channel: ', newChan);
-			
-			console.log('chats: ', chats);
-
-			// console.log('calling onSave conversation to change selected chan and join correct new room ');
 			onSaveConversation(newChan);
-
-			// need to make receiver join channel
-
-
-
 		}
 		socket?.emit("message", message);
 	}
@@ -200,6 +173,37 @@ export default function Chat() {
 			socket?.off('chatDeleted');
 		};
 	}, [chats, socket]);
+
+	const checkLastMessageDeleted = (message: MessageAPI) => {
+		const chatMessage = chats.find(chat => chat.id === message.channelId);
+
+		if (chatMessage?.messages.length === 0)
+		{
+			deleteChat(chatMessage);
+			handleChatDeletion(chatMessage.id);
+		}
+	}
+
+	useEffect(() => {
+		socket?.on("messageDeleted", (deletedMessage) => {
+			const chatIndex = chats.findIndex(chat => chat.id === deletedMessage.channelId);
+			if (chatIndex !== -1) {
+				const messageIndex = chats[chatIndex].messages.findIndex(msg => msg.id === deletedMessage.id);
+				if (messageIndex !== -1) {
+					const newChats = [...chats]; 
+					newChats[chatIndex].messages.splice(messageIndex, 1);
+					setChats(newChats);
+				}
+			}
+			checkLastMessageDeleted(deletedMessage);
+		});
+
+		return () => {
+			socket?.off('messageDeleted');
+		};
+	}, [chats, socket]);
+
+	
 	  
 	useEffect(() => {
 		const newSocket = io("http://localhost:3000/chat");
@@ -217,10 +221,9 @@ export default function Chat() {
 		FUNCTION TO DELETE MESSAGE
 	*/
 
-	const handleDeleteMessage = (message: MessageAPI) => {
+	const handleMessageDeletion = (message: MessageAPI) => {
 		console.log('about to delete: ', message.content);
-		socket?.emit('')
-
+		socket?.emit('messageDeleted', { message: message })
 	}
 
 	const handleChatDeletion = (id: number) => {
@@ -325,8 +328,13 @@ export default function Chat() {
 					}
 			</div>
 			{
-				selectedConversation ? 
-				<MessageList send={send} chat={selectedConversation} chats={chats}/>
+				selectedConversation &&
+				(chats.length > 0) ? 
+				<MessageList
+					send={send} 
+					chat={selectedConversation} 
+					chats={chats}
+					onDelete={handleMessageDeletion}/>
 				: <NoConvo/>
 			}
 		</div>
