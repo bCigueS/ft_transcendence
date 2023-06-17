@@ -313,6 +313,18 @@ export default function Chat() {
 		}
 	}
 
+	chats.sort((a, b) => {
+		const lastMessageDateA = a.messages[a.messages.length - 1].createdAt.toString();
+		const lastMessageDateB = b.messages[b.messages.length - 1].createdAt.toString();
+	  
+		const timestampA = Date.parse(lastMessageDateA);
+		const timestampB = Date.parse(lastMessageDateB);
+	  
+		return timestampB - timestampA;
+	});
+
+	
+
 	return (
 		<div className={classes.page}>
 			<div className={classes.conversations}>
