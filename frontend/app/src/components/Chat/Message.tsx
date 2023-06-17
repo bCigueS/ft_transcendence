@@ -12,7 +12,7 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 	const [ isHovering, setIsHovering ] = useState(false);
 	const [ isDeleted, setIsDeleted ] = useState(false);
 
-	console.log(message);
+	const date = new Date(message.createdAt);
 
 	const whichBubble = () => {
 		if (isMine && isLast)
@@ -43,7 +43,7 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 	return (
 		
 		<>
-		{ displayDay && <div className={classes.date}>{message && message.createdAt.toString()}</div> }
+		{ displayDay && <div className={classes.date}>{message && date.toDateString()}</div> }
 		<div className={whichBubble()} 
 			onMouseOver={handleMouseOver}
 			onMouseOut={handleMouseOut}>
@@ -53,9 +53,9 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 			{ isHovering && 
 				<div className={classes.info}>
 					<div className={classes.hour}>
-					{message.createdAt.getHours().toString()}
+					{date.getHours().toString()}
 					:
-					{message.createdAt.getMinutes().toString() + ' '} 
+					{date.getMinutes().toString() + ' '} 
 					</div>
 					{
 						isMine &&

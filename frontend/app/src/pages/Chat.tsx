@@ -188,6 +188,18 @@ export default function Chat() {
 		  socket?.off("join", joinListener);
 		}
 	}, [socket, joinListener]);
+
+	useEffect(() => {
+		socket?.on('chatDeleted', (data) => {
+			if (chats.find(chat => chat.id === data.chatId)) {
+				setChats(chats => chats.filter(chat => chat.id !== data.chatId));
+			}
+		});
+	
+		return () => {
+			socket?.off('chatDeleted');
+		};
+	}, [chats, socket]);
 	  
 	useEffect(() => {
 		const newSocket = io("http://localhost:3000/chat");
@@ -213,6 +225,7 @@ export default function Chat() {
 
 	const handleChatDeletion = (id: number) => {
 		setChats(chats => chats.filter(chat => chat.id !== id));
+		socket?.emit('chatDeleted', { chatId: id, userId: userCtx.user?.id });
 	};
 
 	/*

@@ -31,10 +31,15 @@ const MessageList: React.FC<{send: (content: string, channelId: number) => {}, c
 	}
 			
 	const displayDay = (message: MessageAPI) => {
+		
 		const messageIndex = messages.findIndex(m => m.id === message.id);
-		if (messageIndex === 0
-			|| messages[messageIndex - 1].createdAt.toDateString() !== message.createdAt.toDateString())
-			return (true);
+		if (messageIndex === 0)
+			return true;
+		
+		const date = new Date(message.createdAt);
+		const prevDate = new Date(messages[messageIndex - 1].createdAt);
+		if (prevDate.toDateString() !== date.toDateString())
+			return true;
 		return false;
 	}
 
