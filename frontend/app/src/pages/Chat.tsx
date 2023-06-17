@@ -7,6 +7,7 @@ import io, { Socket } from 'socket.io-client';
 import { json, useLocation } from 'react-router-dom';
 import MessageList from '../components/Chat/MessageList';
 import { Channel, MessageAPI, deleteChat } from '../components/Chat/chatUtils';
+import ManageChats from '../components/Chat/ManageChats';
 
 
 export default function Chat() {
@@ -328,6 +329,7 @@ export default function Chat() {
 	return (
 		<div className={classes.page}>
 			<div className={classes.conversations}>
+				< ManageChats />
 				{
 					chats.map((chat) => (
 						<ChatInfo key={chat.id}
