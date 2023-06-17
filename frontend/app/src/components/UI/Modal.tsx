@@ -3,7 +3,6 @@ import classes from '../../sass/components/UI/Modal.module.scss';
 import { Fragment } from 'react';
 import ReactDOM from 'react-dom';
 import Card from "./Card";
-import Button from "../UI/Button";
 
 type Props = {
     children?: React.ReactNode,

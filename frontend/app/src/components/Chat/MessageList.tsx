@@ -1,10 +1,11 @@
-import { Channel, MessageAPI } from "../../pages/Chat";
+
 import Message from "./Message";
 import classes from './../../sass/pages/Chat.module.scss';
 import { useContext, useEffect, useRef, useState } from "react";
 import { UserContext } from "../../store/users-contexte";
+import { Channel, MessageAPI } from "./chatUtils";
 
-const MessageList: React.FC<{send: (content: string, channelId: number) => {}, chat: Channel, chats: Channel[]}> = ({ send, chat, chats }) => {
+const MessageList: React.FC<{send: (content: string, channelId: number) => {}, chat: Channel, chats: Channel[], onDelete: (message: MessageAPI) => void}> = ({ send, chat, chats, onDelete }) => {
 
     const [ messages, setMessages ] = useState<MessageAPI[]>(chat.messages);
 	const messageInput = useRef<HTMLInputElement>(null);
@@ -15,9 +16,8 @@ const MessageList: React.FC<{send: (content: string, channelId: number) => {}, c
     }, [chat, chats]);
     
     const isMine = (message: MessageAPI) => {
-		
 		if (message.senderId === userCtx.user?.id)
-		return (true);
+			return (true);
 		return false;
 	}
 	
@@ -43,12 +43,6 @@ const MessageList: React.FC<{send: (content: string, channelId: number) => {}, c
 		return false;
 	}
 
-    const handleDeleteMessage = (message: MessageAPI) => {
-		console.log('about to delete: ', message.content);
-		// socket?.emit('')
-
-	}
-
     const handleSubmit = (event: { preventDefault: () => void; }) => {
         event.preventDefault();
         const enteredText = messageInput.current!.value;
@@ -62,27 +56,23 @@ const MessageList: React.FC<{send: (content: string, channelId: number) => {}, c
 
     return (
         <div className={classes.message}>
-				{/* here we should map through the list of chats
-					and render a MessageList component
-				 */}
-				{ messages && 
-					messages.map((message) => 
-						<Message key={message.id}
-								isMine={isMine(message)}
-								isLast={isLast(message)}
-								displayDay={displayDay(message)}
-								message={message}
-								messages={messages}
-								onDelete={handleDeleteMessage}/>)
-				}
-
-				<form onSubmit={handleSubmit}>
-					<input className={classes.sendInput} 
-							type="text"
-							ref={messageInput}
-							placeholder='type here...' />
-				</form>
-			</div>
+			{ messages && 
+				messages.map((message) => 
+					<Message key={message.id}
+							isMine={isMine(message)}
+							isLast={isLast(message)}
+							displayDay={displayDay(message)}
+							message={message}
+							messages={messages}
+							onDelete={onDelete}/>)
+			}
+			<form onSubmit={handleSubmit}>
+				<input className={classes.sendInput} 
+						type="text"
+						ref={messageInput}
+						placeholder='type here...' />
+			</form>
+		</div>
     );
 }
 

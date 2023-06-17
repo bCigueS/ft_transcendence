@@ -42,10 +42,7 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 
   @SubscribeMessage('join')
   async handleJoin(client: Socket, channelId: number) {
-
-	console.log('client joined channel ', channelId);
 	client.join(channelId.toString());
-
   }
 
   @SubscribeMessage('message')
@@ -103,6 +100,22 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 								userId: number
 							}): Promise<void> {
 	  client.broadcast.emit('chatDeleted', data);
+	}
+
+	@SubscribeMessage('messageDeleted')
+	async handleMessageDeletion(@ConnectedSocket() client: Socket, 
+							@MessageBody() data: { 
+								message: {
+									id: number,
+									createdAt: string,
+									content: string,
+									channelId: number,
+									senderId: number }, 
+								userId: number
+							}): Promise<void> {
+		console.log(' in message gateway, about to delete message: ', data.message.content);
+		this.io.in(data.message.channelId.toString()).emit('messageDeleted', data.message);
+	// client.broadcast.emit('messageDeleted', data.message);
 	}
 
 }
