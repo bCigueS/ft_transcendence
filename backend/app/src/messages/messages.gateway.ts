@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, NotFoundException, Logger } from '@nestjs/common';
-import { OnGatewayInit, WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect, WebSocketServer, SubscribeMessage, MessageBody } from '@nestjs/websockets';
+import { OnGatewayInit, WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect, WebSocketServer, SubscribeMessage, MessageBody, ConnectedSocket } from '@nestjs/websockets';
 import { Socket, Server, Namespace } from 'socket.io';
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
@@ -96,5 +96,13 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 
 	}
   
+	@SubscribeMessage('chatDeleted')
+	async handleChatDeletion(@ConnectedSocket() client: Socket, 
+							@MessageBody() data: { 
+								chatId: number, 
+								userId: number
+							}): Promise<void> {
+	  client.broadcast.emit('chatDeleted', data);
+	}
 
 }

@@ -49,7 +49,6 @@ onDeleteChat: (channelId: number) => void}>
 	}, [conversation, props.chats]);
 
 	const deleteChat = async () => {
-		
 		try {
 			const response = await fetch('http://localhost:3000/channels/' + props.chat.id, {
 				method: 'DELETE',
@@ -70,8 +69,6 @@ onDeleteChat: (channelId: number) => void}>
 		} catch (error: any) {
 			console.log(error.message);
 		}
-
-
 	};
 	
 	const handleClickDelete = () => {
