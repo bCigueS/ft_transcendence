@@ -66,7 +66,7 @@ export interface State {
 
 export type ModalProps = {
 	buttonText: string;
-	text: string;
+	closingText: string;
 	onStartPage(): void;
 	onTool(mode: "keyboard" | "mouse"): void;
 	onDifficulty(level: 0 | 1 | 2 | 3): void;
