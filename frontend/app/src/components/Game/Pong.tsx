@@ -2,11 +2,9 @@ import { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { PongInfo, BallInfo, PongProp } from './utils/types';
 import ModalBoard from './ModalBoard';
 import LiveBoard from './LiveBoard';
+import PausedBoard from './PausedBoard';
 import classes from '../../sass/components/Game/Pong.module.scss';
 import io from 'socket.io-client';
-import PausedBoard from './PausedBoard';
-import DoubleAuthPannel from '../Auth/DoubleAuthPannel';
-
 
 const socket = io('http://localhost:3000/pong', {
 		transports: ["websocket"],
@@ -149,11 +147,6 @@ export default function Pong({userId, userName}: PongProp) {
 			socket.on('newScore', ({ pScore, oScore }) => {
 				setPlayerScore(pScore);
 				setOpponentScore(oScore);
-			});
-			// receive a message from a server that an opponent just left the game
-			socket.on('opponentLeft', ({message}) => {
-				console.log({message});
-				socket.emit('leaveGameRoom', {gameRoom: gameRoom});
 			});
 			// receive a message from server to stop the game, and trigger the modalBoard
 			socket.on('stopGame', ({ message }) => {
@@ -344,7 +337,7 @@ export default function Pong({userId, userName}: PongProp) {
 	}
 	
 	// function to set an initial ball position and direction to start the round
-	const serve = (side: number) => {
+	const ballServe = (side: number) => {
 		// if the game is against computer, the calculation for the ball direction is directly in the front
 		if (playerMode === SINGLE_MODE) {
 			setDeltaX((info.initialDelta + level) * side);
@@ -400,8 +393,8 @@ export default function Pong({userId, userName}: PongProp) {
 			});
 		}
 		
-		// call serve function to set the ball values
-		serve(side);
+		// call ballServe function to set the ball values
+		ballServe(side);
 		// toggle isRunning boolean to start the animation of the game
 		setIsRunning(true);
 	}
@@ -441,14 +434,14 @@ export default function Pong({userId, userName}: PongProp) {
 					}, gameRoom: gameRoom,
 				});
 			}
-			serve(OPPONENT_SIDE);
+			ballServe(OPPONENT_SIDE);
 		}
 		//right collision / ball passing the opponent's paddle, so player gains a point
 		if (ballX >= info.boardWidth) {
 			if (playerMode === SINGLE_MODE) {
 				setPlayerScore(p => p += 1);
 			}
-			serve(PLAYER_SIDE);
+			ballServe(PLAYER_SIDE);
 		}
 	}
 	
@@ -669,6 +662,7 @@ export default function Pong({userId, userName}: PongProp) {
 					playerName={userName}
 					opponentName={opponentName}
 					spectatorMode={false}
+					closingText={''}
 					start={() => {startGame(winner === PLAYER_WIN ? PLAYER_SIDE : OPPONENT_SIDE); setIsLive(false)}}
 				/>
 			)}
@@ -683,7 +677,9 @@ export default function Pong({userId, userName}: PongProp) {
 				/>
 			)}
 			{(isPaused) && (
-				<PausedBoard/>
+				<PausedBoard
+					spectatorMode={false}
+				/>
 			)}
 			<div className={classes.container}>
 				<div className={classes.divider_line}></div>

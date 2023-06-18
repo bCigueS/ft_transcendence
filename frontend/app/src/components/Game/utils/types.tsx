@@ -56,6 +56,7 @@ export type LiveBoardProps = {
 	playerName: string;
 	opponentName: string;
 	spectatorMode: boolean;
+	closingText: string;
 	start(): void;
 }
 

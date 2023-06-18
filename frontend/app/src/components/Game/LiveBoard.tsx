@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { LiveBoardProps, State } from './utils/types';
 import classes from '../../sass/components/Game/Board.module.scss';
 
-export default function LiveBoard({ isReady, playerName, opponentName, spectatorMode, start }: LiveBoardProps) {
+export default function LiveBoard({ isReady, playerName, opponentName, spectatorMode, closingText, start }: LiveBoardProps) {
+	const [isEnded, setIsEnded] = useState(closingText === '' ? false : true);
 	const [state, setState] = useState<State>({
 		time: 3,
 		seconds: 3,
@@ -38,11 +39,18 @@ export default function LiveBoard({ isReady, playerName, opponentName, spectator
 	return (
 		<div className={classes.container}>
 			<div className={classes.content}>
-				{(!isReady && spectatorMode) && (
+				{(!isReady && spectatorMode && !isEnded) && (
 					<>
 						<h2>Welcome to live battle!!</h2>
 						<h1>{playerName} VS {opponentName}</h1>
 						<p>loading ...</p>
+					</>
+				)}
+				{(spectatorMode && isEnded) && (
+					<>
+						<h2>The game has ended!</h2>
+						<h1>{closingText}</h1>
+						{/* <button onClick={}>Return to hompage</button> */}
 					</>
 				)}
 				{(!isReady && !spectatorMode) && (
