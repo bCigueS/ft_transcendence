@@ -141,6 +141,17 @@ export class GamesService {
 
 	return updatedGame;
   }
+
+  async updateSpectatorSocketId(id: number, updateGameDto: UpdateGameDto) {
+	const { spectatorSocketIds } = updateGameDto;
+
+	const updatedGame = await this.prisma.game.update({
+	  where: { id },
+	  data: { spectatorSocketIds: spectatorSocketIds, },
+	});
+
+	return updatedGame;
+  }
 	
   async assignRoom(id: number, room: string) {
 	  const updatedGame = await this.prisma.game.update({
