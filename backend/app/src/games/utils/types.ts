@@ -20,6 +20,7 @@ export type ScoreInfo = {
 
 export type GameOverInfo = {
 	playerId: number;
+	winner: number;
 	playerScore: number;
 	opponentScore: number;
 }

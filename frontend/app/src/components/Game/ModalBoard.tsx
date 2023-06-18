@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ModalProps } from './utils/types';
 import classes from  '../../sass/components/Game/Modal.module.scss';
 
-export default function ModalBoard({ onDifficulty, onTool, onPlayerMode, onStartPage, buttonText, text }: ModalProps) {
+export default function ModalBoard({ onDifficulty, onTool, onPlayerMode, onStartPage, buttonText, closingText }: ModalProps) {
 	const [isStarting, setIsStarting] = useState(buttonText === "Start playing" ? true : false);
 	const [page, setPage] = useState(0);
 	const [isDouble, setIsDouble] = useState(false);
@@ -49,7 +49,7 @@ export default function ModalBoard({ onDifficulty, onTool, onPlayerMode, onStart
 				)}
 				{!isStarting && (
 					<>
-						<h2>{text}</h2>
+						<h2>{closingText}</h2>
 						<button onClick={() => {
 							setIsStarting(true);
 							setPage(1);

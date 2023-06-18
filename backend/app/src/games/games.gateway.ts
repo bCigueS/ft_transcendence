@@ -314,11 +314,15 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 				where: { room: gameRoom },
 			});
 
-			// change status of the game to FINISHED
-			game = await this.gamesService.gameOver(game.id, GameState.FINISHED);
+			if (game.state === GameState.PLAYING) {
+				// change status of the game to FINISHED
+				game = await this.gamesService.gameOver(game.id, GameState.FINISHED);
+			}
 
-			// assign playerId as the winnerId in the game
-			game = await this.gamesService.assignWinner(game.id, gameInfo.playerId);
+			if (gameInfo.winner) {
+				// assign playerId as the winnerId in the game
+				game = await this.gamesService.assignWinner(game.id, gameInfo.playerId);
+			}
 
 			// update the userGame with the score of the winner
 			const playerUser = await this.prisma.userGame.update({
@@ -471,7 +475,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 			if (currentGame) {		
 				// send a message to all player in the room to stop the game and make the player that still in the room as a winner of the recent game
 				this.io.to(currentGame.room).emit('stopGame', {
-					message: `Game has ended, you won!`,
+					message: `Sorry, your opponent has abandoned the game!`,
 				});
 				
 				// leave the gameRoom
