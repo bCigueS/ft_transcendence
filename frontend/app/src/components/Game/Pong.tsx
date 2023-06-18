@@ -27,6 +27,7 @@ const DOUBLE_MODE = "double";
 
 // Game's element
 const PLAYER_WIN = -1;
+const TIE = 0;
 const OPPONENT_WIN = 1;
 
 const PLAYER_SIDE = -1;
@@ -48,7 +49,6 @@ const info: PongInfo = {
 	winnerScore: 3,
 }
 
-
 export default function Pong({userId, userName}: PongProp) {
 	// game play
 	const [isRunning, setIsRunning] = useState(false);
@@ -56,7 +56,8 @@ export default function Pong({userId, userName}: PongProp) {
 	const [isLive, setIsLive] = useState(false);
 	const [isReady, setIsReady] = useState(false);
 	const [gameOver, setGameOver] = useState(false);
-	const [winner, setWinner] = useState(0);
+	const [winner, setWinner] = useState(TIE);
+	const [closingText, setClosingText] = useState('');
 	const [gameRoom, setGameRoom] = useState(0);
 	// game mode
 	const [toolMode, setToolMode] = useState(MOUSE_MODE);
@@ -88,6 +89,32 @@ export default function Pong({userId, userName}: PongProp) {
 	const [opponentScore, setOpponentScore] = useState(0);
 	// canvas
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
+	// // screen info <--------- to be checked
+	// const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+	// const [screenHeight, setScreenHeight] = useState(window.innerHeight);
+	// const [ratio, setRatio] = useState(1);
+
+	// useEffect(() => {
+	// 	const handleResize = () => {
+	// 		setScreenWidth(window.innerWidth);
+	// 		setScreenHeight(window.innerHeight);
+	// 	};
+
+	// 	window.addEventListener('resize', handleResize);
+
+	// 	// Clean up the event listener on unmount
+	// 	return () => {
+	// 		window.removeEventListener('resize', handleResize);
+	// 	};
+	// }, []);
+
+	// useEffect(() => {
+	// if (info.boardWidth) {
+	// 	setRatio(info.boardWidth / screenWidth);
+	// } else if (info.boardHeight) {
+	// 	setRatio(info.boardHeight / screenHeight);
+	// }
+	// }, [info.boardWidth, info.boardHeight, screenWidth, screenHeight]);
 
 	useEffect(() => {
 		if (playerMode === DOUBLE_MODE) {
@@ -132,7 +159,8 @@ export default function Pong({userId, userName}: PongProp) {
 			socket.on('stopGame', ({ message }) => {
 				console.log({ message });
 				setGameOver(true);
-				setWinner(PLAYER_WIN);
+				setWinner(TIE);
+				setClosingText(message);
 				stopGame();
 			});
 			socket.on('updateGame', ({ socketId }) => {
@@ -155,14 +183,14 @@ export default function Pong({userId, userName}: PongProp) {
 		}
 	}, [playerMode])
 
-	// function to stop the animation by toggling the isRunning bool, and send a leave request to the server after 1 second
+	// function to stop the animation by toggling the isRunning bool, and send a leave request to the server
 	const stopGame = () => {
 		setIsRunning(false);
-		if (playerMode === DOUBLE_MODE && playerScore > info.winnerScore) {
-
+		if (playerMode === DOUBLE_MODE && winner !== OPPONENT_WIN) {
 			socket.emit('gameOver', {
 				gameInfo: {
 					playerId: userId,
+					winner: winner,
 					playerScore: playerScore,
 					opponentScore: opponentScore,
 				}, 
@@ -547,6 +575,7 @@ export default function Pong({userId, userName}: PongProp) {
 			// check game status
 			if (opponentScore > info.winnerScore || playerScore > info.winnerScore) {
 				playerScore > info.winnerScore ? setWinner(PLAYER_WIN) : setWinner(OPPONENT_WIN);
+				playerScore > info.winnerScore ? setClosingText('You win!') : setClosingText('You lose!');
 				setGameOver(true);
 				stopGame();
 			}
@@ -650,7 +679,7 @@ export default function Pong({userId, userName}: PongProp) {
 					onPlayerMode={(mode) => {setPlayerMode(mode)}}
 					onStartPage={() => startGame(winner === PLAYER_WIN ? PLAYER_SIDE : OPPONENT_SIDE)}
 					buttonText={gameOver ? "Play again" : "Start playing"}
-					text={winner === PLAYER_WIN ? "You wins!" : "You lose!"}
+					closingText={closingText}
 				/>
 			)}
 			{(isPaused) && (
