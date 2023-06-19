@@ -18,11 +18,8 @@ const HARD_LEVEL = 2;
 const SPECIAL_LEVEL = 3;
 
 // Game's element
-const PLAYER_WIN = -1;
-const OPPONENT_WIN = 1;
-
-const PLAYER_SIDE = -1;
-const OPPONENT_SIDE = 1;
+// const PLAYER_WIN = -1;
+// const OPPONENT_WIN = 1;
 
 // initial data for the game
 const info: PongInfo = {
