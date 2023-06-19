@@ -4,9 +4,12 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthEntity } from './entity/auth.entity';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { toSafeUser } from 'src/users/user.utils';
 
 @Injectable()
 export class AuthService {
+prismaService: any;
 constructor(
 	private prisma: PrismaService, 
 	private jwtService: JwtService, 
@@ -29,11 +32,32 @@ async login(name: string, password: string): Promise<AuthEntity> {
 		accessToken: this.jwtService.sign({ userId: user.id }),
 	};
 }
-
-async registerNewUser(name: string, password: string, login: string): Promise<any> 
+async registerUser(apiResponse: any)
 {
-	const user = await this.prisma.user.findUnique({ where: { login: login } });
-}
+	
+    const createUserDto = new CreateUserDto();
+    createUserDto.name = apiResponse.displayname;
+    createUserDto.login = apiResponse.login;
+    createUserDto.email = apiResponse.email;
+    createUserDto.password = 'lolilolilol';
+    createUserDto.avatar = apiResponse.image.link;
+	console.log(createUserDto);
+	console.log("registerUser");
+
+    const user = await this.prisma.user.create({
+      data: {
+		id42: apiResponse.id,
+        name: createUserDto.name,
+        login: createUserDto.login,
+        email: createUserDto.email,
+        password: createUserDto.password,
+        avatar: createUserDto.avatar,
+      },
+    });
+
+    return (user);
+  }
+
 
 async validateUser(code: string): Promise<any>
 {
@@ -71,11 +95,12 @@ async aboutMe(token: string): Promise<any>
 		if (!user)
 		{
 			console.log("user not found");
+			const user = await this.registerUser(data_response.data);
 		}
 		return (data_response.data);
 	} catch (error) { 
 		error.status = 403;
-		throw new HttpException(error.response.data , HttpStatus.FORBIDDEN, { cause: error });
+		throw new HttpException(error , HttpStatus.FORBIDDEN, { cause: error });
 	}	
 }
 
