@@ -8,6 +8,7 @@ import { json, useLocation } from 'react-router-dom';
 import MessageList from '../components/Chat/MessageList';
 import { Channel, MessageAPI, deleteChat } from '../components/Chat/chatUtils';
 import ManageChats from '../components/Chat/ManageChats';
+import NoDiscussions from '../components/Chat/NoDiscussions';
 
 
 export default function Chat() {
@@ -331,6 +332,7 @@ export default function Chat() {
 			<div className={classes.conversations}>
 				< ManageChats />
 				{
+					chats && chats.length > 0 ?
 					chats.map((chat) => (
 						<ChatInfo key={chat.id}
 						chats={chats}
@@ -339,7 +341,9 @@ export default function Chat() {
 						onSaveConversation={onSaveConversation}
 						onDeleteChat={handleChatDeletion}/>
 						))
-					}
+					:
+					<NoDiscussions/>
+				}
 			</div>
 			{
 				selectedConversation &&

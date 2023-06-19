@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import classes from '../../sass/components/UI/Modal.module.scss';
 import formclasses from '../../sass/components/Chat/CreateGroup.module.scss';
 import { Fragment } from 'react';
 import ReactDOM from 'react-dom';
 import Card from "./../UI/Card";
+import { UserAPI, UserContext } from "../../store/users-contexte";
+import AddToGroup from "./AddToGroup";
 
 type Props = {
     children?: React.ReactNode,
@@ -19,23 +21,31 @@ const Backdrop: React.FC<Props> = (props) => {
 }
 
 const Overlay: React.FC<Props> = (props) => {
-    const [ enteredText, setEnteredText ] = useState<string>(''); 
-	const [ placeholder, setPlaceholder ] = useState<string>('');
-    
-	const handleDelete = () => {
-		if (props.onDelete)
-			props.onDelete();
-		props.onCloseClick();
-	}
+    const [ groupName, setGroupName ] = useState<string>(''); 
+	const [ members, setMembers ] = useState<UserAPI[]>([]);
+	const userCtx = useContext(UserContext);
 
     const handleSubmit = () => {
-
+		if (members.length < 2)
+			alert('you need to select at least 2 members to create a group');
+		console.log('about to create group: ', {groupName, members});
+		props.onCloseClick();
     }
 
     const nameHandler = (event: any) => {
-		setEnteredText(event.target.value);
+		setGroupName(event.target.value);
 	}
 
+	const addMember = (member: UserAPI) => {
+		console.log('added member: ', member);
+		setMembers([...members, member]);
+	}
+
+	const removeMember = (member: UserAPI) => {
+		console.log('removed member: ', member);
+		setMembers(members.filter(m => m.id !== member.id));
+	}
+	
 	return (
 		<Card className={classes.modal}>
 			<header className={classes.header}>
@@ -43,21 +53,58 @@ const Overlay: React.FC<Props> = (props) => {
 			</header>
                 <form method='patch' className={formclasses.container} onSubmit={handleSubmit}>
                     <div className={formclasses.label}>
-                        <label htmlFor="name">Enter a group name</label>
+                        <label htmlFor="name">Group name</label>
                         <input 
                             type="text" 
                             id='name' 
                             name='name' 
-                            value={enteredText} 
+                            value={groupName}
                             onChange={nameHandler}
-                            placeholder={placeholder} 
                             maxLength={12}/>
                     </div>
-                    <button type="submit">Confirm</button>
+					<div className={formclasses["members-label"]}>
+                        <label htmlFor="members">Add members to group</label>
+						{
+							(userCtx.user?.id) &&
+							<div >
+								{
+									userCtx.user?.friends && 
+									userCtx.user.friends.filter((friend) => !members.some(member => member.id === friend.id))
+									.map((friend) => (
+										<AddToGroup 
+											key={friend.id} 
+											user={friend}
+											onAdd={addMember}
+											onRemove={removeMember}
+											isSelected={false}
+										/>
+									))
+								}
+							</div>
+						}
+						{
+							members.length > 0 &&
+						<div className={formclasses.selected}>
+						<h2>Selected members</h2>
+						{
+							members.map((member) => (
+								<AddToGroup 
+								key={member.id} 
+								user={member}
+								onAdd={addMember}
+								onRemove={removeMember}
+								isSelected={true}
+								/>
+								))
+							}
+						</div>
+						}
+                    </div>
+					
                 </form>
 			<footer className={classes.actions}>
 				<button className={classes["button-cancel"]} onClick={props.onCloseClick}>Cancel</button>
-				<button className={classes.button} onClick={handleDelete}>Create</button>
+				<button className={classes.button} onClick={handleSubmit}>Create</button>
 			</footer>
 		</Card>
 	);
