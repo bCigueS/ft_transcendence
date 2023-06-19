@@ -114,6 +114,7 @@ export default function Pong({userId, userName}: PongProp) {
 	// }
 	// }, [info.boardWidth, info.boardHeight, screenWidth, screenHeight]);
 
+	// loop to emit a join request to the server
 	useEffect(() => {
 		if (playerMode === DOUBLE_MODE) {
 			// if the game is for 2 players mode, start by sending a join request to the server
@@ -173,6 +174,7 @@ export default function Pong({userId, userName}: PongProp) {
 		}
 	}, [gameRoom, opponentScore, playerMode, playerScore, userId, winner]);
 
+	// loop to detect stopGame event from server
 	useEffect(() => {
 		if (playerMode === DOUBLE_MODE) {
 			// receive a message from server to stop the game, and trigger the modalBoard
@@ -186,6 +188,7 @@ export default function Pong({userId, userName}: PongProp) {
 		}
 	}, [playerMode, stopGame]);
 
+	// loop to detect an updateGame request event from server
 	useEffect(() => {
 		if (playerMode === DOUBLE_MODE) {
 			socket.on('updateGame', ({ socketId }) => {
@@ -590,7 +593,7 @@ export default function Pong({userId, userName}: PongProp) {
 				stopGame();
 			}
 		}
-	}, [frameCount]);
+	}, [frameCount, isPaused]);
 	
 	// update the frameCount
 	useLayoutEffect(() => {
