@@ -10,6 +10,7 @@ const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: s
 	const [ imageUrl, setImageUrl ] = useState<string>('');
 	const [ loading , setLoading ] = useState<boolean>(false);
 	const [ error, setError ] = useState<string | null>(null);
+	const [ inGame, setInGame ] = useState<boolean>(false);
 	const navigate = useNavigate();
 
 	const stylePicture: React.CSSProperties = {
@@ -52,7 +53,8 @@ const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: s
 
 	useEffect(() => {
 		fetchAvatar();
-	}, [fetchAvatar]);
+		console.log("Error in ProfilIcon need to be change", error);
+	}, [fetchAvatar, error]);
 
 	return (
 		<div 
@@ -74,7 +76,7 @@ const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: s
 			{
 				displayCo &&
 				<i 
-					className="fa-solid fa-circle" 
+					className={!inGame ? "fa-solid fa-circle" : "fa-solid fa-table-tennis-paddle-ball"} 
 					style={{color: user?.connected ? 'green' : 'red' }
 					}>
 				</i>

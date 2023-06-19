@@ -22,6 +22,10 @@ export type UserAPI = {
 
 export const UserContext = React.createContext<{
 		user: UserAPI | null;
+		error: string | null;
+		token?: string;
+		saveToken: (token: string) => void,
+		deleteToken: () => void,
 		fetchUserFriends: (id: number) => void;
 		fetchUserBlockings: (id: number) => void;
 		fetchUser: () => void;
@@ -30,6 +34,10 @@ export const UserContext = React.createContext<{
 		fetchUnblockUser: (targetUser: UserAPI) => void;
 	}>({
 	user: null,
+	error: null,
+	token: undefined,
+	saveToken: (token: string) => {},
+	deleteToken: () => {},
 	fetchUserFriends: (id: number) => {},
 	fetchUserBlockings: (id: number) => {},
 	fetchUser: () => {},
@@ -45,51 +53,90 @@ type Props = {
 	
 	const UsersContextProvider: React.FC<Props> = ( {children, className} ) => {
 		
-		const [user, setUser] = useState<UserAPI | null>(null);
+		const [ user, setUser] = useState<UserAPI | null>(null);
+		const [ token, setToken ] = useState<string | undefined>(undefined);
 		const [ loading, setLoading ] = useState<boolean>(true);
 		const [ error, setError ] = useState<string | null>(null);
 
+		const saveToken = (token: string) => {
+			setToken(token);
+		}
+
+		const deleteToken = () => {
+			setToken(undefined);
+		}
 
 		const fetchRemoveFriend = async (targetUser: UserAPI) => {
+			setError(null);
+
 			const friendId = {
 				friendId: targetUser.id
 			};
-			const response = await fetch('http://localhost:3000/users/' + user?.id + '/remove-friend', {
-				method: 'PATCH',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(friendId)
-			});
-			fetchUser();
+			try {
+				const response = await fetch('http://localhost:3000/users/' + user?.id + '/remove-friend', {
+					method: 'PATCH',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify(friendId)
+				});
+
+				if (!response.ok) {
+					throw new Error('fetchRemoveFriend Failed');
+				}
+				fetchUser();
+			} catch (error: any) {
+				setError(error.message);
+			}
 		}
 
 		const fetchBlockUser = async (targetUser: UserAPI) => {
+			setError(null);
+
 			const blockedId = {
 				blockedId: targetUser.id
 			};
-			const response = await fetch('http://localhost:3000/users/' + user?.id + '/block-user', {
-				method: 'PATCH',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(blockedId)
-			});
-			fetchUser();
+			try {
+				const response = await fetch('http://localhost:3000/users/' + user?.id + '/block-user', {
+					method: 'PATCH',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify(blockedId)
+				});
+
+				if (!response.ok) {
+					throw new Error("Failed to fetch block User");
+				}
+				fetchUser();
+			} catch (error: any) {
+				setError(error.message);
+			}
 		}
 
 		const fetchUnblockUser = async (targetUser: UserAPI) => {
+			setError(null);
+
 			const blockedId = {
 				blockedId: targetUser.id
 			};
-			const response = await fetch('http://localhost:3000/users/' + user?.id + '/unblock-user', {
-				method: 'PATCH',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(blockedId)
-			});
-			fetchUser();
+			try {
+
+				const response = await fetch('http://localhost:3000/users/' + user?.id + '/unblock-user', {
+					method: 'PATCH',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify(blockedId)
+				});
+
+				if (!response.ok) {
+					throw new Error('Failed to fetch Unblock user');
+				}
+				fetchUser();
+			} catch (error: any) {
+				setError(error.message);
+			}
 		}
 
 		const fetchUserFriends = useCallback(async (id: number) => {
@@ -185,7 +232,11 @@ type Props = {
 		  
 		useEffect(() => {
 			fetchUser();
-		  }, [fetchUser]);
+			if (token)
+				console.log("User Context, token: ", token);
+			else 
+				console.log("User Context, no token");
+		  }, [fetchUser, token]);
 	
 
 		if (loading) {
@@ -194,6 +245,10 @@ type Props = {
 
 	const contextValue = {
 		user: user,
+		error: error,
+		token: undefined,
+		saveToken: saveToken,
+		deleteToken: deleteToken,
 		fetchUserFriends: fetchUserFriends,
 		fetchUserBlockings: fetchUserBlockings,
 		fetchUser: fetchUser,

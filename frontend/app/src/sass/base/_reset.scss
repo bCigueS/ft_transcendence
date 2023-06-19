@@ -45,12 +45,13 @@ button {
 }
 
 main {
-	height: 50rem;
+	height: 60rem;
 	max-width: 110rem;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	margin: 1rem 3rem;
+	background-color: $almost-white;
 
 	border: 0.3rem black solid;
 
