@@ -13,7 +13,7 @@ export class UsersService {
   async create(data: CreateUserDto) {
 
     const newUser = await this.prisma.user.create({ data });
-    return toSafeUser(newUser);
+    return newUser;
   }
 
   async findAll() {
@@ -33,7 +33,7 @@ export class UsersService {
       }    
     });
 
-    return toSafeUser(user);
+    return user;
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
