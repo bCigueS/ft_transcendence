@@ -1,17 +1,21 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import classes from '../../sass/components/Chat/Message.module.scss';
-import { UserContext } from '../../store/users-contexte';
+import { UserAPI, UserContext } from '../../store/users-contexte';
 import Modal from '../UI/Modal';
-import { MessageAPI } from './chatUtils';
+import { Channel, MessageAPI } from './chatUtils';
+import ProfilIcon from '../Profile/ProfilIcon';
 
 
 const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean, 
 					message: MessageAPI, messages: MessageAPI[], 
-					onDelete: (message: MessageAPI) => void }> = ( { isMine, isLast, displayDay, message, messages, onDelete } ) => {
+					onDelete: (message: MessageAPI) => void,
+					chat: Channel }> = ( { isMine, isLast, displayDay, message, messages, onDelete, chat } ) => {
 
 	const [ isHovering, setIsHovering ] = useState(false);
 	const [ showModal, setShowModal ] = useState(false);
+	const [ sender, setSender ] = useState<UserAPI | null>(null);
+	const userCtx = useContext(UserContext);
 
 	const date = new Date(message.createdAt);
 
@@ -61,6 +65,21 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 		
 	};
 
+	const displaySender = async () => {
+		let sender = null;
+		if (message.senderId)
+			sender = await userCtx.fetchUserById(message.senderId);
+		if (sender)
+		{
+			setSender(sender);
+		}
+	}
+
+	useEffect(() => {
+		displaySender();
+	});
+
+
 	const handleDeletion = () => 
 	{
 		deleteMessage();
@@ -94,6 +113,9 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 			onMouseOut={handleMouseOut}>
 			<div 
 				className={isMine ? classes.myMessage : classes.yourMessage}>
+				<div className={classes.sender}>
+				{ sender && sender.id !== userCtx.user?.id && chat.name !== "private" && sender?.name}
+				</div>
 				{ message.content }
 			{ isHovering && 
 				<div className={classes.info}>
@@ -111,7 +133,16 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 				</div>
 			}
 			</div>
+			
 		</div>
+		{
+			sender && sender.id !== userCtx.user?.id && isLast ?
+			<div className={classes.senderProfile}>
+			<ProfilIcon user={sender} displayCo={false} size={["2.5rem", "2.5rem"]}/>
+			</div>
+			:
+			<div></div>
+		}
 		</>
 	)
 }

@@ -50,9 +50,6 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 				content: string,
 				channelId: number,
 				senderId: number }): Promise<void> {
-
-	console.log('in message gateway, message: ', message);
-
 	const existingMessages = await this.prisma.message.findMany({
 		where: {
 			channelId: message.channelId
