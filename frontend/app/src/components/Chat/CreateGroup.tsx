@@ -23,11 +23,20 @@ const Backdrop: React.FC<Props> = (props) => {
 const Overlay: React.FC<Props> = (props) => {
     const [ groupName, setGroupName ] = useState<string>(''); 
 	const [ members, setMembers ] = useState<UserAPI[]>([]);
+	const [ typeError, setTypeError ] = useState<string>('');
 	const userCtx = useContext(UserContext);
 
     const handleSubmit = () => {
+		if (groupName === '' || groupName.trim() === '')
+		{
+			setTypeError('You need to provide a name to create a group.')
+			return ;
+		}
 		if (members.length < 2)
-			alert('you need to select at least 2 members to create a group');
+		{
+			setTypeError('You need to select at least two members to create a group.');
+			return ;
+		}
 		console.log('about to create group: ', {groupName, members});
 		props.onCloseClick();
     }
@@ -100,7 +109,10 @@ const Overlay: React.FC<Props> = (props) => {
 						</div>
 						}
                     </div>
-					
+					{ 
+						typeError &&
+						<p className={formclasses.error}>{typeError}</p>
+					}
                 </form>
 			<footer className={classes.actions}>
 				<button className={classes["button-cancel"]} onClick={props.onCloseClick}>Cancel</button>
