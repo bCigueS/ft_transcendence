@@ -1,39 +1,38 @@
-export type PlayerInfo = {
-	name: string;
-	playerId: string;
-	level: number;
-	gameId: string;
-}
-
-export type BallInfo = {
-	dx: number;
-	dy: number;
-}
-
-export type AddPlayerResult = {
-	player: PlayerInfo;
-	opponent: PlayerInfo | null;
-	message: string;
-}
-
-export type RemovePlayerResult = {
-	player: PlayerInfo | null;
-	message: string;
-}
-
-export type CallbackInfo = (message: string) => {
-	message: string;
-}
-
 export type ServeInfo = {
 	initialDelta: number;
 	level: number;
 }
 
 export type CollisionInfo = {
+	x: number;
 	y: number;
 	r: number;
-	playerY: number;
-	paddleHeight: number;
+	squareY: number;
+	squareHeight: number;
 	speed: number;
+	middleBoard: number;
+}
+
+export type ScoreInfo = {
+	playerScore: number;
+	opponentScore: number;
+}
+
+export type GameOverInfo = {
+	playerId: number;
+	winner: number;
+	playerScore: number;
+	opponentScore: number;
+}
+
+export type UpdatedInfo = {
+	x: number;
+	y: number;
+	dx: number;
+	dy:number;
+	s: number;
+	playerY: number;
+	opponentY: number;
+	pScore: number;
+	oScore: number;
 }
