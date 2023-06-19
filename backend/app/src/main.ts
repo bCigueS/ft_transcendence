@@ -7,6 +7,7 @@ import { config } from 'dotenv';
 
 import { SocketIOAdapter } from './socket-io-adapter';
 import { ConfigService } from '@nestjs/config';
+import { json, urlencoded } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -29,6 +30,9 @@ async function bootstrap() {
 
   const { httpAdapter } = app.get(HttpAdapterHost);
   app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter));
+
+  app.use(json({ limit: '50mb' }));
+  app.use(urlencoded({ extended: true, limit: '50mb' }));
 
   await app.listen(3000);
 }

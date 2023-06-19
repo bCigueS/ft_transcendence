@@ -11,11 +11,8 @@
 
 		border-radius: 50%;
 		border: 0.2rem black solid;
-		background-repeat: no-repeat;
-		background-position: center center;
-		background-size: cover;
+		background-color: $almost-white;
 
-		background-image: $profile-pic2;
 		cursor: pointer;
 	}
 
@@ -64,5 +61,20 @@
 				opacity: 1;
 			}
 		}
+	}
+}
+
+.picture {
+	@include flexBox();
+	width: 6.5rem;
+	height: 6.5rem;
+	// border: 0.3rem solid black;
+	border-radius: 50%;
+	overflow: hidden;
+	
+	img {
+		width: auto;
+		overflow: hidden;
+		z-index: 2;
 	}
 }
