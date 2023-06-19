@@ -179,6 +179,4 @@ export class GamesService {
   
 	  return updatedGame;
   }
-
-
 }

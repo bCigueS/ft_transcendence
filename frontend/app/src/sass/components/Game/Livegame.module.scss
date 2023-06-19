@@ -4,12 +4,11 @@
 
 .container {
 	height: 100%;
-	width: 50rem;
-	padding: 3rem 0;
+	width: 100%;
 
 
 	h1 {
-		@include titleh1();
+		@include titleh1($width: 30rem);
 		margin-bottom: 5rem;
 	}
 
