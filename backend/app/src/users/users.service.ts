@@ -279,4 +279,23 @@ export class UsersService {
     });
   }
 
+
+  async seeUserGames(id: number) {
+  
+    const games = await this.prisma.game.findMany({
+        where: {
+            players: {
+                some: {
+                  userId: id
+                }
+            }
+        },
+        include: {
+          players: true,
+        },
+    });
+    
+    return games;
+  }
+
 }

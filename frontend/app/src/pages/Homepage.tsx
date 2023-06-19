@@ -8,21 +8,20 @@ const Homepage: React.FC = () => {
 			<div className={classes.rules}>
 				<h1>Rules of the Game</h1>
 				<div className={classes.info}>
-					<div>
+					<div className={classes.level}>
 						<h2>Choose your level!</h2>
-						<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Rerum distinctio aliquid adipisci voluptatem perspiciatis saepe expedita libero? Nihil nulla earum molestias vel maiores voluptate tempore ipsum, quibusdam molestiae sunt. Maiores?</p>
+						<p>Choose the <span>difficulty level</span>, between one to 3, to change the <span>size</span> of the paddle and the <span>speed</span> of the game !</p>
 					</div>
 
-					<div>
+					<div className={classes.control}>
 						<h2>Choose your control!</h2>
-						<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Rerum distinctio aliquid adipisci voluptatem perspiciatis saepe expedita libero? Nihil nulla earum molestias vel maiores voluptate tempore ipsum, quibusdam molestiae sunt. Maiores?</p>
+						<p>Use <span>Placeholder</span> and <span>Placeholder</span> or your <span>Placeholder</span> to control the paddle!</p>
 
 					</div>
 
-					<div>
+					<div className={classes.play}>
 						<h2>Play the Game!</h2>
-						<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Rerum distinctio aliquid adipisci voluptatem perspiciatis saepe expedita libero? Nihil nulla earum molestias vel maiores voluptate tempore ipsum, quibusdam molestiae sunt. Maiores?</p>
-
+						<p>The first player to <span>11</span> win the game!</p>
 					</div>
 				</div>
 			</div>

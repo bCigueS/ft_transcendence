@@ -1,8 +1,8 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useCallback } from 'react';
 import classes from '../../sass/components/Profile/ProfileContent.module.scss';
 import MatchSummary from './Matches/MatchSummary';
 import ProfileFriends from './ProfileFriends';
-import { UserAPI, UserContext } from '../../store/users-contexte';
+import { UserAPI, UserContext, UserMatch } from '../../store/users-contexte';
 import ProfilSettings from './ProfilSettings';
 
 
@@ -10,15 +10,67 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 
 	const userCtx = useContext(UserContext);
 	const [contentDisplay, setContentDisplay] = useState<string>('Maths');
+	const [ matchesSummary, setMatchesSummary ] = useState<UserMatch[]>([]);
 
 	const tabHandler = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		const display: string = event.currentTarget.textContent || '';
 		setContentDisplay(display);
 	};
 
+	const fetchUser = async(id: number) => {
+		const response = await fetch('http://localhost:3000/users/' + id);
+		if (!response.ok)
+			throw new Error("Failed to fetch user");
+		const data = await response.json();
+		const user: UserAPI = {
+			id: data.id,
+			name: data.name,
+			email: data.email,
+			avatar: data.avatar,
+			doubleAuth: data.doubleAuth,
+			wins: data.wins
+		}
+		return user;
+	}
+
+	const parseMatchData = async (match: any) => {
+		console.log(match);
+
+		const idOfUser: number = match.players[0].userId === userCtx.user?.id ? 0 : 1;
+		const idOfOppo: number = match.players[0].userId === userCtx.user?.id ? 1 : 0;
+		const matchInfo: UserMatch = {
+			user: await fetchUser(match.players[idOfUser].userId),
+			opponent: await fetchUser(match.players[idOfOppo].userId),
+			playerScore: match.players[idOfUser].score,
+			opponentScore: match.players[idOfOppo].score
+		}
+
+		console.log(matchInfo);
+	}
+
+	const fetchMatchSummary = useCallback(async() => {
+		const response = await fetch('http://localhost:3000/users/' + userCtx.user?.id + '/games');
+		if (response.status === 404) {
+			console.error("Error in fetch data");
+			return ;
+		}
+		if (!response.ok)
+			throw new Error("Failed to fetch matchs Summary");
+		const data = await response.json();
+		const matchsSummary: UserMatch[] = data.map((match: any) => {
+			// return {
+			// 	// opponent: data.
+			// }
+			return (parseMatchData(match));
+		})
+		
+		console.log("Result: ", matchesSummary);
+	}, [])
+
 	useEffect(() => {
 		setContentDisplay('Settings');
-	}, [user?.name])
+		fetchMatchSummary();
+	}, [user?.name]);
 
 	return (
 		<div className={classes.container}>
