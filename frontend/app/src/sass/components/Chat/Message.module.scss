@@ -9,6 +9,7 @@
     background-color: $gunmetal-light;
     position: relative;
     align-self: flex-end;
+    word-wrap: break-word;
 
     .myMessage {
         top: 0.5rem;
@@ -31,6 +32,7 @@
     background-color: $gunmetal-light;
     position: relative;
     align-self: flex-end;
+    word-wrap: break-word;
 
     .myMessage {
         top: 0.5rem;
@@ -67,6 +69,7 @@
     background-color: $light-vermillon;
     position: relative;
     align-self: flex-start;
+    word-wrap: break-word;
 
     .sender {
         font-weight: bold;
@@ -97,6 +100,7 @@
     background-color: $light-vermillon;
     position: relative;
     align-self: flex-start;
+    word-wrap: break-word;
 
     .sender {
         font-weight: bold;
