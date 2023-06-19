@@ -6,34 +6,63 @@
 	
 	height: 100%;
 	width: 100%;
-	margin: 0 5rem;
-	@include flexBox($direction: row);
-
-	.rules {
-
-		height: 100%;
-		width: 40rem;
-		padding: 3rem 0;
-		
-		@include flexBox($justify: flex-start);
+	display: grid;
+	padding: 5rem;
+	grid-template-columns: 2fr 1.5fr;
+	grid-template-rows: 1fr;
+	gap: 5rem;
+	
+	.rules {		
 		gap: 3rem;
+		@include flexBox($align: flex-start);
 		
 		h1 {
-			@include titleh1();
+			@include titleh1($width: 30rem);
 		}
 		
 		.info {
-			border: 0.2rem solid black;
 			height: 100%;
 			width: 100%;
 			padding: 2rem;
 			@include flexBox($justify: flex-start, $align: flex-start);
 
+
+			span {
+				color: $light-vermillon;
+				font-weight: 800;
+			}
+
+			p {
+				@include text-body();
+				margin-bottom: 1rem;
+			}
+
+			.level {
+				h2 {
+					@include titleh1($fontSize: 2.4rem, $width: 22rem);
+				}
+			}
+
+			.control {
+				h2 {
+					@include titleh1($fontSize: 2.4rem, $width: 26rem);
+				}
+			}
+
+			.play {
+				h2 {
+					@include titleh1($fontSize: 2.4rem, $width: 19rem);
+				}
+
+			}
 			h2 {
-				@include titleh1($fontSize: 2.4rem, $width: 24rem);
 				margin-bottom: 2rem;
 			}
 		}
+	}
+
+	.other {
+		background-color:aquamarine;
 	}
 
 }

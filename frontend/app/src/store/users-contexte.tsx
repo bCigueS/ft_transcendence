@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
 export type UserMatch = {
+	user?: UserAPI,
 	opponent?: UserAPI,
 	playerScore: number,
 	opponentScore: number
@@ -25,6 +26,7 @@ export const UserContext = React.createContext<{
 		error: string | null;
 		token?: string;
 		saveToken: (token: string, userIdInput: number) => void,
+		saveToken2: (token: string) => void,
 		deleteToken: () => void,
 		fetchUserFriends: (id: number) => void;
 		fetchUserBlockings: (id: number) => void;
@@ -38,6 +40,7 @@ export const UserContext = React.createContext<{
 	error: null,
 	token: undefined,
 	saveToken: (token: string, userIdInput: number) => {},
+	saveToken2: (token: string) => {},
 	deleteToken: () => {},
 	fetchUserFriends: (id: number) => {},
 	fetchUserBlockings: (id: number) => {},
@@ -63,6 +66,10 @@ type Props = {
 
 		const saveToken = (token: string,  userIdInput: number) => {
 			setUserId(userIdInput);
+			setToken(token);
+		}
+
+		const saveToken2 = (token: string) => {
 			setToken(token);
 		}
 
@@ -288,6 +295,7 @@ type Props = {
 		error: error,
 		token: undefined,
 		saveToken: saveToken,
+		saveToken2: saveToken2,
 		deleteToken: deleteToken,
 		fetchUserFriends: fetchUserFriends,
 		fetchUserBlockings: fetchUserBlockings,
