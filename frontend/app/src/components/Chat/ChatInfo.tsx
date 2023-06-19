@@ -4,6 +4,7 @@ import ProfilIcon from "../Profile/ProfilIcon";
 import { UserAPI, UserContext } from "../../store/users-contexte";
 import Modal from "../UI/Modal";
 import { Channel, MessageAPI, deleteChat } from "./chatUtils";
+import GroupIcon from "./GroupIcon";
 
 // const Searchbar: React.FC<{onSaveSearch: (input: string) => void}> = ( props ) => {
 
@@ -75,11 +76,16 @@ onDeleteChat: (channelId: number) => void}>
 		}
 		<div className={`${classes.container} ${props.isSelected ? classes.selected : ''}`}>
 			<div className={classes.picture}>
-			<ProfilIcon user={sender} displayCo={false} size={["4rem", "4rem"]} />
+				{
+					props.chat.name === "private" ?
+					<ProfilIcon user={sender} displayCo={false} size={["4rem", "4rem"]} />
+					:
+					<GroupIcon chat={props.chat} displayCo={false} size={["4rem", "4rem"]}/>
+				}
 			</div>
 			<div className={classes.info} onClick={conversationHandler}>
 				<p className={classes.name}>
-					{ sender && sender?.name}
+					{ sender ? sender?.name : props.chat.name}
 				</p>
 				{ props.chat.messages && 
 					props.chat.messages.length > 0 ? 
