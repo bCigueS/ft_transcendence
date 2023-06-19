@@ -19,6 +19,7 @@ export type PongProp = {
 }
 
 export type SpectatorProp = {
+	mode: number;
 	userId: number;
 	gameLevel: number;
 	gameRoom: string;
@@ -72,4 +73,8 @@ export type ModalProps = {
 	onTool(mode: "keyboard" | "mouse"): void;
 	onDifficulty(level: 0 | 1 | 2 | 3): void;
 	onPlayerMode(mode: "single" | "double"): void;
+}
+
+export type PausedProps = {
+	mode: "spectator" | "play";
 }

@@ -410,15 +410,15 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 				let message;
 				if (gameInfo.winner) {
 					if (playerSocket === client.id) {
-						message += player.name + ' wins!';
+						message = player.name + ' wins!';
 					} else {
-						message += opponent.name + ' wins!';
+						message = opponent.name + ' wins!';
 					}
 				} else {
 					if (playerSocket === client.id) {
-						message += opponent.name + ' has left the game!';
+						message = opponent.name + ' has left the game!';
 					} else {
-						message += player.name + ' has left the game!';
+						message = player.name + ' has left the game!';
 					}
 				}
 	
@@ -511,9 +511,9 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 
 			this.io.to(socketId).emit('currentGameInfo', {
 				gameInfo: gameInfo,
-			})
+			});
 
-			if (game.state === GameState.PLAYING) {
+			if (game && game.state === GameState.PLAYING) {
 				this.io.to(socketId).emit('startWatch', {
 					message: `Everything's ready. Enjoy the match!`,
 				});
