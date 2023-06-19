@@ -3,7 +3,7 @@ import { LiveBoardProps, State } from './utils/types';
 import classes from '../../sass/components/Game/Board.module.scss';
 
 export default function LiveBoard({ isReady, playerName, opponentName, spectatorMode, closingText, start }: LiveBoardProps) {
-	const [isEnded, setIsEnded] = useState(closingText === '' ? false : true);
+	const isEnded = (closingText === '' ? false : true);
 	const [state, setState] = useState<State>({
 		time: 3,
 		seconds: 3,
@@ -34,7 +34,7 @@ export default function LiveBoard({ isReady, playerName, opponentName, spectator
 				start();
 			}
 		}
-	}, [state.time, isReady]);
+	}, [spectatorMode, state.seconds, state.time, isReady, start]);
 
 	return (
 		<div className={classes.container}>

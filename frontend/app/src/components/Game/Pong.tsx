@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useLayoutEffect } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { PongInfo, BallInfo, PongProp } from './utils/types';
 import ModalBoard from './ModalBoard';
 import LiveBoard from './LiveBoard';
@@ -56,7 +56,7 @@ export default function Pong({userId, userName}: PongProp) {
 	const [gameOver, setGameOver] = useState(false);
 	const [winner, setWinner] = useState(TIE);
 	const [closingText, setClosingText] = useState('');
-	const [gameRoom, setGameRoom] = useState(0);
+	const [gameRoom, setGameRoom] = useState('');
 	// game mode
 	const [toolMode, setToolMode] = useState(MOUSE_MODE);
 	const [level, setLevel] = useState(BEGINNER_LEVEL);
@@ -118,6 +118,11 @@ export default function Pong({userId, userName}: PongProp) {
 		if (playerMode === DOUBLE_MODE) {
 			// if the game is for 2 players mode, start by sending a join request to the server
 			socket.emit('join', { id: userId, lvl: level });
+		}
+	}, [playerMode, level, userId]);
+
+	useEffect(() => {
+		if (playerMode === DOUBLE_MODE) {
 			// receive a welcome message from server informing that you are in a specific game room, and trigger a liveBoard
 			socket.on('welcome', ({ message, opponent, gameRoom }) => {
 				console.log({ message, opponent, gameRoom });
@@ -148,6 +153,28 @@ export default function Pong({userId, userName}: PongProp) {
 				setPlayerScore(pScore);
 				setOpponentScore(oScore);
 			});
+		}
+	}, [playerMode]);
+
+	// function to stop the animation by toggling the isRunning bool, and send a leave request to the server
+	const stopGame = useCallback(() => {
+		setIsRunning(false);
+		console.log('in stop game, with gameRoom ', gameRoom);
+		if (playerMode === DOUBLE_MODE && winner !== OPPONENT_WIN) {
+			socket.emit('gameOver', {
+				gameInfo: {
+					playerId: userId,
+					winner: winner,
+					playerScore: playerScore,
+					opponentScore: opponentScore,
+				}, 
+				gameRoom: gameRoom,
+			});
+		}
+	}, [gameRoom, opponentScore, playerMode, playerScore, userId, winner]);
+
+	useEffect(() => {
+		if (playerMode === DOUBLE_MODE) {
 			// receive a message from server to stop the game, and trigger the modalBoard
 			socket.on('stopGame', ({ message }) => {
 				console.log({ message });
@@ -156,6 +183,11 @@ export default function Pong({userId, userName}: PongProp) {
 				setClosingText(message);
 				stopGame();
 			});
+		}
+	}, [playerMode, stopGame]);
+
+	useEffect(() => {
+		if (playerMode === DOUBLE_MODE) {
 			socket.on('updateGame', ({ socketId }) => {
 				socket.emit('lastUpdatedInfo', {
 					gameInfo: {
@@ -174,23 +206,8 @@ export default function Pong({userId, userName}: PongProp) {
 				});
 			});
 		}
-	}, [playerMode])
 
-	// function to stop the animation by toggling the isRunning bool, and send a leave request to the server
-	const stopGame = () => {
-		setIsRunning(false);
-		if (playerMode === DOUBLE_MODE && winner !== OPPONENT_WIN) {
-			socket.emit('gameOver', {
-				gameInfo: {
-					playerId: userId,
-					winner: winner,
-					playerScore: playerScore,
-					opponentScore: opponentScore,
-				}, 
-				gameRoom: gameRoom,
-			});
-		}
-	}
+	}, [playerMode, ballX, ballY, deltaX, deltaY, opponentScore, opponentY, playerScore, playerY, speed, gameRoom]);
 
 	// a function to calculate a new direction of the game after the ball hit a paddle
 	const ballCollision = (squareY: number, squareHeight: number, add: boolean): BallInfo => {
@@ -543,7 +560,7 @@ export default function Pong({userId, userName}: PongProp) {
 	}
 
 	// render the game
-	useLayoutEffect(() => {
+	useEffect(() => {
 		const canvas = canvasRef.current;
 		if (!canvas)
 		return;
@@ -626,7 +643,7 @@ export default function Pong({userId, userName}: PongProp) {
 			}
 		}
 
-	}, [toolMode, isRunning]);
+	}, [isRunning, toolMode, playerMode, gameRoom]);
 	
 	// mouse event handler
 	useEffect(() => {

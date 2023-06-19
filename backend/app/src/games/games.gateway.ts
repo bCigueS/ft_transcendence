@@ -11,6 +11,7 @@ import { UsersService } from '../users/users.service';
 
 import { ServeInfo, CollisionInfo, GameOverInfo, ScoreInfo, UpdatedInfo } from './utils/types';
 import { GameState } from '@prisma/client';
+import { CreateUserGameDto } from './dto/create-user-game.dto';
 
 @WebSocketGateway({ namespace: '/pong' })
 export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -48,6 +49,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 						level: lvl,
 					},
 					include: {
+						players: true,
 						spectators: true
 					}
 				});
@@ -352,70 +354,78 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 				where: { room: gameRoom },
 			});
 
-			if (game.state === GameState.PLAYING) {
-				// change status of the game to FINISHED
-				game = await this.gamesService.gameOver(game.id, GameState.FINISHED);
-			}
-
-			if (gameInfo.winner) {
-				// assign playerId as the winnerId in the game
-				game = await this.gamesService.assignWinner(game.id, gameInfo.playerId);
-			}
-
-			// update the userGame with the score of the winner
-			const playerUser = await this.prisma.userGame.update({
-				where: { userId_gameId: {
-					userId: gameInfo.playerId, gameId: game.id
-				}},
-				data: { score: gameInfo.playerScore },
-			});
-
-			// update the userGame with the score of the opponent
-			const currentGame = await this.prisma.game.findUnique({
-				where: { room: gameRoom },
-				include: { players: true }
-			});
-
-			const opponentId = currentGame.players.find(p => p.userId !== gameInfo.playerId)?.userId;
-
-			let opponentUser;
-			if (opponentId) {
-				opponentUser = await this.prisma.userGame.update({
+			if (game) {
+				if (game.state === GameState.PLAYING) {
+					// change status of the game to FINISHED
+					game = await this.gamesService.gameOver(game.id, GameState.FINISHED);
+				}
+	
+				if (gameInfo.winner) {
+					// assign playerId as the winnerId in the game
+					game = await this.gamesService.assignWinner(game.id, gameInfo.playerId);
+				}
+	
+				// update the userGame with the score of the winner
+				const playerUser = await this.prisma.userGame.update({
 					where: { userId_gameId: {
-						userId: opponentId, gameId: game.id
+						userId: gameInfo.playerId, gameId: game.id
 					}},
-					data: { score: gameInfo.opponentScore },
+					data: { score: gameInfo.playerScore },
 				});
-			}
-
-			const player = await this.prisma.user.findUnique({
-				where: { id : playerUser.userId }
-			});
-
-			const opponent = await this.prisma.user.findUnique({
-				where: { id: opponentUser.userId }
-			});
-			
-			const [playerSocket, opponentSocket] = game.playerSocketIds;
-
-			let message;
-			if (gameInfo.winner) {
-				if (playerSocket === client.id) {
-					message += player.name + ' wins!';
-				} else {
-					message += opponent.name + ' wins!';
+	
+				// update the userGame with the score of the opponent
+				const currentGame = await this.prisma.game.findUnique({
+					where: { room: gameRoom },
+					include: { players: true }
+				});
+	
+				const opponentId = currentGame.players.find(p => p.userId !== gameInfo.playerId)?.userId;
+	
+				let opponentUser;
+				if (opponentId) {
+					opponentUser = await this.prisma.userGame.update({
+						where: { userId_gameId: {
+							userId: opponentId, gameId: game.id
+						}},
+						data: { score: gameInfo.opponentScore },
+					});
 				}
-			} else {
-				if (playerSocket === client.id) {
-					message += opponent.name + ' has left the game!';
-				} else {
-					message += player.name + ' has left the game!';
+	
+				let player, opponent;
+	
+				if (playerUser) {
+					player = await this.prisma.user.findUnique({
+						where: { id : playerUser.userId }
+					});
 				}
+	
+				if (opponentUser) {
+					opponent = await this.prisma.user.findUnique({
+						where: { id: opponentUser.userId }
+					});
+				}
+	
+				const [playerSocket, opponentSocket] = game.playerSocketIds;
+	
+				let message;
+				if (gameInfo.winner) {
+					if (playerSocket === client.id) {
+						message += player.name + ' wins!';
+					} else {
+						message += opponent.name + ' wins!';
+					}
+				} else {
+					if (playerSocket === client.id) {
+						message += opponent.name + ' has left the game!';
+					} else {
+						message += player.name + ' has left the game!';
+					}
+				}
+	
+				this.io.to(gameRoom).emit('endWatch', {
+					message: message,
+				})
 			}
-
-			this.io.to(gameRoom).emit('endWatch', {
-				message: message,
-			})
 	}
 
 	/* -----> Spectator Mode <----- */

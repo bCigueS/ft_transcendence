@@ -3,8 +3,8 @@ import classes from '../../sass/components/Game/Livegame.module.scss';
 import { UserMatch } from '../../store/users-contexte';
 import MatchSummary from '../Profile/Matches/MatchSummary';
 
-interface Props {
-}
+// interface Props {
+// }
 
 
 const DUMMY_MATCHS: UserMatch[] = [
