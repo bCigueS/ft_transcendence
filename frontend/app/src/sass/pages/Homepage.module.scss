@@ -14,14 +14,25 @@
 		height: 100%;
 		width: 40rem;
 		padding: 3rem 0;
-
-		@include flexBox();
+		
+		@include flexBox($justify: flex-start);
+		gap: 3rem;
+		
 		h1 {
 			@include titleh1();
 		}
+		
+		.info {
+			border: 0.2rem solid black;
+			height: 100%;
+			width: 100%;
+			padding: 2rem;
+			@include flexBox($justify: flex-start, $align: flex-start);
 
-		p {
-			@include text-body();
+			h2 {
+				@include titleh1($fontSize: 2.4rem, $width: 24rem);
+				margin-bottom: 2rem;
+			}
 		}
 	}
 
