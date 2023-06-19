@@ -17,11 +17,12 @@ model User {
   doubleAuth  Boolean      @default(false)
   wins        Int          @default(0)
   games       UserGame[]
+  spectators  SpectatorGame[]
   haters      Block[]      @relation("haters")
   blocked     Block[]      @relation("blocked")
   following   Friendship[] @relation("followers")
   followers   Friendship[] @relation("following")
-  winnerGames Game[]       @relation("WinnerGames")
+  winnerGames Game[]       @relation("winnerGames")
 
   messages    Message[]
   channel     ChannelMembership[]
@@ -50,33 +51,40 @@ model Block {
 }
 
 model Game {
-  id        Int        @id @default(autoincrement())
-  createdAt DateTime   @default(now())
-  type      GameType
-  level     Int
-  winnerId  Int?
-  duration  Int?
-  players   UserGame[]
-  winner    User?      @relation("WinnerGames", fields: [winnerId], references: [id], onDelete: Cascade)
+  id        			Int        @id @default(autoincrement())
+  room					String?    @unique
+  createdAt 			DateTime   @default(now())
+  state					GameState  @default(PENDING)
+  level     			Int
+  players   			UserGame[]
+  playerSocketIds		String[]
+  spectators			SpectatorGame[]
+  spectatorSocketIds	String[]
+  winnerId  			Int?
+  winner    			User?      @relation("winnerGames", fields: [winnerId], references: [id], onDelete: Cascade)
 
   @@map("games")
 }
 
-model UserGame {
+model SpectatorGame {
   createdAt   DateTime @default(now())
   userId      Int
   gameId      Int
-  playerIndex Int      @default(1)
-  score       Int      @default(0)
   game        Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, gameId])
 }
 
-enum GameType {
-  PLAYER
-  COMPUTER
+model UserGame {
+  createdAt   DateTime @default(now())
+  userId      Int
+  gameId      Int
+  game        Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  score       Int      @default(0)
+
+  @@id([userId, gameId])
 }
 
 enum GameState {
