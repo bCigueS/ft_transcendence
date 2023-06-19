@@ -1,6 +1,6 @@
-import { Game, GameType } from '@prisma/client';
+import { Game, GameState, UserGame, SpectatorGame } from '@prisma/client';
 
-import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { UserEntity } from '../../users/entities/user.entity';
 
 export class GameEntity implements Game {
@@ -8,22 +8,33 @@ export class GameEntity implements Game {
     @ApiProperty()
 	id: number;
 
+	@ApiProperty()
+	room: string;
+
     @ApiProperty()
 	createdAt: Date;
 
 	@ApiProperty()
-	type: GameType;
+	state: GameState;
 
 	@ApiProperty()
 	level: number;
+
+	@ApiProperty()
+	players: UserGame[];
+
+	@ApiProperty()
+	playerSocketIds: string[];
+
+	@ApiProperty()
+	spectators: SpectatorGame[];
+
+	@ApiProperty()
+	spectatorSocketIds: string[];
 
 	@ApiProperty()
 	winnerId: number;
 
 	@ApiProperty()
 	winner: UserEntity;
-
-	@ApiProperty()
-	duration: number;
-
 }

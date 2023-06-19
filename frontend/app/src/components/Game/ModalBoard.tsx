@@ -1,18 +1,8 @@
 import { useState } from 'react';
+import { ModalProps } from './utils/types';
 import classes from  '../../sass/components/Game/Modal.module.scss';
-import '../../sass/components/Game/Modal.module.scss';
 
-
-type ModalProps = {
-	buttonText: string;
-	text: string;
-	onStartPage(): void;
-	onTool(mode: "keyboard" | "mouse"): void;
-	onDifficulty(level: 0 | 1 | 2): void;
-	onPlayerMode(mode: "single" | "double"): void;
-}
-
-export default function ModalBoard({ onDifficulty, onTool, onPlayerMode, onStartPage, buttonText, text }: ModalProps) {
+export default function ModalBoard({ onDifficulty, onTool, onPlayerMode, onStartPage, buttonText, closingText }: ModalProps) {
 	const [isStarting, setIsStarting] = useState(buttonText === "Start playing" ? true : false);
 	const [page, setPage] = useState(0);
 	const [isDouble, setIsDouble] = useState(false);
@@ -36,6 +26,7 @@ export default function ModalBoard({ onDifficulty, onTool, onPlayerMode, onStart
 						<button onClick={() => {onDifficulty(0); onNextPage();}}>Beginner level</button>
 						<button onClick={() => {onDifficulty(1); onNextPage();}}>Medium level</button>
 						<button onClick={() => {onDifficulty(2); onNextPage();}}>Hard level</button>
+						<button onClick={() => {onDifficulty(3); onNextPage();}}>Special level</button>
 					</>
 				)}
 				{(isStarting && page === 2) && (
@@ -58,7 +49,7 @@ export default function ModalBoard({ onDifficulty, onTool, onPlayerMode, onStart
 				)}
 				{!isStarting && (
 					<>
-						<h2>{text}</h2>
+						<h2>{closingText}</h2>
 						<button onClick={() => {
 							setIsStarting(true);
 							setPage(1);
