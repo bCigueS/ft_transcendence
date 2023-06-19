@@ -117,11 +117,13 @@ export default function Pong({userId, userName}: PongProp) {
 	// loop to emit a join request to the server
 	useEffect(() => {
 		if (playerMode === DOUBLE_MODE) {
+			console.log('emit a join request');
 			// if the game is for 2 players mode, start by sending a join request to the server
 			socket.emit('join', { id: userId, lvl: level });
 		}
 	}, [playerMode, level, userId]);
 
+	// loop to receive several game play events
 	useEffect(() => {
 		if (playerMode === DOUBLE_MODE) {
 			// receive a welcome message from server informing that you are in a specific game room, and trigger a liveBoard
@@ -151,6 +153,7 @@ export default function Pong({userId, userName}: PongProp) {
 			});
 			// receive new score signal
 			socket.on('newScore', ({ pScore, oScore }) => {
+				console.log('updating the scores: player, ', pScore, ' and opponent, ', oScore)
 				setPlayerScore(pScore);
 				setOpponentScore(oScore);
 			});
@@ -177,40 +180,80 @@ export default function Pong({userId, userName}: PongProp) {
 	// loop to detect stopGame event from server
 	useEffect(() => {
 		if (playerMode === DOUBLE_MODE) {
-			// receive a message from server to stop the game, and trigger the modalBoard
-			socket.on('stopGame', ({ message }) => {
+			const handleStopGame = ({ message }: {message: string}) => {
 				console.log({ message });
 				setGameOver(true);
 				setWinner(TIE);
 				setClosingText(message);
 				stopGame();
-			});
+			};
+		
+			// receive a message from server to stop the game, and trigger the modalBoard
+			socket.on('stopGame', handleStopGame);
+		
+			return () => {
+				socket.off('stopGame', handleStopGame);
+			};
 		}
 	}, [playerMode, stopGame]);
 
-	// loop to detect an updateGame request event from server
+	// loop to detect an updateGame request event from server for spectatorMode
+	// useEffect(() => {
+	// 	if (playerMode === DOUBLE_MODE) {
+	// 		console.log('receive updateGame request');
+	// 		socket.on('updateGame', ({ socketId }) => {
+	// 			socket.emit('lastUpdatedInfo', {
+	// 				gameInfo: {
+	// 					x: ballX,
+	// 					y: ballY,
+	// 					dx: deltaX,
+	// 					dy: deltaY,
+	// 					s: speed,
+	// 					playerY: playerY,
+	// 					opponentY: opponentY,
+	// 					pScore: playerScore,
+	// 					oScore: opponentScore,
+	// 				}, 
+	// 				socketId: socketId,
+	// 				gameRoom: gameRoom,
+	// 			});
+	// 		});
+	// 	}
+
+	// }, [playerMode]);
+
+	const handleUpdateGame = useCallback(
+	  ({ socketId }: { socketId: string }) => {
+		socket.emit('lastUpdatedInfo', {
+		  gameInfo: {
+			x: ballX,
+			y: ballY,
+			dx: deltaX,
+			dy: deltaY,
+			s: speed,
+			playerY: playerY,
+			opponentY: opponentY,
+			pScore: playerScore,
+			oScore: opponentScore,
+		  },
+		  socketId: socketId,
+		  gameRoom: gameRoom,
+		});
+	  },
+	  []
+	);
+
 	useEffect(() => {
 		if (playerMode === DOUBLE_MODE) {
-			socket.on('updateGame', ({ socketId }) => {
-				socket.emit('lastUpdatedInfo', {
-					gameInfo: {
-						x: ballX,
-						y: ballY,
-						dx: deltaX,
-						dy: deltaY,
-						s: speed,
-						playerY: playerY,
-						opponentY: opponentY,
-						pScore: playerScore,
-						oScore: opponentScore,
-					}, 
-					socketId: socketId,
-					gameRoom: gameRoom,
-				});
-			});
+		  console.log('receive updateGame request');
+		  socket.on('updateGame', handleUpdateGame);
+	  
+		  return () => {
+			socket.off('updateGame', handleUpdateGame);
+		  };
 		}
-
-	}, [playerMode, ballX, ballY, deltaX, deltaY, opponentScore, opponentY, playerScore, playerY, speed, gameRoom]);
+	  }, [playerMode, handleUpdateGame]);
+	  
 
 	// a function to calculate a new direction of the game after the ball hit a paddle
 	const ballCollision = (squareY: number, squareHeight: number, add: boolean): BallInfo => {
@@ -281,7 +324,7 @@ export default function Pong({userId, userName}: PongProp) {
 		if (ballX <= info.obstacleX + info.obstacleWidth
 			&& ballX >= info.boardWidth / 2 && ballX < info.opponentX
 			&& ballY > obstacleY && ballY < obstacleY + info.obstacleHeight) {
-				if (playerMode === DOUBLE_MODE) {
+				// if (playerMode === DOUBLE_MODE) {
 					// send a signal to server to start calculating a new direction of the ball
 					socket.emit('ballCollision', {
 						gameInfo: {
@@ -294,7 +337,7 @@ export default function Pong({userId, userName}: PongProp) {
 							middleBoard: info.boardWidth / 2,
 						}, gameRoom: gameRoom,
 					});
-				}
+				// }
 
 				// if the game is against computer, the calculation for the new direction is directly in the front
 				if (playerMode === SINGLE_MODE) {
@@ -320,7 +363,7 @@ export default function Pong({userId, userName}: PongProp) {
 	// function to detect when a ball hit the paddle of the player side
 	const detectPlayerCollision = async () => {
 		if (ballX - ballRadius <= info.playerX + info.paddleWidth && ballY > playerY && ballY < playerY + paddleHeight) {
-			if (playerMode === DOUBLE_MODE) {
+			// if (playerMode === DOUBLE_MODE) {
 				// send a signal to server to start calculating a new direction of the ball
 				socket.emit('ballCollision', {
 					gameInfo: {
@@ -333,7 +376,7 @@ export default function Pong({userId, userName}: PongProp) {
 						middleBoard: info.boardWidth / 2,
 					}, gameRoom: gameRoom,
 				});
-			}
+			// }
 
 			// if the game is against computer, the calculation for the new direction is directly in the front
 			if (playerMode === SINGLE_MODE) {
@@ -593,7 +636,7 @@ export default function Pong({userId, userName}: PongProp) {
 				stopGame();
 			}
 		}
-	}, [frameCount, isPaused]);
+	}, [frameCount]);
 	
 	// update the frameCount
 	useLayoutEffect(() => {
@@ -698,7 +741,7 @@ export default function Pong({userId, userName}: PongProp) {
 			)}
 			{(isPaused) && (
 				<PausedBoard
-					spectatorMode={false}
+					mode={'play'}
 				/>
 			)}
 			<div className={classes.container}>

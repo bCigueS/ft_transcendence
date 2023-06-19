@@ -1,7 +1,4 @@
 -- CreateEnum
-CREATE TYPE "GameType" AS ENUM ('PLAYER', 'COMPUTER');
-
--- CreateEnum
 CREATE TYPE "GameState" AS ENUM ('PENDING', 'PLAYING', 'FINISHED');
 
 -- CreateTable
@@ -38,13 +35,24 @@ CREATE TABLE "blocked" (
 -- CreateTable
 CREATE TABLE "games" (
     "id" SERIAL NOT NULL,
+    "room" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "type" "GameType" NOT NULL,
+    "state" "GameState" NOT NULL DEFAULT 'PENDING',
     "level" INTEGER NOT NULL,
+    "playerSocketIds" TEXT[],
+    "spectatorSocketIds" TEXT[],
     "winnerId" INTEGER,
-    "duration" INTEGER,
 
     CONSTRAINT "games_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "SpectatorGame" (
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "userId" INTEGER NOT NULL,
+    "gameId" INTEGER NOT NULL,
+
+    CONSTRAINT "SpectatorGame_pkey" PRIMARY KEY ("userId","gameId")
 );
 
 -- CreateTable
@@ -52,7 +60,6 @@ CREATE TABLE "UserGame" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "userId" INTEGER NOT NULL,
     "gameId" INTEGER NOT NULL,
-    "playerIndex" INTEGER NOT NULL DEFAULT 1,
     "score" INTEGER NOT NULL DEFAULT 0,
 
     CONSTRAINT "UserGame_pkey" PRIMARY KEY ("userId","gameId")
@@ -90,6 +97,9 @@ CREATE TABLE "ChannelMembership" (
 CREATE UNIQUE INDEX "users_name_key" ON "users"("name");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "games_room_key" ON "games"("room");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "ChannelMembership_channelId_userId_key" ON "ChannelMembership"("channelId", "userId");
 
 -- AddForeignKey
@@ -106,6 +116,12 @@ ALTER TABLE "blocked" ADD CONSTRAINT "blocked_blockedId_fkey" FOREIGN KEY ("bloc
 
 -- AddForeignKey
 ALTER TABLE "games" ADD CONSTRAINT "games_winnerId_fkey" FOREIGN KEY ("winnerId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "SpectatorGame" ADD CONSTRAINT "SpectatorGame_gameId_fkey" FOREIGN KEY ("gameId") REFERENCES "games"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "SpectatorGame" ADD CONSTRAINT "SpectatorGame_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "UserGame" ADD CONSTRAINT "UserGame_gameId_fkey" FOREIGN KEY ("gameId") REFERENCES "games"("id") ON DELETE CASCADE ON UPDATE CASCADE;

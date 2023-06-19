@@ -6,6 +6,9 @@ import { UserContext } from '../store/users-contexte';
 import SpectatorBoard from '../components/Game/SpectatorBoard';
 // import { useLocation } from 'react-router-dom';
 
+const PLAY_MODE = 0;
+const SPECTATOR_MODE = 1;
+
 export default function Game() {
 
 	// Import the userContext Api (from React)
@@ -28,9 +31,10 @@ export default function Game() {
 		<div className={classes.gamePage}>
 			{(userName === 'Faaaany') && (
 				<SpectatorBoard
+					mode ={SPECTATOR_MODE}
 					userId={userId}
 					gameLevel={0}
-					gameRoom={'pong6'}
+					gameRoom={'pong10'}
 				/>
 			)}
 			{(userName !== 'Faaaany') && (
