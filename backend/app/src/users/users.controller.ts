@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, NotFou
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { UserEntity } from './entities/user.entity';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -14,6 +14,7 @@ import { Express } from 'express'
 import { toSafeUser } from './user.utils';
 import { Observable } from 'rxjs';
 import { fileURLToPath } from 'url';
+import { unlink } from 'fs';
 
 @Controller('users') @ApiTags('users')
 export class UsersController {
@@ -157,6 +158,18 @@ export class UsersController {
 		return this.usersService.showBlockedUsers(id);
 	}
 
+	@Get(':id/show-haters')
+	// @UseGuards(JwtAuthGuard)
+	// @ApiBearerAuth()
+	@ApiOkResponse({ type: UserEntity })
+	async seeHaters(@Param('id', ParseIntPipe) id: number) {
+		const user = await this.usersService.findOne(id);
+		if (!user)
+			throw new NotFoundException(`User with ${id} does not exist.`);
+
+		return this.usersService.showHaters(id);
+	}
+
 	@Get(':id/show-community')
 	// @UseGuards(JwtAuthGuard)
 	// @ApiBearerAuth()
@@ -172,25 +185,54 @@ export class UsersController {
 	@Post(':id/upload-avatar')
 	// @UseGuards(JwtAuthGuard)
 	// @ApiBearerAuth()
+	@ApiConsumes('multipart/form-data')
+	@ApiBody({
+		schema: {
+			type: 'object',
+			properties: {
+				file: {
+					type: 'string',
+					format: 'binary',
+				},
+			},
+		},
+	})
 	@UseInterceptors(FileInterceptor('file'))
 	async uploadAvatar(
 		@Param('id', ParseIntPipe) id: number,
 		@UploadedFile(
 			new ParseFilePipeBuilder()
 				.addFileTypeValidator({
-				fileType: 'jpeg',
+					fileType: /(jpg|jpeg|png)$/,
+				})
+				.addMaxSizeValidator({
+					maxSize: 1000000
 				})
 				.build({
-				errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
+					errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
 			}),
 		) file: Express.Multer.File) {
-		
-		console.log(file);
+		console.log("This is the file: ", file);
+
+		const validExtension = ['jpg', 'png', 'jpeg'];
+		const fileExtension = file.originalname.split('.').pop().toLowerCase();
+
+		console.log(validExtension);
+		console.log(fileExtension);
+
+		if (!validExtension.includes(fileExtension)) {
+			await unlink(file.path, (err) => {
+				if (err) throw err;
+				console.error(`${file.filename} delete`)
+			});
+		}
 
 		// const avatarPath = './uploads/' + file.filename;
 		const avatarPath = file.filename;
 
 		this.usersService.uploadAvatar(id, avatarPath);
+
+		return { message: 'Avatar uploaded successfully'};
 	}
 
 	@Get(':id/avatar')

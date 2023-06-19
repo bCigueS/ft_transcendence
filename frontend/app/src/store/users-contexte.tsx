@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
 export type UserMatch = {
-	opponent: UserAPI,
+	opponent?: UserAPI,
 	playerScore: number,
 	opponentScore: number
 }
@@ -13,11 +13,11 @@ export type UserAPI = {
 	avatar: string;
 	doubleAuth: boolean;
 	wins: number;
-	gamesPlayed: number;
-	friends: UserAPI[],
-	block: UserAPI[],
-	matchs: UserMatch[],
-	connected: boolean,
+	gamesPlayed?: number;
+	friends?: UserAPI[],
+	block?: UserAPI[],
+	matchs?: UserMatch[],
+	connected?: boolean,
   };
 
 export const UserContext = React.createContext<{
@@ -32,6 +32,7 @@ export const UserContext = React.createContext<{
 		fetchRemoveFriend: (targetUser: UserAPI) => void;
 		fetchBlockUser: (targetUser: UserAPI) => void;
 		fetchUnblockUser: (targetUser: UserAPI) => void;
+		fetchUserById: (userId: number) => void;
 	}>({
 	user: null,
 	error: null,
@@ -43,7 +44,8 @@ export const UserContext = React.createContext<{
 	fetchUser: () => {},
 	fetchRemoveFriend: (targetUser: UserAPI) => {},
 	fetchBlockUser: (targetUser: UserAPI) => {},
-	fetchUnblockUser: (targetUser: UserAPI) => {}
+	fetchUnblockUser: (targetUser: UserAPI) => {},
+	fetchUserById: (userId: number) => {},
 	});
 
 type Props = {
@@ -71,12 +73,14 @@ type Props = {
 
 		const fetchRemoveFriend = async (targetUser: UserAPI) => {
 			setError(null);
+			const storedUserId = localStorage.getItem('userId');
+			const idToFetch = storedUserId ? Number(storedUserId) : userId
 
 			const friendId = {
 				friendId: targetUser.id
 			};
 			try {
-				const response = await fetch('http://localhost:3000/users/' + user?.id + '/remove-friend', {
+				const response = await fetch('http://localhost:3000/users/' + idToFetch + '/remove-friend', {
 					method: 'PATCH',
 					headers: {
 						'Content-Type': 'application/json'
@@ -95,12 +99,14 @@ type Props = {
 
 		const fetchBlockUser = async (targetUser: UserAPI) => {
 			setError(null);
+			const storedUserId = localStorage.getItem('userId');
+			const idToFetch = storedUserId ? Number(storedUserId) : userId
 
 			const blockedId = {
 				blockedId: targetUser.id
 			};
 			try {
-				const response = await fetch('http://localhost:3000/users/' + user?.id + '/block-user', {
+				const response = await fetch('http://localhost:3000/users/' + idToFetch + '/block-user', {
 					method: 'PATCH',
 					headers: {
 						'Content-Type': 'application/json'
@@ -119,13 +125,15 @@ type Props = {
 
 		const fetchUnblockUser = async (targetUser: UserAPI) => {
 			setError(null);
+			const storedUserId = localStorage.getItem('userId');
+			const idToFetch = storedUserId ? Number(storedUserId) : userId
 
 			const blockedId = {
 				blockedId: targetUser.id
 			};
 			try {
 
-				const response = await fetch('http://localhost:3000/users/' + user?.id + '/unblock-user', {
+				const response = await fetch('http://localhost:3000/users/' + idToFetch + '/unblock-user', {
 					method: 'PATCH',
 					headers: {
 						'Content-Type': 'application/json'
@@ -142,13 +150,43 @@ type Props = {
 			}
 		}
 
+		const fetchUserById = useCallback(async (userId: number) => {
+			setError(null);
+
+			let userFound: UserAPI | null = null;
+
+			try {
+				const response = await fetch('http://localhost:3000/users/' + userId);
+				const data = await response.json();
+
+				if (!response.ok)
+					throw new Error('Failed to fetch user with id ' + userId);
+				
+				userFound = {
+					id: data.id,
+					email: data.email,
+					name: data.name,
+					avatar: data.avatar,
+					doubleAuth: data.doubleAuth,
+					wins: data.wins
+				}
+			}
+			catch (error: any) {
+				setError( error.message );
+			}
+			return userFound;
+			
+		}, [])
+
 		const fetchUserFriends = useCallback(async (id: number) => {
 			setError(null);
+			const storedUserId = localStorage.getItem('userId');
+			const idToFetch = storedUserId ? Number(storedUserId) : userId
 
 			let userFriends: UserAPI[] = [];
 
 			try {
-				const response = await fetch('http://localhost:3000/users/1/show-friends');
+				const response = await fetch('http://localhost:3000/users/'+ idToFetch + '/show-friends');
 				const data = await response.json();
 
 				if (!response.ok)
@@ -172,11 +210,12 @@ type Props = {
 
 		const fetchUserBlockings = useCallback(async (id: number) => {
 			setError(null);
-
+			const storedUserId = localStorage.getItem('userId');
+			const idToFetch = storedUserId ? Number(storedUserId) : userId
 			let userBlockings: UserAPI[] = [];
 
 			try {
-				const response = await fetch('http://localhost:3000/users/1/show-blocked-users');
+				const response = await fetch('http://localhost:3000/users/' + idToFetch + '/show-blocked-users');
 				const data = await response.json();
 
 				if (!response.ok)
@@ -237,10 +276,7 @@ type Props = {
 		  
 		useEffect(() => {
 			fetchUser();
-			console.log("User Context, User is: ", user?.name);
-			console.log("User id is: ", userId);
-
-		  }, [fetchUser, userId]);
+		  }, [fetchUser, setUserId, userId, user?.name]);
 
 
 		if (loading) {
@@ -258,7 +294,8 @@ type Props = {
 		fetchUser: fetchUser,
 		fetchRemoveFriend: fetchRemoveFriend,
 		fetchBlockUser: fetchBlockUser,
-		fetchUnblockUser: fetchUnblockUser
+		fetchUnblockUser: fetchUnblockUser,
+		fetchUserById: fetchUserById,
 	};
 
 	return (

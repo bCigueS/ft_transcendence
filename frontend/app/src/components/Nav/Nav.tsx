@@ -1,10 +1,7 @@
 import { Link, NavLink, useRouteLoaderData } from "react-router-dom"
 import classes from '../../sass/components/Nav/Nav.module.scss';
-
-
+import LogoPong from '../../assets/logo/pong2.svg';
 import ProfileMenu from "./ProfileMenu";
-import { useContext, useEffect } from "react";
-import { UserContext } from "../../store/users-contexte";
 
 interface navItem {
 	text: string,
@@ -16,7 +13,6 @@ const Nav: React.FC = () => {
 	const token: string = useRouteLoaderData('root') as string;
 
 	const navItems: navItem[] = [
-		{text: "Home", link:"/"},
 		{text: "PingPong", link:"/pong"},
 		{text: "Chat", link: '/chat'},
 		{text: "Leaderbord", link: "/leaderboard"},
@@ -25,8 +21,8 @@ const Nav: React.FC = () => {
 	return (
 		<header>
 			<nav className={classes.nav}>
-				<Link to='/'>
-					<p>LOGO</p>
+				<Link className={classes.logo} to='/'>
+					<img className={classes.imgLogo} src={LogoPong} alt="LogoPong" />
 				</Link>
 					<ul className={classes.menu}>
 					{ token ? 
@@ -49,7 +45,10 @@ const Nav: React.FC = () => {
 						</NavLink>
 					}
 					</ul>
-				<ProfileMenu />
+				
+				{ token &&
+					<ProfileMenu />
+				}
 			</nav>
 		</header>
 	);

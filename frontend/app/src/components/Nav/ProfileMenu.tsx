@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { Form, Link } from "react-router-dom";
 import { UserContext } from "../../store/users-contexte";
 // import { UserContext } from "../../store/users-contexte";
@@ -10,9 +10,10 @@ interface menuOption {
 	link: string
 }
 
-const ProfilIcon: React.FC = () => {
+const ProfilMenu: React.FC = () => {
 	const userCtx = useContext(UserContext);
 	const [menuOpen, setMenuOpen] = useState(false);
+	const [imageUrl, setImageUrl] = useState<string>('')
 	const menuRef = useRef<HTMLDivElement>(null);
 
 	const logoutHandler = () => {
@@ -34,15 +35,38 @@ const ProfilIcon: React.FC = () => {
 	}, [menuRef]);
 
 	const menuOptions: menuOption[] = [
-		{icon1: 'fa-solid fa-user', icon2: 'fa-solid fa-chevron-right', text: 'Profile', link: '/profile/' + userCtx.user?.name},
-		{icon1: 'fa-solid fa-message', icon2: 'fa-solid fa-chevron-right', text: 'Message', link: '/privmessage'},
+		{icon1: 'fa-solid fa-user', icon2: 'fa-solid fa-chevron-right', text: 'Profile', link: '/profile/' + userCtx.user?.id},
+		{icon1: 'fa-solid fa-message', icon2: 'fa-solid fa-chevron-right', text: 'Message', link: '/chat'},
 	]
+
+	const fetchAvatar = useCallback( async() => {
+		if (userCtx.user?.id === undefined)
+			return ;
+		try {
+			const response = await fetch('http://localhost:3000/users/' + userCtx.user?.id + '/avatar');
+			if (response.ok) {
+				const blob = await response.blob();
+				const url = URL.createObjectURL(blob);
+
+				setImageUrl(url);
+
+			} else {
+				throw new Error("Error in fetching avatar!");				
+			}
+		} catch (error: any) {
+		}
+	}, [userCtx.user?.id]);
+
+	useEffect(() => {
+		fetchAvatar();
+	}, [fetchAvatar]);
 
 	return (
 		<div className="profile-menu" ref={menuRef}>
 			<div
-				className="profile-menu__picture"
+				className="picture"
 				onClick={() => setMenuOpen((prev) => !prev)}>
+					<img src={imageUrl} alt="" />
 			</div>
 			{ menuOpen && (
 				<div className="profile-menu__items">
@@ -68,4 +92,4 @@ const ProfilIcon: React.FC = () => {
 	);
 }
 
-export default ProfilIcon;
+export default ProfilMenu;

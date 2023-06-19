@@ -4,7 +4,9 @@
 
 
 .nav {
-	max-height: 10rem;
+	box-sizing: border-box;
+	min-height: 7rem;
+	// max-height: 10rem;
 	max-width: 110rem;
 	min-width: 70rem;
 	margin: 1rem 3rem;
@@ -20,6 +22,21 @@
 	@include shadowBox();
 
 	border: 0.3rem black solid;
+
+	.logo {
+		max-height: 6rem;
+	}
+
+	.imgLogo {
+		max-height: 6rem;
+		border: 0.3rem black solid;
+		position: relative;
+		transform-style: preserve-3d;
+
+		@include shadowBox();
+	}
+
+
 	.menu {
 		@include flexBox($direction: row, $justify: center);
 		max-width: 50rem;

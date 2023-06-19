@@ -6,6 +6,8 @@ import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { GamesModule } from './games/games.module';
+import { MessagesModule } from './messages/messages.module';
+import { ChannelsModule } from './channels/channels.module';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { GamesModule } from './games/games.module';
     UsersModule,
     AuthModule,
     GamesModule,
+    MessagesModule,
+    ChannelsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
