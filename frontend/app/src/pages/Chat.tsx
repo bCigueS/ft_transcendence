@@ -4,12 +4,11 @@ import classes from '../sass/pages/Chat.module.scss';
 import { UserContext } from '../store/users-contexte';
 import NoConvo from '../components/Chat/NoConvo';
 import io, { Socket } from 'socket.io-client';
-import { json, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import MessageList from '../components/Chat/MessageList';
-import { Channel, MessageAPI, deleteChat } from '../components/Chat/chatUtils';
+import { Channel, MessageAPI, createNewChannel, deleteChat } from '../components/Chat/chatUtils';
 import ManageChats from '../components/Chat/ManageChats';
 import NoDiscussions from '../components/Chat/NoDiscussions';
-
 
 export default function Chat() {
 	
@@ -26,50 +25,6 @@ export default function Chat() {
 		FUNCTIONS FOR MESSAGING
 	*/
 
-	const createNewChannel = async () => {
-
-		let senderId;
-
-		const newChat = chats.find(chat =>
-			chat.id === -1);
-
-		newChat?.members.forEach((member) => {
-			if (member.id !== userCtx.user?.id)
-				senderId = member.id;
-		})
-
-		const chanData = {
-			name: "private",
-			members: [
-			  {
-				userId: userCtx?.user?.id
-			  },
-			  {
-				userId: senderId
-			  }
-			]
-		}
-
-		const response = await fetch('http://localhost:3000/channels', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(chanData)
-		});
-	
-		if (response.status === 422 || response.status === 400 || response.status === 401 || response.status === 404) {
-			return response;
-		}
-	
-		if (!response.ok) {
-			throw json({message: "Could not create new channel."}, {status: 500});
-		}
-	
-		const resData = await response.json();
-		return resData;
-	}
-	
 	const send = async (content: string, selectedConversationId: number) => {
 
 		const message = {
@@ -80,7 +35,29 @@ export default function Chat() {
 
 		if (selectedConversationId === -1)
 		{
-			const newChan = await createNewChannel();
+			let senderId;
+
+			const newChat = chats.find(chat =>
+				chat.id === -1);
+
+			newChat?.members.forEach((member) => {
+				if (member.id !== userCtx.user?.id)
+					senderId = member.id;
+			})
+
+			const chanData = {
+				name: "private",
+				members: [
+					{
+						userId: userCtx?.user?.id
+					},
+					{
+						userId: senderId
+					}
+				]
+			}
+
+			const newChan = await createNewChannel(chanData);
 			message.channelId = newChan.id;
 
 			const dummyChatIndex = chats.findIndex(chat => chat.id === -1);
@@ -316,16 +293,23 @@ export default function Chat() {
 	}
 
 	chats.sort((a, b) => {
-		const lastMessageDateA = a.messages[a.messages.length - 1].createdAt.toString();
-		const lastMessageDateB = b.messages[b.messages.length - 1].createdAt.toString();
+
+		let lastMessageDateA;
+		if (a.messages.length === 0)
+			lastMessageDateA = a.createdAt.toString();
+		else
+			lastMessageDateA = a.messages[a.messages.length - 1].createdAt.toString();
+		let lastMessageDateB;
+		if (b.messages.length === 0)
+			lastMessageDateB = b.createdAt.toString();
+		else
+			lastMessageDateB = b.messages[b.messages.length - 1].createdAt.toString();
 	  
 		const timestampA = Date.parse(lastMessageDateA);
 		const timestampB = Date.parse(lastMessageDateB);
 	  
 		return timestampB - timestampA;
 	});
-
-	
 
 	return (
 		<div className={classes.page}>

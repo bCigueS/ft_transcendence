@@ -6,6 +6,7 @@ import ReactDOM from 'react-dom';
 import Card from "./../UI/Card";
 import { UserAPI, UserContext } from "../../store/users-contexte";
 import AddToGroup from "./AddToGroup";
+import { createNewChannel } from "./chatUtils";
 
 type Props = {
     children?: React.ReactNode,
@@ -38,6 +39,22 @@ const Overlay: React.FC<Props> = (props) => {
 			return ;
 		}
 		console.log('about to create group: ', {groupName, members});
+
+		let membersWithConnectedUser = members;
+		if (userCtx.user) {
+			membersWithConnectedUser = [...members, userCtx.user];
+		}
+
+		const chanData = {
+			name: groupName,
+			members: membersWithConnectedUser.map(member => ({
+				userId: member.id
+			}))
+		}
+	
+		console.log('ChanData: ', chanData);
+		createNewChannel(chanData);
+		window.location.reload();
 		props.onCloseClick();
     }
 
@@ -62,7 +79,7 @@ const Overlay: React.FC<Props> = (props) => {
 			</header>
                 <form method='patch' className={formclasses.container} onSubmit={handleSubmit}>
                     <div className={formclasses.label}>
-                        <label htmlFor="name">Group name</label>
+                        <label>Group name</label>
                         <input 
                             type="text" 
                             id='name' 
@@ -72,7 +89,7 @@ const Overlay: React.FC<Props> = (props) => {
                             maxLength={12}/>
                     </div>
 					<div className={formclasses["members-label"]}>
-                        <label htmlFor="members">Add members to group</label>
+                        <label>Add members to group</label>
 						{
 							(userCtx.user?.id) &&
 							<div >
