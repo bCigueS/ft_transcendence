@@ -4,7 +4,10 @@ import classes from './../../sass/components/Chat/AddToGroup.module.scss';
 
 const AddToGroup: React.FC<{user: UserAPI, onAdd: (member: UserAPI) => void,
 	onRemove: (member: UserAPI) => void,
-	isSelected: boolean}> = (props) => {
+	isSelected: boolean,
+	handleSelect: boolean,
+	handleBan: boolean,
+	handleMute: boolean}> = (props) => {
 
 	const onAddHandler = () => {
 		props.onAdd(props.user);
@@ -24,7 +27,7 @@ const AddToGroup: React.FC<{user: UserAPI, onAdd: (member: UserAPI) => void,
 			</div>
 			
 			{
-				!props.isSelected ?
+				props.handleSelect && !props.isSelected &&
 				<div className={classes.option}>
 						<i 
 						title='Friend'
@@ -32,12 +35,34 @@ const AddToGroup: React.FC<{user: UserAPI, onAdd: (member: UserAPI) => void,
 						className={'fa-solid fa-plus'}>
 					</i>
 				</div>
-				:
+			}
+			{
+				props.handleSelect && props.isSelected &&
 				<div className={classes.option}>
 						<i 
 						title='Friend'
 						onClick={onRemoveHandler}
 						className={'fa-solid fa-minus'}>
+					</i>
+				</div>
+			}
+			{
+				props.handleBan &&
+				<div className={classes.option}>
+						<i 
+						title='Friend'
+						onClick={onRemoveHandler}
+						className={'fa-solid fa-ban'}>
+					</i>
+				</div>
+			}
+			{
+				props.handleMute && props.isSelected &&
+				<div className={classes.option}>
+						<i 
+						title='Friend'
+						onClick={onRemoveHandler}
+						className={'fa-solid fa-volume-xmark'}>
 					</i>
 				</div>
 			}

@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import ChatInfo from '../components/Chat/ChatInfo';
+import ChatOverview from '../components/Chat/ChatOverview';
 import classes from '../sass/pages/Chat.module.scss';
 import { UserContext } from '../store/users-contexte';
 import NoConvo from '../components/Chat/NoConvo';
@@ -280,6 +280,7 @@ export default function Chat() {
 			else
 			{
 				const newChat = {
+					createdAt: new Date(),
 					id: -1,
 					name: 'private',
 					messages: [],
@@ -318,7 +319,7 @@ export default function Chat() {
 				{
 					chats && chats.length > 0 ?
 					chats.map((chat) => (
-						<ChatInfo key={chat.id}
+						<ChatOverview key={chat.id}
 						chats={chats}
 						chat={chat}
 						isSelected={chat.id === selectedConversation?.id ? true : false}

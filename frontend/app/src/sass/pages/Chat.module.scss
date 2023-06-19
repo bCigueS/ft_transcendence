@@ -32,24 +32,20 @@
 
 	}
 
-    .message {
-        grid-column: 2 / 3;
+	.message {
+		grid-column: 2 / 3;
 		grid-row: 1 / 2;
 		width: 100%;
 		padding: 1rem;
 		background-color: $almost-white;
 		border: 0.2rem solid black;
-		overflow: scroll !important;
-		overflow-x: hidden !important;
 		overflow-y: scroll;
 		display: flex;
 		flex-direction: column;
 		justify-content: flex-end;
-
-        @include shadowBox();
+		@include shadowBox();
 		font-size: small;
-
-    }
+	}
 
 	.sendInput {
 		margin-top: 1rem;
