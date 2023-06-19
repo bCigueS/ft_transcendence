@@ -53,8 +53,7 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 					</button>
 				}
 			</div>
-
-			{/* Content */}
+			
 			{
 				contentDisplay === 'Matchs' &&
 				<div className={classes.tabContent}>
