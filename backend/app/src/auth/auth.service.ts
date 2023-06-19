@@ -70,14 +70,7 @@ async aboutMe(token: string): Promise<any>
 		const user = await this.prisma.user.findFirst({ where: { login: data_response.data.login } });
 		if (!user)
 		{
-			const user = await this.prisma.user.create({
-				data: {
-					login: data_response.data.login,
-					name: data_response.data.first_name,
-					password: data_response.data.id,
-					email: data_response.data.email,
-				}
-			});
+			console.log("user not found");
 		}
 		return (data_response.data);
 	} catch (error) { 

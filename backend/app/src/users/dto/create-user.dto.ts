@@ -12,6 +12,11 @@ export class CreateUserDto {
 
 	@IsString()
 	@IsNotEmpty()
+    @ApiProperty()
+    login: string;
+
+	@IsString()
+	@IsNotEmpty()
 	@MaxLength(300)
     @ApiProperty()
     email: string;

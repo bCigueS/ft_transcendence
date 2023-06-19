@@ -7,6 +7,7 @@ async function main() {
     create: {
       email: 'sbeylot@student.42.fr',
       name: 'Simon',
+      login: 'sbeylot',
       password: 'lolilolilol',
       avatar: 'sbeylot.jpg'
     },
@@ -17,6 +18,7 @@ async function main() {
     create: {
       email: 'foctavia@student.42.fr',
       name: 'Faaaany',
+      login: 'foctavia',
       password: 'lolilolilol',
       avatar: 'foctavia.jpg'
     },
@@ -27,6 +29,7 @@ async function main() {
     create: {
       email: 'owalsh@student.42.fr',
       name: 'Olivia',
+      login: 'owalsh',
       password: 'lolilolilol',
       avatar: 'owalsh.jpg'
     },
@@ -37,6 +40,7 @@ async function main() {
     create: {
       email: 'ykuo@student.42.fr',
       name: 'Yang Chi',
+      login: 'ykuo',
       password: 'lolilolilol',
       avatar: 'ykuo.jpg'
     },
