@@ -22,8 +22,8 @@ const Livegame: React.FC = () => {
 			<h1>Live Games</h1>
 			<div className={classes.matchs}>
 				{
-					DUMMY_MATCHS.map((match) => (
-						<MatchSummary summary={match}/>
+					DUMMY_MATCHS.map((match, i) => (
+						<MatchSummary key={i} summary={match}/>
 					))
 				}
 			</div>
