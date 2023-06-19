@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
 export type UserMatch = {
-	opponent: UserAPI,
+	opponent?: UserAPI,
 	playerScore: number,
 	opponentScore: number
 }

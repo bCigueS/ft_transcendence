@@ -1,0 +1,24 @@
+@import '../../abstracts/mixin.scss';
+@import '../../abstracts/variables.scss';
+
+
+.container {
+	height: 100%;
+	width: 50rem;
+	padding: 3rem 0;
+
+
+	h1 {
+		@include titleh1();
+		margin-bottom: 5rem;
+	}
+
+	.matchs {
+		@include flexBox();
+		border: 0.2rem solid black;
+		height: 70%;
+		padding: 3rem;
+		overflow: hidden;
+		overflow-y: scroll;
+	}
+}
