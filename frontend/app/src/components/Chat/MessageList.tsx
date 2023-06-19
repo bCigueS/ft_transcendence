@@ -64,7 +64,8 @@ const MessageList: React.FC<{send: (content: string, channelId: number) => {}, c
 							displayDay={displayDay(message)}
 							message={message}
 							messages={messages}
-							onDelete={onDelete}/>)
+							onDelete={onDelete}
+							chat={chat}/>)
 			}
 			<form onSubmit={handleSubmit}>
 				<input className={classes.sendInput} 
