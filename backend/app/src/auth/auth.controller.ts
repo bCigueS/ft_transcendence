@@ -33,4 +33,16 @@ export class AuthController {
 	token42( @Body() { code } ): Promise<any> {
 		return this.authService.validateUser(code);
 	}
+
+	@Get('me')
+	@ApiOkResponse({ type: AuthEntity })
+	aboutMe( @Body() { token } ): Promise<any> {
+		return this.authService.aboutMe(token);
+	}
+
+	@Post('2fa/add')
+	@ApiOkResponse({ type: AuthEntity })
+	add2fa( @Body() { token, secret } ): Promise<any> {
+		return this.authService.add2fa(token, secret);
+	}
 }
