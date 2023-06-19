@@ -1,52 +1,28 @@
-import { useCallback, useEffect, useState } from 'react';
+// Basic Inports
+import { useCallback, useContext, useEffect, useState } from 'react';
+import { json, useLoaderData } from 'react-router-dom';
+
+//	Components Inports
 import LeaderboardProfil from '../components/Leaderboard/LeaderboardProfil';
 import Searchbar from '../components/Leaderboard/Searchbar';
-import classes from '../sass/pages/Leaderboard.module.scss';
-import { UserAPI } from '../store/users-contexte';
 import FilterSearch from '../components/Leaderboard/FilterSearch';
+
+//	Context Inport
+import { UserAPI, UserContext } from '../store/users-contexte';
+
+//	Functions Inport
 import * as sortU from '../typescript/sortUsers';
+
+//	Style Import
+import classes from '../sass/pages/Leaderboard.module.scss';
 
 
 export default function Leaderboard() {
 
+	const userCtx = useContext(UserContext);
 	const [searchInput, setSearchInput] = useState('');
 	const [filterOption, setFilterOption] = useState('');
-	const [ usersList, setUserList ] = useState<UserAPI[]>([]);
-	const [ isLoading, setIsLoading ] = useState<boolean>(false);
-	const [ error, setError ] = useState<string | null>(null);
-	
-	const fetchUsers = useCallback(async () => {
-		setIsLoading(true);
-		setError(null);
-
-		try {
-			const response = await fetch('http://localhost:3000/users');
-			const data = await response.json();
-
-			if (!response.ok)
-				throw new Error('Error while fetching users!');
-			const usersData: UserAPI[] = data.map((user: any) => {
-				return {
-					id: user.id,
-					email: user.email,
-					name: user.name,
-					avatar: user.avatar,
-					doubleAuth: user.doubleAuth,
-					wins: user.wins
-				}
-			})
-			setUserList(usersData);
-			setIsLoading(false);
-		}
-		catch ( error: any ) {
-			setError(error.message);
-		}
-	}, []);
-	
-	useEffect(() => {
-		fetchUsers();
-	}, [fetchUsers]);
-
+	const [userCommunity, setUserCommunity] = useState<UserAPI[]>([]);
 
 	const saveSearchInput = (enteredSearchInput: string) => {
 		setSearchInput(enteredSearchInput);
@@ -55,28 +31,54 @@ export default function Leaderboard() {
 	const saveFilterOption = (enteredFilterOption: string) => {
 		setFilterOption(enteredFilterOption);
 	};
+	const fetchCommunity = useCallback(async() => {
+		try {
+			const response = await fetch('http://localhost:3000/users/' + userCtx.user?.id + '/show-community');
+			
+			if (!response.ok)
+			throw new Error("Failed to fetch show-community")
 
-	let filteredUser: UserAPI[] = usersList;
+			const data = await response.json();
+			const UserData: UserAPI[] = data.map((user: any) => {
+				return {
+					id: user.id,
+					name: user.name,
+					email: user.email,
+					avatar: user.avatar,
+					doubleAuth: user.doubleAuth,
+					wins: user.wins
+				}
+			})
+			setUserCommunity(UserData);
+
+		} catch(error: any) {
+			console.error(error.message);
+		}
+	}, []);
+
+	useEffect(() => {
+		fetchCommunity();
+	}, [fetchCommunity, userCtx.user])
+
+	let filteredUser: UserAPI[] = userCommunity;
 
 	if (filterOption === 'Most Wins')
-		filteredUser = sortU.winsSortedUser(usersList);
+		filteredUser = sortU.winsSortedUser(userCommunity);
 	else if (filterOption === 'Less Wins')
-		filteredUser = sortU.loosesSortedUser(usersList);
+		filteredUser = sortU.loosesSortedUser(userCommunity);
 	else if (filterOption === 'Most played games')
-		filteredUser = sortU.mostPlayedGame(usersList);
+		filteredUser = sortU.mostPlayedGame(userCommunity);
 	else if (filterOption === 'Less played games')
-		filteredUser = sortU.lessPlayedGame(usersList);
+		filteredUser = sortU.lessPlayedGame(userCommunity);
 	else if (filterOption === 'Nickname (a-z)')
-		filteredUser = sortU.alphaOrderNick(usersList);
+		filteredUser = sortU.alphaOrderNick(userCommunity);
 	else if (filterOption === 'Nickname (z-a)')
-		filteredUser = sortU.unAlphaOrderNick(usersList);
+		filteredUser = sortU.unAlphaOrderNick(userCommunity);
 
 	const displayUsers: UserAPI[] = filteredUser.filter((user) => (
 		user.name.toLowerCase().slice(0, searchInput.length).includes(searchInput.toLowerCase())
 	));
 
-	// Replace this error handling with a nicer one 
-	console.log("Error in Leaderboard.tsx (need to be changed)", error);
 
 	return (
 		<div className={classes.page}>
@@ -87,7 +89,7 @@ export default function Leaderboard() {
 				<FilterSearch onSaveFilter={saveFilterOption}/>
 			</div>
 			<div className={classes.content}>
-				{	isLoading ? <p>Is Loading</p> : displayUsers.map((user) => (
+				{	displayUsers.map((user) => (
 						<LeaderboardProfil key={user.id} user={user} />
 					))
 				}

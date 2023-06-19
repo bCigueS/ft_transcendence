@@ -8,7 +8,7 @@
 	width: 90%;
 	display: grid;
 	grid-template-columns: 1fr 1fr;
-	grid-template-rows: 4.5rem 3fr;
+	grid-template-rows: 4.5rem 1fr;
 	gap:2rem;
 
 	.filter {
@@ -65,7 +65,8 @@
 		grid-row: 2 / 3;
 		background-color: $almost-white;
 		border: 0.2rem solid black;
-		overflow: scroll !important;
+		overflow: scroll;
+		overflow-x: hidden ;
 
 		@include shadowBox();
 

@@ -1,0 +1,28 @@
+@import '../abstracts/mixin.scss';
+@import '../abstracts/variables.scss';
+
+
+.main {
+	
+	height: 100%;
+	width: 100%;
+	margin: 0 5rem;
+	@include flexBox($direction: row);
+
+	.rules {
+
+		height: 100%;
+		width: 40rem;
+		padding: 3rem 0;
+
+		@include flexBox();
+		h1 {
+			@include titleh1();
+		}
+
+		p {
+			@include text-body();
+		}
+	}
+
+}

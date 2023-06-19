@@ -27,10 +27,13 @@ const ProfileFriends: React.FC<{user: UserAPI; block: boolean; friend: boolean}>
 
 			<div className={classes.info}>
 				<h1>{props.user?.name}</h1>
-				<i 
+				{
+					!props.block && 
+					<i 
 					title='Private Message'
 					className='fa-solid fa-message'>
 				</i>
+				}
 
 			</div>
 
@@ -40,16 +43,22 @@ const ProfileFriends: React.FC<{user: UserAPI; block: boolean; friend: boolean}>
 					onClick={props.block ? removeBlockHandler : addBlockHandler}
 					className={props.block ? 'fa-solid fa-lock' : 'fa-solid fa-lock-open'}>
 				</i>
-				<i 
+				{
+					!props.block && 
+					<i 
 					title='Friend'
 					onClick={removeFriendHandler}
 					className={props.friend ? 'fa-solid fa-user-minus' : 'fa-solid fa-user-plus'}>
 				</i>
+				}
 
-				<i
-					title='Game'
-					className='fa-solid fa-table-tennis-paddle-ball'>
-				</i>
+				{
+					!props.block && 
+					<i
+						title='Game'
+						className='fa-solid fa-table-tennis-paddle-ball'>
+					</i>
+				}
 			</div>
 		</div>
 	)

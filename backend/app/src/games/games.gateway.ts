@@ -47,6 +47,9 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 						state: GameState.PENDING,
 						level: lvl,
 					},
+					include: {
+						spectators: true
+					}
 				});
 				// update this game by adding a new UserGame with id of user sent change state playing
 				if (matchingGames && matchingGames[0])
@@ -384,21 +387,29 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 					data: { score: gameInfo.opponentScore },
 				});
 			}
+
+			const player = await this.prisma.user.findUnique({
+				where: { id : playerUser.userId }
+			});
+
+			const opponent = await this.prisma.user.findUnique({
+				where: { id: opponentUser.userId }
+			});
 			
 			const [playerSocket, opponentSocket] = game.playerSocketIds;
 
 			let message;
 			if (gameInfo.winner) {
 				if (playerSocket === client.id) {
-					message += playerUser.name + ' wins!';
+					message += player.name + ' wins!';
 				} else {
-					message += opponentUser.name + ' wins!';
+					message += opponent.name + ' wins!';
 				}
 			} else {
 				if (playerSocket === client.id) {
-					message += opponentUser.name + ' has left the game!';
+					message += opponent.name + ' has left the game!';
 				} else {
-					message += playerUser.name + ' has left the game!';
+					message += player.name + ' has left the game!';
 				}
 			}
 
@@ -439,7 +450,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 			game = await this.gamesService.addSpectator(game.id, updatedGameDto);
 		}
 
-		const isSocketIdListed = game.spectatorSocketIds.include(client.id);
+		const isSocketIdListed = game.spectatorSocketIds.includes(client.id);
 
 		if (!isSocketIdListed) {
 			const updatedGameDto: UpdateGameDto = {
