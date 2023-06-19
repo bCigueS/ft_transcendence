@@ -108,6 +108,7 @@ export default function Chat() {
 			}
 			
 			const newChat = {
+				createdAt: new Date(),
 				id: message.channelId,
 				name: 'private',
 				messages: [newMessage],
@@ -118,8 +119,9 @@ export default function Chat() {
 			}
 			createNewChat();
 		}
-	  };
 
+		console.log('received message in message listener: ', newMessage.content);
+	  };
 
 	const joinListener = (channelId: string) => {
 		console.log('client joined channel ', channelId);
@@ -181,8 +183,6 @@ export default function Chat() {
 			socket?.off('messageDeleted');
 		};
 	}, [chats, socket]);
-
-	
 	  
 	useEffect(() => {
 		const newSocket = io("http://localhost:3000/chat");
@@ -196,10 +196,6 @@ export default function Chat() {
 		}
 	}, [setSocket]);
 
-	/*
-		FUNCTION TO DELETE MESSAGE
-	*/
-
 	const handleMessageDeletion = (message: MessageAPI) => {
 		console.log('about to delete: ', message.content);
 		socket?.emit('messageDeleted', { message: message })
@@ -209,10 +205,6 @@ export default function Chat() {
 		setChats(chats => chats.filter(chat => chat.id !== id));
 		socket?.emit('chatDeleted', { chatId: id, userId: userCtx.user?.id });
 	};
-
-	/*
-		FETCH USER CURRENT CONVOS
-	*/
 
 	const fetchChannels = async() => {
 		try {
@@ -241,6 +233,14 @@ export default function Chat() {
     useEffect(() => {
 		fetchChannels();
 	}, []);
+
+	useEffect(() => {
+		if(socket && chats.length > 0) {
+			chats.forEach(chat => {
+				socket.emit('join', chat.id);
+			});
+		}
+	}, [socket, chats]);
 
 	/*
 		FUNCTIONS WHEN SPECIFIC CHAT IS SELECTED
