@@ -48,8 +48,8 @@ export default function LiveBoard({ isReady, playerName, opponentName, spectator
 				)}
 				{(spectatorMode && isEnded) && (
 					<>
-						<h2>The game has ended!</h2>
-						<h1>{closingText}</h1>
+						<p>The game has ended!</p>
+						<h2>{closingText}</h2>
 						{/* <button onClick={}>Return to hompage</button> */}
 					</>
 				)}

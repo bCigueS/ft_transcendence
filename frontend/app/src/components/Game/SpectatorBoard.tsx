@@ -75,8 +75,15 @@ export default function SpectatorBoard(spectatorProp: SpectatorProp) {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
 	useEffect(() => {
+		if (spectatorProp.mode) {
+			console.log('emit a request to join as spectator to server')
 			// send join request to the server as a spectator
 			socket.emit('spectatorJoin', { userId: spectatorProp.userId, gameRoom: spectatorProp.gameRoom });
+		}
+	}, [spectatorProp.mode]);
+
+	useEffect(() => {
+		if (spectatorProp.mode) {
 			// receive a welcome message from server informing that you are in a specific game room, and trigger a liveBoard
 			socket.on('welcomeSpectator', ({ message, player, opponent, gameRoom }) => {
 				console.log({ message });
@@ -120,7 +127,8 @@ export default function SpectatorBoard(spectatorProp: SpectatorProp) {
 				setIsRunning(false);
 				socket.emit('leaveGameRoom', gameRoom)
 			});
-	}, []);
+		}
+	}, [spectatorProp.mode]);
 	
 	// function to set initial value to start the game
 	const startGame = () => {
@@ -319,13 +327,13 @@ export default function SpectatorBoard(spectatorProp: SpectatorProp) {
 					playerName={playerName}
 					opponentName={opponentName}
 					spectatorMode={true}
-					start={() => {startGame(); setIsLive(false)}}
+					start={() => {startGame()}}
 					closingText={closingText}
 				/>
 			)}
 			{(isPaused) && (
 				<PausedBoard
-					spectatorMode={true}
+					mode={'spectator'}
 				/>
 			)}
 			<div className={classes.container}>
