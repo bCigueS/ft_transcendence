@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { UserAPI } from '../../store/users-contexte';
+import React, { useCallback, useEffect, useState, useContext } from 'react';
+import { UserAPI, UserContext } from '../../store/users-contexte';
 import { NavigateOptions, useNavigate } from 'react-router-dom';
 import classes from '../../sass/components/Profile/ProfilIcon.module.scss';
 
@@ -12,6 +12,7 @@ const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: s
 	const [ error, setError ] = useState<string | null>(null);
 	const [ inGame, setInGame ] = useState<boolean>(false);
 	const navigate = useNavigate();
+	const userCtx = useContext(UserContext);
 
 	const stylePicture: React.CSSProperties = {
 		content: '',
@@ -30,31 +31,37 @@ const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: s
 		navigate(`/profile/${user?.name.toLowerCase()}`, option);
 	}
 
-	const fetchAvatar = useCallback(async() => {
-		setLoading(true);
-		setError(null);
+	// const fetchAvatar = useCallback(async() => {
+	// 	setLoading(true);
+	// 	setError(null);
 
-		try {
-			const response = await fetch('http://localhost:3000/users/' + user?.id + '/avatar');
-			if (response.ok) {
-				const blob = await response.blob();
-				const url = URL.createObjectURL(blob);
+	// 	try {
+	// 		// const response = await fetch('http://localhost:3000/users/' + user?.id + '/avatar');
+	// 		const response = await fetch('https://cdn.intra.42.fr/users/35f6f76007ced8a871b4e49318c31982/ykuo.JPG', {
+	// 			method: 'GET',
+	// 			headers: {
+	// 				'Authorization': 'Bearer ' + userCtx.token,
+	// 			}
+	// 		});
+	// 		if (response.ok) {
+	// 			const blob = await response.blob();
+	// 			const url = URL.createObjectURL(blob);
 
-				setImageUrl(url);
-				setLoading(false);
-			} else {
-				throw new Error("Error in fetching avatar!");				
-			}
-		} catch (error: any) {
-			setError(error.message);
-			setLoading(false);
-		}
-	}, [user?.id]);
+	// 			setImageUrl(url);
+	// 			setLoading(false);
+	// 		} else {
+	// 			throw new Error("Error in fetching avatar!");				
+	// 		}
+	// 	} catch (error: any) {
+	// 		setError(error.message);
+	// 		setLoading(false);
+	// 	}
+	// }, [user?.id]);
 
-	useEffect(() => {
-		fetchAvatar();
-		console.log("Error in ProfilIcon need to be change", error);
-	}, [fetchAvatar, error]);
+	// useEffect(() => {
+	// 	fetchAvatar();
+	// 	console.log("Error in ProfilIcon need to be change", error);
+	// }, [fetchAvatar, error]);
 
 	return (
 		<div 

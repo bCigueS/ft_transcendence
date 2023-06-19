@@ -6,6 +6,8 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { toSafeUser } from 'src/users/user.utils';
+import axios from 'axios';
+import fs from 'fs';
 
 @Injectable()
 export class AuthService {
@@ -32,17 +34,28 @@ async login(name: string, password: string): Promise<AuthEntity> {
 		accessToken: this.jwtService.sign({ userId: user.id }),
 	};
 }
+
+async saveImageFromUrl(url: string, filePath: string): Promise<void> 
+{
+	const response = await axios.get(url,{
+	  responseType: 'arraybuffer',
+	});
+
+	const targetPath = `./uploads/${filePath}`;
+  
+	fs.writeFileSync(filePath, Buffer.from(response.data, 'binary'));
+}
+  
 async registerUser(apiResponse: any)
 {
-	
+	const avatar = `${apiResponse.login}.jpg`; // Specify the desired path where you want to save the image
+
     const createUserDto = new CreateUserDto();
     createUserDto.name = apiResponse.displayname;
     createUserDto.login = apiResponse.login;
     createUserDto.email = apiResponse.email;
     createUserDto.password = 'lolilolilol';
-    createUserDto.avatar = apiResponse.image.link;
-	console.log(createUserDto);
-	console.log("registerUser");
+    createUserDto.avatar = avatar;
 
     const user = await this.prisma.user.create({
       data: {
@@ -55,8 +68,9 @@ async registerUser(apiResponse: any)
       },
     });
 
+	this.saveImageFromUrl(apiResponse.image.link, avatar);
     return (user);
-  }
+}
 
 
 async validateUser(code: string): Promise<any>
@@ -93,10 +107,7 @@ async aboutMe(token: string): Promise<any>
 		const data_response = await this.httpService.get(url_data,  {headers: headersRequest}).toPromise();
 		const user = await this.prisma.user.findFirst({ where: { login: data_response.data.login } });
 		if (!user)
-		{
-			console.log("user not found");
-			const user = await this.registerUser(data_response.data);
-		}
+			await this.registerUser(data_response.data);
 		return (data_response.data);
 	} catch (error) { 
 		error.status = 403;
