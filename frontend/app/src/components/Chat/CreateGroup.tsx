@@ -103,6 +103,9 @@ const Overlay: React.FC<Props> = (props) => {
 											onAdd={addMember}
 											onRemove={removeMember}
 											isSelected={false}
+											handleSelect={true}
+											handleBan={false}
+											handleMute={false}
 										/>
 									))
 								}
@@ -120,6 +123,9 @@ const Overlay: React.FC<Props> = (props) => {
 								onAdd={addMember}
 								onRemove={removeMember}
 								isSelected={true}
+								handleSelect={true}
+								handleBan={false}
+								handleMute={false}
 								/>
 								))
 							}

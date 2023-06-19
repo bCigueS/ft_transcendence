@@ -1,107 +1,133 @@
-import { Fragment, useContext, useEffect, useState } from "react";
-import classes from '../../sass/components/Chat/ChatInfo.module.scss';
-import ProfilIcon from "../Profile/ProfilIcon";
+import React, { useContext, useState } from "react";
+import classes from '../../sass/components/UI/Modal.module.scss';
+import infoclasses from '../../sass/components/Chat/ChatInfo.module.scss';
+import { Fragment } from 'react';
+import ReactDOM from 'react-dom';
+import Card from "./../UI/Card";
 import { UserAPI, UserContext } from "../../store/users-contexte";
-import Modal from "../UI/Modal";
-import { Channel, MessageAPI, deleteChat } from "./chatUtils";
-import GroupIcon from "./GroupIcon";
+import { Channel } from "./chatUtils";
+import AddToGroup from "./AddToGroup";
 
-// const Searchbar: React.FC<{onSaveSearch: (input: string) => void}> = ( props ) => {
+type Props = {
+    children?: React.ReactNode,
+    className?: string,
+    chat: Channel,
+    sender: UserAPI,
+	onInfoClick: () => void,
+    onDelete: () => void
+};
 
-const ChatInfo: React.FC<{chats: Channel[], chat: Channel, isSelected: boolean, onSaveConversation: (channel: Channel) => void,
-onDeleteChat: (channelId: number) => void}> 
-	= ( props ) => {
+const Backdrop: React.FC<Props> = (props) => {
+	return <div className={classes.backdrop} onClick={props.onInfoClick}></div>
+}
 
-	const [sender, setSender] = useState<UserAPI | null>(null);
-	const [lastMessage, setLastMessage] = useState<MessageAPI | null>(null);
-	const [ showModal, setShowModal ] = useState(false);
-	const [ conversation, setConversation ] = useState<number>(0);
+const Overlay: React.FC<Props> = (props) => {
+    const [ groupName, setGroupName ] = useState<string>(''); 
+	const [ members, setMembers ] = useState<UserAPI[]>([]);
+	const [ typeError, setTypeError ] = useState<string>('');
 	const userCtx = useContext(UserContext);
 
-	const conversationHandler = () => {
-		setConversation(props.chat.id)
-		props.onSaveConversation(props.chat);
+    const handleSubmit = () => {
+		// if (groupName === '' || groupName.trim() === '')
+		// {
+		// 	setTypeError('You need to provide a name to create a group.')
+		// 	return ;
+		// }
+		// if (members.length < 2)
+		// {
+		// 	setTypeError('You need to select at least two members to create a group.');
+		// 	return ;
+		// }
+		// console.log('about to create group: ', {groupName, members});
+
+		// let membersWithConnectedUser = members;
+		// if (userCtx.user) {
+		// 	membersWithConnectedUser = [...members, userCtx.user];
+		// }
+
+		// const chanData = {
+		// 	name: groupName,
+		// 	members: membersWithConnectedUser.map(member => ({
+		// 		userId: member.id
+		// 	}))
+		// }
+	
+		// console.log('ChanData: ', chanData);
+		// createNewChannel(chanData);
+		// window.location.reload();
+		props.onInfoClick();
+    }
+
+    const nameHandler = (event: any) => {
+		setGroupName(event.target.value);
 	}
 
-	const getSender = () => {
-		if (props.chat.members && props.chat.name === "private")
-		{
-			props.chat.members.forEach((member) => {
-				if (member.id !== userCtx.user?.id)
-					setSender(member);
-			})
-		}
+	const addMember = (member: UserAPI) => {
+		console.log('added member: ', member);
+		setMembers([...members, member]);
 	}
 
-	const getLastMessage = () => {
-		const messages = props.chat.messages;
-		let latestMessage = null;
-		if (messages && messages.length > 0) {
-			latestMessage = messages.reduce((latest, current) => {
-				return new Date(latest.createdAt) > new Date(current.createdAt) ? latest : current;
-			}, messages[0]);
-		}
-		setLastMessage(latestMessage);
+	const removeMember = (member: UserAPI) => {
+		console.log('removed member: ', member);
+		setMembers(members.filter(m => m.id !== member.id));
 	}
-	
-	useEffect(() => {
-		getSender();
-		getLastMessage();
-	}, [conversation, props.chats]);
 
-		
-	const handleClickDelete = () => {
-		setShowModal(true);
-	}
+    const displayChatName = () => {
+        if (props.chat.name === "private")
+            return props.sender?.name;
+        return props.chat.name;
+    }
+
+    const channelCreatedOn = () => {
+        let date = new Date(props.chat.createdAt);
+        return date.toDateString();
+    }
 	
-	const handleUserConfirmation = () => {
-		setShowModal(false);
-	}
-	
-	const handleDeleteChat = () => {
-		deleteChat(props.chat);
-		props.onDeleteChat(props.chat.id);
-		setShowModal(false);
-	}
+	return (
+		<Card className={classes.modal}>
+            <div className={infoclasses.container}>
+				<h1>{displayChatName()}</h1>
+            <div className={infoclasses.info}>
+                <h2>
+                This awesome conversation started on {channelCreatedOn()}.
+                </h2><br></br>
+                <h2>
+                There are special people in this chat.
+                </h2>
+                {
+                    props.chat.members.map((member) => (
+                        <AddToGroup 
+                        key={member.id} 
+                        user={member}
+                        onAdd={addMember}
+                        onRemove={removeMember}
+                        isSelected={true}
+                        handleSelect={true}
+                        handleBan={true}
+                        handleMute={true}
+                        />
+                        ))
+                    }
+            </div>
+            </div>
+		</Card>
+	);
+}
+
+const portalOverlays = document.getElementById('overlays');
+const portalBackdrop = document.getElementById('backdrop');
+
+const ChatInfo: React.FC<Props> = (props) => {
 
 	return (
 		<Fragment>
-		{showModal &&
-			<Modal
-				title="About to delete chat"
-				message="Do you really wish to delete this chat?"
-				onCloseClick={handleUserConfirmation}
-				onDelete={handleDeleteChat}
-			/>
-		}
-		<div className={`${classes.container} ${props.isSelected ? classes.selected : ''}`}>
-			<div className={classes.picture}>
-				{
-					props.chat.name === "private" ?
-					<ProfilIcon user={sender} displayCo={false} size={["4rem", "4rem"]} />
-					:
-					<GroupIcon chat={props.chat} displayCo={false} size={["4rem", "4rem"]}/>
-				}
-			</div>
-			<div className={classes.info} onClick={conversationHandler}>
-				<p className={classes.name}>
-					{ sender ? sender?.name : props.chat.name}
-				</p>
-				{ props.chat.messages && 
-					props.chat.messages.length > 0 ? 
-					<p className={classes.lastMessage}>
-						{lastMessage?.content}
-					</p> 
-					:
-					<p className={classes.lastMessage} style={{fontStyle: 'italic'}}>
-						draft...
-					</p>
-				}
-			</div>
-			<div className={classes.delete} onClick={handleClickDelete}>
-				<svg width="10px" height="10px" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"> <path fillRule="evenodd" clipRule="evenodd" d="M12.8536 2.85355C13.0488 2.65829 13.0488 2.34171 12.8536 2.14645C12.6583 1.95118 12.3417 1.95118 12.1464 2.14645L7.5 6.79289L2.85355 2.14645C2.65829 1.95118 2.34171 1.95118 2.14645 2.14645C1.95118 2.34171 1.95118 2.65829 2.14645 2.85355L6.79289 7.5L2.14645 12.1464C1.95118 12.3417 1.95118 12.6583 2.14645 12.8536C2.34171 13.0488 2.65829 13.0488 2.85355 12.8536L7.5 8.20711L12.1464 12.8536C12.3417 13.0488 12.6583 13.0488 12.8536 12.8536C13.0488 12.6583 13.0488 12.3417 12.8536 12.1464L8.20711 7.5L12.8536 2.85355Z" fill="currentColor" /> </svg>
-			</div>
-		</div>
+			{portalBackdrop && ReactDOM.createPortal(<Backdrop 
+							onInfoClick={props.onInfoClick} />, portalBackdrop)}
+			{portalOverlays && ReactDOM.createPortal(<Overlay 
+							chat={props.chat}
+                            sender={props.sender}
+							onInfoClick={props.onInfoClick}
+							onDelete={props.onDelete}>{props.children}</Overlay>, portalOverlays)}
 		</Fragment>
 	)
 }
