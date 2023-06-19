@@ -1,64 +1,103 @@
-import React, { useEffect } from 'react';
-import { Form, useActionData, useNavigation } from 'react-router-dom';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { Form, redirect, useSearchParams } from 'react-router-dom';
+import { setTokenAuth } from '../../typescript/Auth';
+import { UserContext } from '../../store/users-contexte';
 
-type ActionData = {
-	error: string,
-	message: string,
-	statusCode: number
-}
+import classes from '../../sass/components/Auth/AuthForm.module.scss';
+import ProfilPatch from '../Profile/ProfilPatch';
+import DoubleAuthPannel from './DoubleAuthPannel';
+
+
+/* 
+*	Component for User connection throught 42 API
+*/
+
+
+//	PREVIOUS VERSION
 
 const AuthForm = () => {
 
-	const data = useActionData() as ActionData;
-	const navigation = useNavigation();
-
-	const isSubmitting = navigation.state === 'submitting';
-
-	const mode: string = "42log";
+	const userCtx = useContext(UserContext);
+	const [ isLogged, setIsLogged ] = useState<boolean>(false);
+	const [ logCode, setLogCode ] = useState<string>("");
+	const [ token, setToken ] = useState<string>("");
+	
 	useEffect(() => {
-		console.log(data);
-	}, [data]);
+		if (window.location.href.includes("code="))
+			setLogCode(window.location.href.split("code=")[1])
+	}, [])
+
+	useEffect(() => {
+		if (logCode !== "") {
+			const fetchToken = async () => {
+				const response = await fetch("http://localhost:3000/auth/me", {
+					method: "POST",
+					headers: {
+					"Content-Type": "application/json"
+					},
+					body: JSON.stringify({code: logCode}),
+				});
+				if (response.ok) {
+					const data = await response.json();
+					setToken(data.token.access_token);
+				}
+			}
+			fetchToken()
+		}
+	}, [logCode])
+
+	useEffect(() => {
+		if (token) {
+			userCtx.saveToken(token);
+			setTokenAuth(token);
+			setIsLogged(true);
+		}
+	}, [token, isLogged])
 
 	return (
-		<div>
-			{	mode !== "42log" &&
-				<Form method='post' >
-					<h1>Log in</h1>
-					<div>
-					<label htmlFor="username">Username</label>
-					<input type="text" id='username' name='username' placeholder='username' required/>
-					</div>
-					<div>
-					<label htmlFor="password">Password</label>
-					<input type="password" id='password' name='password' placeholder='password' required/>
-					</div>
-
-					<p>
-					{
-						data && data.message && 
-						data.message
-					}
-					</p>	{data && data.error && <ul>
-						{Object.values(data.error).map(err => <li></li>)}
-						</ul>}
-						
-						<button disabled={isSubmitting}>{isSubmitting ? 'Submitting...' : 'LogIn' }</button>
-				</Form>
-			}
-			{
-				mode === "42log" &&
-				<div>
-					<p>Log with 42 API</p>
-					<a href={`http://127.0.0.1:3000/auth/forty-two`}>
-						<button>Log in with 42</button>
+		<>
+			{	!isLogged &&
+				<div className={classes.loggin}>
+					<a  href={`http://127.0.0.1:3000/auth/forty-two`}>
+					<button 
+						className = {classes.button}>
+							Log in with<br/>
+							<span>42</span>
+					</button>
 					</a>
 				</div>
 			}
-		</div>
+
+			{
+				isLogged &&
+				<ProfilPatch/>
+				// <DoubleAuthPan	// .tab {
+	// 	overflow: hidden;
+	// 	display: flex;
+	// 	justify-content: center;
+	// 	flex-direction: row;
+	// 	gap: 2rem;
+		
+	// 	.btn {
+	// 		background-color: inherit;
+	// 		float: left;
+	// 		border: none;
+	// 		outline: none;
+	// 		cursor: pointer;
+	// 		padding: 1rem 1.4rem;
+	// 	}
+	// 	.active {
+	// 		@include shadowBox();
+	// 		padding: 0.8rem 1.2rem;
+
+	// 		border: 0.2rem solid black;
+	// 		border-bottom: none;
+	// 		background-color: $almost-white;
+	// 	}
+	// }nel />
+			}
+		</>
 	)
 }
 
 export default AuthForm;
-
-
-// https://api.intra.42.fr/oauth/authorize?client_id=your_very_long_client_id&redirect_uri=http%3A%2F%2Flocalhost%3A1919%2Fusers%2Fauth%2Fft%2Fcallback&response_type=code&scope=public&state=a_very_long_random_string_witchmust_be_unguessable'
