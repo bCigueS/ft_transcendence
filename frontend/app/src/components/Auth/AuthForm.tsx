@@ -35,7 +35,6 @@ const AuthForm: React.FC = () => {
 				}
 			</Form>
 						
-			{/* {	!isLogged &&
 				<div className={classes.loggin}>
 					<a  href={`http://127.0.0.1:3000/auth/forty-two`}>
 					<button 
@@ -45,13 +44,6 @@ const AuthForm: React.FC = () => {
 					</button>
 					</a>
 				</div>
-			}
-
-			{
-				isLogged &&
-				<ProfilPatch/>
-				// <DoubleAuthPannel />
-			} */}
 		</>
 	)
 }
