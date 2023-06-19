@@ -12,6 +12,7 @@ model User {
   id          Int          @id @default(autoincrement())
   email       String
   name        String       @unique
+  login       String       @unique
   password    String
   avatar      String?      @default("default.jpg")
   doubleAuth  Boolean      @default(false)
