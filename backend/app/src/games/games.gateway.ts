@@ -32,64 +32,141 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 	async handleConnection() {
 		console.log('a user is connected');
 	}
+	
+/* -----> Player Mode <----- */
 
-	// receive join game request from client
-	@SubscribeMessage('join')
-	async handleJoinEvent(
-		@MessageBody() { id, lvl, gameRoom }: { id: number, lvl: number, gameRoom?: string },
+	/* -----> Random Mode <----- */
+
+	// receive join random game request from client
+	@SubscribeMessage('joinRandom')
+	async handleJoinRandomEvent(
+		@MessageBody() { id, lvl }: { id: number, lvl: number },
+		@ConnectedSocket() client: Socket,
+		) {
+			let game, player, opponent;
+
+			// find all existing games with state "PENDING" and level === lvl
+			const matchingGames = await this.prisma.game.findMany({ 
+				where: {
+					state: GameState.PENDING,
+					level: lvl,
+				},
+				include: {
+					players: true,
+					spectators: true
+				}
+			});
+			// update this game by adding a new UserGame with id of user sent change state playing
+			if (matchingGames && matchingGames[0])
+			{
+				const updatedGameDto: UpdateGameDto = {
+					state: GameState.PLAYING, // PLAYING
+					players: [
+						{
+							userId: id,
+						},
+					],
+					playerSocketIds: matchingGames[0].playerSocketIds,
+					spectators: matchingGames[0].spectators,
+					spectatorSocketIds: matchingGames[0].spectatorSocketIds,
+				};
+				updatedGameDto.playerSocketIds.push(client.id);
+				
+				game = await this.gamesService.addPlayer(matchingGames[0].id, updatedGameDto);
+
+			} else {
+				// if no player in pending game state with same level has been found, we create a new game
+				const createGameDto: CreateGameDto = {
+					state: GameState.PENDING,
+					level: lvl,
+					players: [
+						{
+							userId: id,
+						},
+					],
+					playerSocketIds: [client.id],
+					spectators: [],
+					spectatorSocketIds: [],
+				};
+				
+				game = await this.gamesService.create(createGameDto);
+				game = await this.gamesService.assignRoom(game.id, 'pong' + game.id);
+
+			}
+
+			player = await this.prisma.user.findUnique({
+				where: { id: id },
+			});
+
+			// get the game to access the data of the player
+			const currentGame = await this.prisma.game.findUnique({
+				where: { room: game.room },
+				include: { players: true }
+			});
+
+			// get the opponent if opponent is exist
+			let opponentId: number | undefined;
+			if (currentGame && currentGame.state === GameState.PLAYING) {
+				opponentId = currentGame.players.find(p => p.userId !== id)?.userId;
+				opponent = await this.prisma.user.findUnique({
+					where: { id: opponentId },
+				});
+			}
+
+			if (game) {
+				// send welcome message to player, and also send the opponent player's data (if any)
+				client.emit('welcome', {
+					message: `Hello ${player.name}, welcome to the game`,
+					opponent: opponent,
+					gameRoom: game.room,
+				});
+				
+				// when the room already has 2 players, send a message to both players that they can start the game
+				if (game.state === GameState.PLAYING) {
+					// tell first player that second player has joined the game
+					if (game && game.playerSocketIds) {
+						game.playerSocketIds.forEach((socketId) => {
+							if (socketId !== client.id) {
+								this.io.to(socketId).emit('opponentJoin', {
+									message: `${player.name} has joined the game`,
+									opponent: player,
+								});
+							}
+							this.io.to(socketId).emit('startGame', {
+								message: `Let's start the game!`,
+							});
+						});
+					}
+				}
+			}
+	}
+
+	/* -----> Invitation Mode <----- */
+
+	// receive a create game invitation request from client
+	@SubscribeMessage('joinInvite')
+	async handleJoinInviteEvent(
+		@MessageBody() { id, opponentId, lvl, gameRoom }: { id: number, opponentId: number, lvl: number, gameRoom?: string },
 		@ConnectedSocket() client: Socket,
 		) {
 			let game, player, opponent;
 
 			if (!gameRoom) {
-				// find all existing games with state "PENDING" and level === lvl
-				const matchingGames = await this.prisma.game.findMany({ 
-					where: {
-						state: GameState.PENDING,
-						level: lvl,
-					},
-					include: {
-						players: true,
-						spectators: true
-					}
-				});
-				// update this game by adding a new UserGame with id of user sent change state playing
-				if (matchingGames && matchingGames[0])
-				{
-					const updatedGameDto: UpdateGameDto = {
-						state: GameState.PLAYING, // PLAYING
-						players: [
-							{
-								userId: id,
-							},
-						],
-						playerSocketIds: matchingGames[0].playerSocketIds,
-						spectators: matchingGames[0].spectators,
-						spectatorSocketIds: matchingGames[0].spectatorSocketIds,
-					};
-					updatedGameDto.playerSocketIds.push(client.id);
-					
-					game = await this.gamesService.addPlayer(matchingGames[0].id, updatedGameDto);
+				const createGameDto: CreateGameDto = {
+					state: GameState.WAITING,
+					level: lvl,
+					players: [
+						{
+							userId: id,
+						},
+					],
+					playerSocketIds: [client.id],
+					spectators: [],
+					spectatorSocketIds: [],
+				};
 
-				} else {
-					// if no player in pending game state with same level has been found, we create a new game
-					const createGameDto: CreateGameDto = {
-						state: GameState.PENDING,
-						level: lvl,
-						players: [
-							{
-								userId: id,
-							},
-						],
-						playerSocketIds: [client.id],
-						spectators: [],
-						spectatorSocketIds: [],
-					};
-					
-					game = await this.gamesService.create(createGameDto);
-					game = await this.gamesService.assignRoom(game.id, 'pong' + game.id);
-
-				}
+				game = await this.gamesService.create(createGameDto);
+				game = await this.gamesService.assignRoom(game.id, 'invite' + game.id);
 			} else {
 				// if gameRoom is provided, then find the game based on the gameRoom
 				game = await this.prisma.game.findUnique({
@@ -116,43 +193,34 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 				where: { id: id },
 			});
 
-			// get the game to access the data of the player
-			const currentGame = await this.prisma.game.findUnique({
-				where: { room: game.room },
-				include: { players: true }
+			opponent = await this.prisma.user.findUnique({
+				where: { id: opponentId },
 			});
 
-			// get the opponent if opponent is exist
-			let opponentId: number | undefined;
-			if (currentGame && currentGame.state === GameState.PLAYING) {
-				opponentId = currentGame.players.find(p => p.userId !== id)?.userId;
-				opponent = await this.prisma.user.findUnique({
-					where: { id: opponentId },
+			if (game) {
+				// send welcome message to player, and also send the opponent player's data (if any)
+				client.emit('welcome', {
+					message: `Hello ${player.name}, welcome to the game`,
+					opponent: opponent,
+					gameRoom: game.room,
 				});
-			}
-
-			// send welcome message to player, and also send the opponent player's data (if any)
-			client.emit('welcome', {
-				message: `Hello ${player.name}, welcome to the game`,
-				opponent: opponent,
-				gameRoom: game.room,
-			});
-			
-			// when the room already has 2 players, send a message to both players that they can start the game
-			if (game.state === GameState.PLAYING) {
-				// tell first player that second player has joined the game
-				if (game && game.playerSocketIds) {
-					game.playerSocketIds.forEach((socketId) => {
-						if (socketId !== client.id) {
-							this.io.to(socketId).emit('opponentJoin', {
-								message: `${player.name} has joined the game`,
-								opponent: player,
+				
+				// when the room already has 2 players, send a message to both players that they can start the game
+				if (game.state === GameState.PLAYING) {
+					// tell first player that second player has joined the game
+					if (game && game.playerSocketIds) {
+						game.playerSocketIds.forEach((socketId) => {
+							if (socketId !== client.id) {
+								this.io.to(socketId).emit('opponentJoin', {
+									message: `${player.name} has joined the game`,
+									opponent: player,
+								});
+							}
+							this.io.to(socketId).emit('startGame', {
+								message: `Let's start the game!`,
 							});
-						}
-						this.io.to(socketId).emit('startGame', {
-							message: `Let's start the game!`,
 						});
-					});
+					}
 				}
 			}
 	}
@@ -428,7 +496,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 			}
 	}
 
-	/* -----> Spectator Mode <----- */
+/* -----> Spectator Mode <----- */
 
 	@SubscribeMessage('spectatorJoin')
 	async handleSpectatorJoinEvent(

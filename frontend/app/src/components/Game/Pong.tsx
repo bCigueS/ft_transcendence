@@ -47,7 +47,7 @@ const info: PongInfo = {
 	winnerScore: 3,
 }
 
-export default function Pong({userId, userName}: PongProp) {
+export default function Pong(prop: PongProp) {
 	// game play
 	const [isRunning, setIsRunning] = useState(false);
 	const [isPaused, setIsPaused] = useState(false);
@@ -89,41 +89,17 @@ export default function Pong({userId, userName}: PongProp) {
 	const frameId = useRef(0);
 	const prevFrameId = useRef(0);
 
-	// // screen info <--------- to be checked
-	// const [screenWidth, setScreenWidth] = useState(window.innerWidth);
-	// const [screenHeight, setScreenHeight] = useState(window.innerHeight);
-	// const [ratio, setRatio] = useState(1);
-
-	// useEffect(() => {
-	// 	const handleResize = () => {
-	// 		setScreenWidth(window.innerWidth);
-	// 		setScreenHeight(window.innerHeight);
-	// 	};
-
-	// 	window.addEventListener('resize', handleResize);
-
-	// 	// Clean up the event listener on unmount
-	// 	return () => {
-	// 		window.removeEventListener('resize', handleResize);
-	// 	};
-	// }, []);
-
-	// useEffect(() => {
-	// if (info.boardWidth) {
-	// 	setRatio(info.boardWidth / screenWidth);
-	// } else if (info.boardHeight) {
-	// 	setRatio(info.boardHeight / screenHeight);
-	// }
-	// }, [info.boardWidth, info.boardHeight, screenWidth, screenHeight]);
-
 	// loop to emit a join request to the server
 	useEffect(() => {
-		if (playerMode === DOUBLE_MODE) {
-			console.log('emit a join request');
-			// if the game is for 2 players mode, start by sending a join request to the server
-			socket.emit('join', { id: userId, lvl: level });
+		if (playerMode === DOUBLE_MODE && !prop.inviteMode) {
+			console.log('emit a join random game request');
+			socket.emit('joinRandom', { id: prop.user.id, lvl: level });
 		}
-	}, [playerMode, level, userId]);
+		if (playerMode === DOUBLE_MODE && prop.inviteMode) {
+			console.log('emit a join invitation game request');
+			socket.emit('joinInvitation', { playerId: prop.user.id, opponentId: prop.opponent.id, lvl: level })
+		}
+	}, [playerMode, level, prop.user.id]);
 
 	// loop to receive several game play events
 	useEffect(() => {
@@ -137,6 +113,10 @@ export default function Pong({userId, userName}: PongProp) {
 				setGameRoom(gameRoom);
 				setIsLive(true);
 				setIsReady(false);
+
+				if (prop.inviteMode) {
+					// to send an invitation to other player
+				}
 			});
 			// receive an information about the opponent from server
 			socket.on('opponentJoin', ({ message, opponent }) => {
@@ -169,7 +149,7 @@ export default function Pong({userId, userName}: PongProp) {
 		if (playerMode === DOUBLE_MODE && winner !== OPPONENT_WIN) {
 			socket.emit('gameOver', {
 				gameInfo: {
-					playerId: userId,
+					playerId: prop.user.id,
 					winner: winner,
 					playerScore: playerScore,
 					opponentScore: opponentScore,
@@ -177,7 +157,7 @@ export default function Pong({userId, userName}: PongProp) {
 				gameRoom: gameRoom,
 			});
 		}
-	}, [gameRoom, opponentScore, playerMode, playerScore, userId, winner]);
+	}, [gameRoom, opponentScore, playerMode, playerScore, winner]);
 
 	// loop to detect stopGame event from server
 	useEffect(() => {
@@ -739,19 +719,21 @@ export default function Pong({userId, userName}: PongProp) {
 			{(!isRunning && isLive) && (
 				<LiveBoard
 					isReady={isReady}
-					playerName={userName}
+					playerName={prop.user.name}
 					opponentName={opponentName}
+					inviteMode={prop.inviteMode}
 					spectatorMode={false}
 					closingText={''}
 					start={() => {startGame(winner === PLAYER_WIN ? PLAYER_SIDE : OPPONENT_SIDE); setIsLive(false)}}
 				/>
 			)}
 			{((!isRunning || gameOver) && !isLive) && (
-				<ModalBoard 
+				<ModalBoard
 					onDifficulty={(level) => {setLevel(level)}}
 					onTool={(mode) => {setToolMode(mode)}}
 					onPlayerMode={(mode) => {setPlayerMode(mode)}}
 					onStartPage={() => startGame(winner === PLAYER_WIN ? PLAYER_SIDE : OPPONENT_SIDE)}
+					inviteMode={prop.inviteMode}
 					buttonText={gameOver ? "Play again" : "Start playing"}
 					closingText={closingText}
 				/>
