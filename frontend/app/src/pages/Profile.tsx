@@ -1,13 +1,14 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import ProfileCardInfo from '../components/Profile/ProfileCard';
 import ProfileContent from '../components/Profile/ProfileContent';
 
 import classes from '../sass/pages/Profile.module.scss';
-import { UserAPI } from '../store/users-contexte';
+import { UserAPI, UserContext } from '../store/users-contexte';
 import { useParams } from 'react-router-dom';
 
 const Profile: React.FC = () => {
 
+	const userCtx = useContext(UserContext);
 	const params = useParams();
 	const [ displayedUser, setDisplayedUser ] = useState<UserAPI | null>(null);
 
@@ -29,6 +30,7 @@ const Profile: React.FC = () => {
 		}
 		setDisplayedUser(dataUser);
 	}, [params.id]);
+
 
 	useEffect(() => {
 		fetchDisplayUser();
