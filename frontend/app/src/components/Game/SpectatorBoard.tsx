@@ -78,9 +78,9 @@ export default function SpectatorBoard(spectatorProp: SpectatorProp) {
 		if (spectatorProp.mode) {
 			console.log('emit a request to join as spectator to server')
 			// send join request to the server as a spectator
-			socket.emit('spectatorJoin', { userId: spectatorProp.userId, gameRoom: spectatorProp.gameRoom });
+			socket.emit('spectatorJoin', { userId: spectatorProp.user.id, gameRoom: spectatorProp.gameRoom });
 		}
-	}, [spectatorProp.mode, spectatorProp.gameRoom, spectatorProp.userId]);
+	}, [spectatorProp.mode, spectatorProp.gameRoom, spectatorProp.user.id]);
 
 	// loop to receive several game play events from the server
 	useEffect(() => {
@@ -333,6 +333,7 @@ export default function SpectatorBoard(spectatorProp: SpectatorProp) {
 					isReady={isReady}
 					playerName={playerName}
 					opponentName={opponentName}
+					inviteMode={false}
 					spectatorMode={true}
 					start={() => {startGame()}}
 					closingText={closingText}
