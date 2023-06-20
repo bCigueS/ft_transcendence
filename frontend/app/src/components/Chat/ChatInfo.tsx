@@ -5,7 +5,7 @@ import { Fragment } from 'react';
 import ReactDOM from 'react-dom';
 import Card from "./../UI/Card";
 import { UserAPI, UserContext } from "../../store/users-contexte";
-import { Channel } from "./chatUtils";
+import { Channel, modifyChannel } from "./chatUtils";
 import AddToGroup from "./AddToGroup";
 import GroupChat from "./GroupChat";
 import PrivateChat from "./PrivateChat";
@@ -54,8 +54,17 @@ const Overlay: React.FC<Props> = (props) => {
 	}
 
 	const onAddAdmin = (member: UserAPI) => {
+
+		const chanData = {
+			admins: [
+				{
+					userId: member.id
+				}
+			]
+		}
 		console.log('added admin: ', member);
 		setAdmins([...admins, member]);
+		modifyChannel(props.chat.id, chanData);
 	}
 
 	return (

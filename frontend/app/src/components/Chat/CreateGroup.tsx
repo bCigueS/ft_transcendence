@@ -25,9 +25,7 @@ const Overlay: React.FC<Props> = (props) => {
     const [ groupName, setGroupName ] = useState<string>(''); 
 	const [ members, setMembers ] = useState<UserAPI[]>([]);
 	const [ typeError, setTypeError ] = useState<string>('');
-	const [ canBan, setCanBan ] = useState<boolean>(false);
-	const [ canMute, setCanMute ] = useState<boolean>(false);
-	const [ canRemove, setCanRemove ] = useState<boolean>(false);
+	
 	const userCtx = useContext(UserContext);
 
     const handleSubmit = () => {
