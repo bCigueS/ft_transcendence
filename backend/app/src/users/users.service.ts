@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -10,11 +10,11 @@ import * as speakeasy from 'speakeasy';
 import * as QRCode from 'qrcode';
 import { Response } from 'express'; // Add this import
 import { CustomRequest } from './users.controller';
-
-
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class UsersService {
+	httpService: any;
   constructor(private prisma: PrismaService) { }
 
   async create(data: CreateUserDto) {
@@ -315,15 +315,8 @@ export class UsersService {
     return games;
 }
 
-  async getUserByToken(token: string) {
-	const user = await this.prisma.user.findFirst({ where: { token: token } });
-	if (!user)
-		throw new NotFoundException(`User with ${token} does not exist.`);
-	return (user);
-}
-
-  async logout(req: CustomRequest)
-  {
+async logout(req: CustomRequest)
+{
 	const userId = parseInt(req.userId);
 	const user = await this.prisma.user.findUnique({ where: { id: userId } });
 	if (!user)
@@ -347,7 +340,6 @@ export class UsersService {
 	if (!user)
 		throw new NotFoundException(`User with ${req.userId} does not exist.`);
 	
-	console.log(req.userId);
 	const secretCode = speakeasy.generateSecret({
 		name: '42ykuo2',
 	});
@@ -357,7 +349,6 @@ export class UsersService {
 		data: { secert: secretCode.base32 },
 	});
 
-		console.log(secretCode);
 	return {
 		otpauthUrl: secretCode.otpauth_url,
 		base32: secretCode.base32,
@@ -366,22 +357,42 @@ export class UsersService {
 
   async verifyTwoFactorAuthenticationCode(req: CustomRequest, token: string)
   {
-	const userId = parseInt(req.userId);
-	const user = await this.prisma.user.findUnique({ where: { id: userId } });
-	if (!user)
-		throw new NotFoundException(`User with ${req.userId} does not exist.`);
-	const verified = speakeasy.totp.verify({
+    const userId = parseInt(req.userId);
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user)
+    	throw new NotFoundException(`User with ${req.userId} does not exist.`);
+    const verified = speakeasy.totp.verify({
 		secret: user.secert,
 		encoding: 'base32',
 		token: token,
-	});
-	await this.prisma.user.update({
+    });
+    await this.prisma.user.update({
 		where: { id: userId },
 		data: { doubleAuth: true },
-	});
-	return {
-		result: verified,
-	};
+    });
+    return {
+      	result: verified,
+    };
+  }
+
+  async disableTwoFactor(req: CustomRequest, token: string)
+  {
+    const userId = parseInt(req.userId);
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user)
+    	throw new NotFoundException(`User with ${req.userId} does not exist.`);
+    const verified = speakeasy.totp.verify({
+		secret: user.secert,
+		encoding: 'base32',
+		token: token,
+    });
+    await this.prisma.user.update({
+		where: { id: userId },
+		data: { doubleAuth: false },
+    });
+    return {
+      	result: verified,
+    };
   }
 
   public async pipeQrCodeStream(stream: Response, otpauthUrl: string)
