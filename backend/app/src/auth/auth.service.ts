@@ -7,6 +7,7 @@ import { HttpService } from '@nestjs/axios';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import axios from 'axios';
 import fs from 'fs';
+import * as jwt from 'jsonwebtoken';
 
 
 @Injectable()
@@ -30,8 +31,15 @@ export class AuthService {
       throw new UnauthorizedException('Invalid password');
     }
 
-	return {
+	const token = jwt.sign({
 		accessToken: user.token,
+		userId: user.id
+	}, `${process.env.NODE_ENV}`, { expiresIn: '1h' });
+
+	console.log(token);
+
+	return {
+		accessToken: token,
 		userId: user.id
 	};
 }
@@ -74,6 +82,7 @@ export class AuthService {
   async validateUser(code: string): Promise<any>
   {
     var response = {};
+	let token = {};
     const url_token = 'https://api.intra.42.fr/oauth/token';
     const data_token = {
 		grant_type: 'authorization_code',
@@ -84,13 +93,21 @@ export class AuthService {
     };
     try {
 		const token_data = await this.httpService.post(url_token, data_token).toPromise();
-		response['token'] = token_data.data;
+		token = token_data.data;
     } catch (error) {
 		error.response.data.status = 403;
 		throw new HttpException(error.response.data, HttpStatus.FORBIDDEN, { cause: error });
     }
-    if (response['token']['access_token']) response['user'] = await this.aboutMe(response['token']['access_token']);
+    if (token['access_token']) response['user'] = await this.aboutMe(token['access_token']);
 	  response['userId'] = response['user']['userId'];
+
+	response['accessToken'] = jwt.sign({
+		accessToken: token['access_token'],
+		userId: response['userId']
+	}, `${process.env.NODE_ENV}`, { expiresIn: '1h' });
+	response['token'] = {};
+	response['token']['access_token'] = response['accessToken'];
+	console.log(response);
     return response;
   }
 
