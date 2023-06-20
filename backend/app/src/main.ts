@@ -23,6 +23,10 @@ async function bootstrap() {
     .setTitle('Pong')
     .setDescription('The Pong API description - for ft_transcendence 42 project.')
     .setVersion('0.1')
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      'Authorization',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
