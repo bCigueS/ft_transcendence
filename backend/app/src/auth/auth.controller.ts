@@ -39,17 +39,4 @@ export class AuthController {
     return this.authService.aboutMe(token);
   }
 
-  @Post('2fa/add')
-  @ApiOkResponse({ type: AuthEntity })
-  async add2fa(@Body() body: any, @Res() res: any): Promise<any> {
-    const { otpauthUrl } = await this.authService.getTwoFactorAuthenticationCode();
-	res.setHeader('Content-Type', 'image/png'); // Set the content type for the image
-    return this.authService.pipeQrCodeStream(res, otpauthUrl);
-  }
-
-  @Post('2fa/verify')
-  @ApiOkResponse({ type: AuthEntity })
-  async verify2fa(@Body() { userId, token }: any): Promise<any> {
-    return await this.authService.verifyTwoFactorAuthenticationCode(userId, token);
-  }
 }
