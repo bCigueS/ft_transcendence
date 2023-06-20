@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { UserAPI } from '../../store/users-contexte';
+import React, { useCallback, useEffect, useState, useContext } from 'react';
+import { UserAPI, UserContext } from '../../store/users-contexte';
 import { NavigateOptions, useNavigate } from 'react-router-dom';
 import DefaultImage from '../../assets/images/default.jpg';
 import classes from '../../sass/components/Profile/ProfilIcon.module.scss';
@@ -11,6 +11,7 @@ const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: s
 	const [ error, setError ] = useState<string | null>(null);
 	const [ inGame, setInGame ] = useState<boolean>(false);
 	const navigate = useNavigate();
+	const userCtx = useContext(UserContext);
 
 	const stylePicture: React.CSSProperties = {
 		content: '',
