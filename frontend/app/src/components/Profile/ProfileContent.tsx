@@ -46,10 +46,14 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 		}
 
 		console.log(matchInfo);
+		return matchInfo;
 	}
 
+	console.log(user?.id);
 	const fetchMatchSummary = useCallback(async() => {
-		const response = await fetch('http://localhost:3000/users/' + userCtx.user?.id + '/games');
+		if (user?.id === undefined)
+			return ;
+		const response = await fetch('http://localhost:3000/users/' + user?.id + '/games');
 		if (response.status === 404) {
 			console.error("Error in fetch data");
 			return ;
@@ -57,20 +61,27 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 		if (!response.ok)
 			throw new Error("Failed to fetch matchs Summary");
 		const data = await response.json();
-		const matchsSummary: UserMatch[] = data.map((match: any) => {
-			// return {
-			// 	// opponent: data.
-			// }
-			return (parseMatchData(match));
-		})
-		
+		let matchArray: UserMatch[] = [];
+
+		await Promise.all(data.map(async (match: UserMatch) => {
+			const parsedMatch = await parseMatchData(match);
+			matchArray = [...matchArray, parsedMatch];
+		  }));
+		// data.forEach(async (match: UserMatch) => {
+		// 	const parsedMatch = await parseMatchData(match);
+		// 	matchArray = [...matchArray, parsedMatch]; 
+		// });
+
+		setMatchesSummary(matchArray);
+		// userCtx.user.setGamesPlayed(matchArray.length);
+		console.log('match array: ', matchArray);
 		console.log("Result: ", matchesSummary);
-	}, [])
+	}, [user?.id])
 
 	useEffect(() => {
-		setContentDisplay('Settings');
+		setContentDisplay('Matchs');
 		fetchMatchSummary();
-	}, [user?.name]);
+	}, [user?.name, user?.id]);
 
 	return (
 		<div className={classes.container}>
@@ -112,8 +123,8 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 				<div className={classes.tabContent}>
 					<div className={classes.listContent}>
 						{
-							user?.matchs?.map((match, index) => (
-								<MatchSummary key={index} summary={match} user={user} />
+							matchesSummary.map((match, index) => (
+								<MatchSummary key={index} summary={match} user={match.user}/>
 							))
 						}
 					</div>

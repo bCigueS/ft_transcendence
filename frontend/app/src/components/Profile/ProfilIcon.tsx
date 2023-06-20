@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { UserAPI } from '../../store/users-contexte';
 import { NavigateOptions, useNavigate } from 'react-router-dom';
+import DefaultImage from '../../assets/images/default.jpg';
 import classes from '../../sass/components/Profile/ProfilIcon.module.scss';
 
 const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: string[]; border?: boolean}> = ( { user, displayCo = true, size = [], border = false}) => {
@@ -67,7 +68,7 @@ const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: s
 				className={classes.picture}
 				style={size.length > 0 ? {width: size[0], height: size[1] } : {}}>
 				<img 
-					src={!loading ? imageUrl : ''} 
+					src={!loading ? imageUrl : DefaultImage} 
 					alt={user?.name} 
 				/>
 			</div>

@@ -21,6 +21,16 @@ export type UserAPI = {
 	connected?: boolean,
   };
 
+//   const SimonUser: UserAPI = {
+// 	id: 1,
+// 	email: "test@test.com",
+// 	name: "Simon",
+// 	avatar: "onsenfou",
+// 	doubleAuth: false,
+// 	wins: 1,
+// 	gamesPlayed: 1,
+//   }
+
 export const UserContext = React.createContext<{
 		user: UserAPI | null;
 		error: string | null;
@@ -31,10 +41,13 @@ export const UserContext = React.createContext<{
 		fetchUserFriends: (id: number) => void;
 		fetchUserBlockings: (id: number) => void;
 		fetchUser: () => void;
+		fetchAddFriend: (otherUser: UserAPI) => void;
 		fetchRemoveFriend: (targetUser: UserAPI) => void;
 		fetchBlockUser: (targetUser: UserAPI) => void;
 		fetchUnblockUser: (targetUser: UserAPI) => void;
 		fetchUserById: (userId: number) => void;
+		isSelf: (otherUser: UserAPI) => boolean;
+		isFriend: (otherUser: UserAPI) => boolean;
 	}>({
 	user: null,
 	error: null,
@@ -45,10 +58,13 @@ export const UserContext = React.createContext<{
 	fetchUserFriends: (id: number) => {},
 	fetchUserBlockings: (id: number) => {},
 	fetchUser: () => {},
+	fetchAddFriend: (otherUser: UserAPI) => {},
 	fetchRemoveFriend: (targetUser: UserAPI) => {},
 	fetchBlockUser: (targetUser: UserAPI) => {},
 	fetchUnblockUser: (targetUser: UserAPI) => {},
 	fetchUserById: (userId: number) => {},
+	isSelf: (otherUser: UserAPI) => false,
+	isFriend: (otherUser: UserAPI) => false,
 	});
 
 type Props = {
@@ -63,6 +79,7 @@ type Props = {
 		const [ token, setToken ] = useState<string | undefined>(undefined);
 		const [ loading, setLoading ] = useState<boolean>(true);
 		const [ error, setError ] = useState<string | null>(null);
+		const [ gamesPlayed, setGamesPlayed ] = useState(0);
 
 		const saveToken = (token: string,  userIdInput: number) => {
 			setUserId(userIdInput);
@@ -121,6 +138,8 @@ type Props = {
 					body: JSON.stringify(blockedId)
 				});
 
+				if (response.status === 400)
+					throw new Error("Failed to add block, user already block");
 				if (!response.ok) {
 					throw new Error("Failed to fetch block User");
 				}
@@ -244,6 +263,42 @@ type Props = {
 			return userBlockings;
 		}, []);
 
+		const isFriend = (otherUser: UserAPI) => {
+			return user?.friends?.some(friend => otherUser.id === friend.id) || false;
+		}
+
+		const isSelf = (otherUser: UserAPI) => {
+			return user?.id === otherUser.id;
+		}
+
+		const fetchAddFriend = async(otherUser: UserAPI) => {
+			setError(null);
+			const friendId = {
+				friendId: otherUser.id
+			};
+
+			try {
+				const response = await fetch('http://localhost:3000/users/' + user?.id + '/add-friend', {
+					method: 'PATCH',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify(friendId)
+				});
+
+				if (response.status === 400) {
+					throw new Error("Failed to add friend!") ;
+				}
+
+				if (!response.ok)
+					throw new Error("Failed to add friend!");
+
+				fetchUser();
+			} catch (error: any) {
+				setError(error.message);
+			}
+		};
+
 		const fetchUser = useCallback(async () => {
 			setError(null);
 			const storedUserId = localStorage.getItem('userId');
@@ -300,10 +355,13 @@ type Props = {
 		fetchUserFriends: fetchUserFriends,
 		fetchUserBlockings: fetchUserBlockings,
 		fetchUser: fetchUser,
+		fetchAddFriend: fetchAddFriend,
 		fetchRemoveFriend: fetchRemoveFriend,
 		fetchBlockUser: fetchBlockUser,
 		fetchUnblockUser: fetchUnblockUser,
 		fetchUserById: fetchUserById,
+		isSelf: isSelf,
+		isFriend: isFriend,
 	};
 
 	return (

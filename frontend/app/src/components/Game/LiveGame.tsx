@@ -1,11 +1,16 @@
 import React from 'react';
 import classes from '../../sass/components/Game/Livegame.module.scss';
 import { UserMatch } from '../../store/users-contexte';
-import MatchSummary from '../Profile/Matches/MatchSummary';
+import LiveGameCard from './LiveGameCard';
 
 
 
 const DUMMY_MATCHS: UserMatch[] = [
+	{playerScore: 0, opponentScore: 0},
+	{playerScore: 0, opponentScore: 0},
+	{playerScore: 0, opponentScore: 0},
+	{playerScore: 0, opponentScore: 0},
+	{playerScore: 0, opponentScore: 0},
 	{playerScore: 0, opponentScore: 0},
 	{playerScore: 0, opponentScore: 0},
 	{playerScore: 0, opponentScore: 0},
@@ -21,7 +26,7 @@ const Livegame: React.FC = () => {
 			<div className={classes.matchs}>
 				{
 					DUMMY_MATCHS.map((match, i) => (
-						<MatchSummary key={i} summary={match}/>
+						<LiveGameCard key={i}/>
 					))
 				}
 			</div>

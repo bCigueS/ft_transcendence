@@ -163,10 +163,21 @@ export class UsersService {
         followingId: blockId,
       },
     });
+
+	const existingBlock = await this.prisma.block.findFirst({
+		where: {
+			MyId: id,
+			blockedId: blockId,
+		},
+	});
   
     if (existingFriendship) {
       this.removeFriend(id, blockId);
     }
+
+	if (existingBlock) {
+		throw new BadRequestException('User is already block');
+	}
 
     const block = await this.prisma.block.create({
       data: {

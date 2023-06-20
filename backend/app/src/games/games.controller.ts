@@ -45,4 +45,10 @@ export class GamesController {
     return this.gamesService.remove(id);
   }
 
+  @Patch(':id')
+  @ApiOkResponse({ type: GameEntity })
+  assignWinner(@Param('id', ParseIntPipe) id: number, @Body() data: { winnerId: number }) {
+	return this.gamesService.assignWinner(id, data?.winnerId);
+  }
+
 }
