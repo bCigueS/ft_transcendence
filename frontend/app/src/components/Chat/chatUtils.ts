@@ -4,8 +4,15 @@ export interface Channel {
     createdAt: Date,
 	id: number,
 	name: string,
+    creatorId: number,
+    creator: UserAPI,
+    isPasswordProtected: boolean,
+    password: string,
 	messages: MessageAPI[],
 	members: UserAPI[],
+	admins: UserAPI[],
+	banned: UserAPI[],
+	muted: UserAPI[],
 }
 
 export interface MessageAPI {

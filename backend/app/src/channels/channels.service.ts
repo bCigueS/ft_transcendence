@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { CreateChannelDto } from './dto/create-channel.dto';
+import { CreateChannelDto, CreateChannelMembershipDto } from './dto/create-channel.dto';
 import { UpdateChannelDto } from './dto/update-channel.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateChannelMembershipDto, CreateMessageDto } from 'src/messages/dto/create-message.dto';
+import { CreateMessageDto } from 'src/messages/dto/create-message.dto';
 import { MessagesService } from 'src/messages/messages.service';
 
 @Injectable()
@@ -10,14 +10,14 @@ export class ChannelsService {
   constructor(private readonly prisma: PrismaService) { }
 
   async create(createChannelDto: CreateChannelDto) {
-    const { name, messages, members } = createChannelDto;
+    const { creatorId, name, messages, members } = createChannelDto;
 
     if (members.length < 2) {
       throw new Error("Invalid channel creation request: must include at least two members.");
     }
 
     const channel = await this.prisma.channel.create({ 
-      data: { name },
+      data: { creatorId, name },
     });
 
     if (messages && messages.length > 0)
@@ -53,8 +53,28 @@ export class ChannelsService {
   async findAll() {
     return await this.prisma.channel.findMany({
       include: {
+        creator: true,
         messages: true,
-        members: true,
+        members: {
+          select: {
+            user: true
+          }
+        },
+        admins: {
+          select: {
+            user: true
+          }
+        },
+        banned: {
+          select: {
+            user: true
+          }
+        },
+        muted: {
+          select: {
+            user: true
+          }
+        },
       }
     });
   }
@@ -66,13 +86,29 @@ export class ChannelsService {
 			id
 			},
 			include: {
-			messages: true,
-			members: {
-				select: {
-				user: true
-				}
+        creator: true,
+			  messages: true,
+			  members: {
+				  select: {
+				    user: true
+				},
+        }, 
+        admins: {
+          select: {
+            user: true
+          }
+        },
+        banned: {
+          select: {
+            user: true
+          }
+        },
+        muted: {
+          select: {
+            user: true
+          }
+        },
 			},
-			}
 		});
 		
 	if (chan) {
@@ -87,7 +123,7 @@ export class ChannelsService {
 
   async update(id: number, updateChannelDto: UpdateChannelDto) {
 
-    const { name, messages, members } = updateChannelDto;
+    const { name, isPasswordProtected, password, messages, members, admins, banned, muted } = updateChannelDto;
 
     const channel = await this.findOne(id); 
 
@@ -97,6 +133,17 @@ export class ChannelsService {
         where: { id },
         data: {
           name: name
+        }
+      });
+    }
+
+    if (isPasswordProtected)
+    {
+      await this.prisma.channel.update({
+        where: { id },
+        data: {
+          isPasswordProtected: isPasswordProtected,
+          password: password,
         }
       });
     }
@@ -130,6 +177,42 @@ export class ChannelsService {
         });
       }
     }
+
+    if (admins) {
+      for (const admin of admins) {
+        const memberDto: CreateChannelMembershipDto = { userId: admin.userId };
+        await this.prisma.adminMembership.create({
+          data: {
+            ...memberDto,
+            channelId: channel.id,
+          },
+        });
+      }
+    }
+
+    if (banned) {
+      for (const ban of banned) {
+        const memberDto: CreateChannelMembershipDto = { userId: ban.userId };
+        await this.prisma.bannedUser.create({
+          data: {
+            ...memberDto,
+            channelId: channel.id,
+          },
+        });
+      }
+    }
+
+    if (muted) {
+      for (const mute of muted) {
+        const memberDto: CreateChannelMembershipDto = { userId: mute.userId };
+        await this.prisma.mutedUser.create({
+          data: {
+            ...memberDto,
+            channelId: channel.id,
+          },
+        });
+      }
+    }
       
     return channel;
   }
@@ -141,6 +224,18 @@ export class ChannelsService {
 	});
 	
 	await this.prisma.channelMembership.deleteMany({
+		where: { channelId: id },
+	});
+
+  await this.prisma.adminMembership.deleteMany({
+		where: { channelId: id },
+	});
+
+  await this.prisma.bannedUser.deleteMany({
+		where: { channelId: id },
+	});
+
+  await this.prisma.mutedUser.deleteMany({
 		where: { channelId: id },
 	});
 	
@@ -176,6 +271,48 @@ export class ChannelsService {
 				}
 			  }
 			},
+      admins: {
+			  select: {
+				user: {
+				  select: {
+					id: true,
+					email: true,
+					name: true,
+					avatar: true,
+					doubleAuth: true,
+					wins: true,
+				  }
+				}
+			  }
+			},
+      banned: {
+			  select: {
+				user: {
+				  select: {
+					id: true,
+					email: true,
+					name: true,
+					avatar: true,
+					doubleAuth: true,
+					wins: true,
+				  }
+				}
+			  }
+			},
+      muted: {
+			  select: {
+				user: {
+				  select: {
+					id: true,
+					email: true,
+					name: true,
+					avatar: true,
+					doubleAuth: true,
+					wins: true,
+				  }
+				}
+			  }
+			},
 			messages: true,
 		  },
 		});
@@ -183,10 +320,15 @@ export class ChannelsService {
 	const reformattedChannels = userChannels.map(channel => {
 		return {
 		...channel,
-		members: channel.members.map(member => member.user)
+		members: channel.members.map(member => member.user),
+		admins: channel.admins.map(admin => admin.user),
+		banned: channel.banned.map(ban => ban.user),
+		muted: channel.muted.map(mute => mute.user),
 		}
 	});
 	
 	return reformattedChannels;
   }
+
+  
 }

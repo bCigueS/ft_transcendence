@@ -76,12 +76,14 @@ const olivia = await findOrCreateUser({
 const channel1 = await prisma.channel.create({
     data: {
         name: 'private',
+        creatorId: simon.id,
     },
 });
 
 const channel2 = await prisma.channel.create({
     data: {
         name: 'private',
+        creatorId: simon.id,
     },
 });
 

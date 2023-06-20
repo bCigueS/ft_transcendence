@@ -49,6 +49,7 @@ const Overlay: React.FC<Props> = (props) => {
 		}
 
 		const chanData = {
+			creatorId: userCtx.user?.id,
 			name: groupName,
 			members: membersWithConnectedUser.map(member => ({
 				userId: member.id

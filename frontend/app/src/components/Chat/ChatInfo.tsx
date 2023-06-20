@@ -31,6 +31,7 @@ const Backdrop: React.FC<BackdropProps> = (props) => {
 const Overlay: React.FC<Props> = (props) => {
     const [ groupName, setGroupName ] = useState<string>(''); 
 	const [ members, setMembers ] = useState<UserAPI[]>([]);
+	const [ admins, setAdmins ] = useState<UserAPI[]>([]);
 	const [ typeError, setTypeError ] = useState<string>('');
 	const userCtx = useContext(UserContext);
 
@@ -52,6 +53,11 @@ const Overlay: React.FC<Props> = (props) => {
 		setMembers(members.filter(m => m.id !== member.id));
 	}
 
+	const onAddAdmin = (member: UserAPI) => {
+		console.log('added admin: ', member);
+		setAdmins([...admins, member]);
+	}
+
 	return (
 		<Card className={classes.modal}>
             {
@@ -67,6 +73,7 @@ const Overlay: React.FC<Props> = (props) => {
 					onInfoClick={props.onInfoClick}
 					onDelete={props.onDelete}
 					onRemove={removeMember}
+					onAddAdmin={onAddAdmin}
 				/>
 			}
 		</Card>
