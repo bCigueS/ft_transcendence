@@ -19,7 +19,7 @@ const AuthForm: React.FC = () => {
 	const [ userId, setUserId ] = useState<string>('');
 	const [ logCode, setLogCode ] = useState<string>("");
 	const [ token, setToken ] = useState<string>("");
-	
+		
 	useEffect(() => {
 		if (window.location.href.includes("code="))
 			setLogCode(window.location.href.split("code=")[1])
@@ -47,16 +47,13 @@ const AuthForm: React.FC = () => {
 
 	useEffect(() => {
 		if (token) {
-			userCtx.saveToken(token, +userId);
-			setTokenAuth(token);
-			localStorage.setItem('userId', userId);
+			setTokenAuth(token, userId);
 			setIsLogged(true);
-			window.location.reload();
+			// window.location.reload();
 		}
 	}, [token, isLogged])
 
 
-	console.log(data);
 	return (
 		<>
 			{/* <Form className={classes.logginForm} method='post' onSubmit={handleSubmit}> */}

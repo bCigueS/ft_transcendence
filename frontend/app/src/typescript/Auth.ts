@@ -10,8 +10,9 @@ export const tokenLoader = () => {
 	return getAuthToken();
 }
 
-export const setTokenAuth = (token: string) => {
+export const setTokenAuth = (token: string, userId: string) => {
 	localStorage.setItem('token', token);
+	localStorage.setItem('userId', userId)
 	return redirect('/');
 }
 

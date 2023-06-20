@@ -35,6 +35,7 @@ export const UserContext = React.createContext<{
 		user: UserAPI | null;
 		error: string | null;
 		token?: string;
+		logInfo? : {userId?: string, token?: string};
 		saveToken: (token: string, userIdInput: number) => void,
 		saveToken2: (token: string) => void,
 		deleteToken: () => void,
@@ -52,6 +53,7 @@ export const UserContext = React.createContext<{
 	user: null,
 	error: null,
 	token: undefined,
+	logInfo: {},
 	saveToken: (token: string, userIdInput: number) => {},
 	saveToken2: (token: string) => {},
 	deleteToken: () => {},
@@ -81,9 +83,16 @@ type Props = {
 		const [ error, setError ] = useState<string | null>(null);
 		const [ gamesPlayed, setGamesPlayed ] = useState(0);
 
+
+		const logInfo = {
+			userId: localStorage.getItem('userId') || String(userId),
+			token: localStorage.getItem('token') || ''
+		}
+
 		const saveToken = (token: string,  userIdInput: number) => {
 			setUserId(userIdInput);
 			setToken(token);
+			fetchUser();
 		}
 
 		const saveToken2 = (token: string) => {
@@ -107,7 +116,8 @@ type Props = {
 				const response = await fetch('http://localhost:3000/users/' + idToFetch + '/remove-friend', {
 					method: 'PATCH',
 					headers: {
-						'Content-Type': 'application/json'
+						'Content-Type': 'application/json',
+						'Authorization' : 'Bearer ' + logInfo.token,
 					},
 					body: JSON.stringify(friendId)
 				});
@@ -133,7 +143,8 @@ type Props = {
 				const response = await fetch('http://localhost:3000/users/' + idToFetch + '/block-user', {
 					method: 'PATCH',
 					headers: {
-						'Content-Type': 'application/json'
+						'Content-Type': 'application/json',
+						'Authorization' : 'Bearer ' + logInfo.token,
 					},
 					body: JSON.stringify(blockedId)
 				});
@@ -162,7 +173,9 @@ type Props = {
 				const response = await fetch('http://localhost:3000/users/' + idToFetch + '/unblock-user', {
 					method: 'PATCH',
 					headers: {
-						'Content-Type': 'application/json'
+						'Content-Type': 'application/json',
+						'Authorization' : 'Bearer ' + logInfo.token,
+
 					},
 					body: JSON.stringify(blockedId)
 				});
@@ -182,7 +195,12 @@ type Props = {
 			let userFound: UserAPI | null = null;
 
 			try {
-				const response = await fetch('http://localhost:3000/users/' + userId);
+				const response = await fetch('http://localhost:3000/users/' + userId, {
+					method: 'GET',
+					headers: {
+						'Authorization' : 'Bearer ' + logInfo.token,
+					}
+				});
 				const data = await response.json();
 
 				if (!response.ok)
@@ -212,7 +230,12 @@ type Props = {
 			let userFriends: UserAPI[] = [];
 
 			try {
-				const response = await fetch('http://localhost:3000/users/'+ idToFetch + '/show-friends');
+				const response = await fetch('http://localhost:3000/users/'+ idToFetch + '/show-friends', {
+					method: 'GET',
+					headers: {
+						'Authorization' : 'Bearer ' + logInfo.token,
+					}
+				});
 				const data = await response.json();
 
 				if (!response.ok)
@@ -241,7 +264,13 @@ type Props = {
 			let userBlockings: UserAPI[] = [];
 
 			try {
-				const response = await fetch('http://localhost:3000/users/' + idToFetch + '/show-blocked-users');
+				const response = await fetch('http://localhost:3000/users/' + idToFetch + '/show-blocked-users', {
+					method: 'GET',
+					headers: {
+						'Authorization' : 'Bearer ' + logInfo.token,
+
+					}
+				});
 				const data = await response.json();
 
 				if (!response.ok)
@@ -281,7 +310,8 @@ type Props = {
 				const response = await fetch('http://localhost:3000/users/' + user?.id + '/add-friend', {
 					method: 'PATCH',
 					headers: {
-						'Content-Type': 'application/json'
+						'Content-Type': 'application/json',
+						'Authorization' : 'Bearer ' + logInfo.token,
 					},
 					body: JSON.stringify(friendId)
 				});
@@ -301,10 +331,14 @@ type Props = {
 
 		const fetchUser = useCallback(async () => {
 			setError(null);
-			const storedUserId = localStorage.getItem('userId');
-			const idToFetch = storedUserId ? Number(storedUserId) : userId
 			try {
-				const response = await fetch('http://localhost:3000/users/' + idToFetch);
+				console.log("inside fetch User: ", logInfo)
+				const response = await fetch('http://localhost:3000/users/' + logInfo.userId, {
+					method: 'GET',
+					headers: {
+						'Authorization' : 'Bearer ' + logInfo.token,
+					}
+				});
 				const data = await response.json();
 			
 				if (!response.ok)
@@ -334,8 +368,9 @@ type Props = {
 			finally {
 				setLoading(false);
 			}
-		  }, [fetchUserFriends, fetchUserBlockings, userId]);
-		  
+		  }, [fetchUserFriends, fetchUserBlockings, userId, token]);
+		
+		
 		useEffect(() => {
 			fetchUser();
 		  }, [fetchUser, setUserId, userId, user?.name]);
@@ -349,6 +384,7 @@ type Props = {
 		user: user,
 		error: error,
 		token: undefined,
+		logInfo: logInfo,
 		saveToken: saveToken,
 		saveToken2: saveToken2,
 		deleteToken: deleteToken,

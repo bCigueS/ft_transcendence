@@ -13,7 +13,12 @@ const Profile: React.FC = () => {
 	const [ displayedUser, setDisplayedUser ] = useState<UserAPI | null>(null);
 
 	const fetchDisplayUser = useCallback(async () => {
-		const response = await fetch('http://localhost:3000/users/' + params.id);
+		const response = await fetch('http://localhost:3000/users/' + params.id, {
+			method: 'GET',
+			headers: {
+				'Authorization' : 'Bearer ' + userCtx.logInfo?.token
+			}
+		});
 		const data = await response.json();
 
 		if (!response.ok)

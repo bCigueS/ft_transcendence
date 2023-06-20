@@ -38,7 +38,7 @@ export const action = async({ request }: { request: Request }) => {
 	const resData = await response.json();
 	const token = resData.accessToken;
 	const userId = resData.userId;
-	localStorage.setItem('tokenDebug', token);
+	localStorage.setItem('token', token);
 	localStorage.setItem('userId', userId);
 	window.location.reload();
 

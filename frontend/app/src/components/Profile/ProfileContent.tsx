@@ -18,7 +18,12 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 	};
 
 	const fetchUser = async(id: number) => {
-		const response = await fetch('http://localhost:3000/users/' + id);
+		const response = await fetch('http://localhost:3000/users/' + id, {
+			method: 'GET', 
+			headers: {
+				'Authorization' : 'Bearer ' + userCtx.logInfo?.token,
+			}
+		});
 		if (!response.ok)
 			throw new Error("Failed to fetch user");
 		const data = await response.json();
@@ -53,7 +58,12 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 	const fetchMatchSummary = useCallback(async() => {
 		if (user?.id === undefined)
 			return ;
-		const response = await fetch('http://localhost:3000/users/' + user?.id + '/games');
+		const response = await fetch('http://localhost:3000/users/' + user?.id + '/games', {
+			method: 'GET',
+			headers: {
+				'Authorization' : 'Bearer ' + userCtx.logInfo?.token,
+			}
+		});
 		if (response.status === 404) {
 			console.error("Error in fetch data");
 			return ;

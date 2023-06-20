@@ -1,8 +1,14 @@
+import { useContext } from 'react';
 import LiveGame from '../components/Game/LiveGame';
 import classes from '../sass/pages/Homepage.module.scss'
+import { UserContext } from '../store/users-contexte';
 
 
 const Homepage: React.FC = () => {
+
+	const userCtx = useContext(UserContext);
+
+	// userCtx.fetchUser();
 	return (
 		<div className={classes.main}>
 			<div className={classes.rules}>
