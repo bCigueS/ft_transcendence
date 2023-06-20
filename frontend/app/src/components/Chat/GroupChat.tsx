@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { Channel } from "./chatUtils";
+import { Channel, banUser, kickUser, modifyChannel, removeAdmin, removeBan, removeMute } from "./chatUtils";
 import classes from '../../sass/components/Chat/ChatInfo.module.scss';
 import AddToGroup from "./AddToGroup";
 import { UserAPI, UserContext } from "../../store/users-contexte";
@@ -22,23 +22,27 @@ const GroupChat: React.FC<Props> = (props) => {
     const [ isChatPasswordProtected, setIsChatPasswordProtected ] = useState(false);
     const [ chatPassword, setChatPassword ] = useState('');
 	const [ typeError, setTypeError ] = useState<string>('');
-    const [ administrators, setAdministrators ] = useState<UserAPI[]>([]);
+    const [ admins, setAdmins ] = useState<UserAPI[]>([]);
+    const [ members, setMembers ] = useState<UserAPI[]>([]);
+    const [ banned, setBanned ] = useState<UserAPI[]>([]);
+    const [ muted, setMuted ] = useState<UserAPI[]>([]);
     const [ displayMembers, setDisplayMembers ] = useState(true);
     const [ displayAdmin, setDisplayAdmin ] = useState(false);
+    const [ displayBanned, setDisplayBanned ] = useState(false);
+    const [ displayMuted, setDisplayMuted ] = useState(false);
 	const userCtx = useContext(UserContext);
     
 
     /*
-    ✅ 
         everyone can:
             leave channel
-            access members profile
-            invite them for a pong duel
+            access members profile ✅
+            invite them for a pong duel ✅
         creator can:
             ban users 
             mute users
             kick users
-            set new administrators
+            set new administrators ✅
             add a password to protect the channel
             delete chat
         administrator can
@@ -51,8 +55,11 @@ const GroupChat: React.FC<Props> = (props) => {
         if (props.chat.admins.find(admin => admin.id === userCtx.user?.id))
             setIsAdmin(true);
         setChatName(props.chat.name);
-        setAdministrators(props.chat.admins);
-    });
+        setAdmins(props.chat.admins);
+        setMembers(props.chat.members);
+        setBanned(props.chat.banned);
+        setMuted(props.chat.muted);
+    }, []);
 
     const channelCreatedOn = () => {
         let date = new Date(props.chat.createdAt);
@@ -83,6 +90,26 @@ const GroupChat: React.FC<Props> = (props) => {
         return false;
     }
 
+    const canBan = (member: UserAPI) => {
+        if (banned.find(b => b.id === member.id))
+            return false;
+        return true;
+    }
+
+    const canMute = (member: UserAPI) => {
+        if (muted.find(m => m.id === member.id))
+            return false;
+        return true;
+    }
+
+    const canAddAsAdmin = (member: UserAPI) => {
+        if (admins.find(admin => admin.id === member.id))
+            return false;
+        if (isCreator)
+            return true;
+        return false; 
+    }
+
     const handlePasswordProtect = (event: any) => {
 		event.preventDefault();
         if (!isChatPasswordProtected && (chatPassword.length === 0 || chatPassword.trim().length === 0))
@@ -109,6 +136,88 @@ const GroupChat: React.FC<Props> = (props) => {
         setDisplayAdmin(!displayAdmin);
     }
 
+    const handleShowBanned = () => {
+        setDisplayBanned(!displayBanned);
+    }
+
+    const handleShowMuted = () => {
+        setDisplayMuted(!displayMuted);
+    }
+
+    const handleAddAdmin = (member: UserAPI) => {
+        console.log('about to add member as admin: ', member);
+
+        setAdmins([...admins, member]);
+        const chanData = {
+            admins: [
+                {
+                    userId: member.id
+                }
+            ]
+        }
+        modifyChannel(props.chat.id, chanData);
+    }
+
+    const handleAddBanned = (member: UserAPI) => {
+        console.log('about to add member as banned: ', member);
+
+        setBanned([...banned, member]);
+        const chanData = {
+            banned: [
+                {
+                    userId: member.id
+                }
+            ]
+        }
+        // modifyChannel(props.chat.id, chanData);
+        banUser(props.chat.id, member.id);
+    }
+
+    const handleAddMuted = (member: UserAPI) => {
+        console.log('about to add member as muted user: ', member);
+
+        setMuted([...muted, member]);
+        const chanData = {
+            muted: [
+                {
+                    userId: member.id
+                }
+            ]
+        }
+        modifyChannel(props.chat.id, chanData);
+    }
+
+    const handleRemoveAdmin = (admin: UserAPI) => {
+        console.log('about to remove admin: ', admin);
+        const newAdmins = admins.filter(a => a.id !== admin.id);
+        setAdmins(newAdmins);
+        removeAdmin(props.chat.id, admin.id);
+    }
+
+    const handleRemoveBan = (ban: UserAPI) => {
+        console.log('about to remove ban: ', ban);
+        const newBanned = banned.filter(b => b.id !== ban.id);
+        setAdmins(newBanned);
+        removeBan(props.chat.id, ban.id);
+    }
+
+    const handleRemoveMute = (mute: UserAPI) => {
+        console.log('about to remove mute: ', mute);
+        const newMuted = muted.filter(m => m.id !== mute.id);
+        setAdmins(newMuted);
+        removeMute(props.chat.id, mute.id);
+    }
+
+    const handleKick = (member: UserAPI) => {
+        console.log('about to remove user from chat: ', member);
+        handleRemoveAdmin(member);
+        handleRemoveBan(member);
+        handleRemoveMute(member);
+        const newMembers = members.filter(m => m.id !== member.id);
+        setMembers(newMembers);
+        kickUser(props.chat.id, member.id);
+    }
+
     return (
         <div className={classes.container}>
         <h1>{chatName}</h1>
@@ -118,7 +227,7 @@ const GroupChat: React.FC<Props> = (props) => {
             </h2><br></br>
             <div className={classes.display}>
             <h2>
-            See special people in this chat.
+            ✨ members ({members.length})
             </h2>
                 <i 
                     title={"members"}
@@ -129,21 +238,115 @@ const GroupChat: React.FC<Props> = (props) => {
             <div className={classes.userList}>
                 {
                     displayMembers &&
-                    props.chat.members.map((member) => (
+                        members.map((member) => 
+                        member.id !== userCtx.user?.id ? (
                         <AddToGroup 
                         key={member.id} 
                         user={member}
-                        onRemove={props.onRemove}
-                        onAddAdmin={props.onAddAdmin}
-                        // handleKickBanMute={true}
+                        onRemove={handleKick}
+                        onAddAdmin={handleAddAdmin}
+                        onAddBanned={handleAddBanned}
+                        onAddMuted={handleAddMuted}
                         handleKickBanMute={canKickBanMute(member)}
+                        handleKick={true}
+                        handleBan={canBan(member)}
+                        handleMute={canMute(member)}
                         handleDM={true}
-                        handleAddAdmin={true}
+                        handleAddAdmin={canAddAsAdmin(member)}
                         />
-                        ))
+                        ) : 
+                        <AddToGroup 
+                        key={member.id} 
+                        user={member}
+                        />)
                     }
                 </div>
-                <div className={classes.passwordLabel}>
+                <div className={classes.display}>
+                <h2>
+                👑 admins ({admins.length})
+                </h2>
+                    <i 
+                        title={"administrators"}
+                        onClick={handleShowAdministrators}
+                        className={displayAdmin ? 'fa-solid fa-caret-down' : 'fa-solid fa-caret-right'}>
+                    </i>
+                </div>
+                    <div className={classes.userList}>
+                {
+                        displayAdmin && admins.length > 0 ?
+                            admins.map((admin) => (
+                        <AddToGroup 
+                        key={admin.id} 
+                        user={admin}
+                        onRemove={handleRemoveAdmin}
+                        handleAddRemove={true}
+                        isSelected={true}
+                        // handleKickBanMute={canKickBanMute(administrator)}
+                        handleDM={true}
+                        />
+                        ))
+                    :
+                    displayAdmin && admins.length === 0 &&
+                    <p className={classes.error}>There are no administrators in this group.</p>
+                }
+                    </div>
+                    <div className={classes.display}>
+                <h2>
+                🚫 banned users ({banned.length})
+                </h2>
+                    <i 
+                        title={"banned"}
+                        onClick={handleShowBanned}
+                        className={displayBanned ? 'fa-solid fa-caret-down' : 'fa-solid fa-caret-right'}>
+                    </i>
+                </div>
+                    <div className={classes.userList}>
+                {
+                        displayBanned && banned.length > 0 ?
+                            banned.map((ban) => (
+                        <AddToGroup 
+                        key={ban.id} 
+                        user={ban}
+                        onRemove={handleRemoveBan}
+                        handleAddRemove={true}
+                        isSelected={true}
+                        handleDM={true}
+                        />
+                        ))
+                    :
+                    displayBanned && banned.length === 0 &&
+                    <p className={classes.error}>There are no banned users in this group.</p>
+                }
+                    </div>
+                    <div className={classes.display}>
+                <h2>
+                🙊 muted users ({muted.length})
+                </h2>
+                    <i 
+                        title={"muted"}
+                        onClick={handleShowMuted}
+                        className={displayMuted ? 'fa-solid fa-caret-down' : 'fa-solid fa-caret-right'}>
+                    </i>
+                </div>
+                    <div className={classes.userList}>
+                {
+                        displayMuted && muted.length > 0 ?
+                            muted.map((mute) => (
+                        <AddToGroup 
+                            key={mute.id} 
+                            user={mute}
+                            onRemove={handleRemoveMute}
+                            handleAddRemove={true}
+                            isSelected={true}
+                            handleDM={true}
+                        />
+                        ))
+                    :
+                    displayMuted && muted.length === 0 &&
+                    <p className={classes.error}>There are no muted users in this group.</p>
+                }
+                    </div>
+                    <div className={classes.passwordLabel}>
                     <h2>
                     Password protection
                     </h2>
@@ -171,31 +374,6 @@ const GroupChat: React.FC<Props> = (props) => {
                             <p className={classes.error}>{typeError}</p>
                         }
                     </div>
-                }
-                <div className={classes.display}>
-                <h2>
-                See administrators
-                </h2>
-                    <i 
-                        title={"administrators"}
-                        onClick={handleShowAdministrators}
-                        className={displayAdmin ? 'fa-solid fa-caret-down' : 'fa-solid fa-caret-right'}>
-                    </i>
-                </div>
-                {
-                    displayAdmin && administrators.length > 0 ?
-                    administrators.map((administrator) => (
-                        <AddToGroup 
-                        key={administrator.id} 
-                        user={administrator}
-                        onRemove={props.onRemove}
-                        // handleKickBanMute={canKickBanMute(administrator)}
-                        // handleDM={true}
-                        />
-                        ))
-                    :
-                    displayAdmin && administrators.length === 0 &&
-                    <p className={classes.error}>There are no administrators in this group.</p>
                 }
                 {
                     <button className={classes.deleteButton} onClick={handleClickLeave}>Leave {chatName}</button>

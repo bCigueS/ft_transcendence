@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateChannelDto, CreateChannelMembershipDto } from './dto/create-channel.dto';
 import { UpdateChannelDto } from './dto/update-channel.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -330,5 +330,98 @@ export class ChannelsService {
 	return reformattedChannels;
   }
 
+  async removeMember(channelId: number, userId: number) {
+    await this.prisma.channelMembership.deleteMany({
+      where: { 
+        channelId: channelId,
+        userId: userId
+      },
+    });
+
+    return this.findOne(channelId);
+  }
+
+  async removeAdmin(channelId: number, userId: number) {
+      await this.prisma.adminMembership.deleteMany({
+        where: { 
+          channelId: channelId,
+          userId: userId
+        },
+      });
+      return this.findOne(channelId);
+    }
+
+    async banUser(channelId: number, userId: number) {
+      const channel = await this.prisma.channel.findUnique({
+          where: { id: channelId },
+      });
+      if (!channel)
+        throw new NotFoundException('Channel not found');
+        
+      await this.prisma.bannedUser.create({
+          data: { 
+              channelId: channelId,
+              userId: userId 
+          },
+      });
   
+      return this.findOne(channelId);
+  }
+  
+  
+
+  async removeBan(channelId: number, userId: number) {
+    await this.prisma.bannedUser.deleteMany({
+      where: { 
+        channelId: channelId,
+        userId: userId
+      },
+    });
+    return this.findOne(channelId);
+  }
+
+  async removeMute(channelId: number, userId: number) {
+
+    await this.prisma.mutedUser.deleteMany({
+      where: { 
+        channelId: channelId,
+        userId: userId
+      },
+    });
+
+    return this.findOne(channelId);
+  }
+
+  async kickUser(channelId: number, userId: number) {
+
+    const channel = await this.prisma.channel.findUnique({
+        where: { id: channelId },
+    });
+    if (!channel) 
+      throw new NotFoundException('Channel not found');
+
+    await this.prisma.channelMembership.delete({
+        where: { channelId_userId: { channelId, userId } },
+    });
+
+    const admin = await this.prisma.adminMembership.findUnique({
+        where: { channelId_userId: { channelId, userId } },
+    });
+    if (admin) {
+        await this.prisma.adminMembership.delete({
+            where: { channelId_userId: { channelId, userId } },
+        });
+    }
+
+    const muted = await this.prisma.mutedUser.findUnique({
+        where: { channelId_userId: { channelId, userId } },
+    });
+    if (muted) {
+        await this.prisma.mutedUser.delete({
+            where: { channelId_userId: { channelId, userId } },
+        });
+    }
+    return this.findOne(channelId);
+  }
+
 }

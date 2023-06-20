@@ -81,8 +81,7 @@
         display: flex;
         flex-direction: row;
         width: 100%;
-        // justify-content: space-between;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.8rem;
 
         i {
             position: relative;
@@ -100,13 +99,10 @@
     .label {
 		position: relative;
 		width: 100%;
-		// border: 0.2rem solid black;
-		// padding: 1.5rem 1rem;
 		@include flexBox($direction: column);
         align-items: flex-start;
 		position:relative;
 		transform-style: preserve-3d;
-		// background-color: $almost-white;
         font-size: small;
         font-style: italic;
         margin-bottom: 1rem;

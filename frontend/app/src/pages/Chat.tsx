@@ -109,6 +109,7 @@ export default function Chat() {
 			
 			const newChat = {
 				createdAt: new Date(),
+				creatorId: userCtx.user?.id,
 				id: message.channelId,
 				name: 'private',
 				messages: [newMessage],
@@ -277,15 +278,22 @@ export default function Chat() {
 	
 			if (chatExist)
 				onSaveConversation(chatExist);
-			else
+			else if (userCtx.user)
 			{
 				const newChat = {
-					createdAt: new Date(),
-					id: -1,
-					name: 'private',
-					messages: [],
-					members: [user, userCtx.user]
-				}
+						createdAt: new Date(),
+						creatorId: userCtx.user?.id,
+						creator: userCtx.user,
+						id: -1,
+						name: 'private',
+						messages: [],
+						members: [user, userCtx.user],
+						isPasswordProtected: false,
+						password: '',
+						admins: [],
+						banned: [],
+						muted: [],
+					}
 
 				setChats([...chats, newChat]);
 				onSaveConversation(newChat);
