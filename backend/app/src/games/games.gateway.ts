@@ -492,7 +492,6 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 			message: `Hello ${spectator.name}, welcome to the game`,
 			player: player,
 			opponent: opponent,
-			gameRoom: game.room,
 		});
 
 		if (game && game.playerSocketIds && game.playerSocketIds[0] && player) {
