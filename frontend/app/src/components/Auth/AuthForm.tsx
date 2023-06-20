@@ -37,7 +37,7 @@ const AuthForm: React.FC = () => {
 				});
 				if (response.ok) {
 					const data = await response.json();
-					setToken(data.token.access_token);
+					setToken(data.accessToken);
 					setUserId(data.userId);
 				}
 			}
@@ -59,7 +59,7 @@ const AuthForm: React.FC = () => {
 			{/* <Form className={classes.logginForm} method='post' onSubmit={handleSubmit}> */}
 			<Form className={classes.logginForm} method='post'>
 				<h1>Connect Debug</h1>
-				<p>Password is 'lolilolilolilol'</p>
+				<p>Password is 'lolilolilol'</p>
 				<div className={classes.label}>
 					<label htmlFor="name">Username</label>
 					<input type="text" name="name" id="name" />

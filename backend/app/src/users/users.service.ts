@@ -366,6 +366,7 @@ export class UsersService {
 
   async verifyTwoFactorAuthenticationCode(req: CustomRequest, token: string)
   {
+	console.log(token, req.userId);
 	const userId = parseInt(req.userId);
 	const user = await this.prisma.user.findUnique({ where: { id: userId } });
 	if (!user)

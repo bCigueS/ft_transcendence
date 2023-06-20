@@ -15,6 +15,7 @@ import { Observable } from 'rxjs';
 import { fileURLToPath } from 'url';
 import { unlink } from 'fs';
 import { GameEntity } from 'src/games/entities/game.entity';
+import { constants } from 'buffer';
 
 export interface CustomRequest extends Request
 {
@@ -280,6 +281,7 @@ export class UsersController {
 	@Post('2fa/verify')
 	@ApiOkResponse({ type: UserEntity })
 	async verify2fa(@Body() { token }: any,  @Req() req: CustomRequest): Promise<any> {
+		console.log(token);
 	  return await this.usersService.verifyTwoFactorAuthenticationCode(req, token);
 	}
 }

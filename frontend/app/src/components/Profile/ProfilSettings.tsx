@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { UserAPI, UserContext } from '../../store/users-contexte';
 import ProfilPatch from './ProfilPatch';
 import { json } from 'react-router-dom';
+import DoubleAuthPannel from '../Auth/DoubleAuthPannel';
 
 
 const ProfilSettings: React.FC<{user: UserAPI | null}> = ( { user } ) => {
@@ -59,7 +60,10 @@ const ProfilSettings: React.FC<{user: UserAPI | null}> = ( { user } ) => {
 
 
 	return (
-		<ProfilPatch onPatchUser={handlePatchUser}/>
+		<>
+			{/* <ProfilPatch onPatchUser={handlePatchUser}/> */}
+			<DoubleAuthPannel />
+		</>
 	)
 }
 

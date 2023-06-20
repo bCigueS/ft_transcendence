@@ -17,14 +17,7 @@ const PatchForm: React.FC<PatchUser> = ({ onPatchUser }) => {
 	const [ typeError, setTypeError ] = useState<string>('');
 	const [ filePreview, setFilePreview ] = useState<string | null>('');
 
-	useEffect(() => {
-		if (userCtx.user?.doubleAuth === true)
-			setIsChecked(true);
-	}, []);
 
-	const doubleAuthHandler = () => {
-		setIsChecked(!isChecked);
-	}
 
 	const handleSubmit = async(event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -79,13 +72,6 @@ const PatchForm: React.FC<PatchUser> = ({ onPatchUser }) => {
 					onChange={nameHandler}
 					placeholder={placeholder} 
 					maxLength={12}/>
-			</div>
-			<div className={classes.label}>
-				<h2>Double Authentication</h2>
-				<label htmlFor="switch" className={classes.switch}>
-					<input type="checkbox" id='switch' name='auth' checked={isChecked} onChange={doubleAuthHandler} value={isChecked ? 'true' : 'false'}/>
-					<span className={classes.slider}></span>
-				</label>
 			</div>
 			<div className={classes.label} style={{flexDirection: 'column', gap:'1.5rem', justifyContent:'flex-start'}}>
 				<div style={{ width: '100%', display: 'flex' , flexDirection: "row", justifyContent: 'space-between', alignItems: 'center'}}>
