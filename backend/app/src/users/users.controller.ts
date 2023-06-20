@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, NotFoundException, UseGuards, UseInterceptors, UploadedFile, Res, ParseFilePipeBuilder, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, NotFoundException, UseGuards, UseInterceptors, UploadedFile, Res, ParseFilePipeBuilder, HttpStatus, Req } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -9,11 +9,13 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { AddFriendDto } from './dto/add-friend.dto';
 import { BlockingDto } from './dto/blocking.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
 import { Express } from 'express'
 import { toSafeUser } from './user.utils';
-import { Observable } from 'rxjs';
-import { fileURLToPath } from 'url';
+
+export interface CustomRequest extends Request
+{
+	userId: string;
+}
 
 @Controller('users') @ApiTags('users')
 export class UsersController {
@@ -201,5 +203,26 @@ export class UsersController {
 		const user = await this.usersService.findOne(id);
 		return res.sendFile(user.avatar, { root: './uploads'});
 	}
-	
+
+
+	@Post('logout')
+	@ApiOkResponse({ type: UserEntity })
+	async logout(@Body() body: any, @Req() req: CustomRequest, @Res() res: any): Promise<any> {
+	  return this.usersService.logout(req);
+	}
+  
+
+	@Post('2fa/add')
+	@ApiOkResponse({ type: UserEntity })
+	async add2fa(@Body() body: any, @Req() req: CustomRequest, @Res() res: any): Promise<any> {
+	const { otpauthUrl } = await this.usersService.getTwoFactorAuthenticationCode(req);
+	res.setHeader('Content-Type', 'image/png'); // Set the content type for the image
+	return this.usersService.pipeQrCodeStream(res, otpauthUrl);
+	}
+  
+	@Post('2fa/verify')
+	@ApiOkResponse({ type: UserEntity })
+	async verify2fa(@Body() { token }: any,  @Req() req: CustomRequest): Promise<any> {
+	  return await this.usersService.verifyTwoFactorAuthenticationCode(req, token);
+	}
 }
