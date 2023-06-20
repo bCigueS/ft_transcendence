@@ -1,11 +1,13 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import Pong from '../components/Game/Pong';
 
 import classes from '../sass/pages/Game.module.scss';
 import { UserContext } from '../store/users-contexte';
 import SpectatorBoard from '../components/Game/SpectatorBoard';
+import { useLocation } from 'react-router-dom';
 // import { useLocation } from 'react-router-dom';
 
+// board mode
 const PLAY_MODE = 0;
 const SPECTATOR_MODE = 1;
 
@@ -13,15 +15,42 @@ export default function Game() {
 
 	// Import the userContext Api (from React)
 	const userCtx = useContext(UserContext);
-	// const location = useLocation();
+	const location = useLocation();
+	const { state } = location;
 
 	// player info
-	const userId = userCtx.user?.id;
-	const userName = userCtx.user?.name;
+	const user = userCtx.user;
+	const opponent = state?.opponent;
+	const inviteMode = (state.gameInvitation ? true : false);
 
-	// console.log('Location: ', location.state);
+	// screen info
+	const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+	const [screenHeight, setScreenHeight] = useState(window.innerHeight);
+	const [ratio, setRatio] = useState(1);
 
-	if (!userId || !userName) {
+	useEffect(() => {
+		const handleResize = () => {
+			setScreenWidth(window.innerWidth);
+			setScreenHeight(window.innerHeight);
+		};
+
+		window.addEventListener('resize', handleResize);
+
+		// Clean up the event listener on unmount
+		return () => {
+			window.removeEventListener('resize', handleResize);
+		};
+	}, []);
+
+	useEffect(() => {
+		if (info.boardWidth) {
+			setRatio(info.boardWidth / screenWidth);
+		} else if (info.boardHeight) {
+			setRatio(info.boardHeight / screenHeight);
+		}
+	}, [info.boardWidth, info.boardHeight, screenWidth, screenHeight]);
+
+	if (!user) {
 		return (
 			<></>
 		);
@@ -29,18 +58,19 @@ export default function Game() {
 
 	return (
 		<div className={classes.gamePage}>
-			{(userName === 'Faaaany') && (
+			{(user?.name === 'Faaaany') && (
 				<SpectatorBoard
 					mode ={SPECTATOR_MODE}
-					userId={userId}
+					user={user}
 					gameLevel={0}
 					gameRoom={'pong10'}
 				/>
 			)}
-			{(userName !== 'Faaaany') && (
+			{(user?.name !== 'Faaaany') && (
 				<Pong
-					userId={userId}
-					userName={userName}
+					user={user}
+					opponent={opponent}
+					inviteMode={inviteMode}
 				/>
 			)}
 		</div>

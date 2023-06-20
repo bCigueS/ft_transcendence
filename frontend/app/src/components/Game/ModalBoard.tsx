@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ModalProps } from './utils/types';
 import classes from  '../../sass/components/Game/Modal.module.scss';
 
-export default function ModalBoard({ onDifficulty, onTool, onPlayerMode, onStartPage, buttonText, closingText }: ModalProps) {
+export default function ModalBoard({ onDifficulty, onTool, onPlayerMode, onStartPage, inviteMode, buttonText, closingText }: ModalProps) {
 	const [isStarting, setIsStarting] = useState(buttonText === "Start playing" ? true : false);
 	const [page, setPage] = useState(0);
 	const [isDouble, setIsDouble] = useState(false);
@@ -29,13 +29,19 @@ export default function ModalBoard({ onDifficulty, onTool, onPlayerMode, onStart
 						<button onClick={() => {onDifficulty(3); onNextPage();}}>Special level</button>
 					</>
 				)}
-				{(isStarting && page === 2) && (
+				{(isStarting && page === 2 && !inviteMode) && (
 					<>
 						<button onClick={() => {onTool("keyboard"); onNextPage();}}>Play with keyboard</button>
 						<button onClick={() => {onTool("mouse"); onNextPage();}}>Play with mouse</button>
 					</>
 				)}
-				{(isStarting && page === 3) && (
+				{(isStarting && page === 2 && inviteMode) && (
+					<>
+						<button onClick={() => {onTool("keyboard"); onPlayerMode("double"); setIsDouble(true); onNextPage();}}>Play with keyboard</button>
+						<button onClick={() => {onTool("mouse"); onPlayerMode("double"); setIsDouble(true); onNextPage();}}>Play with mouse</button>
+					</>
+				)}
+				{(isStarting && page === 3 && !inviteMode) && (
 					<>
 						<button onClick={() => {onPlayerMode("single"); onNextPage();}}>1 player</button>
 						<button onClick={() => {onPlayerMode("double"); setIsDouble(true); onNextPage();}}>2 players</button>
