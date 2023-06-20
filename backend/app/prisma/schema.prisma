@@ -60,7 +60,7 @@ model Game {
   playerSocketIds		String[]
   spectators			SpectatorGame[]
   spectatorSocketIds	String[]
-  winnerId  			Int?
+  winnerId  			Int?		
   winner    			User?      @relation("winnerGames", fields: [winnerId], references: [id], onDelete: Cascade)
 
   @@map("games")
