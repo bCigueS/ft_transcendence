@@ -6,6 +6,13 @@ import { User as UserEntity } from '.prisma/client';
 import { Friendship } from '@prisma/client';
 import { toSafeUser } from './user.utils';
 
+import * as speakeasy from 'speakeasy';
+import * as QRCode from 'qrcode';
+import { Response } from 'express'; // Add this import
+import { CustomRequest } from './users.controller';
+
+
+
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) { }
@@ -13,7 +20,7 @@ export class UsersService {
   async create(data: CreateUserDto) {
 
     const newUser = await this.prisma.user.create({ data });
-    return toSafeUser(newUser);
+    return newUser;
   }
 
   async findAll() {
@@ -35,8 +42,7 @@ export class UsersService {
 
     if (!user)
       return null;
-
-    return toSafeUser(user);
+    return user;
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
@@ -307,6 +313,80 @@ export class UsersService {
     });
     
     return games;
+}
+
+  async getUserByToken(token: string) {
+	const user = await this.prisma.user.findFirst({ where: { token: token } });
+	if (!user)
+		throw new NotFoundException(`User with ${token} does not exist.`);
+	return (user);
+}
+
+  async logout(req: CustomRequest)
+  {
+	const userId = parseInt(req.userId);
+	const user = await this.prisma.user.findUnique({ where: { id: userId } });
+	if (!user)
+		throw new NotFoundException(`User with ${req.userId} does not exist.`);
+	await this.prisma.user.update({
+		where: { id: userId },
+		data: { 
+			token: "",
+			status: 0
+		},
+	});
+    return {
+      accessToken: '',
+    };
+  }
+
+  async getTwoFactorAuthenticationCode(req: CustomRequest)
+  {
+	const userId = parseInt(req.userId);
+	const user = await this.prisma.user.findUnique({ where: { id: userId } });
+	if (!user)
+		throw new NotFoundException(`User with ${req.userId} does not exist.`);
+	
+	console.log(req.userId);
+	const secretCode = speakeasy.generateSecret({
+		name: '42ykuo2',
+	});
+
+	await this.prisma.user.update({
+		where: { id: userId },
+		data: { secert: secretCode.base32 },
+	});
+
+		console.log(secretCode);
+	return {
+		otpauthUrl: secretCode.otpauth_url,
+		base32: secretCode.base32,
+	};
+  }
+
+  async verifyTwoFactorAuthenticationCode(req: CustomRequest, token: string)
+  {
+	const userId = parseInt(req.userId);
+	const user = await this.prisma.user.findUnique({ where: { id: userId } });
+	if (!user)
+		throw new NotFoundException(`User with ${req.userId} does not exist.`);
+	const verified = speakeasy.totp.verify({
+		secret: user.secert,
+		encoding: 'base32',
+		token: token,
+	});
+	await this.prisma.user.update({
+		where: { id: userId },
+		data: { doubleAuth: true },
+	});
+	return {
+		result: verified,
+	};
+  }
+
+  public async pipeQrCodeStream(stream: Response, otpauthUrl: string)
+  {
+    return QRCode.toFileStream(stream, otpauthUrl);
   }
 
 }
