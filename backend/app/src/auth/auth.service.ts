@@ -71,8 +71,8 @@ export class AuthService {
     return user;
   }
 
-  async validateUser(code: string): Promise<any> {
-	console.log("vali");
+  async validateUser(code: string): Promise<any>
+  {
     var response = {};
     const url_token = 'https://api.intra.42.fr/oauth/token';
     const data_token = {
@@ -90,12 +90,12 @@ export class AuthService {
 		throw new HttpException(error.response.data, HttpStatus.FORBIDDEN, { cause: error });
     }
     if (response['token']['access_token']) response['user'] = await this.aboutMe(response['token']['access_token']);
-	response['userId'] = response['user']['userId'];
-	console.log(response);
+	  response['userId'] = response['user']['userId'];
     return response;
   }
 
-  async aboutMe(token: string): Promise<any> {
+  async aboutMe(token: string): Promise<any> 
+  {
     const url_data = 'https://api.intra.42.fr/v2/me';
     const headersRequest = { Authorization: `Bearer ${token}` };
     try {
@@ -111,21 +111,19 @@ export class AuthService {
 				},
 			});
 		}
-		data_response['data']['userId'] = user.id;
-		return data_response.data;
+		return {
+			userId: user.id,
+			id: data_response.data['id'],
+			email: data_response.data['email'],
+			login: data_response.data['login'],
+			displayname: data_response.data['displayname'],
+			image: data_response.data['image_url'],
+			first_name: data_response.data['first_name'],
+			last_name: data_response.data['last_name'],
+			};
     } catch (error) {
       error.status = 403;
       throw new HttpException(error, HttpStatus.FORBIDDEN, { cause: error });
     }
   }
-
-  async add2fa(token: string, secret: string): Promise<any> {
-    return true;
-  }
-
-//   async fortyTwo(): Promise<AuthEntity> {
-//     return {
-//       accessToken: this.jwtService.sign({ userId: 42 }),
-//     };
-//   }
 }
