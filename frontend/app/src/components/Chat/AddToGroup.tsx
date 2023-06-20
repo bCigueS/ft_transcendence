@@ -4,10 +4,21 @@ import classes from './../../sass/components/Chat/AddToGroup.module.scss';
 
 const AddToGroup: React.FC<{user: UserAPI, 	onAdd?: (member: UserAPI) => void,
 	onRemove?: (member: UserAPI) => void,
+	onAddAdmin?: (member: UserAPI) => void,
 	isSelected?: boolean,
 	handleAddRemove?: boolean,
 	handleDM?: boolean,
-	handleKickBanMute?: boolean}> = ({user, onAdd, onRemove, isSelected = false, handleAddRemove = false, handleDM = false, handleKickBanMute = false}) => {
+	handleKickBanMute?: boolean,
+	handleAddAdmin?: boolean}> = ({
+		user, 
+		onAdd, 
+		onRemove,
+		onAddAdmin,
+		isSelected = false, 
+		handleAddRemove = false, 
+		handleDM = false, 
+		handleKickBanMute = false,
+		handleAddAdmin = false}) => {
 
 	const onAddHandler = () => {
 		if (onAdd)
@@ -17,6 +28,11 @@ const AddToGroup: React.FC<{user: UserAPI, 	onAdd?: (member: UserAPI) => void,
 	const onRemoveHandler = () => {
 		if (onRemove)
 			onRemove(user);
+	}
+
+	const onAddAdminHandler = () => {
+		if (onAddAdmin)
+			onAddAdmin(user);
 	}
 
     return (
@@ -78,6 +94,14 @@ const AddToGroup: React.FC<{user: UserAPI, 	onAdd?: (member: UserAPI) => void,
 						onClick={onRemoveHandler}
 						className={'fa-solid fa-volume-xmark'}>
 					</i>
+					{
+						handleAddAdmin &&
+						<i 
+						title={"Admin"}
+						onClick={onAddAdminHandler}
+						className={'fa-solid fa-star'}>
+						</i>
+					}
 				</div>
 			}
 

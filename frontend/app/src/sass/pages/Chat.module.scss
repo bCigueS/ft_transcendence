@@ -13,15 +13,15 @@
 
     .conversations {
 		width: 100%;
-		height: 100%;
+		max-height: 100%;
 		grid-column: 1 / 2;
 		grid-row: 1 / 2;
 		background-color: $almost-white;
 		border: 0.2rem solid black;
 		
         overflow: scroll;
-		overflow-y: hidden;
-		overflow-x: hidden;
+		// overflow-y: hidden;
+		// overflow-x: hidden;
 
 		display: flex;
 		flex-direction: column;
@@ -36,13 +36,20 @@
 		grid-column: 2 / 3;
 		grid-row: 1 / 2;
 		width: 100%;
+		height: 55rem;
+
+		bottom: 0rem;
+
 		padding: 1rem;
 		background-color: $almost-white;
 		border: 0.2rem solid black;
-		overflow-y: scroll;
+		overflow: scroll;
+		overscroll-behavior:contain;
+		// overflow-y: scroll;
+		overflow-x: hidden !important;
 		display: flex;
 		flex-direction: column;
-		justify-content: flex-end;
+		// justify-content: flex-end;
 		@include shadowBox();
 		font-size: small;
 	}

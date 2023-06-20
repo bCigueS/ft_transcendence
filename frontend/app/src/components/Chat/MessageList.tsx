@@ -1,7 +1,7 @@
 
 import Message from "./Message";
 import classes from './../../sass/pages/Chat.module.scss';
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { UserContext } from "../../store/users-contexte";
 import { Channel, MessageAPI } from "./chatUtils";
 
@@ -11,9 +11,19 @@ const MessageList: React.FC<{send: (content: string, channelId: number) => {}, c
 	const messageInput = useRef<HTMLInputElement>(null);
 	const userCtx = useContext(UserContext);
 
+	// const messageContainerRef = useRef<HTMLDivElement>(null);
+	const lastMessageRef = useRef<HTMLDivElement>(null);
+	useEffect(() => {
+		const lastMessageElement = lastMessageRef.current;
+		if (lastMessageElement) {
+		  lastMessageElement.scrollIntoView({ behavior: 'instant', block: 'end' });
+		}
+	}, []);
+
     useEffect(() => {
         setMessages(chat.messages);
     }, [chat, chats]);
+
     
     const isMine = (message: MessageAPI) => {
 		if (message.senderId === userCtx.user?.id)
@@ -54,6 +64,7 @@ const MessageList: React.FC<{send: (content: string, channelId: number) => {}, c
         messageInput.current!.value = '';
     }
 
+
     return (
         <div className={classes.message}>
 			{ messages && 
@@ -67,11 +78,12 @@ const MessageList: React.FC<{send: (content: string, channelId: number) => {}, c
 							onDelete={onDelete}
 							chat={chat}/>)
 			}
-			<form onSubmit={handleSubmit}>
+			<form  onSubmit={handleSubmit}>
 				<input className={classes.sendInput} 
 						type="text"
 						ref={messageInput}
 						placeholder='type here...' />
+			<div ref={lastMessageRef}></div>
 			</form>
 		</div>
     );

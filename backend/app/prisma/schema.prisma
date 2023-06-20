@@ -24,7 +24,11 @@ model User {
   winnerGames Game[]       @relation("WinnerGames")
 
   messages    Message[]
+  channelCreator  Channel[]
   channel     ChannelMembership[]
+  admin       AdminMembership[]
+  bannedUsers BannedUser[]
+  mutedUsers  MutedUser[]
 
   @@map("users")
 }
@@ -98,14 +102,55 @@ model Message {
 }
 
 model Channel {
-  createdAt DateTime    @default(now())
-  id        Int         @id @default(autoincrement())
-  name      String?     @default("private")
-  messages  Message[]
-  members   ChannelMembership[]
+  createdAt           DateTime    @default(now())
+  id                  Int         @id @default(autoincrement())
+  name                String?     @default("private")
+  messages            Message[]
+
+  creatorId           Int 
+  creator             User        @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  
+  members             ChannelMembership[]
+  admins              AdminMembership[]
+  banned              BannedUser[]
+  muted               MutedUser[]
+
+  isPasswordProtected Boolean     @default(false)
+  password            String?
+
 }
 
 model ChannelMembership {
+  id        Int      @id @default(autoincrement())
+  channelId Int
+  userId    Int
+  channel   Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([channelId, userId])
+}
+
+model AdminMembership {
+  id        Int      @id @default(autoincrement())
+  channelId Int
+  userId    Int
+  channel   Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([channelId, userId])
+}
+
+model BannedUser {
+  id        Int      @id @default(autoincrement())
+  channelId Int
+  userId    Int
+  channel   Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([channelId, userId])
+}
+
+model MutedUser {
   id        Int      @id @default(autoincrement())
   channelId Int
   userId    Int
