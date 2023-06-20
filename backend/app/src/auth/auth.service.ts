@@ -8,7 +8,7 @@ import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import axios from 'axios';
 import fs from 'fs';
 import * as jwt from 'jsonwebtoken';
-
+import * as speakeasy from 'speakeasy';
 
 @Injectable()
 export class AuthService {
@@ -99,15 +99,38 @@ export class AuthService {
 		throw new HttpException(error.response.data, HttpStatus.FORBIDDEN, { cause: error });
     }
     if (token['access_token']) response['user'] = await this.aboutMe(token['access_token']);
-	  response['userId'] = response['user']['userId'];
+	response['userId'] = response['user']['userId'];
+	response['doubleAuth'] = response['user']['doubleAuth'];
+	// if (response['user']['otp'] == false)
 
-	response['accessToken'] = jwt.sign({
-		accessToken: token['access_token'],
-		userId: response['userId']
-	}, `${process.env.NODE_ENV}`, { expiresIn: '1h' });
-	response['token'] = {};
-	response['token']['access_token'] = response['accessToken'];
+	// todo check if user enable 2fa
+	{
+		response['accessToken'] = jwt.sign({
+			accessToken: token['access_token'],
+			userId: response['userId']
+		}, `${process.env.NODE_ENV}`, { expiresIn: '1h' });
+	}
     return response;
+  }
+
+
+  async verifyTwoFactorAuthenticationCode(userId: number, token: string)
+  {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user)
+    	throw new NotFoundException(`User with ${userId} does not exist.`);
+    const verified = speakeasy.totp.verify({
+		secret: user.secert,
+		encoding: 'base32',
+		token: token,
+    });
+    await this.prisma.user.update({
+		where: { id: userId },
+		data: { doubleAuth: true },
+    });
+    return {
+      	result: verified,
+    };
   }
 
   async aboutMe(token: string): Promise<any> 
@@ -129,6 +152,7 @@ export class AuthService {
 		}
 		return {
 			userId: user.id,
+			doubleAuth: user.doubleAuth,
 			id: data_response.data['id'],
 			email: data_response.data['email'],
 			login: data_response.data['login'],
