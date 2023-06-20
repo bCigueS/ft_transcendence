@@ -45,7 +45,6 @@ export default function SpectatorBoard(spectatorProp: SpectatorProp) {
 	const [isReady, setIsReady] = useState(false);
 	const [gameOver, setGameOver] = useState(false);
 	const [closingText, setClosingText] = useState('');
-	const [gameRoom, setGameRoom] = useState(0);
 	// animation
 	const [frameCount, setFrameCount] = useState(0);
 	const [speed, setSpeed] = useState(0);
@@ -59,10 +58,10 @@ export default function SpectatorBoard(spectatorProp: SpectatorProp) {
 	// paddle info
 	const [paddleHeight, setPaddleHeight] = useState(0);
 	// players info
-	const [playerId, setPlayerId] = useState(0);
+	// const [playerId, setPlayerId] = useState(0);
 	const [playerName, setPlayerName] = useState('');
 	const [playerY, setPlayerY] = useState((info.boardHeight - paddleHeight) / 2);
-	const [opponentId, setOpponentId] = useState(0);
+	// const [opponentId, setOpponentId] = useState(0);
 	const [opponentName, setOpponentName] = useState('');
 	const [opponentY, setOpponentY] = useState((info.boardHeight - paddleHeight) / 2);
 	// obstacle info
@@ -74,18 +73,20 @@ export default function SpectatorBoard(spectatorProp: SpectatorProp) {
 	// canvas
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
+	// loop to emit a join request to the server
 	useEffect(() => {
 		if (spectatorProp.mode) {
 			console.log('emit a request to join as spectator to server')
 			// send join request to the server as a spectator
 			socket.emit('spectatorJoin', { userId: spectatorProp.userId, gameRoom: spectatorProp.gameRoom });
 		}
-	}, [spectatorProp.mode]);
+	}, [spectatorProp.mode, spectatorProp.gameRoom, spectatorProp.userId]);
 
+	// loop to receive several game play events from the server
 	useEffect(() => {
 		if (spectatorProp.mode) {
 			// receive a welcome message from server informing that you are in a specific game room, and trigger a liveBoard
-			socket.on('welcomeSpectator', ({ message, player, opponent, gameRoom }) => {
+			socket.on('welcomeSpectator', ({ message, player, opponent }) => {
 				console.log({ message });
 				if (player) {
 					setPlayerName(player.name);
@@ -93,7 +94,6 @@ export default function SpectatorBoard(spectatorProp: SpectatorProp) {
 				if (opponent) {
 					setOpponentName(opponent.name);
 				}
-				setGameRoom(gameRoom);
 				setIsLive(true);
 				setIsReady(false);
 			});
@@ -125,10 +125,10 @@ export default function SpectatorBoard(spectatorProp: SpectatorProp) {
 				setClosingText(message);
 				setGameOver(true);
 				setIsRunning(false);
-				socket.emit('leaveGameRoom', gameRoom)
+				socket.emit('leaveGameRoom', spectatorProp.gameRoom)
 			});
 		}
-	}, [spectatorProp.mode]);
+	}, [spectatorProp.mode, spectatorProp.gameRoom]);
 	
 	// function to set initial value to start the game
 	const startGame = () => {
@@ -166,6 +166,7 @@ export default function SpectatorBoard(spectatorProp: SpectatorProp) {
 		});
 	}
 
+	// functiom to set the uodated new score after ball passed one of the player paddle
 	const updateScore = () => {
 		// receiving the updated score from server
 		socket.on('newScore', ({pScore, oScore}) => {
