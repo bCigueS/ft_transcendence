@@ -36,7 +36,12 @@ const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: s
 		if (user?.id === undefined)
 			return ;
 		try {
-			const response = await fetch('http://localhost:3000/users/' + user?.id + '/avatar');
+			const response = await fetch('http://localhost:3000/users/' + user?.id + '/avatar', {
+				method: 'GET',
+				headers: {
+					'Authorization' : 'Bearer ' + userCtx.logInfo?.token,
+				}
+			});
 			if (response.ok) {
 				const blob = await response.blob();
 				const url = URL.createObjectURL(blob);
