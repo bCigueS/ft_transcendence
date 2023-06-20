@@ -30,6 +30,15 @@ export class UserEntity implements User {
 	@ApiProperty()
 	wins: number;
 
+	@ApiProperty()
+	secert: string;
+
+	@ApiProperty()
+	status: number;
+
+	@ApiProperty()
+	token: string;
+
 	// @ApiProperty({ required: false })
 	// friends?: Friendship[];
 

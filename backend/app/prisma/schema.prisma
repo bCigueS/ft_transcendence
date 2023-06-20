@@ -18,6 +18,9 @@ model User {
   avatar      String?      @default("default.jpg")
   doubleAuth  Boolean      @default(false)
   wins        Int          @default(0)
+  secert      String?
+  status      Int          @default(0)
+  token       String?
   games       UserGame[]
   haters      Block[]      @relation("haters")
   blocked     Block[]      @relation("blocked")
