@@ -2,21 +2,15 @@
 @import '../../abstracts/variables.scss';
 
 .container {
-	width: 35rem;
+	width: 100%;
 	padding: 2rem 3rem;
     justify-content: space-between;
 
+
     .info {
-        // font-weight: 800;
         margin-top: 2rem;
         position: relative;
         width: 100%;
-        // border: 0.2rem solid black;
-        padding: 1.5rem 1rem;
-        // @include flexBox($direction: row);
-        position:relative;
-        transform-style: preserve-3d;
-        background-color: $almost-white;      
         margin-bottom: 2rem;
         font-size: x-small;
     }
@@ -31,4 +25,31 @@
     button {
 		@include buttonMixin();	
 	}
+    
+    .deleteButton {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+        left: 65%;
+    }
+    
+    .clickDelete {
+        
+        h3 {
+            padding-top: 3rem;
+            padding-bottom: 1rem;
+            font-size: large;
+        }
+        
+        .actions {
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .cancelButton {
+            @include buttonMixin($color: $gunmetal-dark);	
+        }
+    }
 }

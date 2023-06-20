@@ -2,70 +2,85 @@ import { UserAPI } from "../../store/users-contexte";
 import ProfilIcon from "../Profile/ProfilIcon";
 import classes from './../../sass/components/Chat/AddToGroup.module.scss';
 
-const AddToGroup: React.FC<{user: UserAPI, onAdd: (member: UserAPI) => void,
-	onRemove: (member: UserAPI) => void,
-	isSelected: boolean,
-	handleSelect: boolean,
-	handleBan: boolean,
-	handleMute: boolean}> = (props) => {
+const AddToGroup: React.FC<{user: UserAPI, 	onAdd?: (member: UserAPI) => void,
+	onRemove?: (member: UserAPI) => void,
+	isSelected?: boolean,
+	handleAddRemove?: boolean,
+	handleDM?: boolean,
+	handleKickBanMute?: boolean}> = ({user, onAdd, onRemove, isSelected = false, handleAddRemove = false, handleDM = false, handleKickBanMute = false}) => {
 
 	const onAddHandler = () => {
-		props.onAdd(props.user);
+		if (onAdd)
+			onAdd(user);
 	}
 
 	const onRemoveHandler = () => {
-		props.onRemove(props.user);
+		if (onRemove)
+			onRemove(user);
 	}
 
     return (
-		<div className={classes.container}>
+		<div className={handleKickBanMute ? classes.enhancedContainer : classes.container}>
 
-			<ProfilIcon user={props.user} />
+			<ProfilIcon user={user} />
+			<h2>{user?.name}</h2>
 
-			<div className={classes.info}>
-				<h2>{props.user?.name}</h2>
-			</div>
+			{
+				handleAddRemove ?
+				<div className={classes.info}>
+					{
+						isSelected ?
+						<i 
+							title='Remove'
+							onClick={onRemoveHandler}
+							className='fa-solid fa-minus'>
+						</i>
+						:
+						<i
+							title='Add'
+							onClick={onAddHandler}
+							className='fa-solid fa-plus'>
+						</i>
+					}
+				</div>
+				:
+				<div className={classes.info}>
+					{
+						handleDM &&
+						<i 
+						title='Private Message'
+						className='fa-solid fa-message'>
+						</i>
+					}
+					<i
+						title='Game'
+						className='fa-solid fa-table-tennis-paddle-ball'>
+					</i>
+				</div>
+			}
+
 			
 			{
-				props.handleSelect && !props.isSelected &&
+				handleKickBanMute &&
 				<div className={classes.option}>
-						<i 
-						title='Friend'
-						onClick={onAddHandler}
-						className={'fa-solid fa-plus'}>
-					</i>
-				</div>
-			}
-			{
-				props.handleSelect && props.isSelected &&
-				<div className={classes.option}>
-						<i 
-						title='Friend'
-						onClick={onRemoveHandler}
-						className={'fa-solid fa-minus'}>
-					</i>
-				</div>
-			}
-			{
-				props.handleBan &&
-				<div className={classes.option}>
-						<i 
-						title='Friend'
+					<i
+						title='Ban'
 						onClick={onRemoveHandler}
 						className={'fa-solid fa-ban'}>
 					</i>
-				</div>
-			}
-			{
-				props.handleMute && props.isSelected &&
-				<div className={classes.option}>
-						<i 
-						title='Friend'
+					<i 
+						title='Kick'
+						onClick={onRemoveHandler}
+						className={'fa-solid fa-minus'}>
+					</i>
+					<i 
+						title={"Mute"}
 						onClick={onRemoveHandler}
 						className={'fa-solid fa-volume-xmark'}>
 					</i>
 				</div>
 			}
+
 		</div>
 	)
 }

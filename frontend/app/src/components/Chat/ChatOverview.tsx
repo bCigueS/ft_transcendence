@@ -65,10 +65,6 @@ onDeleteChat: (channelId: number) => void}>
 		setShowModal(true);
 	}
 
-	const displayChatInfoTitle = () => {
-		
-	}
-
 	return (
 		<Fragment>
 		{/* {showModal &&
@@ -82,7 +78,6 @@ onDeleteChat: (channelId: number) => void}>
 		{showModal &&
 			<ChatInfo
 				chat={props.chat}
-				sender={sender}
 				onInfoClick={handleUserConfirmation}
 				onDelete={handleDeleteChat}
 			/>
