@@ -6,6 +6,12 @@
 	padding: 2rem 3rem;
     justify-content: space-between;
 
+    .userList {
+        max-height: 25rem;
+        overflow: scroll;
+        overflow-x: hidden !important;
+    }
+
 
     .info {
         margin-top: 2rem;
@@ -52,4 +58,83 @@
             @include buttonMixin($color: $gunmetal-dark);	
         }
     }
+
+    .passwordLabel {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        margin-top: 2rem;
+
+        i {
+            font-size: 1.5rem;
+            
+            &:hover {
+                animation: scaleButton 0.5s ease-in-out;
+                color: $light-vermillon;
+            }
+        }
+    }
+
+    .display {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        // justify-content: space-between;
+        margin-bottom: 0.5rem;
+
+        i {
+            position: relative;
+            font-size: 1.5rem;
+            top: 0.2rem;
+            left: 1rem;
+            
+            &:hover {
+                animation: scaleButton 0.5s ease-in-out;
+                color: $light-vermillon;
+            }
+        }
+    }
+
+    .label {
+		position: relative;
+		width: 100%;
+		// border: 0.2rem solid black;
+		// padding: 1.5rem 1rem;
+		@include flexBox($direction: column);
+        align-items: flex-start;
+		position:relative;
+		transform-style: preserve-3d;
+		// background-color: $almost-white;
+        font-size: small;
+        font-style: italic;
+        margin-bottom: 1rem;
+
+		input {
+			width: 16rem;
+			height: 3rem;
+			border: 0.2rem black solid;
+			text-align: left;
+			padding: 0 0.8rem ;
+		}
+
+		
+		// label, h2 {
+		// 	font-size: 1.6rem;
+		// 	font-weight: 800;
+		// 	letter-spacing: -0.15rem;
+
+		// }
+
+        
+	}
+    .error {
+        margin-top: 0.5rem;
+        margin-bottom: 1.5rem;
+        // font-weight: 800;
+        // font-size: 1.2rem;
+        // letter-spacing: 0.1rem;
+    }
+
 }
