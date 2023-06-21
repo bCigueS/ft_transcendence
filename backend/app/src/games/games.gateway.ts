@@ -154,7 +154,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 
 			if (!gameRoom || gameRoom === '') {
 				const createGameDto: CreateGameDto = {
-					state: GameState.PENDING, // to be changed with WAITING
+					state: GameState.WAITING,
 					level: lvl,
 					players: [
 						{
@@ -169,13 +169,20 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 				game = await this.gamesService.assignRoom(game.id, 'invite' + game.id);
 
 				if (game) {
-					client.emit('passGameRoom', {gameRoom: game.room });
+					client.emit('passGameRoom', { gameRoom: game.room });
 				}		
 			} else {
 				// if gameRoom is provided, then find the game based on the gameRoom
 				game = await this.prisma.game.findUnique({
 					where: { room: gameRoom }
 				});
+
+				if (!game) {
+					this.io.to(client.id).emit('stopGame', {
+						message: `Sorry, your opponent has left!`,
+					});
+					return ;
+				}
 
 				const updatedGameDto: UpdateGameDto = {
 					state: GameState.PLAYING,
@@ -230,9 +237,10 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 
 	@SubscribeMessage('sendInvitation')
 	async handleSendInvitationEvent(
-		@MessageBody() { playerId, opponentId, link }: { playerId: number, opponentId: number, link: string },
+		@MessageBody() { playerId, opponentId, gameRoom }: { playerId: number, opponentId: number, gameRoom: string },
 		@ConnectedSocket() client: Socket,
 		) {
+			const link = `joinGame/${gameRoom}_${playerId}`;
 			GamesGateway.eventEmitter.emit('gameInvitation', {
 				senderId: playerId,
 				receiverId: opponentId,
