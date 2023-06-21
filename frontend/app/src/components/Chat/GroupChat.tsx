@@ -52,14 +52,18 @@ const GroupChat: React.FC<Props> = (props) => {
     useEffect(() => {
         if (userCtx.user?.id === props.chat.creatorId)
             setIsCreator(true);
-        if (props.chat.admins.find(admin => admin.id === userCtx.user?.id))
+        if (props.chat.admins?.find(admin => admin.id === userCtx.user?.id))
             setIsAdmin(true);
         setChatName(props.chat.name);
-        setAdmins(props.chat.admins);
-        setMembers(props.chat.members);
-        setBanned(props.chat.banned);
-        setMuted(props.chat.muted);
-    }, []);
+        if (props.chat.admins)
+            setAdmins(props.chat.admins);
+        if (props.chat.members)
+            setMembers(props.chat.members);
+        if (props.chat.banned)
+            setBanned(props.chat.banned);
+        if (props.chat.muted)
+            setMuted(props.chat.muted);
+    }, [props.chat.admins, props.chat.banned, props.chat.muted, props.chat.creatorId, props.chat.members, props.chat.name, userCtx.user?.id]);
 
     const channelCreatedOn = () => {
         let date = new Date(props.chat.createdAt);

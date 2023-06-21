@@ -1,11 +1,11 @@
 
 import Message from "./Message";
 import classes from './../../sass/pages/Chat.module.scss';
-import { useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { UserContext } from "../../store/users-contexte";
 import { Channel, MessageAPI } from "./chatUtils";
 
-const MessageList: React.FC<{send: (content: string, channelId: number) => {}, chat: Channel, chats: Channel[], onDelete: (message: MessageAPI) => void}> = ({ send, chat, chats, onDelete }) => {
+const MessageList: React.FC<{send: (content: string, channelId: number) => {}, chat: Channel, chats: Channel[], msgs: MessageAPI[], onDelete: (message: MessageAPI) => void}> = ({ send, chat, chats, msgs, onDelete }) => {
 
     const [ messages, setMessages ] = useState<MessageAPI[]>(chat.messages);
 	const messageInput = useRef<HTMLInputElement>(null);
@@ -16,13 +16,13 @@ const MessageList: React.FC<{send: (content: string, channelId: number) => {}, c
 	useEffect(() => {
 		const lastMessageElement = lastMessageRef.current;
 		if (lastMessageElement) {
-		  lastMessageElement.scrollIntoView({ behavior: 'instant', block: 'end' });
+		  lastMessageElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
 		}
 	}, []);
 
     useEffect(() => {
         setMessages(chat.messages);
-    }, [chat, chats]);
+    }, [chat, chats, msgs]);
 
     
     const isMine = (message: MessageAPI) => {

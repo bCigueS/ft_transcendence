@@ -5,14 +5,14 @@ export interface Channel {
 	id: number,
 	name: string,
     creatorId: number | undefined,
-    creator: UserAPI,
-    isPasswordProtected: boolean,
-    password: string,
+    creator?: UserAPI,
+    isPasswordProtected?: boolean,
+    password?: string,
 	messages: MessageAPI[],
 	members: UserAPI[],
-	admins: UserAPI[],
-	banned: UserAPI[],
-	muted: UserAPI[],
+	admins?: UserAPI[],
+	banned?: UserAPI[],
+	muted?: UserAPI[],
 }
 
 export interface MessageAPI {
@@ -27,6 +27,11 @@ type User = { userId: number | undefined };
 type CreateChannelDTO = {
   name: string,
   members: User[],
+  isPasswordProtected?: boolean,
+  password?: string,
+  admins?: User[],
+  banned?: User[],
+  muted?: User[],
 };
 
 type UpdateChannelDTO = {
@@ -191,7 +196,7 @@ export const kickUser = async (channelId: number, userId: number) => {
         });
     
         if (response.status === 400) {
-            throw new Error("Failed to kick user from channe;!") ;
+            throw new Error("Failed to kick user from channel!") ;
         }
 
         if (!response.ok)

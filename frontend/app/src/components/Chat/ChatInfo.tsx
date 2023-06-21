@@ -1,12 +1,10 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useState } from "react";
 import classes from '../../sass/components/UI/Modal.module.scss';
-import infoclasses from '../../sass/components/Chat/ChatInfo.module.scss';
 import { Fragment } from 'react';
 import ReactDOM from 'react-dom';
 import Card from "./../UI/Card";
-import { UserAPI, UserContext } from "../../store/users-contexte";
+import { UserAPI } from "../../store/users-contexte";
 import { Channel, modifyChannel } from "./chatUtils";
-import AddToGroup from "./AddToGroup";
 import GroupChat from "./GroupChat";
 import PrivateChat from "./PrivateChat";
 
@@ -32,8 +30,6 @@ const Overlay: React.FC<Props> = (props) => {
     const [ groupName, setGroupName ] = useState<string>(''); 
 	const [ members, setMembers ] = useState<UserAPI[]>([]);
 	const [ admins, setAdmins ] = useState<UserAPI[]>([]);
-	const [ typeError, setTypeError ] = useState<string>('');
-	const userCtx = useContext(UserContext);
 
     const handleSubmit = () => {
 		props.onInfoClick();

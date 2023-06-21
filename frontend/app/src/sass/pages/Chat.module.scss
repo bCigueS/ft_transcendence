@@ -3,7 +3,6 @@
 
 .page {
 	font-size: 1.6rem;
-
 	height: 90%;
 	width: 90%;
 	display: grid;
@@ -41,7 +40,7 @@
 		overflow-x: hidden !important;
 		display: flex;
 		flex-direction: column;
-		// justify-content: flex-end;
+		justify-content: flex-end;
 		// bottom: -3rem;
 		font-size: small;
 		@include shadowBox();

@@ -55,15 +55,6 @@ const AddToGroup: React.FC<{user: UserAPI, 	onAdd?: (member: UserAPI) => void,
 			onAddMuted(user);
 	}
 
-	if (handleKickBanMute)
-		console.log('user connect has power to kick ban mute');
-	if (handleKick)
-		console.log('member can be kicked');
-	if (handleBan)
-		console.log('member can be banned');
-	if (handleMute)
-		console.log('member can be muted');
-
     return (
 		<div className={handleKickBanMute ? classes.enhancedContainer : classes.container}>
 
