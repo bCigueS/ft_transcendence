@@ -12,6 +12,7 @@ type Props = {
     onDelete: () => void,
     onRemove: (member: UserAPI) => void,
     onAddAdmin: (member: UserAPI) => void,
+    onKick: (channelId: number, kickedId: number) => void
 };
 
 const GroupChat: React.FC<Props> = (props) => {
@@ -30,6 +31,7 @@ const GroupChat: React.FC<Props> = (props) => {
     const [ displayAdmin, setDisplayAdmin ] = useState(false);
     const [ displayBanned, setDisplayBanned ] = useState(false);
     const [ displayMuted, setDisplayMuted ] = useState(false);
+    const [joinLink, setJoinLink] = useState('');
 	const userCtx = useContext(UserContext);
     
 
@@ -201,7 +203,7 @@ const GroupChat: React.FC<Props> = (props) => {
     const handleRemoveBan = (ban: UserAPI) => {
         console.log('about to remove ban: ', ban);
         const newBanned = banned.filter(b => b.id !== ban.id);
-        setAdmins(newBanned);
+        setBanned(newBanned);
         removeBan(props.chat.id, ban.id);
     }
 
@@ -219,8 +221,20 @@ const GroupChat: React.FC<Props> = (props) => {
         handleRemoveMute(member);
         const newMembers = members.filter(m => m.id !== member.id);
         setMembers(newMembers);
+        props.onKick(props.chat.id, member.id);
         kickUser(props.chat.id, member.id);
     }
+
+    useEffect(() => {
+        if(props.chat && props.chat.id && props.chat.name) {
+          setJoinLink(`join/${props.chat.name}_${props.chat.id}`);
+        }
+      }, [props.chat]);
+    
+      const copyToClipboard = (e: any) => {
+        navigator.clipboard.writeText(joinLink);
+        e.target.focus();
+      };
 
     return (
         <div className={classes.container}>
@@ -359,6 +373,11 @@ const GroupChat: React.FC<Props> = (props) => {
                         onClick={handlePasswordProtect}
                         className={isChatPasswordProtected ? 'fa-solid fa-lock' : 'fa-solid fa-lock-open'}>
                     </i>
+                </div>
+                <div>
+                        Invite your friends
+                        <p>Join link: {joinLink}</p>
+                        <button onClick={copyToClipboard}>Copy Join Link</button>
                 </div>
                 {
                     !isChatPasswordProtected && 

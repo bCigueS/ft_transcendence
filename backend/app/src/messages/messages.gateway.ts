@@ -142,6 +142,19 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 	  client.broadcast.emit('chatDeleted', data);
 	}
 
+	@SubscribeMessage('kickUser')
+	async handleKickUser(@ConnectedSocket() client: Socket, 
+							@MessageBody() data: { 
+								channelId: number, 
+								userId: number
+							}): Promise<void> {
+		console.log('in message gateway, received kickUser of user ', data.userId, 'from channel: ', data.channelId);
+		const kickedSocketId = this.onlineUsers[data.userId];
+		this.io.to(kickedSocketId).emit('handleKick', data.channelId.toString());
+			// client.broadcast.emit('chatDeleted', data);
+	}
+
+
 	@SubscribeMessage('messageDeleted')
 	async handleMessageDeletion(@ConnectedSocket() client: Socket, 
 							@MessageBody() data: { 
