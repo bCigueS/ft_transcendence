@@ -16,6 +16,7 @@ import { Observable } from 'rxjs';
 import { fileURLToPath } from 'url';
 import { unlink } from 'fs';
 import { GameEntity } from 'src/games/entities/game.entity';
+import { IsNumber, isNumber } from 'class-validator';
 
 @Controller('users') @ApiTags('users')
 export class UsersController {
@@ -255,6 +256,29 @@ export class UsersController {
             throw new NotFoundException(`User with ${id} does not have any game.`);
         
         return games;
+    }
+
+	@Get(':id/getMatches')
+    @ApiOkResponse({ type: isNumber })
+    async getMatches(
+        @Param('id', ParseIntPipe) id: number) {
+
+		const games = await this.usersService.seeUserGames(id);
+		if (!games || games.length === 0)
+			throw new NotFoundException(`User with ID ${id} does not have any games.`);
+		
+		const totalMatches = games.length;
+		return totalMatches;
+    }
+
+	@Get(':id/getWins')
+    @ApiOkResponse({ type: IsNumber })
+    async getWins(
+        @Param('id', ParseIntPipe) id: number) {
+
+        const wins = await this.usersService.getWins(id);
+        
+        return wins;
     }
 	
 }
