@@ -17,9 +17,19 @@ export const setTokenAuth = (token: string, userId: string) => {
 }
 
 export const action = () => {
+	const logout = async() => {
+		const response = await fetch('http://localhost:3000/users/logout', {
+			method: 'POST',
+			headers: {
+				'Authorization': 'Bearer ' + getAuthToken(),
+			}
+		})
+	}
+	logout();
 	localStorage.removeItem('token');
 	localStorage.removeItem('userId');
-	return redirect('/');
+	localStorage.removeItem('isLogged');
+	return redirect('/auth');
 }
 
 export const checkAuthLoader = () => {

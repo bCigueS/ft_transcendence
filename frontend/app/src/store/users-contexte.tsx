@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { redirect } from 'react-router-dom';
 
 export type UserMatch = {
 	user?: UserAPI,
@@ -26,7 +27,9 @@ export const UserContext = React.createContext<{
 		error: string | null;
 		token?: string;
 		logInfo? : {userId?: string, token?: string};
+		isLogged: boolean;
 		deleteToken: () => void,
+		login: () => void,
 		fetchUserFriends: (id: number) => void;
 		fetchUserBlockings: (id: number) => void;
 		fetchUser: () => void;
@@ -42,6 +45,8 @@ export const UserContext = React.createContext<{
 	error: null,
 	token: undefined,
 	logInfo: {},
+	isLogged: false,
+	login: () => {},
 	deleteToken: () => {},
 	fetchUserFriends: (id: number) => {},
 	fetchUserBlockings: (id: number) => {},
@@ -64,19 +69,27 @@ type Props = {
 		
 		const [ user, setUser ] = useState<UserAPI | null>(null);
 		const [ userId, setUserId ] = useState<number>(1);
+		const [ isLogged, setIsLogged ] = useState<boolean>(localStorage.getItem('isLogged') ? true : false);
 		const [ loading, setLoading ] = useState<boolean>(true);
 		const [ error, setError ] = useState<string | null>(null);
 
 
-		const logInfo = {
+		let logInfo = {
 			userId: localStorage.getItem('userId') || String(userId),
 			token: localStorage.getItem('token') || ''
 		}
 
+		const login = () => {
+			setIsLogged(true);
+			localStorage.setItem('isLogged', 'true');
+		}
 
 		const deleteToken = () => {
 			setUserId(1);
+			setIsLogged(false);
+			return redirect('/');
 		}
+
 
 		const fetchRemoveFriend = async (targetUser: UserAPI) => {
 			setError(null);
@@ -294,6 +307,10 @@ type Props = {
 
 		const fetchUser = useCallback(async () => {
 			setError(null);
+			if (logInfo.token === '') {
+				setLoading(false);
+				return ;
+			}
 			try {
 				const response = await fetch('http://localhost:3000/users/' + logInfo.userId, {
 					method: 'GET',
@@ -303,8 +320,15 @@ type Props = {
 				});
 				const data = await response.json();
 			
-				if (!response.ok)
-				throw new Error('Failed to fetch User');
+				if (response.status === 403) {
+					logInfo.token = '';
+					logInfo.userId = '1';
+					setIsLogged(false);
+				}
+
+				if (!response.ok) {
+					throw new Error('Failed to fetch User');
+				}
 
 				const userFriends = await fetchUserFriends(data.id);
 				const userBlockings = await fetchUserBlockings(data.id);
@@ -330,23 +354,29 @@ type Props = {
 			finally {
 				setLoading(false);
 			}
-		  }, [fetchUserFriends, fetchUserBlockings, logInfo.userId, logInfo.token]);
+		}, [fetchUserFriends, fetchUserBlockings, logInfo.userId, logInfo.token]);
 		
 		
 		useEffect(() => {
 			fetchUser();
 		  }, [fetchUser, userId, user?.name]);
 
+		useEffect(() => {
+			localStorage.setItem('isLogged', String(isLogged));
+		}, [isLogged, localStorage.getItem('isLogged')])
 
 		if (loading) {
 			return <div>Loading...</div>
 		}
+
 
 	const contextValue = {
 		user: user,
 		error: error,
 		token: undefined,
 		logInfo: logInfo,
+		isLogged: isLogged,
+		login: login,
 		deleteToken: deleteToken,
 		fetchUserFriends: fetchUserFriends,
 		fetchUserBlockings: fetchUserBlockings,

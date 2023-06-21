@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import classes from '../../sass/components/Auth/AuthForm.module.scss';
 import { Form, useActionData } from 'react-router-dom';
 import { setTokenAuth } from '../../typescript/Auth';
+import { UserAPI, UserContext } from '../../store/users-contexte';
 
 interface DataError {
 	statusCode?: number,
@@ -13,10 +14,13 @@ interface DataError {
 const AuthForm: React.FC = () => {
 
 	const data: DataError = useActionData() as DataError;
+	const userCtx = useContext(UserContext);
 	const [ isLogged, setIsLogged ] = useState<boolean>(false);
+	const [ user, setUser ] = useState<UserAPI | undefined>(undefined);
 	const [ userId, setUserId ] = useState<string>('');
 	const [ logCode, setLogCode ] = useState<string>("");
 	const [ token, setToken ] = useState<string>("");
+	const [ doubleAuth, setDoubleAuth ] = useState<boolean>(false);
 		
 	useEffect(() => {
 		if (window.location.href.includes("code="))
@@ -39,48 +43,89 @@ const AuthForm: React.FC = () => {
 					setUserId(data.userId);
 				}
 			}
-			fetchToken()
+			fetchToken();
 		}
 	}, [logCode])
+	
+	useEffect(() => {
+		const fetchUser = async() => {
+			const response = await fetch("http://localhost:3000/users/" + userId, {
+				method: 'GET',
+				headers: {
+					'Authorization': 'Bearer ' + token,
+				}
+			})
+			const data = await response.json();
+			const userConnect: UserAPI = {
+				id: data.id,
+				name: data.name,
+				email: data.email,
+				avatar: data.avatar,
+				doubleAuth: data.doubleAuth,
+				wins: data.wins
+			}
+			setUser(userConnect);
+		}
+		if (token)
+			fetchUser();
+	}, [token])
 
 	useEffect(() => {
 		if (token) {
+			console.log(user);
 			setTokenAuth(token, userId);
 			setIsLogged(true);
-			window.location.reload();
+			if (user?.doubleAuth === true) {
+				setDoubleAuth(true);
+				console.log("je dois rediriger vers Double Factor")
+			}
+			else {
+				userCtx.login();
+				window.location.reload();
+			}
 		}
-	}, [token, isLogged, userId])
+	}, [user])
+
 
 
 	return (
 		<>
-			{/* <Form className={classes.logginForm} method='post' onSubmit={handleSubmit}> */}
-			<Form className={classes.logginForm} method='post'>
-				<h1>Connect Debug</h1>
-				<p>Password is 'lolilolilol'</p>
-				<div className={classes.label}>
-					<label htmlFor="name">Username</label>
-					<input type="text" name="name" id="name" />
-				</div>
+			{
+				!doubleAuth &&
+				<Form className={classes.logginForm} method='post'>
+					<h1>Connect Debug</h1>
+					<p>Password is 'lolilolilol'</p>
+					<div className={classes.label}>
+						<label htmlFor="name">Username</label>
+						<input type="text" name="name" id="name" />
+					</div>
 
-				<div className={classes.label}>
-					<label htmlFor="password">Password</label>
-					<input type="password" name="password" id="password" />
-				</div>
-				<button>Connect</button>
-				{ data && data.message &&
-					<p className={classes.error}><span>Error {data.statusCode}</span>{data.message}</p>
-				}
-			</Form>		
+					<div className={classes.label}>
+						<label htmlFor="password">Password</label>
+						<input type="password" name="password" id="password" />
+					</div>
+					<button>Connect</button>
+					{ data && data.message &&
+						<p className={classes.error}><span>Error {data.statusCode}</span>{data.message}</p>
+					}
+				</Form>		
+			}
+			{
+				!doubleAuth && 
 				<div className={classes.loggin}>
-					<a  href={`http://127.0.0.1:3000/auth/forty-two`}>
-					<button 
-						className = {classes.button}>
-							Log in with<br/>
-							<span>42</span>
-					</button>
-					</a>
-				</div>
+				<a  href={`http://127.0.0.1:3000/auth/forty-two`}>
+				<button 
+					className = {classes.button}>
+						Log in with<br/>
+						<span>42</span>
+				</button>
+				</a>
+			</div>
+			}
+			{
+				doubleAuth && 
+				<p>CA MARCHE</p>
+			}
 		</>
 	)
 }
