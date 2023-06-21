@@ -37,16 +37,16 @@ const GroupChat: React.FC<Props> = (props) => {
 
     /*
         everyone can:
-            leave channel
+            leave channel ✅
             access members profile ✅
             invite them for a pong duel ✅
         creator can:
             ban users 
             mute users
-            kick users
+            kick users ✅
             set new administrators ✅
-            add a password to protect the channel
-            delete chat
+            add a password to protect the channel 
+            delete chat ✅
         administrator can
             kick, ban, mute other users, except the channel administrator
     */
@@ -72,8 +72,25 @@ const GroupChat: React.FC<Props> = (props) => {
         return date.toDateString();
     }
 
+    // const removeMember = (member: UserAPI) => {
+	// 	console.log('removed member: ', member);
+	// 	setMembers(members.filter(m => m.id !== member.id));
+	// }
+
     const handleClickLeave = () => {
         console.log(userCtx.user?.name, ' left channel ', props.chat.name);
+        if (userCtx.user)
+            handleRemoveAdmin(userCtx.user);
+        if (userCtx.user)
+            handleRemoveBan(userCtx.user);
+        if (userCtx.user)
+            handleRemoveMute(userCtx.user);
+        const newMembers = members.filter(m => m.id !== userCtx.user?.id);
+        setMembers(newMembers);
+        if (userCtx.user)
+            kickUser(props.chat.id, userCtx.user?.id);
+        if (userCtx.user)
+            props.onKick(props.chat.id, userCtx.user.id);
     }
 
     const handleClickDelete = () => {
@@ -372,21 +389,24 @@ const GroupChat: React.FC<Props> = (props) => {
                         {/* <p>Join link: {joinLink}</p> */}
                         <button onClick={copyToClipboard}>Copy Join Link</button>
                     </div>
-                    <div className={classes.passwordLabel}>
-                        <h2>
-                        Password protection
-                        </h2>
-                        <i 
-                            title={isChatPasswordProtected ? "block" : "unblock"}
-                            onClick={handlePasswordProtect}
-                            className={isChatPasswordProtected ? 'fa-solid fa-lock' : 'fa-solid fa-lock-open'}>
-                        </i>
-                    </div>
-                {
-                    !isChatPasswordProtected && 
-                    <div className={classes.label}>
-                        <form onSubmit={handlePasswordProtect}>
-                        <input 
+                    {
+                        isCreator &&
+                        <div>
+                            <div className={classes.passwordLabel}>
+                                <h2>
+                                Password protection
+                                </h2>
+                                <i 
+                                    title={isChatPasswordProtected ? "block" : "unblock"}
+                                    onClick={handlePasswordProtect}
+                                    className={isChatPasswordProtected ? 'fa-solid fa-lock' : 'fa-solid fa-lock-open'}>
+                                </i>
+                            </div>
+                        {
+                            !isChatPasswordProtected && 
+                            <div className={classes.label}>
+                            <form onSubmit={handlePasswordProtect}>
+                            <input 
                             type="password" 
                             id='name' 
                             name='name'
@@ -394,12 +414,14 @@ const GroupChat: React.FC<Props> = (props) => {
                             onChange={passwordHandler}
                             maxLength={12}/>
                             <br></br>
-                        </form>
-                        { 
-                            typeError &&
-                            <p className={classes.error}>{typeError}</p>
+                            </form>
+                            { 
+                                typeError &&
+                                <p className={classes.error}>{typeError}</p>
+                            }
+                            </div>
                         }
-                    </div>
+                </div>
                 }
                 <div className={classes.actions}>
                 {
@@ -411,10 +433,15 @@ const GroupChat: React.FC<Props> = (props) => {
                 }
                 </div>
                 <div className={classes.actions}>
-                {
-                    
-                    userConfirm &&
-                        <p className={classes.error}>Are you sure you wish to delete this chat?</p>
+                    {
+                        userConfirm &&
+                        <div className={classes.clickDelete}>
+                            <h3>Are you sure you wish to delete this chat?</h3>
+                            <div className={classes.actions}>
+                                <button className={classes.cancelButton} onClick={handleCancelDelete}>Cancel</button>
+                                <button className={classes.button} onClick={handleConfirmDelete}>Confirm</button>
+                            </div>
+                        </div>
                     }
                 </div>
         </div>
