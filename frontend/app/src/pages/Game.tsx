@@ -67,7 +67,7 @@ export default function Game() {
 					mode ={SPECTATOR_MODE}
 					user={user}
 					gameLevel={0}
-					gameRoom={'pong10'}
+					gameRoom={'pong2'}
 				/>
 			)}
 			{(user?.name !== 'Faaaany') && (

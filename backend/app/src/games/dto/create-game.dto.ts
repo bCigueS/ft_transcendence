@@ -3,7 +3,6 @@ import { IsArray, IsInt, IsNotEmpty, IsOptional, IsString, MaxLength, MinLength,
 import { Type } from "class-transformer";
 import { CreateUserGameDto } from "./create-user-game.dto";
 import { GameState } from "@prisma/client";
-import { CreateSpectatorGameDto } from "./create-spectator-game.dto";
 
 export class CreateGameDto {
 	@IsString()
@@ -31,12 +30,6 @@ export class CreateGameDto {
 	@IsString()
 	@ApiProperty()
 	playerSocketIds: Array<string>;
-
-	@IsNotEmpty()
-	@ValidateNested({ each: true })
-	@Type(() => CreateSpectatorGameDto)
-	@ApiProperty({ type: [CreateSpectatorGameDto] })
-	spectators: CreateSpectatorGameDto[];
 
 	@IsNotEmpty()
 	@IsArray()

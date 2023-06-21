@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Logger, NotFoundException } from '@nestjs/common';
 import { OnGatewayInit, OnGatewayConnection, WebSocketGateway, SubscribeMessage, WebSocketServer, MessageBody, ConnectedSocket, OnGatewayDisconnect } from '@nestjs/websockets';
 import { Socket, Server, Namespace } from 'socket.io';
 
@@ -12,6 +12,7 @@ import { UsersService } from '../users/users.service';
 import { ServeInfo, CollisionInfo, GameOverInfo, ScoreInfo, UpdatedInfo } from './utils/types';
 import { GameState } from '@prisma/client';
 import { CreateUserGameDto } from './dto/create-user-game.dto';
+import { UpdateUserDto } from 'src/users/dto/update-user.dto';
 
 @WebSocketGateway({ namespace: '/pong' })
 export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -53,7 +54,6 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 				},
 				include: {
 					players: true,
-					spectators: true
 				}
 			});
 			// update this game by adding a new UserGame with id of user sent change state playing
@@ -67,7 +67,6 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 						},
 					],
 					playerSocketIds: matchingGames[0].playerSocketIds,
-					spectators: matchingGames[0].spectators,
 					spectatorSocketIds: matchingGames[0].spectatorSocketIds,
 				};
 				updatedGameDto.playerSocketIds.push(client.id);
@@ -85,7 +84,6 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 						},
 					],
 					playerSocketIds: [client.id],
-					spectators: [],
 					spectatorSocketIds: [],
 				};
 				
@@ -161,7 +159,6 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 						},
 					],
 					playerSocketIds: [client.id],
-					spectators: [],
 					spectatorSocketIds: [],
 				};
 
@@ -181,7 +178,6 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 						},
 					],
 					playerSocketIds: game.playerSocketIds,
-					spectators: game.spectators,
 					spectatorSocketIds: game.spectatorSocketIds,
 				};
 				updatedGameDto.playerSocketIds.push(client.id);
@@ -440,7 +436,18 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 					}},
 					data: { score: gameInfo.playerScore },
 				});
-	
+
+				// update the win counts in the user
+				let player = await this.prisma.user.findUnique({
+					where: { id: gameInfo.playerId },
+				});
+
+				if (!player) {
+					throw new NotFoundException(`User with ${gameInfo.playerId} does not exist.`);
+				}
+
+				player = await this.prisma.usersService.updateWinsMatch(player.id, player.wins + 1);
+
 				// update the userGame with the score of the opponent
 				const currentGame = await this.prisma.game.findUnique({
 					where: { room: gameRoom },
@@ -459,13 +466,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 					});
 				}
 	
-				let player, opponent;
-	
-				if (playerUser) {
-					player = await this.prisma.user.findUnique({
-						where: { id : playerUser.userId }
-					});
-				}
+				let opponent;
 	
 				if (opponentUser) {
 					opponent = await this.prisma.user.findUnique({
@@ -507,25 +508,8 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 			where: { room: gameRoom }
 		});
 
-		const isSpectator = await this.prisma.spectatorGame.findFirst({
-		  where: {
-			gameId: game.id,
-			userId: userId,
-		  },
-		});
-		
-		if (!isSpectator) {
-			const updatedGameDto: UpdateGameDto = {
-				spectators: [
-					{
-						userId: userId,
-					}
-				],
-				spectatorSocketIds: game.spectatorSocketIds,
-			};
-			updatedGameDto.spectatorSocketIds.push(client.id);
-	
-			game = await this.gamesService.addSpectator(game.id, updatedGameDto);
+		if (!game) {
+			throw new NotFoundException(`game with room ${gameRoom} does not exist.`);
 		}
 
 		const isSocketIdListed = game.spectatorSocketIds.includes(client.id);
