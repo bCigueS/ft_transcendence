@@ -7,7 +7,6 @@ import RootLayout from './pages/RootLayout';
 import ErrorPage from './pages/Error';
 import Homepage from './pages/Homepage';
 import ProfilePage from './pages/Profile';
-import PrivateMessagePage from './pages/PrivateMessagePage';
 import ChatPage from './pages/Chat';
 import Game from './pages/Game';
 import Leaderboard from './pages/Leaderboard';
@@ -32,10 +31,6 @@ const router = createBrowserRouter([
 			{
 				path: 'profile/:id',
 				element: <ProfilePage />,
-			},
-			{
-				path: 'privmessage',
-				element: <PrivateMessagePage />,
 			},
 			{
 				path: 'chat',

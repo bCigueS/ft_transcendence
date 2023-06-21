@@ -8,6 +8,7 @@ const DoubleAuthPannel: React.FC = () => {
 	const userCtx = useContext(UserContext)
 	const [ imageUrl, setImageUrl ] = useState<string>('');
 	const [ isChecked, setIsChecked ] = useState<boolean>(false);
+	const [ error, setError ] = useState<string | null>(null);
 
 	useEffect(() => {
 		if (userCtx.user?.doubleAuth === true)
@@ -34,6 +35,7 @@ const DoubleAuthPannel: React.FC = () => {
 				setImageUrl(url);
 			}
 		} catch (error: any) {
+			setError(error.message);
 			console.error(error.message);
 		}
 	}
@@ -60,6 +62,15 @@ const DoubleAuthPannel: React.FC = () => {
 
 		if (!response.ok)
 			throw new Error("Failed to fetch 2fa");
+		const data = await response.json();
+		if (data.result === true) {
+			userCtx.login();
+			window.location.reload();
+
+		} else {
+			setError("Not the right code try again");
+		}
+
 		} catch (error: any) {
 			console.error(error.message);
 		}
@@ -84,6 +95,10 @@ const DoubleAuthPannel: React.FC = () => {
 				<input type="text" name='code'/>
 				<button type="submit">Submit</button>
 			</form>
+			{
+				error && 
+				<p>{error}</p>
+			}
 		</div>
 	)
 }

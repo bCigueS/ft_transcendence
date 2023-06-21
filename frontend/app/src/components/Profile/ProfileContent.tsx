@@ -4,6 +4,7 @@ import MatchSummary from './Matches/MatchSummary';
 import ProfileFriends from './ProfileFriends';
 import { UserAPI, UserContext, UserMatch } from '../../store/users-contexte';
 import ProfilSettings from './ProfilSettings';
+import DoubleAuthPannel from '../Auth/DoubleAuthPannel';
 
 
 const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
@@ -118,7 +119,7 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 				{
 					user?.id === userCtx.user?.id &&
 					<button 
-						className={`${classes.btn} ${contentDisplay === 'Authentication' ? classes.active : ''}`} 
+						className={`${classes.btn} ${contentDisplay === 'Auth' ? classes.active : ''}`} 
 						onClick={tabHandler}>
 						Auth
 					</button>
@@ -178,6 +179,12 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 				(contentDisplay === 'Settings' && user?.id === userCtx.user?.id) &&
 				<div className={classes.tabContent}>
 					<ProfilSettings user={userCtx.user}/>
+				</div>
+			}
+			{
+				(contentDisplay === 'Auth' && user?.id === userCtx.user?.id) &&
+				<div className={classes.tabContent}>
+					<DoubleAuthPannel />
 				</div>
 			}
 		</div>
