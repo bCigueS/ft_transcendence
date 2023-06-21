@@ -46,6 +46,7 @@ export default function Chat() {
 			})
 
 			const chanData = {
+				creatorId: userCtx.user?.id,
 				name: "private",
 				members: [
 					{
@@ -56,7 +57,6 @@ export default function Chat() {
 					}
 				]
 			}
-
 			const newChan = await createNewChannel(chanData);
 			message.channelId = newChan.id;
 
@@ -120,8 +120,6 @@ export default function Chat() {
 			}
 			createNewChat();
 		}
-
-		console.log('received message in message listener: ', newMessage.content);
 	  }, [chats, userCtx]);
 
 	  const fetchChannels = useCallback(async() => {
@@ -243,10 +241,6 @@ export default function Chat() {
 		}
 	}, [socket, chats]);
 
-	/*
-		FUNCTIONS WHEN SPECIFIC CHAT IS SELECTED
-	*/
-
 	const onSaveConversation = useCallback((channel: Channel) => {
 		setSelectedConversation(channel);
 		socket?.emit('join', channel.id);
@@ -258,11 +252,6 @@ export default function Chat() {
 			setMessages(selectedChannel.messages);
 	}, [selectedConversation, chats]);
 
-	/*
-		CREATE DUMMY CHAT WHEN START DISCUSSION
-	*/
-
-	
 	const checkPreviousPage = useCallback(() => {
 
 		if (location?.state?.newChat) {
@@ -278,18 +267,11 @@ export default function Chat() {
 				const newChat = {
 						createdAt: new Date(),
 						creatorId: userCtx.user?.id,
-						creator: userCtx.user,
 						id: -1,
 						name: 'private',
 						messages: [],
-						members: [user, userCtx.user],
-						isPasswordProtected: false,
-						password: '',
-						admins: [],
-						banned: [],
-						muted: [],
+						members: [user, userCtx.user]
 					}
-
 				setChats([...chats, newChat]);
 				onSaveConversation(newChat);
 			}
