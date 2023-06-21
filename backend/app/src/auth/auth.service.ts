@@ -9,6 +9,7 @@ import axios from 'axios';
 import fs from 'fs';
 import * as jwt from 'jsonwebtoken';
 import * as speakeasy from 'speakeasy';
+import * as CryptoJS from 'crypto-js';
 
 @Injectable()
 export class AuthService {
@@ -99,35 +100,58 @@ export class AuthService {
 		throw new HttpException(error.response.data, HttpStatus.FORBIDDEN, { cause: error });
     }
     if (token['access_token']) response['user'] = await this.aboutMe(token['access_token']);
-	response['userId'] = response['user']['userId'];
-	response['doubleAuth'] = response['user']['doubleAuth'];
-	// if (response['user']['otp'] == false)
-
-	// todo check if user enable 2fa
+    response['userId'] = response['user']['userId'];
+    response['doubleAuth'] = response['user']['doubleAuth'];
+	if (response['user']['doubleAuth'] == false)
 	{
 		response['accessToken'] = jwt.sign({
 			accessToken: token['access_token'],
 			userId: response['userId']
 		}, `${process.env.NODE_ENV}`, { expiresIn: '1h' });
 	}
+	else
+		delete response["user"];
     return response;
   }
 
 
-  async verifyTwoFactorAuthenticationCode(userId: number, token: string)
+  async verifyTwoFactorAuthenticationCode(userId: number, code: string)
   {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user)
     	throw new NotFoundException(`User with ${userId} does not exist.`);
     const verified = speakeasy.totp.verify({
-		secret: user.secert,
-		encoding: 'base32',
-		token: token,
+      secret: user.secert,
+      encoding: 'base32',
+      token: code,
     });
-    await this.prisma.user.update({
-		where: { id: userId },
-		data: { doubleAuth: true },
-    });
+	if (verified)
+	{
+		try {
+			const url_data = 'https://api.intra.42.fr/v2/me';
+			const token = CryptoJS.AES.decrypt(user.token, `${process.env.NODE_ENV}`).toString(CryptoJS.enc.Utf8);
+			const headersRequest = { Authorization: `Bearer ${token}` };
+			const data_response = await this.httpService.get(url_data, { headers: headersRequest }).toPromise();
+			if (user)
+				await this.prisma.user.update({ where: { id42: data_response.data['id'] }, data: {status: 1},});
+			return {
+				userId: user.id,
+				doubleAuth: user.doubleAuth,
+				id: data_response.data['id'],
+				email: data_response.data['email'],
+				login: data_response.data['login'],
+				displayname: data_response.data['displayname'],
+				image: data_response.data['image_url'],
+				first_name: data_response.data['first_name'],
+				last_name: data_response.data['last_name'],
+			};
+		} catch (error) {
+			error.status = 403;
+			throw new HttpException(error, HttpStatus.FORBIDDEN, { cause: error });
+		}
+	}
+	else
+		await this.prisma.user.update({ where: { id: userId}, data: {status: 0},});
     return {
       	result: verified,
     };
@@ -145,10 +169,18 @@ export class AuthService {
 			await this.prisma.user.update({
 				where: { id42: data_response.data['id'] },
 				data: { 
-					token: token,
+					token: CryptoJS.AES.encrypt(token, `${process.env.NODE_ENV}`).toString(),
 					status: 1
 				},
 			});
+			// const decryptedData = CryptoJS.AES.decrypt(CryptoJS.AES.encrypt(token, `${process.env.NODE_ENV}`).toString(), `${process.env.NODE_ENV}`).toString(CryptoJS.enc.Utf8);
+		}
+		if (user.doubleAuth == true)
+		{
+			return {
+				userId: user.id,
+				doubleAuth: user.doubleAuth,
+			};
 		}
 		return {
 			userId: user.id,
@@ -160,7 +192,7 @@ export class AuthService {
 			image: data_response.data['image_url'],
 			first_name: data_response.data['first_name'],
 			last_name: data_response.data['last_name'],
-			};
+		};
     } catch (error) {
       error.status = 403;
       throw new HttpException(error, HttpStatus.FORBIDDEN, { cause: error });

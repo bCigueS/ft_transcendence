@@ -273,7 +273,7 @@ export class UsersController {
 	async add2fa(@Body() body: any, @Req() req: CustomRequest, @Res() res: any): Promise<any>
 	{
 		const { otpauthUrl } = await this.usersService.getTwoFactorAuthenticationCode(req);
-		res.setHeader('Content-Type', 'image/png'); // Set the content type for the image
+		res.setHeader('Content-Type', 'image/png');
 		return this.usersService.pipeQrCodeStream(res, otpauthUrl);
 	}
   
