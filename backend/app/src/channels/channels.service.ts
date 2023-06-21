@@ -55,7 +55,7 @@ export class ChannelsService {
     return await this.prisma.channel.findMany({
       include: {
         creator: true,
-        messages: true,
+        // messages: true,
         members: {
           select: {
             user: true

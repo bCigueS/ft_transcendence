@@ -9,6 +9,7 @@ import MessageList from '../components/Chat/MessageList';
 import { Channel, JoinChannelDTO, MessageAPI, createNewChannel, deleteChat } from '../components/Chat/chatUtils';
 import ManageChats from '../components/Chat/ManageChats';
 import NoDiscussions from '../components/Chat/NoDiscussions';
+import React from 'react';
 
 export default function Chat() {
 	
@@ -146,7 +147,14 @@ export default function Chat() {
 		}
 	}, [userCtx.user?.id])
 
-	const handleJoinLink = async (channelId: number) => {
+
+	const handleJoinGroup = useCallback((channelId: number, userId: number) => {
+		// setChats(chats => chats.filter(chat => chat.id !== id));
+		socket?.emit('handleJoinGroup', { channelId: channelId, userId: userId });
+		
+	}, [socket, userCtx.user?.id])
+
+	const handleJoinLink = useCallback(async (channelId: number) => {
 		console.log('in handle join link');
 
 		if (!userCtx.user?.id)
@@ -171,12 +179,12 @@ export default function Chat() {
 	
 		  await fetchChannels();
 		  setSelectedConversation(chats.find(chat => chat.id === channelId));
-
+		  handleJoinGroup(channelId, userCtx.user.id);
 		  
 		} catch (error) {
 		  console.error(error);
 		}
-	}
+	}, [selectedConversation, fetchChannels, chats, handleJoinGroup, userCtx.user?.id]);
 	
 	const joinListener = useCallback((channelId: string) => {
 		console.log('client joined channel ', channelId);
@@ -190,7 +198,20 @@ export default function Chat() {
 			setSelectedConversation(undefined);
 		fetchChannels();
 	}, [fetchChannels, socket, selectedConversation]);
-	  
+	
+	const userJoinedListener = (userId: number) => {
+		console.log('user ', userId, ' joined the channel');
+
+	}
+
+	useEffect(() => {
+		socket?.on('userJoined', userJoinedListener)
+	
+		return () => {
+		  socket?.off('userJoined');
+		}
+	  }, [socket]);
+
 	useEffect(() => {
 		socket?.on("message", messageListener);
 		return () => {
@@ -234,6 +255,7 @@ export default function Chat() {
 		socket?.emit('kickUser', { channelId: channelId, userId: kickedId });
 
 	}, [socket, userCtx.user?.id])
+
 
 	const checkLastMessageDeleted = useCallback((message: MessageAPI) => {
 		const chatMessage = chats.find(chat => chat.id === message.channelId);
