@@ -21,6 +21,9 @@ const ProfilSettings: React.FC<{user: UserAPI | null}> = ( { user } ) => {
 			console.log(avatarData);
 			const avatarResponse = await fetch('http://localhost:3000/users/' + userCtx.user?.id + '/upload-avatar', {
 				method: 'POST',
+				headers: {
+					'Authorization' : 'Bearer ' + userCtx.logInfo?.token,
+				},
 				body: avatarData
 			})
 
@@ -37,7 +40,8 @@ const ProfilSettings: React.FC<{user: UserAPI | null}> = ( { user } ) => {
 			const response = await fetch('http://localhost:3000/users/' + userCtx.user?.id, {
 				method: 'PATCH',
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
+					'Authorization' : 'Bearer ' + userCtx.logInfo?.token,
 				},
 				body: JSON.stringify(patchData)
 			});
