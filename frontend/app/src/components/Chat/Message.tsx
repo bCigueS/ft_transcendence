@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import classes from '../../sass/components/Chat/Message.module.scss';
 import { UserAPI, UserContext } from '../../store/users-contexte';
