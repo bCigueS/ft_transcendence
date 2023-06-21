@@ -3,6 +3,8 @@ import classes from '../../sass/components/Game/Livegame.module.scss';
 import { UserMatch } from '../../store/users-contexte';
 import LiveGameCard from './LiveGameCard';
 
+// interface Props {
+// }
 
 
 const DUMMY_MATCHS: UserMatch[] = [

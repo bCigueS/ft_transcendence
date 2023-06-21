@@ -9,7 +9,7 @@ const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: s
 	const [ imageUrl, setImageUrl ] = useState<string>('');
 	const [ loading , setLoading ] = useState<boolean>(false);
 	const [ error, setError ] = useState<string | null>(null);
-	const [ inGame, setInGame ] = useState<boolean>(false);
+	// const [ inGame, setInGame ] = useState<boolean>(false);
 	const navigate = useNavigate();
 	const userCtx = useContext(UserContext);
 
@@ -55,7 +55,7 @@ const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: s
 			setError(error.message);
 			setLoading(false);
 		}
-	}, [user?.id]);
+	}, [user?.id, userCtx.logInfo?.token]);
 
 	useEffect(() => {
 		fetchAvatar();
@@ -81,7 +81,8 @@ const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: s
 			{
 				displayCo &&
 				<i 
-					className={!inGame ? "fa-solid fa-circle" : "fa-solid fa-table-tennis-paddle-ball"} 
+					// className={!inGame ? "fa-solid fa-circle" : "fa-solid fa-table-tennis-paddle-ball"} 
+					className="fa-solid fa-circle"
 					style={{color: user?.connected ? 'green' : 'red' }
 					}>
 				</i>

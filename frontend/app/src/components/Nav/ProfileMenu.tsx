@@ -59,7 +59,7 @@ const ProfilMenu: React.FC = () => {
 			}
 		} catch (error: any) {
 		}
-	}, [userCtx.user?.id]);
+	}, [userCtx.user?.id, userCtx.logInfo?.token]);
 
 	useEffect(() => {
 		fetchAvatar();
