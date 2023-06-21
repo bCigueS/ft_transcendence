@@ -9,7 +9,7 @@ import ChatInfo from "./ChatInfo";
 // const Searchbar: React.FC<{onSaveSearch: (input: string) => void}> = ( props ) => {
 
 const ChatOverview: React.FC<{chats: Channel[], chat: Channel, isSelected: boolean, onSaveConversation: (channel: Channel) => void,
-onDeleteChat: (channelId: number) => void}> 
+onDeleteChat: (channelId: number) => void, onKick: (channelId: number, kickedId: number) => void}> 
 	= ( props ) => {
 
 	const [sender, setSender] = useState<UserAPI | null>(null);
@@ -79,6 +79,7 @@ onDeleteChat: (channelId: number) => void}>
 				chat={props.chat}
 				onInfoClick={handleUserConfirmation}
 				onDelete={handleDeleteChat}
+				onKick={props.onKick}
 			/>
 		}
 		<div className={`${classes.container} ${props.isSelected ? classes.selected : ''}`}>

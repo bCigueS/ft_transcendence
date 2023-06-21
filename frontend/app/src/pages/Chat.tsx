@@ -6,7 +6,7 @@ import NoConvo from '../components/Chat/NoConvo';
 import io, { Socket } from 'socket.io-client';
 import { useLocation } from 'react-router-dom';
 import MessageList from '../components/Chat/MessageList';
-import { Channel, MessageAPI, createNewChannel, deleteChat } from '../components/Chat/chatUtils';
+import { Channel, JoinChannelDTO, MessageAPI, createNewChannel, deleteChat } from '../components/Chat/chatUtils';
 import ManageChats from '../components/Chat/ManageChats';
 import NoDiscussions from '../components/Chat/NoDiscussions';
 
@@ -145,12 +145,49 @@ export default function Chat() {
 			console.log(error.message);
 		}
 	}, [userCtx.user?.id])
+
+	const handleJoinLink = async (channelId: number) => {
+		console.log('in handle join link');
+
+		if (!userCtx.user?.id)
+			return ;
+
+		const joinData: JoinChannelDTO = {
+			userId: userCtx.user?.id,
+		}
+		
+		try {
+		  const response = await fetch(`http://localhost:3000/channels/${channelId}/join`, {
+			method: 'PATCH',
+			headers: {
+			  'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(joinData)
+		  });
+	
+		  if (!response.ok) {
+			throw new Error("Failed to join channel!");
+		  }
+	
+		  await fetchChannels();
+		  setSelectedConversation(chats.find(chat => chat.id === channelId));
+
+		  
+		} catch (error) {
+		  console.error(error);
+		}
+	}
 	
 	const joinListener = useCallback((channelId: string) => {
 		console.log('client joined channel ', channelId);
 		socket?.emit('join', parseInt(channelId, 10));
 		fetchChannels();
 	  }, [fetchChannels, socket]);
+
+	const kickListener = useCallback((channelId: string) => {
+		console.log('client was kicked from channel ', channelId);
+		fetchChannels();
+	}, [fetchChannels, socket]);
 	  
 	useEffect(() => {
 		socket?.on("message", messageListener);
@@ -165,6 +202,13 @@ export default function Chat() {
 		  socket?.off("join", joinListener);
 		}
 	}, [socket, joinListener]);
+
+	useEffect(() => {
+		socket?.on("handleKick", kickListener);
+		return () => {
+		  socket?.off("handleKick", kickListener);
+		}
+	}, [socket, kickListener]);
 
 	useEffect(() => {
 		socket?.on('chatDeleted', (data) => {
@@ -182,6 +226,12 @@ export default function Chat() {
 		setChats(chats => chats.filter(chat => chat.id !== id));
 		socket?.emit('chatDeleted', { chatId: id, userId: userCtx.user?.id });
 	}, [socket, userCtx.user?.id]);
+
+	const handleKick = useCallback((channelId: number, kickedId: number) => {
+		// setChats(chats => chats.filter(chat => chat.id !== id));
+		socket?.emit('kickUser', { channelId: channelId, userId: kickedId });
+
+	}, [socket, userCtx.user?.id])
 
 	const checkLastMessageDeleted = useCallback((message: MessageAPI) => {
 		const chatMessage = chats.find(chat => chat.id === message.channelId);
@@ -284,7 +334,6 @@ export default function Chat() {
 		}
 	}, [chats, checkPreviousPage]);
 
-
 	chats.sort((a, b) => {
 
 		let lastMessageDateA;
@@ -316,7 +365,8 @@ export default function Chat() {
 						chat={chat}
 						isSelected={chat.id === selectedConversation?.id ? true : false}
 						onSaveConversation={onSaveConversation}
-						onDeleteChat={handleChatDeletion}/>
+						onDeleteChat={handleChatDeletion}
+						onKick={handleKick}/>
 						))
 					:
 					<NoDiscussions/>
@@ -330,7 +380,8 @@ export default function Chat() {
 					chat={selectedConversation}
 					msgs={messages}
 					chats={chats}
-					onDelete={handleMessageDeletion}/>
+					onDelete={handleMessageDeletion}
+					onJoin={handleJoinLink}/>
 				: <NoConvo/>
 			}
 		</div>

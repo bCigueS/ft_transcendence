@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateChannelDto, CreateChannelMembershipDto } from './dto/create-channel.dto';
 import { UpdateChannelDto } from './dto/update-channel.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateMessageDto } from 'src/messages/dto/create-message.dto';
-import { MessagesService } from 'src/messages/messages.service';
+import { JoinChannelDto } from './dto/join-channel.dto';
+import { MessagesGateway } from 'src/messages/messages.gateway';
 
 @Injectable()
 export class ChannelsService {
@@ -367,8 +368,6 @@ export class ChannelsService {
   
       return this.findOne(channelId);
   }
-  
-  
 
   async removeBan(channelId: number, userId: number) {
     await this.prisma.bannedUser.deleteMany({
@@ -421,7 +420,40 @@ export class ChannelsService {
             where: { channelId_userId: { channelId, userId } },
         });
     }
+
     return this.findOne(channelId);
+  }
+
+  async join(channelId: number, JoinChannelDto: JoinChannelDto)
+  {
+    console.log('in join channels service');
+
+    const channel = await this.prisma.channel.findUnique({
+        where: { id: channelId },
+    });
+    if (!channel)
+    {
+      console.log('did not find channel');
+      throw new NotFoundException('Channel not found');
+    }
+
+    if (channel.isPasswordProtected && (!JoinChannelDto.password || JoinChannelDto.password.length === 0))
+      throw new Error('You need to provide a password to enter that channel');
+
+    if (channel.isPasswordProtected && (channel.password !== JoinChannelDto.password))
+      throw new Error('Wrong password provided');
+    
+    const memberDto: CreateChannelMembershipDto = { userId: JoinChannelDto.userId };
+    await this.prisma.channelMembership.create({
+      data: {
+        ...memberDto,
+        channelId: channel.id,
+      },
+    });
+
+    return channel;
+
+
   }
 
 }
