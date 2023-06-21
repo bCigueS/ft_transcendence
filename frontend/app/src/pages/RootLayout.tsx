@@ -9,7 +9,6 @@ export default function RootLayout() {
 		<>
 			<Nav />
 			<main>
-				{/* <Outlet/> */}
 				{ token ? <Outlet/> : <Navigate to='/auth'/>}
 			</main>
 		</>

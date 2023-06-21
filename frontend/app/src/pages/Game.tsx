@@ -15,42 +15,46 @@ export default function Game() {
 
 	// Import the userContext Api (from React)
 	const userCtx = useContext(UserContext);
-	const location = useLocation();
-	const { state } = location;
+	// const location = useLocation();
+	// const { state } = location;
 
 	// player info
+	const userId = userCtx.user?.id;
+	const userName = userCtx.user?.name;
 	const user = userCtx.user;
-	const opponent = state?.opponent;
-	const inviteMode = (state.gameInvitation ? true : false);
+	// const opponent = state?.opponent;
+	// const inviteMode = (state.gameInvitation ? true : false);
+	const inviteMode = false;
 
-	// screen info
-	const [screenWidth, setScreenWidth] = useState(window.innerWidth);
-	const [screenHeight, setScreenHeight] = useState(window.innerHeight);
-	const [ratio, setRatio] = useState(1);
+	// ---> to be checked
+	// // screen info
+	// const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+	// const [screenHeight, setScreenHeight] = useState(window.innerHeight);
+	// const [ratio, setRatio] = useState(1);
 
-	useEffect(() => {
-		const handleResize = () => {
-			setScreenWidth(window.innerWidth);
-			setScreenHeight(window.innerHeight);
-		};
+	// useEffect(() => {
+	// 	const handleResize = () => {
+	// 		setScreenWidth(window.innerWidth);
+	// 		setScreenHeight(window.innerHeight);
+	// 	};
 
-		window.addEventListener('resize', handleResize);
+	// 	window.addEventListener('resize', handleResize);
 
-		// Clean up the event listener on unmount
-		return () => {
-			window.removeEventListener('resize', handleResize);
-		};
-	}, []);
+	// 	// Clean up the event listener on unmount
+	// 	return () => {
+	// 		window.removeEventListener('resize', handleResize);
+	// 	};
+	// }, []);
 
-	useEffect(() => {
-		if (info.boardWidth) {
-			setRatio(info.boardWidth / screenWidth);
-		} else if (info.boardHeight) {
-			setRatio(info.boardHeight / screenHeight);
-		}
-	}, [info.boardWidth, info.boardHeight, screenWidth, screenHeight]);
+	// useEffect(() => {
+	// 	if (info.boardWidth) {
+	// 		setRatio(info.boardWidth / screenWidth);
+	// 	} else if (info.boardHeight) {
+	// 		setRatio(info.boardHeight / screenHeight);
+	// 	}
+	// }, [info.boardWidth, info.boardHeight, screenWidth, screenHeight]);
 
-	if (!user) {
+	if (!userId || !userName) {
 		return (
 			<></>
 		);
@@ -68,8 +72,10 @@ export default function Game() {
 			)}
 			{(user?.name !== 'Faaaany') && (
 				<Pong
-					user={user}
-					opponent={opponent}
+					userId={userId}
+					userName={userName}
+					// user={user}
+					// opponent={opponent}
 					inviteMode={inviteMode}
 				/>
 			)}

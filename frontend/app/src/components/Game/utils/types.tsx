@@ -16,8 +16,10 @@ export type PongInfo = {
 }
 
 export type PongProp = {
-	user: UserAPI;
-	opponent: UserAPI;
+	userId: number;
+	userName: string;
+	// user: UserAPI;
+	// opponent: UserAPI;
 	inviteMode: boolean;
 }
 
@@ -44,6 +46,7 @@ export type BallInfo = {
 	dx: number;
 	dy: number;
 	x: number;
+	// y: number;
 	s: number;
 }
 
