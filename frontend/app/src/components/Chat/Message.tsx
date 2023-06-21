@@ -1,16 +1,23 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import classes from '../../sass/components/Chat/Message.module.scss';
-import { UserContext } from '../../store/users-contexte';
-import { MessageAPI } from '../../pages/Chat';
+import { UserAPI, UserContext } from '../../store/users-contexte';
+import Modal from '../UI/Modal';
+import { Channel, MessageAPI } from './chatUtils';
+import ProfilIcon from '../Profile/ProfilIcon';
 
 
 const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean, 
 					message: MessageAPI, messages: MessageAPI[], 
-					onDelete: (message: MessageAPI) => void }> = ( { isMine, isLast, displayDay, message, messages, onDelete } ) => {
+					onDelete: (message: MessageAPI) => void,
+					chat: Channel }> = ( { isMine, isLast, displayDay, message, messages, onDelete, chat } ) => {
 
 	const [ isHovering, setIsHovering ] = useState(false);
-	const [ isDeleted, setIsDeleted ] = useState(false);
+	const [ showModal, setShowModal ] = useState(false);
+	const [ sender, setSender ] = useState<UserAPI | null>(null);
+	const userCtx = useContext(UserContext);
+
+	const date = new Date(message.createdAt);
 
 	const whichBubble = () => {
 		if (isMine && isLast)
@@ -33,27 +40,89 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 		setIsHovering(false);
 	}
 
-	const handleClickDelete = () => 
-	{
-		onDelete(message);
+	const deleteMessage = async () => {
+		try {
+			const response = await fetch('http://localhost:3000/messages/' + message.id, {
+				method: 'DELETE',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+		
+			if (response.status === 400) {
+				throw new Error("Failed to delete message!") ;
+			}
+
+			if (!response.ok)
+				throw new Error("Failed to delete message!") ;
+
+			
+		} catch (error: any) {
+			console.log(error.message);
+		}
+
+		// if last message delete channel
+		
+	};
+
+	const displaySender = async () => {
+		let sender = null;
+		if (message.senderId)
+			sender = await userCtx.fetchUserById(message.senderId);
+		if (sender)
+		{
+			setSender(sender);
+		}
 	}
+
+	useEffect(() => {
+		displaySender();
+	});
+
+
+	const handleDeletion = () => 
+	{
+		deleteMessage();
+		onDelete(message);
+		setShowModal(false);
+	}
+
+	const handleClickDelete = () => {
+		setShowModal(true);
+	}
+
+	const handleUserConfirmation = () => {
+		setShowModal(false);
+	}
+
 
 	return (
 		
 		<>
-		{ displayDay && <div className={classes.date}>{message.createdAt.toDateString()}</div> }
+		{showModal &&
+			<Modal
+				title="About to delete message"
+				message="Do you really wish to delete this message?"
+				onCloseClick={handleUserConfirmation}
+				onDelete={handleDeletion}
+			/>
+		}
+		{ displayDay && <div className={classes.date}>{message && date.toDateString()}</div> }
 		<div className={whichBubble()} 
 			onMouseOver={handleMouseOver}
 			onMouseOut={handleMouseOut}>
 			<div 
 				className={isMine ? classes.myMessage : classes.yourMessage}>
+				<div className={classes.sender}>
+				{ sender && sender.id !== userCtx.user?.id && chat.name !== "private" && sender?.name}
+				</div>
 				{ message.content }
 			{ isHovering && 
 				<div className={classes.info}>
 					<div className={classes.hour}>
-					{message.createdAt.getHours().toString()}
+					{date.getHours().toString()}
 					:
-					{message.createdAt.getMinutes().toString() + ' '} 
+					{date.getMinutes().toString() + ' '} 
 					</div>
 					{
 						isMine &&
@@ -64,7 +133,16 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 				</div>
 			}
 			</div>
+			
 		</div>
+		{
+			sender && sender.id !== userCtx.user?.id && isLast ?
+			<div className={classes.senderProfile}>
+			<ProfilIcon user={sender} displayCo={false} size={["2.5rem", "2.5rem"]}/>
+			</div>
+			:
+			<div></div>
+		}
 		</>
 	)
 }
