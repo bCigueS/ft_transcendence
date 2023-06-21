@@ -144,11 +144,12 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 	/* -----> Invitation Mode <----- */
 
 	// receive a create game invitation request from client
-	@SubscribeMessage('joinInvite')
+	@SubscribeMessage('joinInvitation')
 	async handleJoinInviteEvent(
-		@MessageBody() { id, opponentId, lvl, gameRoom }: { id: number, opponentId: number, lvl: number, gameRoom?: string },
+		@MessageBody() { playerId, opponentId, lvl, gameRoom }: { playerId: number, opponentId: number, lvl: number, gameRoom?: string },
 		@ConnectedSocket() client: Socket,
 		) {
+			console.log('receive join invite event, from userId ', playerId);
 			let game, player, opponent;
 
 			if (!gameRoom || gameRoom === '') {
@@ -157,7 +158,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 					level: lvl,
 					players: [
 						{
-							userId: id,
+							userId: playerId,
 						},
 					],
 					playerSocketIds: [client.id],
@@ -167,11 +168,9 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 				game = await this.gamesService.create(createGameDto);
 				game = await this.gamesService.assignRoom(game.id, 'invite' + game.id);
 
-				GamesGateway.eventEmitter.emit('gameInvitation', {
-					senderId: id,
-					receiverId: opponentId,
-					gameRoom: game.room,
-				});			
+				if (game) {
+					client.emit('passGameRoom', {gameRoom: game.room });
+				}		
 			} else {
 				// if gameRoom is provided, then find the game based on the gameRoom
 				game = await this.prisma.game.findUnique({
@@ -182,7 +181,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 					state: GameState.PLAYING,
 					players: [
 						{
-							userId: id,
+							userId: playerId,
 						},
 					],
 					playerSocketIds: game.playerSocketIds,
@@ -194,7 +193,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 			}
 
 			player = await this.prisma.user.findUnique({
-				where: { id: id },
+				where: { id: playerId },
 			});
 
 			opponent = await this.prisma.user.findUnique({
@@ -227,6 +226,18 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 					}
 				}
 			}
+	}
+
+	@SubscribeMessage('sendInvitation')
+	async handleSendInvitationEvent(
+		@MessageBody() { playerId, opponentId, link }: { playerId: number, opponentId: number, link: string },
+		@ConnectedSocket() client: Socket,
+		) {
+			GamesGateway.eventEmitter.emit('gameInvitation', {
+				senderId: playerId,
+				receiverId: opponentId,
+				link: link,
+			});
 	}
 
 	// receiving a startBall request to inform the server to start a calculation for the direction of the ball to the players
