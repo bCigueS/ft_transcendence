@@ -9,6 +9,8 @@ import { UpdateMessageDto } from './dto/update-message.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { MessageEntity } from './entities/message.entity';
 import { GamesGateway } from '../games/games.gateway';
+import { CreateChannelDto } from 'src/channels/dto/create-channel.dto';
+import { ChannelsService } from 'src/channels/channels.service';
 
 @WebSocketGateway({ namespace: '/chat', cors: '*' })
 export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
@@ -24,25 +26,42 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
   afterInit(): void {
     this.logger.log(`Websocket chat gateway initialized.`);
 
-	GamesGateway.eventEmitter.on('gameInvitation', async ({ senderId, receiverId, gameRoom }) => {
+	GamesGateway.eventEmitter.on('gameInvitation', async ({ senderId, receiverId, link }) => {
+		console.log('in event emitter');
 		const sender = await this.prisma.user.findUnique({ where: { id: senderId } });
-
-		// prisma.channels.findMany where name = "private" with members are sender and receiver
-		// if exist, get channelId and you have it
-		// else, create channel 
-			// name: "private",
-			// members: [sender, receiver]
-			// creatorId: senderId
-			// get  CHANNEL ID AFTER CREATED
-		// 
 
 		if (!sender) {
 			throw new NotFoundException(`User with ${senderId} does not exist.`);
 		}
-		
+		let channel = await this.prisma.channel.findFirst({
+			where: {
+				name: "private",
+				members: {
+					every: {
+						userId: {
+							in: [senderId, receiverId]
+						}
+					},
+				},
+			},
+		});
+
+		if (!channel) {
+			const createChannelDto: CreateChannelDto = {
+				name: "private", 
+				members: [senderId, receiverId],
+				creatorId: senderId
+			}
+			channel = await this.messagesService.createChannel(createChannelDto);
+
+			this.handleJoin(receiverId, channel.id);
+		}
+
+		console.log(channel);
+
 		this.handleMessage(receiverId, {
-		content: `${sender.name} has invited you to a game!`,
-		channelId: gameRoom,
+		content: `${sender.name} has invited you to a game! Click here, ${link}`,
+		channelId: channel.id,
 		senderId: senderId,
 	  });
 	});
@@ -68,7 +87,7 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
   async handleJoin(client: Socket, channelId: number) {
 	client.join(channelId.toString());
   }
---
+  
   @SubscribeMessage('message')
   async handleMessage(client: Socket, message: { 
 				content: string,
@@ -140,3 +159,4 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 	}
 
 }
+

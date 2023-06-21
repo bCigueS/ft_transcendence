@@ -22,7 +22,8 @@ export default function Game() {
 	const userId = userCtx.user?.id;
 	const userName = userCtx.user?.name;
 	const opponent = state?.opponent;
-	const inviteMode = (state.gameInvitation ? true : false);
+	const inviteMode = (state?.gameInvitation ? true : false);
+	console.log ('game invitation ', inviteMode);
 
 	// ---> to be checked
 	// // screen info
@@ -60,7 +61,7 @@ export default function Game() {
 
 	return (
 		<div className={classes.gamePage}>
-			{(user?.name === 'Faaaany') && (
+			{(user?.name === 'Yang Chi') && (
 				<SpectatorBoard
 					mode ={SPECTATOR_MODE}
 					user={user}
@@ -68,12 +69,12 @@ export default function Game() {
 					gameRoom={'pong2'}
 				/>
 			)}
-			{(user?.name !== 'Faaaany') && (
+			{(user?.name !== 'Yang Chi') && (
 				<Pong
 					userId={userId}
 					userName={userName}
 					// user={user}
-					// opponent={opponent}
+					opponent={opponent}
 					inviteMode={inviteMode}
 				/>
 			)}
