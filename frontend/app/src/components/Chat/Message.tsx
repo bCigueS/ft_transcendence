@@ -80,7 +80,6 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 		displaySender();
 	});
 
-
 	const handleDeletion = () => 
 	{
 		deleteMessage();
@@ -101,9 +100,12 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 		if (message.content.includes('join/')) {
 			const channelId = message.content.split('_')[1];
 			return (
-				<a href="#" onClick={() => onJoin(+channelId)}>
-					{message.content}
-				</a>
+				<div className={classes.link}>
+					You've been invited to join a group 👇 <br></br>
+					<a href="#" onClick={() => onJoin(+channelId)}>
+						{message.content}
+					</a>
+				</div>
 		);
 	} else {
 		return (

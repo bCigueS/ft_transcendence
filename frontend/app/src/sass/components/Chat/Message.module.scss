@@ -21,6 +21,23 @@
         text-align: right;
     }
 
+    .link {
+        display: flex;
+        flex-direction: column;
+
+        a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        a:hover {
+            color: $gunmetal-dark; 
+            text-decoration:none; 
+            cursor:pointer;
+        }
+    }
+
 }
 
 .myLastBubble {
@@ -58,6 +75,23 @@
         border-style: solid;
     }
 
+    .link {
+        display: flex;
+        flex-direction: column;
+
+        a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        a:hover {
+            color: $gunmetal-dark; 
+            text-decoration:none; 
+            cursor:pointer;
+        }
+    }
+
 }
 
 .yourBubble {
@@ -87,6 +121,23 @@
 
     .sender {
         font-style: bold;
+    }
+
+    .link {
+        display: flex;
+        flex-direction: column;
+
+        a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        a:hover {
+            color: $gunmetal-dark; 
+            text-decoration:none; 
+            cursor:pointer;
+        }
     }
 
 }
@@ -128,7 +179,22 @@
         border-style: solid;
     }
 
+    .link {
+        display: flex;
+        flex-direction: column;
 
+        a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        a:hover {
+            color: $gunmetal-dark; 
+            text-decoration:none; 
+            cursor:pointer;
+        }
+    }
 
 }
 
