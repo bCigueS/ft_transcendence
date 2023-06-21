@@ -10,7 +10,8 @@ import ProfilIcon from '../Profile/ProfilIcon';
 const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean, 
 					message: MessageAPI, messages: MessageAPI[], 
 					onDelete: (message: MessageAPI) => void,
-					chat: Channel }> = ( { isMine, isLast, displayDay, message, messages, onDelete, chat } ) => {
+					chat: Channel,
+					onJoin: (channelId: number) => void }> = ( { isMine, isLast, displayDay, message, messages, onDelete, chat, onJoin } ) => {
 
 	const [ isHovering, setIsHovering ] = useState(false);
 	const [ showModal, setShowModal ] = useState(false);
@@ -95,6 +96,22 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 		setShowModal(false);
 	}
 
+	const displayMessage = () => {
+
+		if (message.content.includes('join/')) {
+			const channelId = message.content.split('_')[1];
+			return (
+				<a href="#" onClick={() => onJoin(+channelId)}>
+					{message.content}
+				</a>
+		);
+	} else {
+		return (
+			<p>{message.content}</p>
+			);
+		}
+	}
+		
 
 	return (
 		
@@ -116,7 +133,7 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 				<div className={classes.sender}>
 				{ sender && sender.id !== userCtx.user?.id && chat.name !== "private" && sender?.name}
 				</div>
-				{ message.content }
+				{ displayMessage() }
 			{ isHovering && 
 				<div className={classes.info}>
 					<div className={classes.hour}>

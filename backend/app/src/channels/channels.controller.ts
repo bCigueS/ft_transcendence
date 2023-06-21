@@ -3,6 +3,7 @@ import { ChannelsService } from './channels.service';
 import { CreateChannelDto } from './dto/create-channel.dto';
 import { UpdateChannelDto } from './dto/update-channel.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { JoinChannelDto } from './dto/join-channel.dto';
 
 @Controller('channels') @ApiTags('channels')
 export class ChannelsController {
@@ -91,6 +92,14 @@ export class ChannelsController {
 		@Param('userId', ParseIntPipe) userId: number,
 	) {
 		return this.channelsService.kickUser(channelId, userId);
+	}
+
+	@Patch(':channelId/join')
+	async join(@Param('channelId', ParseIntPipe) channelId: number,
+				@Body() JoinChannelDto: JoinChannelDto) {
+		
+		
+		return this.channelsService.join(channelId, JoinChannelDto);
 	}
 
 
