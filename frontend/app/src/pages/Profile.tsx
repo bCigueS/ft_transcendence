@@ -34,7 +34,7 @@ const Profile: React.FC = () => {
 			gamesPlayed: 0,
 		}
 		setDisplayedUser(dataUser);
-	}, [params.id]);
+	}, [params.id, userCtx.logInfo?.token]);
 
 
 	useEffect(() => {

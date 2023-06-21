@@ -296,7 +296,6 @@ export class UsersService {
     });
   }
 
-
   async seeUserGames(id: number) {
   
     const games = await this.prisma.game.findMany({

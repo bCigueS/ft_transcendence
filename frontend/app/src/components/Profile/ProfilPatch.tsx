@@ -1,7 +1,5 @@
-import React, { FormEvent, useContext, useEffect, useState } from 'react';
+import React, { FormEvent, useState } from 'react';
 import classes from '../../sass/components/Profile/ProfilPatch.module.scss';
-import ProfilIcon from './ProfilIcon';
-import { UserContext } from '../../store/users-contexte';
 import DefaultPreview from '../../assets/images/default.jpg';
 
 interface PatchUser {
@@ -10,9 +8,7 @@ interface PatchUser {
 
 const PatchForm: React.FC<PatchUser> = ({ onPatchUser }) => {
 
-	const userCtx = useContext(UserContext);
 	const [ enteredText, setEnteredText ] = useState<string>(''); 
-	const [ isChecked, setIsChecked ] = useState<boolean>(false);
 	const [ placeholder, setPlaceholder ] = useState<string>('');
 	const [ typeError, setTypeError ] = useState<string>('');
 	const [ filePreview, setFilePreview ] = useState<string | null>('');
@@ -22,7 +18,6 @@ const PatchForm: React.FC<PatchUser> = ({ onPatchUser }) => {
 	const handleSubmit = async(event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		const formData = new FormData(event.currentTarget);
-		formData.append('auth', String(isChecked));
 		const response = await onPatchUser(formData);
 		setEnteredText('');
 		
@@ -89,7 +84,6 @@ const PatchForm: React.FC<PatchUser> = ({ onPatchUser }) => {
 							/>
 						}
 					</div>
-
 					<label htmlFor="avatar" className={classes.fileLabel}>Change your avatar</label>
 					<input 
 						type="file" 

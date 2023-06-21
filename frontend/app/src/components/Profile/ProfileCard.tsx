@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 
 import { UserAPI, UserContext } from '../../store/users-contexte';
 
@@ -92,10 +92,10 @@ const ProfileCard: React.FC<{ user?: UserAPI | null}> = ( { user } ) => {
 					onClick={addBlockHandler}
 					></i>
 					<i 
-					className='fa-solid fa-table-tennis-paddle-ball'>
+					className='fa-solid fa-table-tennis-paddle-ball' onClick={handleClickGame}>
 					</i>
 					<i 
-					className='fa-solid fa-message'>
+					className='fa-solid fa-message' onClick={handleClickMessage}>
 					</i>
 				</div>
 			}

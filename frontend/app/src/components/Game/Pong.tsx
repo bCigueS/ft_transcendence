@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useLayoutEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { PongInfo, BallInfo, PongProp } from './utils/types';
 import ModalBoard from './ModalBoard';
 import LiveBoard from './LiveBoard';
@@ -47,7 +47,7 @@ const info: PongInfo = {
 	winnerScore: 1,
 }
 
-export default function Pong({userId, userName}: PongProp) {
+export default function Pong(prop: PongProp) {
 	// game play
 	const [isRunning, setIsRunning] = useState(false);
 	const [isPaused, setIsPaused] = useState(false);
@@ -56,18 +56,16 @@ export default function Pong({userId, userName}: PongProp) {
 	const [gameOver, setGameOver] = useState(false);
 	const [winner, setWinner] = useState(TIE);
 	const [closingText, setClosingText] = useState('');
-	const [gameRoom, setGameRoom] = useState(0);
+	const [gameRoom, setGameRoom] = useState('');
 	// game mode
 	const [toolMode, setToolMode] = useState(MOUSE_MODE);
 	const [level, setLevel] = useState(BEGINNER_LEVEL);
 	const [playerMode, setPlayerMode] = useState(SINGLE_MODE);
-	// animation
-	const [frameCount, setFrameCount] = useState(0);
-	const [speed, setSpeed] = useState(0);
 	// ball info
 	const [ballRadius, setBallRadius] = useState(0);
 	const [ballX, setBallX] = useState(0);
 	const [ballY, setBallY] = useState(0);
+	const [ballSpeed, setBallSpeed] = useState(0);
 	// ball direction
 	const [deltaX, setDeltaX] = useState(0);
 	const [deltaY, setDeltaY] = useState(0);
@@ -87,37 +85,25 @@ export default function Pong({userId, userName}: PongProp) {
 	const [opponentScore, setOpponentScore] = useState(0);
 	// canvas
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
-	// // screen info <--------- to be checked
-	// const [screenWidth, setScreenWidth] = useState(window.innerWidth);
-	// const [screenHeight, setScreenHeight] = useState(window.innerHeight);
-	// const [ratio, setRatio] = useState(1);
+	// animation
+	const frameId = useRef(0);
+	const prevFrameId = useRef(0);
 
-	// useEffect(() => {
-	// 	const handleResize = () => {
-	// 		setScreenWidth(window.innerWidth);
-	// 		setScreenHeight(window.innerHeight);
-	// 	};
+	// loop to emit a join request to the server
+	useEffect(() => {
+		if (playerMode === DOUBLE_MODE && !prop.inviteMode) {
+			console.log('emit a join random game request');
+			socket.emit('joinRandom', { id: prop.userId, lvl: level });
+		}
+		if (playerMode === DOUBLE_MODE && prop.inviteMode) {
+			console.log('emit a join invitation game request');
+			// socket.emit('joinInvitation', { playerId: prop.userId, opponentId: prop.opponent.id, lvl: level })
+		}
+	}, [playerMode, level, prop.userId, prop.inviteMode]);
 
-	// 	window.addEventListener('resize', handleResize);
-
-	// 	// Clean up the event listener on unmount
-	// 	return () => {
-	// 		window.removeEventListener('resize', handleResize);
-	// 	};
-	// }, []);
-
-	// useEffect(() => {
-	// if (info.boardWidth) {
-	// 	setRatio(info.boardWidth / screenWidth);
-	// } else if (info.boardHeight) {
-	// 	setRatio(info.boardHeight / screenHeight);
-	// }
-	// }, [info.boardWidth, info.boardHeight, screenWidth, screenHeight]);
-
+	// loop to receive several game play events
 	useEffect(() => {
 		if (playerMode === DOUBLE_MODE) {
-			// if the game is for 2 players mode, start by sending a join request to the server
-			socket.emit('join', { id: userId, lvl: level });
 			// receive a welcome message from server informing that you are in a specific game room, and trigger a liveBoard
 			socket.on('welcome', ({ message, opponent, gameRoom }) => {
 				console.log({ message, opponent, gameRoom });
@@ -127,6 +113,10 @@ export default function Pong({userId, userName}: PongProp) {
 				setGameRoom(gameRoom);
 				setIsLive(true);
 				setIsReady(false);
+
+				if (prop.inviteMode) {
+					// to send an invitation to other player
+				}
 			});
 			// receive an information about the opponent from server
 			socket.on('opponentJoin', ({ message, opponent }) => {
@@ -138,6 +128,22 @@ export default function Pong({userId, userName}: PongProp) {
 				console.log({ message });
 				setIsReady(true);
 			});
+			// receiving the ball direction from server
+			socket.on('ballServe', ({ dx, dy }) => {
+				setDeltaX(dx);
+				setDeltaY(dy);
+				setBallX(info.boardWidth / 2);
+				setBallY(info.boardHeight / 2);
+				setBallSpeed(info.initialSpeed + level);
+			});
+			// receiving the new ball direction from server
+			socket.on('ballBounce', ({dx, dy, x, y, s}) => {
+				setDeltaX(dx);
+				setDeltaY(dy);
+				setBallX(x);
+				setBallY(y);
+				setBallSpeed(s);
+			});
 			// receive a pause signal
 			socket.on('makePause', ({ message }) => {
 				console.log({ message });
@@ -148,41 +154,17 @@ export default function Pong({userId, userName}: PongProp) {
 				setPlayerScore(pScore);
 				setOpponentScore(oScore);
 			});
-			// receive a message from server to stop the game, and trigger the modalBoard
-			socket.on('stopGame', ({ message }) => {
-				console.log({ message });
-				setGameOver(true);
-				setWinner(TIE);
-				setClosingText(message);
-				stopGame();
-			});
-			socket.on('updateGame', ({ socketId }) => {
-				socket.emit('lastUpdatedInfo', {
-					gameInfo: {
-						x: ballX,
-						y: ballY,
-						dx: deltaX,
-						dy: deltaY,
-						s: speed,
-						playerY: playerY,
-						opponentY: opponentY,
-						pScore: playerScore,
-						oScore: opponentScore,
-					}, 
-					socketId: socketId,
-					gameRoom: gameRoom,
-				});
-			});
 		}
-	}, [playerMode])
+	}, [playerMode, level, prop.inviteMode]);
 
 	// function to stop the animation by toggling the isRunning bool, and send a leave request to the server
-	const stopGame = () => {
+	const stopGame = useCallback(() => {
 		setIsRunning(false);
+		console.log('in stop game, with gameRoom ', gameRoom);
 		if (playerMode === DOUBLE_MODE && winner !== OPPONENT_WIN) {
 			socket.emit('gameOver', {
 				gameInfo: {
-					playerId: userId,
+					playerId: prop.userId,
 					winner: winner,
 					playerScore: playerScore,
 					opponentScore: opponentScore,
@@ -190,161 +172,93 @@ export default function Pong({userId, userName}: PongProp) {
 				gameRoom: gameRoom,
 			});
 		}
-	}
+	}, [gameRoom, opponentScore, playerMode, playerScore, winner, prop.userId]);
 
-	// a function to calculate a new direction of the game after the ball hit a paddle
-	const ballCollision = (squareY: number, squareHeight: number, add: boolean): BallInfo => {
-		let dx = 0, dy = 0, x= 0, s = 0;
-
-		// the area of the paddle where the ball hits (top/middle/bottom) affect the calculation of the new direction
-		let collisionPoint = (ballY + (ballRadius / 2)) - (squareY + (squareHeight / 2));
-		collisionPoint = collisionPoint / (squareHeight / 2);
-
-		let angle = (Math.PI / 4) * collisionPoint;
-
-		dx = speed * Math.cos(angle);
-		dy = speed * Math.sin(angle);
-		x = (add === true ? ballX + ballRadius : ballX - ballRadius);
-		s = speed + 0.5
-
-		return {dx, dy, x, s};
-	}
-	
-	// function to detect when a ball hit the paddle of the opponent side
-	const detectOpponentCollision = async () => {
-		if (ballX + ballRadius >= info.opponentX && ballY > opponentY && ballY < opponentY + paddleHeight) {
-			// if the game is against computer, the calculation for the new direction is directly in the front
-			if (playerMode === SINGLE_MODE) {
-				const {dx, dy, x, s} = await ballCollision(opponentY, paddleHeight, false);
-				
-				setDeltaX(dx * -1);
-				setDeltaY(dy);
-				setBallX(x);
-				setSpeed(s);
-			} else if (playerMode === DOUBLE_MODE) {
-				// receiving the new ball direction from server
-				socket.on('ballLaunch', ({dx, dy, x, y, s}) => {
-					setDeltaX(dx);
-					setDeltaY(dy);
-					setBallX(x);
-					setBallY(y);
-					setSpeed(s);
-				});
-			}
+	// loop to detect stopGame event from server
+	useEffect(() => {
+		if (playerMode === DOUBLE_MODE) {
+			const handleStopGame = ({ message }: {message: string}) => {
+				console.log({ message });
+				setGameOver(true);
+				setWinner(TIE);
+				setClosingText(message);
+				stopGame();
+			};
+		
+			// receive a message from server to stop the game, and trigger the modalBoard
+			socket.on('stopGame', handleStopGame);
+		
+			return () => {
+				socket.off('stopGame', handleStopGame);
+			};
 		}
-	}
+	}, [playerMode, stopGame]);
 
-	// function to detect when a ball hit the obstacle
-	const detectObstacleCollision = async () => {
-		if (ballX + ballRadius >= info.obstacleX
-			&& ballX > info.playerX + info.paddleWidth && ballX <= info.boardWidth / 2
-			&& ballY > obstacleY && ballY < obstacleY + info.obstacleHeight) {
-				// if the game is against computer, the calculation for the new direction is directly in the front
-				if (playerMode === SINGLE_MODE) {
-					const {dx, dy, x, s} = await ballCollision(obstacleY, info.obstacleHeight, false);
-					
-					setDeltaX(dx * -1);
-					setDeltaY(dy);
-					setBallX(x);
-					setSpeed(s);
-				} else if (playerMode === DOUBLE_MODE) {
-					// receiving the new ball direction from server
-					socket.on('ballLaunch', ({dx, dy, x, y, s}) => {
-						setDeltaX(dx);
-						setDeltaY(dy);
-						setBallX(x);
-						setBallY(y);
-						setSpeed(s);
-					});
-				}
-		}
-		if (ballX <= info.obstacleX + info.obstacleWidth
-			&& ballX >= info.boardWidth / 2 && ballX < info.opponentX
-			&& ballY > obstacleY && ballY < obstacleY + info.obstacleHeight) {
-				if (playerMode === DOUBLE_MODE) {
-					// send a signal to server to start calculating a new direction of the ball
-					socket.emit('ballCollision', {
-						gameInfo: {
-							x: ballX,
-							y: ballY,
-							r: ballRadius,
-							squareY: obstacleY,
-							squareHeight: info.obstacleHeight,
-							speed: speed,
-							middleBoard: info.boardWidth / 2,
-						}, gameRoom: gameRoom,
-					});
-				}
+	// --> to be checked
+	// loop to detect an updateGame request event from server for spectatorMode
+	// useEffect(() => {
+	// 	if (playerMode === DOUBLE_MODE) {
+	// 		socket.on('updateGame', ({ socketId }) => {
+	// 			socket.emit('lastUpdatedInfo', {
+	// 				gameInfo: {
+	// 					x: ballX,
+	// 					y: ballY,
+	// 					dx: deltaX,
+	// 					dy: deltaY,
+	// 					s: ballSpeed,
+	// 					playerY: playerY,
+	// 					opponentY: opponentY,
+	// 					pScore: playerScore,
+	// 					oScore: opponentScore,
+	// 				}, 
+	// 				socketId: socketId,
+	// 				gameRoom: gameRoom,
+	// 			});
+	// 		});
+	// 	}
 
-				// if the game is against computer, the calculation for the new direction is directly in the front
-				if (playerMode === SINGLE_MODE) {
-					const {dx, dy, x, s} = await ballCollision(obstacleY, info.obstacleHeight, true);
-					
-					setDeltaX(dx);
-					setDeltaY(dy);
-					setBallX(x);
-					setSpeed(s);
-				} else if (playerMode === DOUBLE_MODE) {
-					// receiving the new ball direction from server
-					socket.on('ballLaunch', ({dx, dy, x, y, s}) => {
-						setDeltaX(dx);
-						setDeltaY(dy);
-						setBallX(x);
-						setBallY(y);
-						setSpeed(s);
-					});
-				}
-		}
-	}
+	// }, [playerMode]);
 
-	// function to detect when a ball hit the paddle of the player side
-	const detectPlayerCollision = async () => {
-		if (ballX - ballRadius <= info.playerX + info.paddleWidth && ballY > playerY && ballY < playerY + paddleHeight) {
-			if (playerMode === DOUBLE_MODE) {
-				// send a signal to server to start calculating a new direction of the ball
-				socket.emit('ballCollision', {
-					gameInfo: {
-						x: ballX,
-						y: ballY,
-						r: ballRadius,
-						squareY: playerY,
-						squareHeight: paddleHeight,
-						speed: speed,
-						middleBoard: info.boardWidth / 2,
-					}, gameRoom: gameRoom,
-				});
-			}
+	// const handleUpdateGame = useCallback(
+	//   ({ socketId }: { socketId: string }) => {
+	// 	socket.emit('lastUpdatedInfo', {
+	// 	  gameInfo: {
+	// 		x: ballX,
+	// 		y: ballY,
+	// 		dx: deltaX,
+	// 		dy: deltaY,
+	// 		s: ballSpeed,
+	// 		playerY: playerY,
+	// 		opponentY: opponentY,
+	// 		pScore: playerScore,
+	// 		oScore: opponentScore,
+	// 	  },
+	// 	  socketId: socketId,
+	// 	  gameRoom: gameRoom,
+	// 	});
+	//   },
+	//   []
+	// );
 
-			// if the game is against computer, the calculation for the new direction is directly in the front
-			if (playerMode === SINGLE_MODE) {
-				const {dx, dy, x, s} = await ballCollision(playerY, paddleHeight, true);
-				
-				setDeltaX(dx);
-				setDeltaY(dy);
-				setBallX(x);
-				setSpeed(s);
-			} else if (playerMode === DOUBLE_MODE) {
-				// receiving the new ball direction from server
-				socket.on('ballLaunch', ({dx, dy, x, y, s}) => {
-					setDeltaX(dx);
-					setDeltaY(dy);
-					setBallX(x);
-					setBallY(y);
-					setSpeed(s);
-				});
-			}
-		}
-	}
-	
+	// useEffect(() => {
+	// 	if (playerMode === DOUBLE_MODE) {
+	// 	  socket.on('updateGame', handleUpdateGame);
+	  
+	// 	  return () => {
+	// 		socket.off('updateGame', handleUpdateGame);
+	// 	  };
+	// 	}
+	//   }, [playerMode, handleUpdateGame]);
+
 	// function to set an initial ball position and direction to start the round
-	const ballServe = (side: number) => {
+	const ballServe = useCallback((side: number) => {
 		// if the game is against computer, the calculation for the ball direction is directly in the front
 		if (playerMode === SINGLE_MODE) {
 			setDeltaX((info.initialDelta + level) * side);
 			setDeltaY(5 * (Math.random() * 2 - 1));
 			setBallX(info.boardWidth / 2);
 			setBallY(info.boardHeight / 2);
-			setSpeed(info.initialSpeed + level);
+			setBallSpeed(info.initialSpeed + level);
 		// if the game is against other player, calculation will be done by server
 		} else if (playerMode === DOUBLE_MODE) {
 			// receiving the ball direction from server
@@ -353,10 +267,10 @@ export default function Pong({userId, userName}: PongProp) {
 				setDeltaY(dy);
 				setBallX(info.boardWidth / 2);
 				setBallY(info.boardHeight / 2);
-				setSpeed(info.initialSpeed + level);
+				setBallSpeed(info.initialSpeed + level);
 			});
 		}
-	}
+	}, [level, playerMode]);
 	
 	// function to set initial value to start the game
 	const startGame = (side: number) => {
@@ -398,9 +312,136 @@ export default function Pong({userId, userName}: PongProp) {
 		// toggle isRunning boolean to start the animation of the game
 		setIsRunning(true);
 	}
-	
+
+	// a function to calculate a new direction of the game after the ball hit a paddle
+	const ballCollision = useCallback((squareY: number, squareHeight: number, add: boolean): BallInfo => {
+		let dx = 0, dy = 0, x= 0, y = 0, s = 0;
+
+		// the area of the paddle where the ball hits (top/middle/bottom) affect the calculation of the new direction
+		let collisionPoint = (ballY + (ballRadius / 2)) - (squareY + (squareHeight / 2));
+		collisionPoint = collisionPoint / (squareHeight / 2);
+
+		let angle = (Math.PI / 4) * collisionPoint;
+
+		dx = ballSpeed * Math.cos(angle);
+		dy = ballSpeed * Math.sin(angle);
+		x = (add === true ? ballX + ballRadius : ballX - ballRadius);
+		y = ballY;
+		s = ballSpeed + 0.5
+
+		return {dx, dy, x, y, s};
+	}, [ballRadius, ballX, ballY, ballSpeed]);
+
+	// a function to handle ballBounce event from socket
+	useEffect(() => {
+		const handleBallBounce = ({ dx, dy, x, y, s }: BallInfo) => {
+			setDeltaX(dx);
+			setDeltaY(dy);
+			setBallX(x);
+			setBallY(y);
+			setBallSpeed(s);
+		};
+	  
+		socket.on('ballBounce', handleBallBounce);
+	  
+		// Clean up the event listener when the component is unmounted
+		return () => {
+		  socket.off('ballBounce', handleBallBounce);
+		};
+	  }, []); 
+
+	// function to detect when a ball hit the obstacle
+	const detectObstacleCollision = useCallback( async () => {
+		if (ballX + ballRadius >= info.obstacleX
+			&& ballX > info.playerX + info.paddleWidth && ballX <= info.boardWidth / 2
+			&& ballY > obstacleY && ballY < obstacleY + info.obstacleHeight) {
+				// if the game is against computer, the calculation for the new direction is directly in the front
+				if (playerMode === SINGLE_MODE) {
+					const {dx, dy, x, s} = await ballCollision(obstacleY, info.obstacleHeight, false);
+					
+					setDeltaX(dx * -1);
+					setDeltaY(dy);
+					setBallX(x);
+					setBallSpeed(s);
+				}
+		}
+		if (ballX <= info.obstacleX + info.obstacleWidth
+			&& ballX >= info.boardWidth / 2 && ballX < info.opponentX
+			&& ballY > obstacleY && ballY < obstacleY + info.obstacleHeight) {
+				if (playerMode === DOUBLE_MODE) {
+					// send a signal to server to start calculating a new direction of the ball
+					socket.emit('ballCollision', {
+						gameInfo: {
+							x: ballX,
+							y: ballY,
+							r: ballRadius,
+							squareY: obstacleY,
+							squareHeight: info.obstacleHeight,
+							ballSpeed: ballSpeed,
+							middleBoard: info.boardWidth / 2,
+						}, gameRoom: gameRoom,
+					});
+				}
+
+				// if the game is against computer, the calculation for the new direction is directly in the front
+				if (playerMode === SINGLE_MODE) {
+					const {dx, dy, x, s} = await ballCollision(obstacleY, info.obstacleHeight, true);
+					
+					setDeltaX(dx);
+					setDeltaY(dy);
+					setBallX(x);
+					setBallSpeed(s);
+				}
+		}
+	}, [ballCollision, ballRadius, ballX, ballY, gameRoom, obstacleY, playerMode, ballSpeed]);
+
+	// function to detect when a ball hit the paddle of the opponent side
+	const detectOpponentCollision = useCallback( async () => {
+		if (ballX + ballRadius >= info.opponentX && ballY > opponentY && ballY < opponentY + paddleHeight) {
+			// if the game is against computer, the calculation for the new direction is directly in the front
+			if (playerMode === SINGLE_MODE) {
+				const {dx, dy, x, s} = await ballCollision(opponentY, paddleHeight, false);
+				
+				setDeltaX(dx * -1);
+				setDeltaY(dy);
+				setBallX(x);
+				setBallSpeed(s);
+			}
+		}
+	}, [ballCollision, ballRadius, ballX, ballY, opponentY, paddleHeight, playerMode]);
+
+	// function to detect when a ball hit the paddle of the player side
+	const detectPlayerCollision = useCallback( async () => {
+		if (ballX - ballRadius <= info.playerX + info.paddleWidth && ballY > playerY && ballY < playerY + paddleHeight) {
+			if (playerMode === DOUBLE_MODE) {
+				// send a signal to server to start calculating a new direction of the ball
+				socket.emit('ballCollision', {
+					gameInfo: {
+						x: ballX,
+						y: ballY,
+						r: ballRadius,
+						squareY: playerY,
+						squareHeight: paddleHeight,
+						ballSpeed: ballSpeed,
+						middleBoard: info.boardWidth / 2,
+					}, gameRoom: gameRoom,
+				});
+			}
+
+			// if the game is against computer, the calculation for the new direction is directly in the front
+			if (playerMode === SINGLE_MODE) {
+				const {dx, dy, x, s} = await ballCollision(playerY, paddleHeight, true);
+				
+				setDeltaX(dx);
+				setDeltaY(dy);
+				setBallX(x);
+				setBallSpeed(s);
+			}
+		}
+	}, [ballCollision, ballRadius, ballX, ballY, gameRoom, paddleHeight, playerMode, playerY, ballSpeed]);
+
 	// function to detect ball collision with all 4 part of the walls/borders
-	const detectWallCollision = () => {
+	const detectWallCollision = useCallback(() => {
 		const minY    = ballRadius;
 		const maxY    = info.boardHeight - ballRadius;
 
@@ -443,16 +484,16 @@ export default function Pong({userId, userName}: PongProp) {
 			}
 			ballServe(PLAYER_SIDE);
 		}
-	}
+	}, [ballRadius, ballServe, ballX, ballY, gameRoom, level, opponentScore, playerMode, playerScore]);
 	
 	// function to calculate the movement of the ball based on its direction
-	const moveBall = () => {
+	const moveBall = useCallback(() => {
 		setBallX(x => x += deltaX);
 		setBallY(y => y += deltaY);
-	}
+	}, [deltaX, deltaY]);
 
 	// function to calculate the opponent movement (against computer or other player)
-	const moveOpponent = () => {
+	const moveOpponent = useCallback(() => {
 		// calculating movement of the computer
 		const nextPos = ballY - (paddleHeight / 2) * (level === HARD_LEVEL || level === SPECIAL_LEVEL ? 0.5 : 0.1);
 		
@@ -466,10 +507,10 @@ export default function Pong({userId, userName}: PongProp) {
 				setOpponentY(y);
 			});
 		}
-	}
+	}, [ballY, level, paddleHeight, playerMode]);
 
 	// function to calculate the players movement based on its input (mouse event or keyboard event)
-	const movePlayer = () => {
+	const movePlayer = useCallback(() => {
 		if (toolMode === KEYBOARD_MODE && isRunning)
 		{
 			const nextPostUp = playerY - 15;
@@ -489,10 +530,10 @@ export default function Pong({userId, userName}: PongProp) {
 				}
 			}
 		}
-	}
+	}, [gameRoom, isRunning, paddleDown, paddleHeight, paddleUp, playerMode, playerY, toolMode]);
 
 	// function to calculate the steady movement of the obstacle
-	const moveObstacle = () => {
+	const moveObstacle = useCallback(() => {
 		const nextPostUp = obstacleY - info.obstacleSpeed;
 		const nextPostDown = obstacleY + info.obstacleSpeed + info.obstacleHeight;
 		if (obstacleDir && nextPostUp >= 0) {
@@ -502,10 +543,10 @@ export default function Pong({userId, userName}: PongProp) {
 		} else {
 			setObstacleDir(current => !current);
 		}
-	} 
+	}, [obstacleDir, obstacleY]);
 	
 	// function to draw the board with its initial element
-	const drawBoard = (context: CanvasRenderingContext2D) => {
+	const drawBoard = useCallback((context: CanvasRenderingContext2D) => {
 		context.clearRect(0, 0, info.boardWidth, info.boardHeight);
 		// draw background
 		context.fillStyle = '#4E6E81';
@@ -516,10 +557,10 @@ export default function Pong({userId, userName}: PongProp) {
 		context.font = '42px Inter';
 		context.fillText(' ' + playerScore, 245, 50);
 		context.fillText(' ' + opponentScore, 345, 50);
-	}
+	}, [playerScore, opponentScore]);
 	
 	// function to draw the elements of the game
-	const drawElement = (context: CanvasRenderingContext2D) => {
+	const drawElement = useCallback((context: CanvasRenderingContext2D) => {
 		// draw player
 		context.fillStyle = '#F2F2F2';
 		context.fillRect(info.playerX, playerY, info.paddleWidth, paddleHeight);
@@ -540,57 +581,66 @@ export default function Pong({userId, userName}: PongProp) {
 			context.fillRect(info.obstacleX, obstacleY, info.obstacleWidth, info.obstacleHeight);
 			context.save();
 		}
-	}
+	}, [ballRadius, ballX, ballY, playerY, opponentY, obstacleY, level, paddleHeight]);
 
 	// render the game
-	useLayoutEffect(() => {
+	useEffect(() => {
 		const canvas = canvasRef.current;
-		if (!canvas)
-		return;
+		if (!canvas) return;
+	  
 		const context = canvas.getContext('2d');
-		if (!context)
-		return;
-		
-		drawBoard(context);
-		// start animation
-		if (isRunning && !isPaused) {
-			drawElement(context);
-			moveBall();
-			movePlayer();
-			moveOpponent();
-			if (level === SPECIAL_LEVEL) {
-				moveObstacle();
-				detectObstacleCollision();
-			}
-			detectWallCollision();
-			detectPlayerCollision();
-			detectOpponentCollision();
-			// check game status
-			if (opponentScore > info.winnerScore || playerScore > info.winnerScore) {
-				playerScore > info.winnerScore ? setWinner(PLAYER_WIN) : setWinner(OPPONENT_WIN);
-				playerScore > info.winnerScore ? setClosingText('You win!') : setClosingText('You lose!');
-				setGameOver(true);
-				stopGame();
-			}
-		}
-	}, [frameCount]);
-	
-	// update the frameCount
-	useLayoutEffect(() => {
+		if (!context) return;
+	  
 		const fps = 24;
-		let frameId: number;
-
-		const render = () => {
-			setTimeout(() => {
-				setFrameCount(fc => fc + 1);
-				frameId = requestAnimationFrame(render);
-			}, 1000 / fps);
-		}
-
-		frameId = requestAnimationFrame(render);
+		const frameDuration = 1000 / fps; // Frame duration in milliseconds
+	  
+		const render = (timestamp: number) => {
+			const deltaTime = timestamp - prevFrameId.current;
 		
-		return () => {window.cancelAnimationFrame(frameId);}
-	}, []);
+			if (deltaTime >= frameDuration) {
+				prevFrameId.current = timestamp;
+				
+				drawBoard(context);
+				if (isRunning && !isPaused) {
+					drawElement(context);
+					moveBall();
+					movePlayer();
+					moveOpponent();
+					detectPlayerCollision();
+					detectOpponentCollision();
+					detectWallCollision();
+					// added function for special level
+					if (level === SPECIAL_LEVEL) {
+						moveObstacle();
+						detectObstacleCollision();
+					}
+					// check game status
+					if (opponentScore > info.winnerScore || playerScore > info.winnerScore) {
+						playerScore > info.winnerScore ? setWinner(PLAYER_WIN) : setWinner(OPPONENT_WIN);
+						playerScore > info.winnerScore ? setClosingText('You win!') : setClosingText('You lose!');
+						setGameOver(true);
+						stopGame();
+					}
+				}
+			}
+			
+			frameId.current = requestAnimationFrame(render);
+		};
+
+		frameId.current = requestAnimationFrame(render);
+	  
+		// Cleanup
+		return () => {
+			window.cancelAnimationFrame(frameId.current);
+		};
+
+	  }, [drawBoard, drawElement,
+			moveBall, movePlayer, moveOpponent,
+			detectPlayerCollision, detectOpponentCollision, detectWallCollision,
+			moveObstacle, detectObstacleCollision,
+			stopGame,
+			level, playerScore, opponentScore,
+			isRunning, isPaused]);
 
 	// keyboard event handler
 	useEffect(() => {
@@ -626,7 +676,7 @@ export default function Pong({userId, userName}: PongProp) {
 			}
 		}
 
-	}, [toolMode, isRunning]);
+	}, [isRunning, toolMode, playerMode, gameRoom]);
 	
 	// mouse event handler
 	useEffect(() => {
@@ -659,26 +709,28 @@ export default function Pong({userId, userName}: PongProp) {
 			{(!isRunning && isLive) && (
 				<LiveBoard
 					isReady={isReady}
-					playerName={userName}
+					playerName={prop.userName}
 					opponentName={opponentName}
+					inviteMode={prop.inviteMode}
 					spectatorMode={false}
 					closingText={''}
 					start={() => {startGame(winner === PLAYER_WIN ? PLAYER_SIDE : OPPONENT_SIDE); setIsLive(false)}}
 				/>
 			)}
 			{((!isRunning || gameOver) && !isLive) && (
-				<ModalBoard 
+				<ModalBoard
 					onDifficulty={(level) => {setLevel(level)}}
 					onTool={(mode) => {setToolMode(mode)}}
 					onPlayerMode={(mode) => {setPlayerMode(mode)}}
 					onStartPage={() => startGame(winner === PLAYER_WIN ? PLAYER_SIDE : OPPONENT_SIDE)}
+					inviteMode={prop.inviteMode}
 					buttonText={gameOver ? "Play again" : "Start playing"}
 					closingText={closingText}
 				/>
 			)}
 			{(isPaused) && (
 				<PausedBoard
-					spectatorMode={false}
+					mode={'play'}
 				/>
 			)}
 			<div className={classes.container}>

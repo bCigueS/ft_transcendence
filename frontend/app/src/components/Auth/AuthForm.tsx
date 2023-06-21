@@ -1,7 +1,6 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import classes from '../../sass/components/Auth/AuthForm.module.scss';
 import { Form, useActionData } from 'react-router-dom';
-import { UserContext } from '../../store/users-contexte';
 import { setTokenAuth } from '../../typescript/Auth';
 
 interface DataError {
@@ -14,7 +13,6 @@ interface DataError {
 const AuthForm: React.FC = () => {
 
 	const data: DataError = useActionData() as DataError;
-	const userCtx = useContext(UserContext);
 	const [ isLogged, setIsLogged ] = useState<boolean>(false);
 	const [ userId, setUserId ] = useState<string>('');
 	const [ logCode, setLogCode ] = useState<string>("");
@@ -49,9 +47,9 @@ const AuthForm: React.FC = () => {
 		if (token) {
 			setTokenAuth(token, userId);
 			setIsLogged(true);
-			// window.location.reload();
+			window.location.reload();
 		}
-	}, [token, isLogged])
+	}, [token, isLogged, userId])
 
 
 	return (
@@ -73,8 +71,7 @@ const AuthForm: React.FC = () => {
 				{ data && data.message &&
 					<p className={classes.error}><span>Error {data.statusCode}</span>{data.message}</p>
 				}
-			</Form>
-						
+			</Form>		
 				<div className={classes.loggin}>
 					<a  href={`http://127.0.0.1:3000/auth/forty-two`}>
 					<button 
