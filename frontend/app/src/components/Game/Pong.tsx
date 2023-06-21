@@ -57,6 +57,7 @@ export default function Pong(prop: PongProp) {
 	const [winner, setWinner] = useState(TIE);
 	const [closingText, setClosingText] = useState('');
 	const [gameRoom, setGameRoom] = useState('');
+	// const [linkInvite, setLinkInvite] = useState('');
 	// game mode
 	const [toolMode, setToolMode] = useState(MOUSE_MODE);
 	const [level, setLevel] = useState(BEGINNER_LEVEL);
@@ -89,22 +90,15 @@ export default function Pong(prop: PongProp) {
 	const frameId = useRef(0);
 	const prevFrameId = useRef(0);
 
-	const generateInvitationLink = (gameRoom: string) => {
-		const currentUrl = window.location.href;
-		const invitationLink = `${currentUrl}?gameRoom=${gameRoom}`;
-
-		return invitationLink;
-	}
-
 	// loop to emit a join request to the server
 	useEffect(() => {
 		if (playerMode === DOUBLE_MODE && !prop.inviteMode) {
 			console.log('emit a join random game request');
 			socket.emit('joinRandom', { id: prop.userId, lvl: level });
 		}
-		if (playerMode === DOUBLE_MODE && prop.inviteMode) {
+		if (playerMode === DOUBLE_MODE && prop.inviteMode && !prop.isInvited) {
 			console.log('emit a join invitation game request');
-			socket.emit('joinInvitation', { playerId: prop.userId, opponentId: prop.opponent.id, lvl: level })
+			socket.emit('joinInvitation', { playerId: prop.userId, opponentId: prop.opponentId, lvl: level, gameRoom: prop.gameRoom })
 		}
 	}, [playerMode, level, prop.userId, prop.inviteMode]);
 
@@ -112,13 +106,12 @@ export default function Pong(prop: PongProp) {
 	useEffect(() => {
 		if (playerMode === DOUBLE_MODE) {
 			socket.on('passGameRoom', ({ gameRoom }) => {
-				const link = generateInvitationLink(gameRoom);
-					socket.emit('sendInvitation', {
-						playerId: prop.userId,
-						opponentId: prop.opponent.id,
-						// gameRoom: gameRoom,
-						link: link
-					});
+				socket.emit('sendInvitation', {
+					playerId: prop.userId,
+					opponentId: prop.opponentId,
+					gameRoom: gameRoom,
+					// link: linkInvite
+				});
 			});
 			// receive a welcome message from server informing that you are in a specific game room, and trigger a liveBoard
 			socket.on('welcome', ({ message, opponent, gameRoom }) => {
@@ -707,6 +700,7 @@ export default function Pong(prop: PongProp) {
 					onPlayerMode={(mode) => {setPlayerMode(mode)}}
 					onStartPage={() => startGame(winner === PLAYER_WIN ? PLAYER_SIDE : OPPONENT_SIDE)}
 					inviteMode={prop.inviteMode}
+					isInvited={prop.isInvited}
 					buttonText={gameOver ? "Play again" : "Start playing"}
 					closingText={closingText}
 				/>

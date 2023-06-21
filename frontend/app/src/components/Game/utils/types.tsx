@@ -18,9 +18,10 @@ export type PongInfo = {
 export type PongProp = {
 	userId: number;
 	userName: string;
-	// user: UserAPI;
-	opponent: UserAPI;
+	opponentId: number | undefined;
 	inviteMode: boolean;
+	isInvited: boolean;
+	gameRoom: string | undefined;
 }
 
 export type SpectatorProp = {
@@ -75,6 +76,7 @@ export interface State {
 
 export type ModalProps = {
 	inviteMode: boolean;
+	isInvited: boolean;
 	buttonText: string;
 	closingText: string;
 	onStartPage(): void;

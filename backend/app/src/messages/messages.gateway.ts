@@ -60,7 +60,7 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 		console.log(channel);
 
 		this.handleMessage(receiverId, {
-		content: `${sender.name} has invited you to a game! Click here, ${link}`,
+		content: `${sender.name} has invited you to a game! Click the link bellow>${link}`,
 		channelId: channel.id,
 		senderId: senderId,
 	  });

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ModalProps } from './utils/types';
 import classes from  '../../sass/components/Game/Modal.module.scss';
 
-export default function ModalBoard({ onDifficulty, onTool, onPlayerMode, onStartPage, inviteMode, buttonText, closingText }: ModalProps) {
+export default function ModalBoard({ onDifficulty, onTool, onPlayerMode, onStartPage, inviteMode, isInvited, buttonText, closingText }: ModalProps) {
 	const [isStarting, setIsStarting] = useState(buttonText === "Start playing" ? true : false);
 	const [page, setPage] = useState(0);
 	const [isDouble, setIsDouble] = useState(false);
@@ -15,13 +15,19 @@ export default function ModalBoard({ onDifficulty, onTool, onPlayerMode, onStart
 	return (
 		<div className={classes.container}>
 			<div className={classes.content}>
-				{(isStarting && page === 0) && (
+				{(isStarting && page === 0 && !isInvited) && (
 					<div className={classes.subcontent} onClick={onNextPage}>
 						<h2>Let's Pong!</h2>
 						<i className='fa-solid fa-table-tennis-paddle-ball'></i>
 					</div>
 				)}
-				{(isStarting && page === 1) && (
+				{(isStarting && page === 0 && isInvited) && (
+					<div className={classes.subcontent} onClick={() => {onNextPage(); onNextPage();}}>
+						<h2>Let's Pong!</h2>
+						<i className='fa-solid fa-table-tennis-paddle-ball'></i>
+					</div>
+				)}
+				{(isStarting && page === 1 && !isInvited) && (
 					<>
 						<button onClick={() => {onDifficulty(0); onNextPage();}}>Beginner level</button>
 						<button onClick={() => {onDifficulty(1); onNextPage();}}>Medium level</button>

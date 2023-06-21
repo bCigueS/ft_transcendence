@@ -21,9 +21,13 @@ export default function Game() {
 	const user = userCtx.user;
 	const userId = userCtx.user?.id;
 	const userName = userCtx.user?.name;
-	const opponent = state?.opponent;
+	const opponentId = (state?.opponentId ? state?.opponentId : undefined);
 	const inviteMode = (state?.gameInvitation ? true : false);
-	console.log ('game invitation ', inviteMode);
+	const isInvited = (state?.isInvited && state?.isInvited === true ? true : false);
+	const gameRoom = (state?.gameRoom ? state?.gameRoom : undefined)
+	console.log('game invitation ', state?.gameInvitation);
+	console.log('isInvited ', state?.isInvited); 
+	console.log('gameRoom ', state?.gameRoom);
 
 	// ---> to be checked
 	// // screen info
@@ -73,9 +77,10 @@ export default function Game() {
 				<Pong
 					userId={userId}
 					userName={userName}
-					// user={user}
-					opponent={opponent}
+					opponentId={opponentId}
+					gameRoom={gameRoom}
 					inviteMode={inviteMode}
+					isInvited={isInvited}
 				/>
 			)}
 		</div>

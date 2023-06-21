@@ -81,6 +81,7 @@ model UserGame {
 
 enum GameState {
   PENDING
+  WAITING
   PLAYING
   FINISHED
 }
