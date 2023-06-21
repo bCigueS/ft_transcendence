@@ -1,28 +1,14 @@
-import { useContext, useEffect, useRef, useState } from 'react';
-import ChatInfo from '../components/Chat/ChatInfo';
+import { useCallback, useContext, useEffect, useState } from 'react';
+import ChatOverview from '../components/Chat/ChatOverview';
 import classes from '../sass/pages/Chat.module.scss';
-import modalclasses from  '../sass/components/Game/Modal.module.scss';
-import { UserAPI, UserContext } from '../store/users-contexte';
-import Message from '../components/Chat/Message';
+import { UserContext } from '../store/users-contexte';
 import NoConvo from '../components/Chat/NoConvo';
 import io, { Socket } from 'socket.io-client';
-import { json, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import MessageList from '../components/Chat/MessageList';
-
-export interface Channel {
-	id: number,
-	name: string,
-	messages: MessageAPI[],
-	members: UserAPI[],
-}
-
-export interface MessageAPI {
-	createdAt: Date,
-	id: number,
-	senderId: number | undefined,
-	content: string,
-	channelId: number,
-}
+import { Channel, MessageAPI, createNewChannel, deleteChat } from '../components/Chat/chatUtils';
+import ManageChats from '../components/Chat/ManageChats';
+import NoDiscussions from '../components/Chat/NoDiscussions';
 
 export default function Chat() {
 	
@@ -38,56 +24,7 @@ export default function Chat() {
 	/*
 		FUNCTIONS FOR MESSAGING
 	*/
-	
-	useEffect(() => {
-		const newSocket = io("http://localhost:3000/chat");
-		setSocket(newSocket);
-	}, [setSocket])
 
-	const createNewChannel = async () => {
-
-		let senderId;
-
-		const newChat = chats.find(chat =>
-			chat.id === -1);
-
-		newChat?.members.forEach((member) => {
-			if (member.id != userCtx.user?.id)
-				senderId = member.id;
-		})
-
-		const chanData = {
-			name: "private",
-			members: [
-			  {
-				userId: userCtx?.user?.id
-			  },
-			  {
-				userId: senderId
-			  }
-			]
-		}
-
-		const response = await fetch('http://localhost:3000/channels', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(chanData)
-		});
-	
-		if (response.status === 422 || response.status === 400 || response.status === 401 || response.status === 404) {
-			return response;
-		}
-	
-		if (!response.ok) {
-			throw json({message: "Could not create new channel."}, {status: 500});
-		}
-	
-		const resData = await response.json();
-		return resData;
-	}
-	
 	const send = async (content: string, selectedConversationId: number) => {
 
 		const message = {
@@ -98,13 +35,45 @@ export default function Chat() {
 
 		if (selectedConversationId === -1)
 		{
-			const newChan = await createNewChannel();
+			let senderId;
+
+			const newChat = chats.find(chat =>
+				chat.id === -1);
+
+			newChat?.members.forEach((member) => {
+				if (member.id !== userCtx.user?.id)
+					senderId = member.id;
+			})
+
+			const chanData = {
+				creatorId: userCtx.user?.id,
+				name: "private",
+				members: [
+					{
+						userId: userCtx?.user?.id
+					},
+					{
+						userId: senderId
+					}
+				]
+			}
+			const newChan = await createNewChannel(chanData);
 			message.channelId = newChan.id;
+
+			const dummyChatIndex = chats.findIndex(chat => chat.id === -1);
+
+			if (dummyChatIndex !== -1) {
+			  const updatedChats = chats.filter((_, index) => index !== dummyChatIndex);
+			  setChats([...updatedChats, newChan]);
+			} else {
+			  setChats([...chats, newChan]);
+			}
+			onSaveConversation(newChan);
 		}
 		socket?.emit("message", message);
 	}
 
-	const messageListener = (message: {
+	const messageListener = useCallback(async (message: {
 		id: number,
 		senderId: number,
 		content: string,
@@ -121,7 +90,8 @@ export default function Chat() {
 		const newChats = [...chats];
 		const chatIndex = newChats.findIndex(chat => chat.id === newMessage.channelId);
 	  
-		if (chatIndex !== -1) {
+
+		if (chatIndex !== -1 && newChats[chatIndex].messages) {
 		  newChats[chatIndex].messages = [...newChats[chatIndex].messages, newMessage];
 		  setChats(newChats);
 		} else {
@@ -138,6 +108,8 @@ export default function Chat() {
 			}
 			
 			const newChat = {
+				createdAt: new Date(),
+				creatorId: userCtx.user?.id,
 				id: message.channelId,
 				name: 'private',
 				messages: [newMessage],
@@ -148,72 +120,139 @@ export default function Chat() {
 			}
 			createNewChat();
 		}
-	  };
-	  
-	
-	useEffect(() => {
+	  }, [chats, userCtx]);
 
+	  const fetchChannels = useCallback(async() => {
+		try {
+			const response = await fetch('http://localhost:3000/channels/userId/' + userCtx.user?.id, {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+			});
+		
+			if (response.status === 400) {
+				throw new Error("Failed to fetch user channels!") ;
+			}
+
+			if (!response.ok)
+				throw new Error("Failed to fetch user channels!") ;
+
+			const data = await response.json();
+			setChats(data);
+			
+		} catch (error: any) {
+			console.log(error.message);
+		}
+	}, [userCtx.user?.id])
+	
+	const joinListener = useCallback((channelId: string) => {
+		console.log('client joined channel ', channelId);
+		socket?.emit('join', parseInt(channelId, 10));
+		fetchChannels();
+	  }, [fetchChannels, socket]);
+	  
+	useEffect(() => {
 		socket?.on("message", messageListener);
 		return () => {
-			socket?.off("message", messageListener);
+		  socket?.off("message", messageListener);
 		}
-	}, [messageListener])
+	}, [socket, messageListener]);
+	  
+	useEffect(() => {
+		socket?.on("join", joinListener);
+		return () => {
+		  socket?.off("join", joinListener);
+		}
+	}, [socket, joinListener]);
 
-	/*
-		FUNCTION TO DELETE MESSAGE
-	*/
-
-	const handleDeleteMessage = (message: MessageAPI) => {
-		console.log('about to delete: ', message.content);
-		socket?.emit('')
-
-	}
-
-	/*
-		FETCH USER CURRENT CONVOS
-	*/
+	useEffect(() => {
+		socket?.on('chatDeleted', (data) => {
+			if (chats.find(chat => chat.id === data.chatId)) {
+				setChats(chats => chats.filter(chat => chat.id !== data.chatId));
+			}
+		});
 	
-    useEffect(() => {
-		fetch('http://localhost:3000/channels/userId/' + userCtx.user?.id)
-		.then(response => response.json())
-		.then(data => {
-			data.forEach((channel: Channel) => {
-				channel.messages.forEach(message => {
-					message.createdAt = new Date(message.createdAt);
-				});
-                });
-				
-                setChats(data);
-            })
-            .catch(err => console.error('An error occurred:', err));
-	}, []);
+		return () => {
+			socket?.off('chatDeleted');
+		};
+	}, [chats, socket]);
 
-	/*
-		FUNCTIONS WHEN SPECIFIC CHAT IS SELECTED
-	*/
+	const handleChatDeletion = useCallback((id: number) => {
+		setChats(chats => chats.filter(chat => chat.id !== id));
+		socket?.emit('chatDeleted', { chatId: id, userId: userCtx.user?.id });
+	}, [socket, userCtx.user?.id]);
 
-	const onSaveConversation = (channel: Channel) => {
+	const checkLastMessageDeleted = useCallback((message: MessageAPI) => {
+		const chatMessage = chats.find(chat => chat.id === message.channelId);
+
+		if (chatMessage?.messages.length === 0)
+		{
+			deleteChat(chatMessage);
+			handleChatDeletion(chatMessage.id);
+		}
+	}, [chats, handleChatDeletion])
+
+	useEffect(() => {
+		socket?.on("messageDeleted", (deletedMessage) => {
+			const chatIndex = chats.findIndex(chat => chat.id === deletedMessage.channelId);
+			if (chatIndex !== -1) {
+				const messageIndex = chats[chatIndex].messages.findIndex(msg => msg.id === deletedMessage.id);
+				if (messageIndex !== -1) {
+					const newChats = [...chats]; 
+					newChats[chatIndex].messages.splice(messageIndex, 1);
+					setChats(newChats);
+				}
+			}
+			checkLastMessageDeleted(deletedMessage);
+		});
+
+		return () => {
+			socket?.off('messageDeleted');
+		};
+	}, [chats, socket, checkLastMessageDeleted]);
+	  
+	useEffect(() => {
+		const newSocket = io("http://localhost:3000/chat");
+		setSocket(newSocket);
+		newSocket.on('connect', () => {
+		  newSocket.emit('user_connected', userCtx.user?.id);
+		});
+	  
+		return () => {
+		  newSocket.removeAllListeners();
+		}
+	}, [setSocket, userCtx.user?.id]);
+
+	const handleMessageDeletion = (message: MessageAPI) => {
+		console.log('about to delete: ', message.content);
+		socket?.emit('messageDeleted', { message: message })
+	}
+	
+	useEffect(() => {
+		fetchChannels();
+	}, [fetchChannels]);
+
+	useEffect(() => {
+		if(socket && chats.length > 0) {
+			chats.forEach(chat => {
+				socket.emit('join', chat.id);
+			});
+		}
+	}, [socket, chats]);
+
+	const onSaveConversation = useCallback((channel: Channel) => {
 		setSelectedConversation(channel);
 		socket?.emit('join', channel.id);
-	}
+	}, [socket])
 
 	useEffect(() => {
 		let selectedChannel = chats.find(chat => chat.id === selectedConversation?.id);
 		if (selectedChannel)
 			setMessages(selectedChannel.messages);
-	}, [selectedConversation]);
+	}, [selectedConversation, chats]);
 
-	/*
-		CREATE DUMMY CHAT WHEN START DISCUSSION
-	*/
-
-	useEffect(() => {
-		if (chats) {
-			checkPreviousPage();
-		}
-	}, [chats]);
-
-	const checkPreviousPage = () => {
+	const checkPreviousPage = useCallback(() => {
 
 		if (location?.state?.newChat) {
 
@@ -223,38 +262,75 @@ export default function Chat() {
 	
 			if (chatExist)
 				onSaveConversation(chatExist);
-			else
+			else if (userCtx.user)
 			{
 				const newChat = {
-					id: -1,
-					name: 'private',
-					messages: [],
-					members: [user, userCtx.user]
-				}
-
+						createdAt: new Date(),
+						creatorId: userCtx.user?.id,
+						id: -1,
+						name: 'private',
+						messages: [],
+						members: [user, userCtx.user]
+					}
 				setChats([...chats, newChat]);
 				onSaveConversation(newChat);
 			}
 		}
-	}
+	}, [chats, location?.state?.newChat, onSaveConversation, userCtx.user])
+
+	useEffect(() => {
+		if (chats) {
+			checkPreviousPage();
+		}
+	}, [chats, checkPreviousPage]);
+
+
+	chats.sort((a, b) => {
+
+		let lastMessageDateA;
+		if (a.messages.length === 0)
+			lastMessageDateA = a.createdAt.toString();
+		else
+			lastMessageDateA = a.messages[a.messages.length - 1].createdAt.toString();
+		let lastMessageDateB;
+		if (b.messages.length === 0)
+			lastMessageDateB = b.createdAt.toString();
+		else
+			lastMessageDateB = b.messages[b.messages.length - 1].createdAt.toString();
+	  
+		const timestampA = Date.parse(lastMessageDateA);
+		const timestampB = Date.parse(lastMessageDateB);
+	  
+		return timestampB - timestampA;
+	});
 
 	return (
 		<div className={classes.page}>
-
 			<div className={classes.conversations}>
+				< ManageChats />
 				{
+					chats && chats.length > 0 ?
 					chats.map((chat) => (
-						<ChatInfo key={chat.id}
+						<ChatOverview key={chat.id}
 						chats={chats}
 						chat={chat}
 						isSelected={chat.id === selectedConversation?.id ? true : false}
-						onSaveConversation={onSaveConversation}/>
+						onSaveConversation={onSaveConversation}
+						onDeleteChat={handleChatDeletion}/>
 						))
-					}
+					:
+					<NoDiscussions/>
+				}
 			</div>
 			{
-				selectedConversation ? 
-				<MessageList send={send} chat={selectedConversation} chats={chats}/>
+				selectedConversation &&
+				(chats.length > 0) ? 
+				<MessageList
+					send={send} 
+					chat={selectedConversation}
+					msgs={messages}
+					chats={chats}
+					onDelete={handleMessageDeletion}/>
 				: <NoConvo/>
 			}
 		</div>

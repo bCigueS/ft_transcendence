@@ -46,12 +46,11 @@ const ProfileFriends: React.FC<{user: UserAPI; block: boolean; friend: boolean}>
 				{
 					!props.block && 
 					<i 
-					title='Friend'
-					onClick={removeFriendHandler}
-					className={props.friend ? 'fa-solid fa-user-minus' : 'fa-solid fa-user-plus'}>
-				</i>
+						title='Friend'
+						onClick={removeFriendHandler}
+						className={props.friend ? 'fa-solid fa-user-minus' : 'fa-solid fa-user-plus'}>
+					</i>
 				}
-
 				{
 					!props.block && 
 					<i

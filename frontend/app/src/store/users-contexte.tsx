@@ -61,6 +61,7 @@ type Props = {
 		const [ loading, setLoading ] = useState<boolean>(true);
 		const [ error, setError ] = useState<string | null>(null);
 
+
 		const saveToken = (token: string,  userIdInput: number) => {
 			setUserId(userIdInput);
 			setToken(token);
@@ -206,7 +207,7 @@ type Props = {
 				setError( error.message);
 			}
 			return userFriends;
-		}, []);
+		}, [userId]);
 
 		const fetchUserBlockings = useCallback(async (id: number) => {
 			setError(null);
@@ -235,7 +236,7 @@ type Props = {
 				setError( error.message);
 			}
 			return userBlockings;
-		}, []);
+		}, [userId]);
 
 		const fetchUser = useCallback(async () => {
 			setError(null);

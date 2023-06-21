@@ -9,6 +9,7 @@
     background-color: $gunmetal-light;
     position: relative;
     align-self: flex-end;
+    word-wrap: break-word;
 
     .myMessage {
         top: 0.5rem;
@@ -31,6 +32,7 @@
     background-color: $gunmetal-light;
     position: relative;
     align-self: flex-end;
+    word-wrap: break-word;
 
     .myMessage {
         top: 0.5rem;
@@ -49,23 +51,30 @@
         position: absolute;
         bottom: -0.7rem;
         right: 1.4rem;
-        border-right: 0.4rem solid $gunmetal-light;
-        border-left: 0.4rem solid transparent;
-        border-top: 0.4rem solid $gunmetal-light;
-        border-bottom: 0.4rem solid transparent;
+        border-right: 0.5rem solid $gunmetal-light;
+        border-left: 0.5rem solid transparent;
+        border-top: 0.5rem solid $gunmetal-light;
+        border-bottom: 0.5rem solid transparent;
         border-style: solid;
     }
 
 }
 
 .yourBubble {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
+    margin-left: 2.4rem;
     padding: 0.5rem;
     max-width: 30rem;
     border-radius: 2rem;
     background-color: $light-vermillon;
     position: relative;
     align-self: flex-start;
+    word-wrap: break-word;
+
+    .sender {
+        font-weight: bold;
+        // color: red;
+    }
 
     .yourMessage {
         top: 0.5rem;
@@ -76,16 +85,27 @@
         color: white;
     }
 
+    .sender {
+        font-style: bold;
+    }
+
 }
 
 .yourLastBubble {
-    margin-bottom: 1rem;
+    // margin-bottom: 1rem;
+    margin-left: 2.4rem;
     padding: 0.5rem;
     max-width: 30rem;
     border-radius: 2rem;
     background-color: $light-vermillon;
     position: relative;
     align-self: flex-start;
+    word-wrap: break-word;
+
+    .sender {
+        font-weight: bold;
+        // color: red;
+    }
 
     .yourMessage {
         top: 0.5rem;
@@ -101,12 +121,14 @@
         position: absolute;
         bottom: -0.7rem;
         left: 1.4rem;
-        border-left: 0.4rem solid $light-vermillon;
-        border-right: 0.4rem solid transparent;
-        border-top: 0.4rem solid $light-vermillon;
-        border-bottom: 0.4rem solid transparent;
+        border-left: 0.5rem solid $light-vermillon;
+        border-right: 0.5rem solid transparent;
+        border-top: 0.5rem solid $light-vermillon;
+        border-bottom: 0.5rem solid transparent;
         border-style: solid;
     }
+
+
 
 }
 
@@ -115,10 +137,6 @@
 	display: flex;
   	justify-content: space-between;
 	margin-top: 0.5rem;
-
-	.hour {
-
-	}
 
 
 	.delete:hover {
@@ -134,3 +152,7 @@
 	color: $gunmetal-dark;
 }
 
+.senderProfile {
+    position: relative;
+    bottom: 1rem;
+}
