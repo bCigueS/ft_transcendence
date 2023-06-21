@@ -19,7 +19,7 @@ export type PongProp = {
 	userId: number;
 	userName: string;
 	// user: UserAPI;
-	// opponent: UserAPI;
+	// opponent: UserAPI | undefined;
 	inviteMode: boolean;
 }
 

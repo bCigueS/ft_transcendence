@@ -13,10 +13,12 @@ import { ServeInfo, CollisionInfo, GameOverInfo, ScoreInfo, UpdatedInfo } from '
 import { GameState } from '@prisma/client';
 import { CreateUserGameDto } from './dto/create-user-game.dto';
 import { UpdateUserDto } from 'src/users/dto/update-user.dto';
+import EventEmitter from 'events';
 
 @WebSocketGateway({ namespace: '/pong' })
 export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 	private readonly logger = new Logger(GamesGateway.name);
+	static eventEmitter: EventEmitter = new EventEmitter();
 
 	constructor(private readonly gamesService: GamesService, private prisma: PrismaService) {}
 
@@ -149,7 +151,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 		) {
 			let game, player, opponent;
 
-			if (!gameRoom) {
+			if (!gameRoom || gameRoom === '') {
 				const createGameDto: CreateGameDto = {
 					state: GameState.PENDING, // to be changed with WAITING
 					level: lvl,
@@ -164,6 +166,12 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 
 				game = await this.gamesService.create(createGameDto);
 				game = await this.gamesService.assignRoom(game.id, 'invite' + game.id);
+
+				GamesGateway.eventEmitter.emit('gameInvitation', {
+					senderId: id,
+					receiverId: opponentId,
+					gameRoom: game.room,
+				});			
 			} else {
 				// if gameRoom is provided, then find the game based on the gameRoom
 				game = await this.prisma.game.findUnique({
