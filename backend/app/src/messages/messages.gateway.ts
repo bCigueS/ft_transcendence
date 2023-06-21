@@ -43,6 +43,8 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
   @SubscribeMessage('join')
   async handleJoin(client: Socket, channelId: number) {
 	client.join(channelId.toString());
+	// const receiverSocketId = this.onlineUsers[receiver.userId];
+	// this.io.to(channelId.toString()).emit('userJoined', client.id);
   }
 
   @SubscribeMessage('message')
