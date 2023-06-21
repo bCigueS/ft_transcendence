@@ -172,7 +172,7 @@ export default function Chat() {
 		  await fetchChannels();
 		  setSelectedConversation(chats.find(chat => chat.id === channelId));
 
-		  
+
 		} catch (error) {
 		  console.error(error);
 		}
@@ -186,8 +186,12 @@ export default function Chat() {
 
 	const kickListener = useCallback((channelId: string) => {
 		console.log('client was kicked from channel ', channelId);
+		if (selectedConversation && +channelId === selectedConversation.id)
+			setSelectedConversation(undefined);
 		fetchChannels();
-	}, [fetchChannels, socket]);
+		// window.location.reload();
+
+	}, [fetchChannels, socket, selectedConversation]);
 	  
 	useEffect(() => {
 		socket?.on("message", messageListener);
@@ -284,6 +288,10 @@ export default function Chat() {
 	}, [fetchChannels]);
 
 	useEffect(() => {
+		fetchChannels();
+	}, [selectedConversation]);
+
+	useEffect(() => {
 		if(socket && chats.length > 0) {
 			chats.forEach(chat => {
 				socket.emit('join', chat.id);
@@ -301,6 +309,8 @@ export default function Chat() {
 		if (selectedChannel)
 			setMessages(selectedChannel.messages);
 	}, [selectedConversation, chats]);
+
+	
 
 	const checkPreviousPage = useCallback(() => {
 
