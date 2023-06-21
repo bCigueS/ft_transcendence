@@ -5,7 +5,7 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { UserContext } from "../../store/users-contexte";
 import { Channel, MessageAPI } from "./chatUtils";
 
-const MessageList: React.FC<{send: (content: string, channelId: number) => {}, chat: Channel, chats: Channel[], msgs: MessageAPI[], onDelete: (message: MessageAPI) => void}> = ({ send, chat, chats, msgs, onDelete }) => {
+const MessageList: React.FC<{send: (content: string, channelId: number) => {}, chat: Channel, chats: Channel[], msgs: MessageAPI[], onDelete: (message: MessageAPI) => void, onJoin: (channelId: number) => void}> = ({ send, chat, chats, msgs, onDelete, onJoin }) => {
 
     const [ messages, setMessages ] = useState<MessageAPI[]>(chat.messages);
 	const messageInput = useRef<HTMLInputElement>(null);
@@ -76,7 +76,8 @@ const MessageList: React.FC<{send: (content: string, channelId: number) => {}, c
 							message={message}
 							messages={messages}
 							onDelete={onDelete}
-							chat={chat}/>)
+							chat={chat}
+							onJoin={onJoin}/>)
 			}
 			<form  onSubmit={handleSubmit}>
 				<input className={classes.sendInput} 

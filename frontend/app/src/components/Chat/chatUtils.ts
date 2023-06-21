@@ -1,4 +1,5 @@
-import { UserAPI } from "../../store/users-contexte";
+import { useCallback, useContext } from "react";
+import { UserAPI, UserContext } from "../../store/users-contexte";
 
 export interface Channel {
     createdAt: Date,
@@ -43,6 +44,12 @@ type UpdateChannelDTO = {
     banned?: User[],
     muted?: User[],
   };
+
+export type JoinChannelDTO = {
+    userId: number,
+    password?: string,
+}
+
 
 export const createNewChannel = async (chanData: CreateChannelDTO) => {
 
@@ -231,3 +238,6 @@ export const banUser = async (channelId: number, userId: number) => {
     }
 
 };
+
+
+
