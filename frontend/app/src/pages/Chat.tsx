@@ -146,7 +146,7 @@ export default function Chat() {
 		}
 	}, [userCtx.user?.id])
 
-	const handleJoinLink = async (channelId: number) => {
+	const handleJoinLink = useCallback(async (channelId: number) => {
 		console.log('in handle join link');
 
 		if (!userCtx.user?.id)
@@ -176,7 +176,7 @@ export default function Chat() {
 		} catch (error) {
 		  console.error(error);
 		}
-	}
+	}, [fetchChannels, selectedConversation, chats, userCtx.user?.id])
 	
 	const joinListener = useCallback((channelId: string) => {
 		console.log('client joined channel ', channelId);
