@@ -10,9 +10,9 @@ done
 
 npx prisma migrate dev
 
-npx prisma db seed
-
 npx prisma db push --force-reset && npx prisma db push 
+
+npx prisma db seed
 
 # Start the application
 exec "$@"

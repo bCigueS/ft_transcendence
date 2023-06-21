@@ -10,8 +10,3 @@ export class CreateMessageDto {
 	@ApiProperty()
     channelId: number;
 }
-
-export class CreateChannelMembershipDto {
-    @ApiProperty({ description: 'The ID of the user to add to the channel' })
-    userId: number;
-}

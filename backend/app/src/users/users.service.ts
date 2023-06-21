@@ -244,10 +244,6 @@ export class UsersService {
   }
 
   async showCommunity(id: number) {
-  
-    const user = await this.prisma.user.findMany({ 
-      where: { id: id }
-    });
 
     const blocked = await this.showBlockedUsers(id);
 	const haters = await this.showHaters(id);
