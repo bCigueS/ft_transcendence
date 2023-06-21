@@ -21,23 +21,11 @@ export type UserAPI = {
 	connected?: boolean,
   };
 
-//   const SimonUser: UserAPI = {
-// 	id: 1,
-// 	email: "test@test.com",
-// 	name: "Simon",
-// 	avatar: "onsenfou",
-// 	doubleAuth: false,
-// 	wins: 1,
-// 	gamesPlayed: 1,
-//   }
-
 export const UserContext = React.createContext<{
 		user: UserAPI | null;
 		error: string | null;
 		token?: string;
 		logInfo? : {userId?: string, token?: string};
-		saveToken: (token: string, userIdInput: number) => void,
-		saveToken2: (token: string) => void,
 		deleteToken: () => void,
 		fetchUserFriends: (id: number) => void;
 		fetchUserBlockings: (id: number) => void;
@@ -54,8 +42,6 @@ export const UserContext = React.createContext<{
 	error: null,
 	token: undefined,
 	logInfo: {},
-	saveToken: (token: string, userIdInput: number) => {},
-	saveToken2: (token: string) => {},
 	deleteToken: () => {},
 	fetchUserFriends: (id: number) => {},
 	fetchUserBlockings: (id: number) => {},
@@ -78,10 +64,8 @@ type Props = {
 		
 		const [ user, setUser ] = useState<UserAPI | null>(null);
 		const [ userId, setUserId ] = useState<number>(1);
-		const [ token, setToken ] = useState<string | undefined>(undefined);
 		const [ loading, setLoading ] = useState<boolean>(true);
 		const [ error, setError ] = useState<string | null>(null);
-		const [ gamesPlayed, setGamesPlayed ] = useState(0);
 
 
 		const logInfo = {
@@ -89,31 +73,19 @@ type Props = {
 			token: localStorage.getItem('token') || ''
 		}
 
-		const saveToken = (token: string,  userIdInput: number) => {
-			setUserId(userIdInput);
-			setToken(token);
-			fetchUser();
-		}
-
-		const saveToken2 = (token: string) => {
-			setToken(token);
-		}
 
 		const deleteToken = () => {
 			setUserId(1);
-			setToken(undefined);
 		}
 
 		const fetchRemoveFriend = async (targetUser: UserAPI) => {
 			setError(null);
-			const storedUserId = localStorage.getItem('userId');
-			const idToFetch = storedUserId ? Number(storedUserId) : userId
 
 			const friendId = {
 				friendId: targetUser.id
 			};
 			try {
-				const response = await fetch('http://localhost:3000/users/' + idToFetch + '/remove-friend', {
+				const response = await fetch('http://localhost:3000/users/' + logInfo.userId + '/remove-friend', {
 					method: 'PATCH',
 					headers: {
 						'Content-Type': 'application/json',
@@ -133,14 +105,11 @@ type Props = {
 
 		const fetchBlockUser = async (targetUser: UserAPI) => {
 			setError(null);
-			const storedUserId = localStorage.getItem('userId');
-			const idToFetch = storedUserId ? Number(storedUserId) : userId
-
 			const blockedId = {
 				blockedId: targetUser.id
 			};
 			try {
-				const response = await fetch('http://localhost:3000/users/' + idToFetch + '/block-user', {
+				const response = await fetch('http://localhost:3000/users/' + logInfo.userId + '/block-user', {
 					method: 'PATCH',
 					headers: {
 						'Content-Type': 'application/json',
@@ -162,15 +131,13 @@ type Props = {
 
 		const fetchUnblockUser = async (targetUser: UserAPI) => {
 			setError(null);
-			const storedUserId = localStorage.getItem('userId');
-			const idToFetch = storedUserId ? Number(storedUserId) : userId
 
 			const blockedId = {
 				blockedId: targetUser.id
 			};
 			try {
 
-				const response = await fetch('http://localhost:3000/users/' + idToFetch + '/unblock-user', {
+				const response = await fetch('http://localhost:3000/users/' + logInfo.userId + '/unblock-user', {
 					method: 'PATCH',
 					headers: {
 						'Content-Type': 'application/json',
@@ -195,7 +162,7 @@ type Props = {
 			let userFound: UserAPI | null = null;
 
 			try {
-				const response = await fetch('http://localhost:3000/users/' + userId, {
+				const response = await fetch('http://localhost:3000/users/' + logInfo.userId, {
 					method: 'GET',
 					headers: {
 						'Authorization' : 'Bearer ' + logInfo.token,
@@ -220,17 +187,15 @@ type Props = {
 			}
 			return userFound;
 			
-		}, [])
+		}, [logInfo.token, logInfo.userId])
 
 		const fetchUserFriends = useCallback(async (id: number) => {
 			setError(null);
-			const storedUserId = localStorage.getItem('userId');
-			const idToFetch = storedUserId ? Number(storedUserId) : userId
 
 			let userFriends: UserAPI[] = [];
 
 			try {
-				const response = await fetch('http://localhost:3000/users/'+ idToFetch + '/show-friends', {
+				const response = await fetch('http://localhost:3000/users/'+ logInfo.userId + '/show-friends', {
 					method: 'GET',
 					headers: {
 						'Authorization' : 'Bearer ' + logInfo.token,
@@ -255,16 +220,14 @@ type Props = {
 				setError( error.message);
 			}
 			return userFriends;
-		}, []);
+		}, [logInfo.token, logInfo.userId]);
 
 		const fetchUserBlockings = useCallback(async (id: number) => {
 			setError(null);
-			const storedUserId = localStorage.getItem('userId');
-			const idToFetch = storedUserId ? Number(storedUserId) : userId
 			let userBlockings: UserAPI[] = [];
 
 			try {
-				const response = await fetch('http://localhost:3000/users/' + idToFetch + '/show-blocked-users', {
+				const response = await fetch('http://localhost:3000/users/' + logInfo.userId + '/show-blocked-users', {
 					method: 'GET',
 					headers: {
 						'Authorization' : 'Bearer ' + logInfo.token,
@@ -290,7 +253,7 @@ type Props = {
 				setError( error.message);
 			}
 			return userBlockings;
-		}, []);
+		}, [logInfo.token, logInfo.userId]);
 
 		const isFriend = (otherUser: UserAPI) => {
 			return user?.friends?.some(friend => otherUser.id === friend.id) || false;
@@ -332,7 +295,6 @@ type Props = {
 		const fetchUser = useCallback(async () => {
 			setError(null);
 			try {
-				console.log("inside fetch User: ", logInfo)
 				const response = await fetch('http://localhost:3000/users/' + logInfo.userId, {
 					method: 'GET',
 					headers: {
@@ -368,12 +330,12 @@ type Props = {
 			finally {
 				setLoading(false);
 			}
-		  }, [fetchUserFriends, fetchUserBlockings, userId, token]);
+		  }, [fetchUserFriends, fetchUserBlockings, logInfo.userId, logInfo.token]);
 		
 		
 		useEffect(() => {
 			fetchUser();
-		  }, [fetchUser, setUserId, userId, user?.name]);
+		  }, [fetchUser, userId, user?.name]);
 
 
 		if (loading) {
@@ -385,8 +347,6 @@ type Props = {
 		error: error,
 		token: undefined,
 		logInfo: logInfo,
-		saveToken: saveToken,
-		saveToken2: saveToken2,
 		deleteToken: deleteToken,
 		fetchUserFriends: fetchUserFriends,
 		fetchUserBlockings: fetchUserBlockings,

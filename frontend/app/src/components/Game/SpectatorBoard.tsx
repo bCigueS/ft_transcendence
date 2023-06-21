@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useLayoutEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { PongInfo, SpectatorProp, UpdatedInfo } from './utils/types';
 import LiveBoard from './LiveBoard';
 import PausedBoard from './PausedBoard';
@@ -18,11 +18,8 @@ const HARD_LEVEL = 2;
 const SPECIAL_LEVEL = 3;
 
 // Game's element
-const PLAYER_WIN = -1;
-const OPPONENT_WIN = 1;
-
-const PLAYER_SIDE = -1;
-const OPPONENT_SIDE = 1;
+// const PLAYER_WIN = -1;
+// const OPPONENT_WIN = 1;
 
 // initial data for the game
 const info: PongInfo = {
@@ -48,10 +45,6 @@ export default function SpectatorBoard(spectatorProp: SpectatorProp) {
 	const [isReady, setIsReady] = useState(false);
 	const [gameOver, setGameOver] = useState(false);
 	const [closingText, setClosingText] = useState('');
-	const [gameRoom, setGameRoom] = useState(0);
-	// animation
-	const [frameCount, setFrameCount] = useState(0);
-	const [speed, setSpeed] = useState(0);
 	// ball info
 	const [ballRadius, setBallRadius] = useState(0);
 	const [ballX, setBallX] = useState(0);
@@ -62,10 +55,10 @@ export default function SpectatorBoard(spectatorProp: SpectatorProp) {
 	// paddle info
 	const [paddleHeight, setPaddleHeight] = useState(0);
 	// players info
-	const [playerId, setPlayerId] = useState(0);
+	// const [playerId, setPlayerId] = useState(0);
 	const [playerName, setPlayerName] = useState('');
 	const [playerY, setPlayerY] = useState((info.boardHeight - paddleHeight) / 2);
-	const [opponentId, setOpponentId] = useState(0);
+	// const [opponentId, setOpponentId] = useState(0);
 	const [opponentName, setOpponentName] = useState('');
 	const [opponentY, setOpponentY] = useState((info.boardHeight - paddleHeight) / 2);
 	// obstacle info
@@ -76,12 +69,24 @@ export default function SpectatorBoard(spectatorProp: SpectatorProp) {
 	const [opponentScore, setOpponentScore] = useState(0);
 	// canvas
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
+	// animation
+	const frameId = useRef(0);
+	const prevFrameId = useRef(0);
 
+	// loop to emit a join request to the server
 	useEffect(() => {
+		if (spectatorProp.mode) {
+			console.log('emit a request to join as spectator to server')
 			// send join request to the server as a spectator
-			socket.emit('spectatorJoin', { userId: spectatorProp.userId, gameRoom: spectatorProp.gameRoom });
+			socket.emit('spectatorJoin', { userId: spectatorProp.user.id, gameRoom: spectatorProp.gameRoom });
+		}
+	}, [spectatorProp.mode, spectatorProp.gameRoom, spectatorProp.user.id]);
+
+	// loop to receive several game play events from the server
+	useEffect(() => {
+		if (spectatorProp.mode) {
 			// receive a welcome message from server informing that you are in a specific game room, and trigger a liveBoard
-			socket.on('welcomeSpectator', ({ message, player, opponent, gameRoom }) => {
+			socket.on('welcomeSpectator', ({ message, player, opponent }) => {
 				console.log({ message });
 				if (player) {
 					setPlayerName(player.name);
@@ -89,7 +94,6 @@ export default function SpectatorBoard(spectatorProp: SpectatorProp) {
 				if (opponent) {
 					setOpponentName(opponent.name);
 				}
-				setGameRoom(gameRoom);
 				setIsLive(true);
 				setIsReady(false);
 			});
@@ -99,7 +103,6 @@ export default function SpectatorBoard(spectatorProp: SpectatorProp) {
 				setBallY(gameInfo.y);
 				setDeltaX(gameInfo.dx);
 				setDeltaY(gameInfo.dy);
-				setSpeed(gameInfo.s);
 				setPlayerY(gameInfo.playerY);
 				setOpponentY(gameInfo.opponentY);
 				setPlayerScore(gameInfo.pScore);
@@ -121,9 +124,10 @@ export default function SpectatorBoard(spectatorProp: SpectatorProp) {
 				setClosingText(message);
 				setGameOver(true);
 				setIsRunning(false);
-				socket.emit('leaveGameRoom', gameRoom)
+				socket.emit('leaveGameRoom', spectatorProp.gameRoom)
 			});
-	}, []);
+		}
+	}, [spectatorProp.mode, spectatorProp.gameRoom]);
 	
 	// function to set initial value to start the game
 	const startGame = () => {
@@ -150,27 +154,27 @@ export default function SpectatorBoard(spectatorProp: SpectatorProp) {
 	}
 		
 	// function to set an initial ball position and direction to start the round
-	const ballServe = () => {
+	const ballServe = useCallback(() => {
 		// receiving the ball direction from server
 		socket.on('ballServe', ({ dx, dy }) => {
 			setDeltaX(dx);
 			setDeltaY(dy);
 			setBallX(info.boardWidth / 2);
 			setBallY(info.boardHeight / 2);
-			setSpeed(info.initialSpeed + spectatorProp.gameLevel);
 		});
-	}
+	}, []);
 
-	const updateScore = () => {
+	// functiom to set the uodated new score after ball passed one of the player paddle
+	const updateScore = useCallback(() => {
 		// receiving the updated score from server
 		socket.on('newScore', ({pScore, oScore}) => {
 			setPlayerScore(pScore);
 			setOpponentScore(oScore);
 		});
-	}
+	}, []);
 	
 	// function to detect ball collision with all 4 part of the walls/borders
-	const detectWallCollision = () => {
+	const detectWallCollision = useCallback(() => {
 		const minY    = ballRadius;
 		const maxY    = info.boardHeight - ballRadius;
 
@@ -184,44 +188,43 @@ export default function SpectatorBoard(spectatorProp: SpectatorProp) {
 			setDeltaY(y => y * -1);
 			setBallY(maxY);
 		}
-	}
+	}, [ballRadius, ballY]);
 		
 	// function to detect when a ball hit the paddles
-	const detectCollision = async () => {
+	const detectCollision = useCallback( async () => {
 		// receiving the new ball direction from server
-		socket.on('ballLaunch', ({dx, dy, x, y, s}) => {
+		socket.on('ballBounce', ({dx, dy, x, y, s}) => {
 			setDeltaX(dx);
 			setDeltaY(dy);
 			setBallX(x);
 			setBallY(y);
-			setSpeed(s);
 		});
-	}
+	}, []);
 	
 	// function to calculate the movement of the ball based on its direction
-	const moveBall = () => {
+	const moveBall = useCallback(() => {
 		setBallX(x => x += deltaX);
 		setBallY(y => y += deltaY);
-	}
+	}, [deltaX, deltaY]);
 
 	// function to calculate the opponent movement (against computer or other player)
-	const moveOpponent = () => {
+	const moveOpponent = useCallback(() => {
 		// receiving a new opponent position from the server
 		socket.on('opponentMove', ({y}) => {
 			setOpponentY(y);
 		});
-	}
+	}, []);
 
 	// function to calculate the players movement based on its input (mouse event or keyboard event)
-	const movePlayer = () => {
+	const movePlayer = useCallback(() => {
 		// receiving a new player position from the server
 		socket.on('playerMove', ({y}) => {
 			setPlayerY(y);
 		});
-	}
+	}, []);
 
 	// function to calculate the steady movement of the obstacle
-	const moveObstacle = () => {
+	const moveObstacle = useCallback(() => {
 		const nextPostUp = obstacleY - info.obstacleSpeed;
 		const nextPostDown = obstacleY + info.obstacleSpeed + info.obstacleHeight;
 		if (obstacleDir && nextPostUp >= 0) {
@@ -231,10 +234,10 @@ export default function SpectatorBoard(spectatorProp: SpectatorProp) {
 		} else {
 			setObstacleDir(current => !current);
 		}
-	} 
+	}, [obstacleDir, obstacleY]);
 	
 	// function to draw the board with its initial element
-	const drawBoard = (context: CanvasRenderingContext2D) => {
+	const drawBoard = useCallback((context: CanvasRenderingContext2D) => {
 		context.clearRect(0, 0, info.boardWidth, info.boardHeight);
 		// draw background
 		context.fillStyle = '#4E6E81';
@@ -245,10 +248,10 @@ export default function SpectatorBoard(spectatorProp: SpectatorProp) {
 		context.font = '42px Inter';
 		context.fillText(' ' + playerScore, 245, 50);
 		context.fillText(' ' + opponentScore, 345, 50);
-	}
+	}, [opponentScore, playerScore]);
 	
 	// function to draw the elements of the game
-	const drawElement = (context: CanvasRenderingContext2D) => {
+	const drawElement = useCallback((context: CanvasRenderingContext2D) => {
 		// draw player
 		context.fillStyle = '#F2F2F2';
 		context.fillRect(info.playerX, playerY, info.paddleWidth, paddleHeight);
@@ -269,50 +272,59 @@ export default function SpectatorBoard(spectatorProp: SpectatorProp) {
 			context.fillRect(info.obstacleX, obstacleY, info.obstacleWidth, info.obstacleHeight);
 			context.save();
 		}
-	}
-
-	// render the game
-	useLayoutEffect(() => {
-		const canvas = canvasRef.current;
-		if (!canvas)
-		return;
-		const context = canvas.getContext('2d');
-		if (!context)
-		return;
-		
-		drawBoard(context);
-		// start animation
-		if (isRunning && !isPaused) {
-			drawElement(context);
-			moveBall();
-			movePlayer();
-			moveOpponent();
-			if (spectatorProp.gameLevel === SPECIAL_LEVEL) {
-				moveObstacle();
-			}
-			ballServe();
-			detectCollision();
-			detectWallCollision();
-			updateScore();
-		}
-	}, [frameCount]);
+	}, [ballRadius, ballX, ballY, obstacleY, opponentY, paddleHeight, playerY, spectatorProp.gameLevel]);
 	
-	// update the frameCount
-	useLayoutEffect(() => {
-		const fps = 24;
-		let frameId: number;
-
-		const render = () => {
-			setTimeout(() => {
-				setFrameCount(fc => fc + 1);
-				frameId = requestAnimationFrame(render);
-			}, 1000 / fps);
-		}
-
-		frameId = requestAnimationFrame(render);
+	// render the game
+	useEffect(() => {
+		const canvas = canvasRef.current;
+		if (!canvas) return;
 		
-		return () => {window.cancelAnimationFrame(frameId);}
-	}, []);
+		const context = canvas.getContext('2d');
+		if (!context) return;
+		
+		const fps = 24;
+		const frameDuration = 1000 / fps; // Frame duration in milliseconds
+		
+		const render = (timestamp: number) => {
+			const deltaTime = timestamp - prevFrameId.current;
+		
+			if (deltaTime >= frameDuration) {
+				prevFrameId.current = timestamp;
+				
+				drawBoard(context);
+				if (isRunning && !isPaused) {
+					drawElement(context);
+					ballServe();
+					updateScore();
+					moveBall();
+					movePlayer();
+					moveOpponent();
+					detectCollision();
+					detectWallCollision();
+					// added function for special level
+					if (spectatorProp.gameLevel === SPECIAL_LEVEL) {
+						moveObstacle();
+					}
+				}
+			}
+			
+			frameId.current = requestAnimationFrame(render);
+		};
+
+		frameId.current = requestAnimationFrame(render);
+		
+		// Cleanup
+		return () => {
+			window.cancelAnimationFrame(frameId.current);
+		};
+
+		}, [drawBoard, drawElement,
+			ballServe, updateScore,
+			moveBall, movePlayer, moveOpponent,
+			detectCollision, detectWallCollision,
+			moveObstacle,
+			spectatorProp.gameLevel,
+			isRunning, isPaused]);
 	
 	return (
 		<>
@@ -321,14 +333,15 @@ export default function SpectatorBoard(spectatorProp: SpectatorProp) {
 					isReady={isReady}
 					playerName={playerName}
 					opponentName={opponentName}
+					inviteMode={false}
 					spectatorMode={true}
-					start={() => {startGame(); setIsLive(false)}}
+					start={() => {startGame()}}
 					closingText={closingText}
 				/>
 			)}
 			{(isPaused) && (
 				<PausedBoard
-					spectatorMode={true}
+					mode={'spectator'}
 				/>
 			)}
 			<div className={classes.container}>

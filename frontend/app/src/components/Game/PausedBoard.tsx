@@ -1,20 +1,22 @@
-import { useState } from 'react';
 import classes from '../../sass/components/Game/Board.module.scss';
+import { PausedProps } from './utils/types';
 
-export default function PausedBoard({ spectatorMode }: { spectatorMode: boolean }) {
-	const [text, setText] = useState('');
-	if (spectatorMode) {
-		setText("Please wait for the players to continue the game");
-	} else {
-		setText("Press 'spacebar' to continue playing");
-	}
+export default function PausedBoard({ mode }: PausedProps) {
 	return (
 		<div className={classes.container}>
 			<div className={classes.content}>
-				<>
-					<h2>Game is paused</h2>
-					<p>{text}</p>
-				</>
+				{(mode === 'spectator') && (
+					<>
+						<h2>Game is paused</h2>
+						<p>Please wait for the players to continue the game</p>
+					</>
+				)}
+				{(mode === 'play') && (
+					<>
+						<h2>Game is paused</h2>
+						<p>Press 'spacebar' to continue playing</p>
+					</>
+				)}
 			</div>
 		</div>
 	);

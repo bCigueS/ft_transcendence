@@ -1,3 +1,5 @@
+import { UserAPI } from "../../../store/users-contexte";
+
 export type PongInfo = {
 	boardWidth: number;
 	boardHeight: number;
@@ -16,10 +18,14 @@ export type PongInfo = {
 export type PongProp = {
 	userId: number;
 	userName: string;
+	// user: UserAPI;
+	// opponent: UserAPI;
+	inviteMode: boolean;
 }
 
 export type SpectatorProp = {
-	userId: number;
+	mode: number;
+	user: UserAPI;
 	gameLevel: number;
 	gameRoom: string;
 }
@@ -40,6 +46,7 @@ export type BallInfo = {
 	dx: number;
 	dy: number;
 	x: number;
+	y: number;
 	s: number;
 }
 
@@ -48,13 +55,14 @@ export type CollisionInfo = {
 	r: number;
 	playerY: number;
 	paddleHeight: number;
-	speed: number;
+	ballSpeed: number;
 }
 
 export type LiveBoardProps = {
 	isReady: boolean;
 	playerName: string;
 	opponentName: string;
+	inviteMode: boolean;
 	spectatorMode: boolean;
 	closingText: string;
 	start(): void;
@@ -66,10 +74,15 @@ export interface State {
 }
 
 export type ModalProps = {
+	inviteMode: boolean;
 	buttonText: string;
 	closingText: string;
 	onStartPage(): void;
 	onTool(mode: "keyboard" | "mouse"): void;
 	onDifficulty(level: 0 | 1 | 2 | 3): void;
 	onPlayerMode(mode: "single" | "double"): void;
+}
+
+export type PausedProps = {
+	mode: "spectator" | "play";
 }

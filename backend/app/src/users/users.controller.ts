@@ -249,6 +249,18 @@ export class UsersController {
 		const user = await this.usersService.findOne(id);
 		return res.sendFile(user.avatar, { root: './uploads'});
 	}
+
+	// @Get(':id/games')
+    // @ApiOkResponse({ type: GameEntity, isArray: true })
+    // async seeUserGames(
+    //     @Param('id', ParseIntPipe) id: number) {
+
+    //     const games = await this.usersService.seeUserGames(id);
+    //     if (!games)
+    //         throw new NotFoundException(`User with ${id} does not have any game.`);
+        
+    //     return games;
+    // }
 	
 	@Get(':id/games')
     @ApiOkResponse({ type: GameEntity, isArray: true })

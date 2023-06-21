@@ -2,7 +2,6 @@ import React, { useContext } from 'react';
 import { UserAPI, UserContext } from '../../store/users-contexte';
 import ProfilPatch from './ProfilPatch';
 import { json } from 'react-router-dom';
-import DoubleAuthPannel from '../Auth/DoubleAuthPannel';
 
 
 const ProfilSettings: React.FC<{user: UserAPI | null}> = ( { user } ) => {
@@ -12,9 +11,7 @@ const ProfilSettings: React.FC<{user: UserAPI | null}> = ( { user } ) => {
 	const handlePatchUser = async(DataForm: any) => {
 
 		const patchData = {
-			name: DataForm.get('name') === '' ? userCtx.user?.name : DataForm.get('name'),
-			doubleAuth: DataForm.get('auth') === 'true' ? true : false,
-			
+			name: DataForm.get('name') === '' ? userCtx.user?.name : DataForm.get('name'),			
 		}
 
 		const avatarData = new FormData();
@@ -61,8 +58,8 @@ const ProfilSettings: React.FC<{user: UserAPI | null}> = ( { user } ) => {
 
 	return (
 		<>
-			{/* <ProfilPatch onPatchUser={handlePatchUser}/> */}
-			<DoubleAuthPannel />
+			<ProfilPatch onPatchUser={handlePatchUser}/>
+			{/* <DoubleAuthPannel /> */}
 		</>
 	)
 }

@@ -1,6 +1,5 @@
 // Basic Inports
 import { useCallback, useContext, useEffect, useState } from 'react';
-import { json, useLoaderData } from 'react-router-dom';
 
 //	Components Inports
 import LeaderboardProfil from '../components/Leaderboard/LeaderboardProfil';
@@ -33,7 +32,12 @@ export default function Leaderboard() {
 	};
 	const fetchCommunity = useCallback(async() => {
 		try {
-			const response = await fetch('http://localhost:3000/users/' + userCtx.user?.id + '/show-community');
+			const response = await fetch('http://localhost:3000/users/' + userCtx.logInfo?.userId + '/show-community', {
+				method: 'GET',
+				headers: {
+					'Authorization' : 'Bearer ' + userCtx.logInfo?.token,
+				}
+			});
 			
 			if (!response.ok)
 			throw new Error("Failed to fetch show-community")
@@ -54,7 +58,7 @@ export default function Leaderboard() {
 		} catch(error: any) {
 			console.error(error.message);
 		}
-	}, []);
+	}, [userCtx.logInfo?.token, userCtx.logInfo?.userId]);
 
 	useEffect(() => {
 		fetchCommunity();

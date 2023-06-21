@@ -17,7 +17,7 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 		setContentDisplay(display);
 	};
 
-	const fetchUser = async(id: number) => {
+	const fetchUser = useCallback(async(id: number) => {
 		const response = await fetch('http://localhost:3000/users/' + id, {
 			method: 'GET', 
 			headers: {
@@ -36,10 +36,9 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 			wins: data.wins
 		}
 		return user;
-	}
+	},[userCtx.logInfo?.token])
 
-	const parseMatchData = async (match: any) => {
-		console.log(match);
+	const parseMatchData = useCallback(async (match: any) => {
 
 		const idOfUser: number = match.players[0].userId === userCtx.user?.id ? 0 : 1;
 		const idOfOppo: number = match.players[0].userId === userCtx.user?.id ? 1 : 0;
@@ -50,11 +49,9 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 			opponentScore: match.players[idOfOppo].score
 		}
 
-		console.log(matchInfo);
 		return matchInfo;
-	}
+	},[fetchUser, userCtx.user?.id]);
 
-	console.log(user?.id);
 	const fetchMatchSummary = useCallback(async() => {
 		if (user?.id === undefined)
 			return ;
@@ -77,21 +74,14 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 			const parsedMatch = await parseMatchData(match);
 			matchArray = [...matchArray, parsedMatch];
 		  }));
-		// data.forEach(async (match: UserMatch) => {
-		// 	const parsedMatch = await parseMatchData(match);
-		// 	matchArray = [...matchArray, parsedMatch]; 
-		// });
 
 		setMatchesSummary(matchArray);
-		// userCtx.user.setGamesPlayed(matchArray.length);
-		console.log('match array: ', matchArray);
-		console.log("Result: ", matchesSummary);
-	}, [user?.id])
+	}, [user?.id, userCtx.logInfo?.token, parseMatchData])
 
 	useEffect(() => {
 		setContentDisplay('Matchs');
 		fetchMatchSummary();
-	}, [user?.name, user?.id]);
+	}, [user?.name, user?.id, fetchMatchSummary]);
 
 	return (
 		<div className={classes.container}>
@@ -123,6 +113,14 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 						className={`${classes.btn} ${contentDisplay === 'Settings' ? classes.active : ''}`} 
 						onClick={tabHandler}>
 						Settings
+					</button>
+				}
+				{
+					user?.id === userCtx.user?.id &&
+					<button 
+						className={`${classes.btn} ${contentDisplay === 'Authentication' ? classes.active : ''}`} 
+						onClick={tabHandler}>
+						Auth
 					</button>
 				}
 			</div>
