@@ -46,7 +46,7 @@ export type BallInfo = {
 	dx: number;
 	dy: number;
 	x: number;
-	// y: number;
+	y: number;
 	s: number;
 }
 
