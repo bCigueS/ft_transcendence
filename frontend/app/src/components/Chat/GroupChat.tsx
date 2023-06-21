@@ -31,7 +31,7 @@ const GroupChat: React.FC<Props> = (props) => {
     const [ displayAdmin, setDisplayAdmin ] = useState(false);
     const [ displayBanned, setDisplayBanned ] = useState(false);
     const [ displayMuted, setDisplayMuted ] = useState(false);
-    const [joinLink, setJoinLink] = useState('');
+    const [ joinLink, setJoinLink ] = useState('');
 	const userCtx = useContext(UserContext);
     
 
@@ -75,6 +75,7 @@ const GroupChat: React.FC<Props> = (props) => {
     const handleClickLeave = () => {
         console.log(userCtx.user?.name, ' left channel ', props.chat.name);
     }
+
     const handleClickDelete = () => {
         setUserConfirm(true);
     }
@@ -221,8 +222,8 @@ const GroupChat: React.FC<Props> = (props) => {
         handleRemoveMute(member);
         const newMembers = members.filter(m => m.id !== member.id);
         setMembers(newMembers);
-        props.onKick(props.chat.id, member.id);
         kickUser(props.chat.id, member.id);
+        props.onKick(props.chat.id, member.id);
     }
 
     useEffect(() => {
@@ -364,21 +365,23 @@ const GroupChat: React.FC<Props> = (props) => {
                     <p className={classes.error}>There are no muted users in this group.</p>
                 }
                     </div>
-                    <div className={classes.passwordLabel}>
-                    <h2>
-                    Password protection
-                    </h2>
-                    <i 
-                        title={isChatPasswordProtected ? "block" : "unblock"}
-                        onClick={handlePasswordProtect}
-                        className={isChatPasswordProtected ? 'fa-solid fa-lock' : 'fa-solid fa-lock-open'}>
-                    </i>
-                </div>
-                <div>
-                        Invite your friends
-                        <p>Join link: {joinLink}</p>
+                    <div className={classes.invite}>
+                        <h2>
+                            Invite your friends
+                        </h2>
+                        {/* <p>Join link: {joinLink}</p> */}
                         <button onClick={copyToClipboard}>Copy Join Link</button>
-                </div>
+                    </div>
+                    <div className={classes.passwordLabel}>
+                        <h2>
+                        Password protection
+                        </h2>
+                        <i 
+                            title={isChatPasswordProtected ? "block" : "unblock"}
+                            onClick={handlePasswordProtect}
+                            className={isChatPasswordProtected ? 'fa-solid fa-lock' : 'fa-solid fa-lock-open'}>
+                        </i>
+                    </div>
                 {
                     !isChatPasswordProtected && 
                     <div className={classes.label}>
@@ -398,23 +401,22 @@ const GroupChat: React.FC<Props> = (props) => {
                         }
                     </div>
                 }
-                {
-                    <button className={classes.deleteButton} onClick={handleClickLeave}>Leave {chatName}</button>
-                }
-                {
-                    userConfirm &&
-                    <div className={classes.clickDelete}>
-                    <h3>Are you sure you wish to leave this chat?</h3>
-                    <div className={classes.actions}>
-                    <button className={classes.cancelButton} onClick={handleCancelDelete}>Cancel</button>
-                    <button className={classes.button} onClick={handleConfirmDelete}>Confirm</button>
-                    </div>
-                    </div>
-                }
+                <div className={classes.actions}>
                 {
                     isCreator && 
                     <button className={classes.deleteButton} onClick={handleClickDelete}>Delete {chatName}</button>
                 }
+                {
+                    <button className={classes.leaveButton} onClick={handleClickLeave}>Leave {chatName}</button>
+                }
+                </div>
+                <div className={classes.actions}>
+                {
+                    
+                    userConfirm &&
+                        <p className={classes.error}>Are you sure you wish to delete this chat?</p>
+                    }
+                </div>
         </div>
         </div>
     );

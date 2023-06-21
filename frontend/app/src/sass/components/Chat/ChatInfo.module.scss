@@ -29,15 +29,10 @@
     }
 
     button {
-		@include buttonMixin();	
+		@include buttonMixin($color: $gunmetal-dark);	
 	}
     
-    .deleteButton {
-        display: flex;
-        flex-direction: row;
-        justify-content: flex-end;
-        left: 65%;
-    }
+    
     
     .clickDelete {
         
@@ -59,6 +54,21 @@
         }
     }
 
+    .invite {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+        margin-bottom: 0.5rem;
+        margin-top: 2rem;
+
+        h2 {
+            top: 2rem;
+        }
+
+        
+    }
+
     .passwordLabel {
         display: flex;
         flex-direction: row;
@@ -77,7 +87,6 @@
         }
     }
 
-            // color: yellow;
     .display {
         display: flex;
         flex-direction: row;
@@ -116,14 +125,6 @@
 			padding: 0 0.8rem ;
 		}
 
-		
-		// label, h2 {
-		// 	font-size: 1.6rem;
-		// 	font-weight: 800;
-		// 	letter-spacing: -0.15rem;
-
-		// }
-
         
 	}
     .error {
@@ -132,6 +133,20 @@
         // font-weight: 800;
         // font-size: 1.2rem;
         // letter-spacing: 0.1rem;
+    }
+
+    .actions {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+
+        .leaveButton {
+            @include buttonMixin($color: $gunmetal-dark);   
+        }
+
+        .deleteButton {
+            @include buttonMixin();   
+        }
     }
 
 }
