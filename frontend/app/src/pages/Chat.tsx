@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import ChatOverview from '../components/Chat/ChatOverview';
 import classes from '../sass/pages/Chat.module.scss';
 import { UserContext } from '../store/users-contexte';
@@ -73,7 +73,7 @@ export default function Chat() {
 		socket?.emit("message", message);
 	}
 
-	const messageListener = (message: {
+	const messageListener = useCallback(async (message: {
 		id: number,
 		senderId: number,
 		content: string,
@@ -122,13 +122,37 @@ export default function Chat() {
 		}
 
 		console.log('received message in message listener: ', newMessage.content);
-	  };
+	  }, [chats, userCtx]);
 
-	const joinListener = (channelId: string) => {
+	  const fetchChannels = useCallback(async() => {
+		try {
+			const response = await fetch('http://localhost:3000/channels/userId/' + userCtx.user?.id, {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+			});
+		
+			if (response.status === 400) {
+				throw new Error("Failed to fetch user channels!") ;
+			}
+
+			if (!response.ok)
+				throw new Error("Failed to fetch user channels!") ;
+
+			const data = await response.json();
+			setChats(data);
+			
+		} catch (error: any) {
+			console.log(error.message);
+		}
+	}, [userCtx.user?.id])
+	
+	const joinListener = useCallback((channelId: string) => {
 		console.log('client joined channel ', channelId);
 		socket?.emit('join', parseInt(channelId, 10));
 		fetchChannels();
-	  }
+	  }, [fetchChannels, socket]);
 	  
 	useEffect(() => {
 		socket?.on("message", messageListener);
@@ -156,7 +180,12 @@ export default function Chat() {
 		};
 	}, [chats, socket]);
 
-	const checkLastMessageDeleted = (message: MessageAPI) => {
+	const handleChatDeletion = useCallback((id: number) => {
+		setChats(chats => chats.filter(chat => chat.id !== id));
+		socket?.emit('chatDeleted', { chatId: id, userId: userCtx.user?.id });
+	}, [socket, userCtx.user?.id]);
+
+	const checkLastMessageDeleted = useCallback((message: MessageAPI) => {
 		const chatMessage = chats.find(chat => chat.id === message.channelId);
 
 		if (chatMessage?.messages.length === 0)
@@ -164,7 +193,7 @@ export default function Chat() {
 			deleteChat(chatMessage);
 			handleChatDeletion(chatMessage.id);
 		}
-	}
+	}, [chats, handleChatDeletion])
 
 	useEffect(() => {
 		socket?.on("messageDeleted", (deletedMessage) => {
@@ -183,7 +212,7 @@ export default function Chat() {
 		return () => {
 			socket?.off('messageDeleted');
 		};
-	}, [chats, socket]);
+	}, [chats, socket, checkLastMessageDeleted]);
 	  
 	useEffect(() => {
 		const newSocket = io("http://localhost:3000/chat");
@@ -195,45 +224,16 @@ export default function Chat() {
 		return () => {
 		  newSocket.removeAllListeners();
 		}
-	}, [setSocket]);
+	}, [setSocket, userCtx.user?.id]);
 
 	const handleMessageDeletion = (message: MessageAPI) => {
 		console.log('about to delete: ', message.content);
 		socket?.emit('messageDeleted', { message: message })
 	}
-
-	const handleChatDeletion = (id: number) => {
-		setChats(chats => chats.filter(chat => chat.id !== id));
-		socket?.emit('chatDeleted', { chatId: id, userId: userCtx.user?.id });
-	};
-
-	const fetchChannels = async() => {
-		try {
-			const response = await fetch('http://localhost:3000/channels/userId/' + userCtx.user?.id, {
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-			});
-		
-			if (response.status === 400) {
-				throw new Error("Failed to fetch user channels!") ;
-			}
-
-			if (!response.ok)
-				throw new Error("Failed to fetch user channels!") ;
-
-			const data = await response.json();
-			setChats(data);
-			
-		} catch (error: any) {
-			console.log(error.message);
-		}
-	}
 	
-    useEffect(() => {
+	useEffect(() => {
 		fetchChannels();
-	}, []);
+	}, [fetchChannels]);
 
 	useEffect(() => {
 		if(socket && chats.length > 0) {
@@ -247,28 +247,23 @@ export default function Chat() {
 		FUNCTIONS WHEN SPECIFIC CHAT IS SELECTED
 	*/
 
-	const onSaveConversation = (channel: Channel) => {
+	const onSaveConversation = useCallback((channel: Channel) => {
 		setSelectedConversation(channel);
 		socket?.emit('join', channel.id);
-	}
+	}, [socket])
 
 	useEffect(() => {
 		let selectedChannel = chats.find(chat => chat.id === selectedConversation?.id);
 		if (selectedChannel)
 			setMessages(selectedChannel.messages);
-	}, [selectedConversation]);
+	}, [selectedConversation, chats]);
 
 	/*
 		CREATE DUMMY CHAT WHEN START DISCUSSION
 	*/
 
-	useEffect(() => {
-		if (chats) {
-			checkPreviousPage();
-		}
-	}, [chats]);
-
-	const checkPreviousPage = () => {
+	
+	const checkPreviousPage = useCallback(() => {
 
 		if (location?.state?.newChat) {
 
@@ -299,7 +294,14 @@ export default function Chat() {
 				onSaveConversation(newChat);
 			}
 		}
-	}
+	}, [chats, location?.state?.newChat, onSaveConversation, userCtx.user])
+
+	useEffect(() => {
+		if (chats) {
+			checkPreviousPage();
+		}
+	}, [chats, checkPreviousPage]);
+
 
 	chats.sort((a, b) => {
 
@@ -343,7 +345,8 @@ export default function Chat() {
 				(chats.length > 0) ? 
 				<MessageList
 					send={send} 
-					chat={selectedConversation} 
+					chat={selectedConversation}
+					msgs={messages}
 					chats={chats}
 					onDelete={handleMessageDeletion}/>
 				: <NoConvo/>
