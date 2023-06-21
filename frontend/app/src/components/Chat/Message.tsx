@@ -1,10 +1,11 @@
-import { useContext, useEffect, useState } from 'react';
+import { MouseEventHandler, useContext, useEffect, useState } from 'react';
 
 import classes from '../../sass/components/Chat/Message.module.scss';
 import { UserAPI, UserContext } from '../../store/users-contexte';
 import Modal from '../UI/Modal';
 import { Channel, MessageAPI } from './chatUtils';
 import ProfilIcon from '../Profile/ProfilIcon';
+import { useNavigate } from 'react-router-dom';
 
 
 const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean, 
@@ -17,6 +18,7 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 	const [ showModal, setShowModal ] = useState(false);
 	const [ sender, setSender ] = useState<UserAPI | null>(null);
 	const userCtx = useContext(UserContext);
+	const navigate = useNavigate();
 
 	const date = new Date(message.createdAt);
 
@@ -95,6 +97,18 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 	const handleUserConfirmation = () => {
 		setShowModal(false);
 	}
+	
+	const handleClickJoinGame = (senderId: number, gameRoom: string) => {
+		console.log(senderId, gameRoom);
+		navigate('/pong', {
+			state: {
+				opponentId: senderId,
+				gameInvitation: true,
+				isInvited: true,
+				gameRoom: gameRoom,
+			}
+		})
+	}
 
 	const displayMessage = () => {
 
@@ -104,8 +118,24 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 				<a href="#" onClick={() => onJoin(+channelId)}>
 					{message.content}
 				</a>
-		);
-	} else {
+			);
+		} else if (message.content.includes('joinGame/')) {
+			const invitation = message.content.split('>')[0];
+			const link = message.content.split('>')[1];
+
+			const info = message.content.split('/')[1];
+			const gameRoom = info.split('_')[0];
+			const senderId = info.split('_')[1];
+			// console.log('in message, gameRoom and senderId are ', gameRoom, senderId);
+			return (
+				<>
+					<p>{invitation}</p>
+					<a href="#" onClick={() => handleClickJoinGame(+senderId, gameRoom)}>
+						{link}
+					</a>
+				</>
+			);
+		} else {
 		return (
 			<p>{message.content}</p>
 			);

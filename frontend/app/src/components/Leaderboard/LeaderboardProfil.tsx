@@ -89,8 +89,9 @@ const LeaderboardProfil: React.FC<{user: UserAPI}> = ( { user }) => {
 	const handleClickGame = () => {
 		navigate('/pong', {
 			state: {
-				opponent: user,
+				opponentId: user.id,
 				gameInvitation: true,
+				isInvited: false,
 			}
 		})
 	}
