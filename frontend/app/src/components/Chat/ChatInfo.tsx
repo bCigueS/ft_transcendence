@@ -13,7 +13,8 @@ type Props = {
     className?: string,
     chat: Channel,
 	onInfoClick: () => void,
-    onDelete: () => void
+    onDelete: () => void,
+    onKick: (channelId: number, kickedId: number) => void
 };
 
 type BackdropProps = {
@@ -79,6 +80,7 @@ const Overlay: React.FC<Props> = (props) => {
 					onDelete={props.onDelete}
 					onRemove={removeMember}
 					onAddAdmin={onAddAdmin}
+					onKick={props.onKick}
 				/>
 			}
 		</Card>
@@ -97,7 +99,8 @@ const ChatInfo: React.FC<Props> = (props) => {
 			{portalOverlays && ReactDOM.createPortal(<Overlay 
 							chat={props.chat}
 							onInfoClick={props.onInfoClick}
-							onDelete={props.onDelete}>{props.children}</Overlay>, portalOverlays)}
+							onDelete={props.onDelete}
+							onKick={props.onKick}>{props.children}</Overlay>, portalOverlays)}
 		</Fragment>
 	)
 }
