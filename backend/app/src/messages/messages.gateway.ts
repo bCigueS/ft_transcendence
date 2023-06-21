@@ -8,6 +8,7 @@ import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { MessageEntity } from './entities/message.entity';
+import { GamesGateway } from '../games/games.gateway';
 
 @WebSocketGateway({ namespace: '/chat', cors: '*' })
 export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
@@ -20,7 +21,31 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 
   afterInit(): void {
     this.logger.log(`Websocket chat gateway initialized.`);
+
+	GamesGateway.eventEmitter.on('gameInvitation', async ({ senderId, receiverId, gameRoom }) => {
+		const sender = await this.prisma.user.findUnique({ where: { id: senderId } });
+
+		// prisma.channels.findMany where name = "private" with members are sender and receiver
+		// if exist, get channelId and you have it
+		// else, create channel 
+			// name: "private",
+			// members: [sender, receiver]
+			// creatorId: senderId
+			// get  CHANNEL ID AFTER CREATED
+		// 
+
+		if (!sender) {
+			throw new NotFoundException(`User with ${senderId} does not exist.`);
+		}
+		
+		this.handleMessage(receiverId, {
+		content: `${sender.name} has invited you to a game!`,
+		channelId: gameRoom,
+		senderId: senderId,
+	  });
+	});
   }
+
 
   @SubscribeMessage('join')
   async handleJoin(client: Socket, channelId: number) {

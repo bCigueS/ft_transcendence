@@ -219,7 +219,7 @@ export default function Pong(prop: PongProp) {
 		return () => {
 		socket.off('updateGame', handleUpdateGame);
 		};
-	}, []);
+	}, [ballSpeed, ballX, ballY, deltaX, deltaY, gameRoom, opponentScore, opponentY, playerScore, playerY]);
 
 	// function to set an initial ball position and direction to start the round
 	const ballServe = useCallback((side: number) => {
@@ -461,7 +461,7 @@ export default function Pong(prop: PongProp) {
 	const moveBall = useCallback(() => {
 		setBallX(x => x += deltaX);
 		setBallY(y => y += deltaY);
-	}, [ballX, ballY, deltaX, deltaY]);
+	}, [deltaX, deltaY]);
 
 	// function to calculate the opponent movement (against computer or other player)
 	const moveOpponent = useCallback(() => {

@@ -13,18 +13,16 @@ const SPECTATOR_MODE = 1;
 
 export default function Game() {
 
-	// Import the userContext Api (from React)
 	const userCtx = useContext(UserContext);
-	// const location = useLocation();
-	// const { state } = location;
+	const location = useLocation();
+	const { state } = location;
 
 	// player info
+	const user = userCtx.user;
 	const userId = userCtx.user?.id;
 	const userName = userCtx.user?.name;
-	const user = userCtx.user;
-	// const opponent = state?.opponent;
-	// const inviteMode = (state.gameInvitation ? true : false);
-	const inviteMode = false;
+	const opponent = state?.opponent;
+	const inviteMode = (state.gameInvitation ? true : false);
 
 	// ---> to be checked
 	// // screen info
