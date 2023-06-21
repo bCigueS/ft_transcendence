@@ -17,10 +17,6 @@ const MEDIUM_LEVEL = 1;
 const HARD_LEVEL = 2;
 const SPECIAL_LEVEL = 3;
 
-// Game's element
-// const PLAYER_WIN = -1;
-// const OPPONENT_WIN = 1;
-
 // initial data for the game
 const info: PongInfo = {
 	boardWidth: 640,

@@ -193,62 +193,33 @@ export default function Pong(prop: PongProp) {
 			};
 		}
 	}, [playerMode, stopGame]);
+	
+	useEffect(() => {
+		const handleUpdateGame = ({ socketId }: { socketId: string }) => {
+			socket.emit('lastUpdatedInfo', {
+				gameInfo: {
+				x: ballX,
+				y: ballY,
+				dx: deltaX,
+				dy: deltaY,
+				s: ballSpeed,
+				playerY: playerY,
+				opponentY: opponentY,
+				pScore: playerScore,
+				oScore: opponentScore,
+				},
+				socketId: socketId,
+				gameRoom: gameRoom,
+			});
+			console.log('just emit updated info');
+		}
 
-	// --> to be checked
-	// loop to detect an updateGame request event from server for spectatorMode
-	// useEffect(() => {
-	// 	if (playerMode === DOUBLE_MODE) {
-	// 		socket.on('updateGame', ({ socketId }) => {
-	// 			socket.emit('lastUpdatedInfo', {
-	// 				gameInfo: {
-	// 					x: ballX,
-	// 					y: ballY,
-	// 					dx: deltaX,
-	// 					dy: deltaY,
-	// 					s: ballSpeed,
-	// 					playerY: playerY,
-	// 					opponentY: opponentY,
-	// 					pScore: playerScore,
-	// 					oScore: opponentScore,
-	// 				}, 
-	// 				socketId: socketId,
-	// 				gameRoom: gameRoom,
-	// 			});
-	// 		});
-	// 	}
-
-	// }, [playerMode]);
-
-	// const handleUpdateGame = useCallback(
-	//   ({ socketId }: { socketId: string }) => {
-	// 	socket.emit('lastUpdatedInfo', {
-	// 	  gameInfo: {
-	// 		x: ballX,
-	// 		y: ballY,
-	// 		dx: deltaX,
-	// 		dy: deltaY,
-	// 		s: ballSpeed,
-	// 		playerY: playerY,
-	// 		opponentY: opponentY,
-	// 		pScore: playerScore,
-	// 		oScore: opponentScore,
-	// 	  },
-	// 	  socketId: socketId,
-	// 	  gameRoom: gameRoom,
-	// 	});
-	//   },
-	//   []
-	// );
-
-	// useEffect(() => {
-	// 	if (playerMode === DOUBLE_MODE) {
-	// 	  socket.on('updateGame', handleUpdateGame);
-	  
-	// 	  return () => {
-	// 		socket.off('updateGame', handleUpdateGame);
-	// 	  };
-	// 	}
-	//   }, [playerMode, handleUpdateGame]);
+		socket.on('updateGame', handleUpdateGame);
+	
+		return () => {
+		socket.off('updateGame', handleUpdateGame);
+		};
+	}, []);
 
 	// function to set an initial ball position and direction to start the round
 	const ballServe = useCallback((side: number) => {
