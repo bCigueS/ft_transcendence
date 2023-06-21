@@ -4,6 +4,7 @@ import { UpdateChannelDto } from './dto/update-channel.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateMessageDto } from 'src/messages/dto/create-message.dto';
 import { MessagesService } from 'src/messages/messages.service';
+import { MessagesGateway } from 'src/messages/messages.gateway';
 
 @Injectable()
 export class ChannelsService {

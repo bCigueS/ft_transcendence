@@ -89,6 +89,13 @@ export default function Pong(prop: PongProp) {
 	const frameId = useRef(0);
 	const prevFrameId = useRef(0);
 
+	const generateInvitationLink = (gameRoom: string) => {
+		const currentUrl = window.location.href;
+		const invitationLink = `${currentUrl}?gameRoom=${gameRoom}`;
+
+		return invitationLink;
+	}
+
 	// loop to emit a join request to the server
 	useEffect(() => {
 		if (playerMode === DOUBLE_MODE && !prop.inviteMode) {
@@ -97,13 +104,22 @@ export default function Pong(prop: PongProp) {
 		}
 		if (playerMode === DOUBLE_MODE && prop.inviteMode) {
 			console.log('emit a join invitation game request');
-			// socket.emit('joinInvitation', { playerId: prop.userId, opponentId: prop.opponent.id, lvl: level })
+			socket.emit('joinInvitation', { playerId: prop.userId, opponentId: prop.opponent.id, lvl: level })
 		}
 	}, [playerMode, level, prop.userId, prop.inviteMode]);
 
 	// loop to receive several game play events
 	useEffect(() => {
 		if (playerMode === DOUBLE_MODE) {
+			socket.on('passGameRoom', ({ gameRoom }) => {
+				const link = generateInvitationLink(gameRoom);
+					socket.emit('sendInvitation', {
+						playerId: prop.userId,
+						opponentId: prop.opponent.id,
+						// gameRoom: gameRoom,
+						link: link
+					});
+			});
 			// receive a welcome message from server informing that you are in a specific game room, and trigger a liveBoard
 			socket.on('welcome', ({ message, opponent, gameRoom }) => {
 				console.log({ message, opponent, gameRoom });
@@ -113,10 +129,6 @@ export default function Pong(prop: PongProp) {
 				setGameRoom(gameRoom);
 				setIsLive(true);
 				setIsReady(false);
-
-				if (prop.inviteMode) {
-					// to send an invitation to other player
-				}
 			});
 			// receive an information about the opponent from server
 			socket.on('opponentJoin', ({ message, opponent }) => {

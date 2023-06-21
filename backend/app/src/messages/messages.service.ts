@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CreateChannelDto } from 'src/channels/dto/create-channel.dto';
 
 @Injectable()
 export class MessagesService {
@@ -32,5 +33,23 @@ export class MessagesService {
 
 	async remove(id: number) {
 		return await this.prisma.message.delete({ where: { id } });
+	}
+
+	async createChannel(createChannelDto: CreateChannelDto) {
+		const { name, members, creatorId } = createChannelDto;
+
+		const newChannel = await this.prisma.channel.create({
+			data: {
+				name,
+				members: {
+					create: members.map(member => ({
+						userId: member.userId
+					}))
+				},
+				creatorId,
+			},
+		});
+
+		return newChannel;
 	}
 }
