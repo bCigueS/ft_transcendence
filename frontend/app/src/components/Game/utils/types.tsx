@@ -55,7 +55,7 @@ export type CollisionInfo = {
 	r: number;
 	playerY: number;
 	paddleHeight: number;
-	speed: number;
+	ballSpeed: number;
 }
 
 export type LiveBoardProps = {

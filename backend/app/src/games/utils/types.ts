@@ -9,7 +9,7 @@ export type CollisionInfo = {
 	r: number;
 	squareY: number;
 	squareHeight: number;
-	speed: number;
+	ballSpeed: number;
 	middleBoard: number;
 }
 
