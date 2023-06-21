@@ -186,8 +186,10 @@ export default function Chat() {
 
 	const kickListener = useCallback((channelId: string) => {
 		console.log('client was kicked from channel ', channelId);
+		if (selectedConversation && +channelId === selectedConversation.id)
+			setSelectedConversation(undefined);
 		fetchChannels();
-	}, [fetchChannels, socket]);
+	}, [fetchChannels, socket, selectedConversation]);
 	  
 	useEffect(() => {
 		socket?.on("message", messageListener);
