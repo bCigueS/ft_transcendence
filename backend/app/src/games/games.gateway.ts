@@ -153,7 +153,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 
 			if (!gameRoom) {
 				const createGameDto: CreateGameDto = {
-					state: GameState.WAITING,
+					state: GameState.PENDING, // to be changed with WAITING
 					level: lvl,
 					players: [
 						{
@@ -314,7 +314,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 			const dy = gameInfo.speed * Math.sin(angle);
 			const s = gameInfo.speed + 0.5;
 
-			const dist = (gameInfo.x > gameInfo.middleBoard ? gameInfo.x - gameInfo.middleBoard : gameInfo.middleBoard - (gameInfo.x - gameInfo.r));
+			const dist = (gameInfo.x > gameInfo.middleBoard ? gameInfo.x - gameInfo.middleBoard : gameInfo.middleBoard - gameInfo.x);
 			const opponentX = (gameInfo.x > gameInfo.middleBoard ? gameInfo.middleBoard - dist : gameInfo.middleBoard + dist);
 
 			// get the players in the room and send the ball direction to both players (horizontal direction is in reverse/mirror)
@@ -330,7 +330,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 
 			if (game && game.playerSocketIds) {
 				game.playerSocketIds.forEach((socketId) => {
-					this.io.to(socketId).emit('ballLaunch', {
+					this.io.to(socketId).emit('ballBounce', {
 						dx: (socketId === client.id ? dx : dx * -1),
 						dy: dy,
 						x: (socketId === client.id ? gameInfo.x + gameInfo.r : opponentX - gameInfo.r),
@@ -341,7 +341,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 			}
 
 			if (playerSocket) {
-				this.io.to(gameRoom).emit('ballLaunch', {
+				this.io.to(gameRoom).emit('ballBounce', {
 					dx: (playerSocket === client.id ? dx : dx * -1),
 					dy: dy,
 					x: (playerSocket === client.id ? gameInfo.x + gameInfo.r : opponentX - gameInfo.r),

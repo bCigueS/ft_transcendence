@@ -193,7 +193,7 @@ export default function SpectatorBoard(spectatorProp: SpectatorProp) {
 	// function to detect when a ball hit the paddles
 	const detectCollision = useCallback( async () => {
 		// receiving the new ball direction from server
-		socket.on('ballLaunch', ({dx, dy, x, y, s}) => {
+		socket.on('ballBounce', ({dx, dy, x, y, s}) => {
 			setDeltaX(dx);
 			setDeltaY(dy);
 			setBallX(x);

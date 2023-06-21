@@ -93,13 +93,13 @@ export default function Pong(prop: PongProp) {
 	useEffect(() => {
 		if (playerMode === DOUBLE_MODE && !prop.inviteMode) {
 			console.log('emit a join random game request');
-			socket.emit('joinRandom', { id: prop.user.id, lvl: level });
+			socket.emit('joinRandom', { id: prop.userId, lvl: level });
 		}
 		if (playerMode === DOUBLE_MODE && prop.inviteMode) {
 			console.log('emit a join invitation game request');
-			socket.emit('joinInvitation', { playerId: prop.user.id, opponentId: prop.opponent.id, lvl: level })
+			// socket.emit('joinInvitation', { playerId: prop.userId, opponentId: prop.opponent.id, lvl: level })
 		}
-	}, [playerMode, level, prop.user.id]);
+	}, [playerMode, level, prop.userId, prop.inviteMode]);
 
 	// loop to receive several game play events
 	useEffect(() => {
@@ -128,6 +128,22 @@ export default function Pong(prop: PongProp) {
 				console.log({ message });
 				setIsReady(true);
 			});
+			// receiving the ball direction from server
+			socket.on('ballServe', ({ dx, dy }) => {
+				setDeltaX(dx);
+				setDeltaY(dy);
+				setBallX(info.boardWidth / 2);
+				setBallY(info.boardHeight / 2);
+				setBallSpeed(info.initialSpeed + level);
+			});
+			// receiving the new ball direction from server
+			socket.on('ballBounce', ({dx, dy, x, y, s}) => {
+				setDeltaX(dx);
+				setDeltaY(dy);
+				setBallX(x);
+				setBallY(y);
+				setBallSpeed(s);
+			});
 			// receive a pause signal
 			socket.on('makePause', ({ message }) => {
 				console.log({ message });
@@ -140,7 +156,7 @@ export default function Pong(prop: PongProp) {
 				setOpponentScore(oScore);
 			});
 		}
-	}, [playerMode]);
+	}, [playerMode, prop.inviteMode]);
 
 	// function to stop the animation by toggling the isRunning bool, and send a leave request to the server
 	const stopGame = useCallback(() => {
@@ -149,7 +165,7 @@ export default function Pong(prop: PongProp) {
 		if (playerMode === DOUBLE_MODE && winner !== OPPONENT_WIN) {
 			socket.emit('gameOver', {
 				gameInfo: {
-					playerId: prop.user.id,
+					playerId: prop.userId,
 					winner: winner,
 					playerScore: playerScore,
 					opponentScore: opponentScore,
@@ -157,7 +173,7 @@ export default function Pong(prop: PongProp) {
 				gameRoom: gameRoom,
 			});
 		}
-	}, [gameRoom, opponentScore, playerMode, playerScore, winner]);
+	}, [gameRoom, opponentScore, playerMode, playerScore, winner, prop.userId]);
 
 	// loop to detect stopGame event from server
 	useEffect(() => {
@@ -236,14 +252,6 @@ export default function Pong(prop: PongProp) {
 	// 	  };
 	// 	}
 	//   }, [playerMode, handleUpdateGame]);
-	  
-
-	// a function to calculate a new direction of the game after the ball hit a paddle
-
-	
-
-
-	// function to detect when a ball hit the obstacle
 
 	// function to set an initial ball position and direction to start the round
 	const ballServe = useCallback((side: number) => {
@@ -308,6 +316,7 @@ export default function Pong(prop: PongProp) {
 		setIsRunning(true);
 	}
 
+	// a function to calculate a new direction of the game after the ball hit a paddle
 	const ballCollision = useCallback((squareY: number, squareHeight: number, add: boolean): BallInfo => {
 		let dx = 0, dy = 0, x= 0, s = 0;
 
@@ -325,7 +334,8 @@ export default function Pong(prop: PongProp) {
 		return {dx, dy, x, s};
 	}, [ballRadius, ballX, ballY, ballSpeed]);
 
-	const detectObstacleCollision = useCallback(async () => {
+	// function to detect when a ball hit the obstacle
+	const detectObstacleCollision = useCallback( async () => {
 		if (ballX + ballRadius >= info.obstacleX
 			&& ballX > info.playerX + info.paddleWidth && ballX <= info.boardWidth / 2
 			&& ballY > obstacleY && ballY < obstacleY + info.obstacleHeight) {
@@ -339,7 +349,7 @@ export default function Pong(prop: PongProp) {
 					setBallSpeed(s);
 				} else if (playerMode === DOUBLE_MODE) {
 					// receiving the new ball direction from server
-					socket.on('ballLaunch', ({dx, dy, x, y, s}) => {
+					socket.on('ballBounce', ({dx, dy, x, y, s}) => {
 						setDeltaX(dx);
 						setDeltaY(dy);
 						setBallX(x);
@@ -376,7 +386,7 @@ export default function Pong(prop: PongProp) {
 					setBallSpeed(s);
 				} else if (playerMode === DOUBLE_MODE) {
 					// receiving the new ball direction from server
-					socket.on('ballLaunch', ({dx, dy, x, y, s}) => {
+					socket.on('ballBounce', ({dx, dy, x, y, s}) => {
 						setDeltaX(dx);
 						setDeltaY(dy);
 						setBallX(x);
@@ -400,7 +410,7 @@ export default function Pong(prop: PongProp) {
 				setBallSpeed(s);
 			} else if (playerMode === DOUBLE_MODE) {
 				// receiving the new ball direction from server
-				socket.on('ballLaunch', ({dx, dy, x, y, s}) => {
+				socket.on('ballBounce', ({dx, dy, x, y, s}) => {
 					setDeltaX(dx);
 					setDeltaY(dy);
 					setBallX(x);
@@ -439,7 +449,7 @@ export default function Pong(prop: PongProp) {
 				setBallSpeed(s);
 			} else if (playerMode === DOUBLE_MODE) {
 				// receiving the new ball direction from server
-				socket.on('ballLaunch', ({dx, dy, x, y, s}) => {
+				socket.on('ballBounce', ({dx, dy, x, y, s}) => {
 					setDeltaX(dx);
 					setDeltaY(dy);
 					setBallX(x);
@@ -719,7 +729,7 @@ export default function Pong(prop: PongProp) {
 			{(!isRunning && isLive) && (
 				<LiveBoard
 					isReady={isReady}
-					playerName={prop.user.name}
+					playerName={prop.userName}
 					opponentName={opponentName}
 					inviteMode={prop.inviteMode}
 					spectatorMode={false}
