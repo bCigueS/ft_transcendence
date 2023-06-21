@@ -151,7 +151,6 @@ export default function Pong(prop: PongProp) {
 			});
 			// receive new score signal
 			socket.on('newScore', ({ pScore, oScore }) => {
-				console.log('updating the scores: player, ', pScore, ' and opponent, ', oScore)
 				setPlayerScore(pScore);
 				setOpponentScore(oScore);
 			});
@@ -199,7 +198,6 @@ export default function Pong(prop: PongProp) {
 	// loop to detect an updateGame request event from server for spectatorMode
 	// useEffect(() => {
 	// 	if (playerMode === DOUBLE_MODE) {
-	// 		console.log('receive updateGame request');
 	// 		socket.on('updateGame', ({ socketId }) => {
 	// 			socket.emit('lastUpdatedInfo', {
 	// 				gameInfo: {
@@ -244,7 +242,6 @@ export default function Pong(prop: PongProp) {
 
 	// useEffect(() => {
 	// 	if (playerMode === DOUBLE_MODE) {
-	// 	  console.log('receive updateGame request');
 	// 	  socket.on('updateGame', handleUpdateGame);
 	  
 	// 	  return () => {
@@ -335,9 +332,9 @@ export default function Pong(prop: PongProp) {
 		return {dx, dy, x, y, s};
 	}, [ballRadius, ballX, ballY, ballSpeed]);
 
+	// a function to handle ballBounce event from socket
 	useEffect(() => {
 		const handleBallBounce = ({ dx, dy, x, y, s }: BallInfo) => {
-			console.log('in handleBallBounce ', dx, dy);
 			setDeltaX(dx);
 			setDeltaY(dy);
 			setBallX(x);
@@ -345,7 +342,6 @@ export default function Pong(prop: PongProp) {
 			setBallSpeed(s);
 		};
 	  
-		// Set up the event listener for ballBounce
 		socket.on('ballBounce', handleBallBounce);
 	  
 		// Clean up the event listener when the component is unmounted
@@ -367,21 +363,12 @@ export default function Pong(prop: PongProp) {
 					setDeltaY(dy);
 					setBallX(x);
 					setBallSpeed(s);
-				// } else if (playerMode === DOUBLE_MODE) {
-				// 	// receiving the new ball direction from server
-				// 	socket.on('ballBounce', ({dx, dy, x, y, s}) => {
-				// 		setDeltaX(dx);
-				// 		setDeltaY(dy);
-				// 		setBallX(x);
-				// 		setBallY(y);
-				// 		setBallSpeed(s);
-				// 	});
 				}
 		}
 		if (ballX <= info.obstacleX + info.obstacleWidth
 			&& ballX >= info.boardWidth / 2 && ballX < info.opponentX
 			&& ballY > obstacleY && ballY < obstacleY + info.obstacleHeight) {
-				// if (playerMode === DOUBLE_MODE) {
+				if (playerMode === DOUBLE_MODE) {
 					// send a signal to server to start calculating a new direction of the ball
 					socket.emit('ballCollision', {
 						gameInfo: {
@@ -394,7 +381,7 @@ export default function Pong(prop: PongProp) {
 							middleBoard: info.boardWidth / 2,
 						}, gameRoom: gameRoom,
 					});
-				// }
+				}
 
 				// if the game is against computer, the calculation for the new direction is directly in the front
 				if (playerMode === SINGLE_MODE) {
@@ -404,15 +391,6 @@ export default function Pong(prop: PongProp) {
 					setDeltaY(dy);
 					setBallX(x);
 					setBallSpeed(s);
-				// } else if (playerMode === DOUBLE_MODE) {
-				// 	// receiving the new ball direction from server
-				// 	socket.on('ballBounce', ({dx, dy, x, y, s}) => {
-				// 		setDeltaX(dx);
-				// 		setDeltaY(dy);
-				// 		setBallX(x);
-				// 		setBallY(y);
-				// 		setBallSpeed(s);
-				// 	});
 				}
 		}
 	}, [ballCollision, ballRadius, ballX, ballY, gameRoom, obstacleY, playerMode, ballSpeed]);
@@ -428,15 +406,6 @@ export default function Pong(prop: PongProp) {
 				setDeltaY(dy);
 				setBallX(x);
 				setBallSpeed(s);
-			// } else if (playerMode === DOUBLE_MODE) {
-			// 	// receiving the new ball direction from server
-			// 	socket.on('ballBounce', ({dx, dy, x, y, s}) => {
-			// 		setDeltaX(dx);
-			// 		setDeltaY(dy);
-			// 		setBallX(x);
-			// 		setBallY(y);
-			// 		setBallSpeed(s);
-			// 	});
 			}
 		}
 	}, [ballCollision, ballRadius, ballX, ballY, opponentY, paddleHeight, playerMode]);
@@ -444,7 +413,7 @@ export default function Pong(prop: PongProp) {
 	// function to detect when a ball hit the paddle of the player side
 	const detectPlayerCollision = useCallback( async () => {
 		if (ballX - ballRadius <= info.playerX + info.paddleWidth && ballY > playerY && ballY < playerY + paddleHeight) {
-			// if (playerMode === DOUBLE_MODE) {
+			if (playerMode === DOUBLE_MODE) {
 				// send a signal to server to start calculating a new direction of the ball
 				socket.emit('ballCollision', {
 					gameInfo: {
@@ -457,7 +426,7 @@ export default function Pong(prop: PongProp) {
 						middleBoard: info.boardWidth / 2,
 					}, gameRoom: gameRoom,
 				});
-			// }
+			}
 
 			// if the game is against computer, the calculation for the new direction is directly in the front
 			if (playerMode === SINGLE_MODE) {
@@ -467,15 +436,6 @@ export default function Pong(prop: PongProp) {
 				setDeltaY(dy);
 				setBallX(x);
 				setBallSpeed(s);
-			// } else if (playerMode === DOUBLE_MODE) {
-			// 	// receiving the new ball direction from server
-			// 	socket.on('ballBounce', ({dx, dy, x, y, s}) => {
-			// 		setDeltaX(dx);
-			// 		setDeltaY(dy);
-			// 		setBallX(x);
-			// 		setBallY(y);
-			// 		setBallSpeed(s);
-			// 	});
 			}
 		}
 	}, [ballCollision, ballRadius, ballX, ballY, gameRoom, paddleHeight, playerMode, playerY, ballSpeed]);
@@ -530,7 +490,6 @@ export default function Pong(prop: PongProp) {
 	const moveBall = useCallback(() => {
 		setBallX(x => x += deltaX);
 		setBallY(y => y += deltaY);
-		// console.log('moveBall ', ballX, ballY, deltaX, deltaY);
 	}, [ballX, ballY, deltaX, deltaY]);
 
 	// function to calculate the opponent movement (against computer or other player)

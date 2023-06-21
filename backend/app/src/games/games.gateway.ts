@@ -310,11 +310,11 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 
 			const angle = (Math.PI / 4) * collisionPoint;
 
-			const dx = gameInfo.speed * Math.cos(angle);
-			const dy = gameInfo.speed * Math.sin(angle);
-			const s = gameInfo.speed + 0.5;
+			const dx = gameInfo.ballSpeed * Math.cos(angle);
+			const dy = gameInfo.ballSpeed * Math.sin(angle);
+			const s = gameInfo.ballSpeed + 0.5;
 
-			const dist = (gameInfo.x > gameInfo.middleBoard ? gameInfo.x - gameInfo.middleBoard : gameInfo.middleBoard - gameInfo.x);
+			const dist = (gameInfo.x > gameInfo.middleBoard ? gameInfo.x - gameInfo.middleBoard : gameInfo.middleBoard - (gameInfo.x - gameInfo.r));
 			const opponentX = (gameInfo.x > gameInfo.middleBoard ? gameInfo.middleBoard - dist : gameInfo.middleBoard + dist);
 
 			// get the players in the room and send the ball direction to both players (horizontal direction is in reverse/mirror)
