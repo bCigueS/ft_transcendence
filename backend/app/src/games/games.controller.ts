@@ -42,8 +42,8 @@ export class GamesController {
 
   @Get(':id/liveGames')
   @ApiOkResponse({ type: GameEntity, isArray: true })
-  async getLiveGame(@Param('id', ParseIntPipe) id: number) {
-	  const games = await this.gamesService.getLiveGame();
+  async getLiveGames(@Param('id', ParseIntPipe) id: number) {
+	  const games = await this.gamesService.getLiveGames();
 	  if (!games)
 		  throw new NotFoundException(`Currently there is not any live game.`);
 	  

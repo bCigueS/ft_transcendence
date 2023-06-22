@@ -152,8 +152,7 @@ export class GamesService {
 	  return updatedGame;
   }
 
-  async getLiveGame() {
-	console.log('in getLiveGame');
+  async getLiveGames() {
 	const games = await this.prisma.game.findMany({
 		where: {
 			state: GameState.PLAYING,
