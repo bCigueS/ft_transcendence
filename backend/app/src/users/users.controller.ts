@@ -272,25 +272,13 @@ export class UsersController {
     }
 
 	@Get(':id/getWins')
-    @ApiOkResponse({ type: IsNumber })
+    @ApiOkResponse({ type: isNumber })
     async getWins(
         @Param('id', ParseIntPipe) id: number) {
 
         const wins = await this.usersService.getWins(id);
         
         return wins;
-    }
-	
-	@Get(':id/games')
-    @ApiOkResponse({ type: GameEntity, isArray: true })
-    async seeUserGames(
-        @Param('id', ParseIntPipe) id: number) {
-
-        const games = await this.usersService.seeUserGames(id);
-        if (!games)
-            throw new NotFoundException(`User with ${id} does not have any game.`);
-        
-        return games;
     }
 }
 
