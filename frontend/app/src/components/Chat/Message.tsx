@@ -102,9 +102,11 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 		console.log(senderId, gameRoom);
 		navigate('/pong', {
 			state: {
+				playerId: userCtx.user?.id,
 				opponentId: senderId,
 				gameInvitation: true,
 				isInvited: true,
+				isSpectator: false,
 				gameRoom: gameRoom,
 			}
 		})

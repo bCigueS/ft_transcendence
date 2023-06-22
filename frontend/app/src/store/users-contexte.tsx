@@ -7,6 +7,12 @@ export type UserMatch = {
 	opponentScore: number
 }
 
+export type UserLiveGames = {
+	player?: UserAPI;
+	opponent?: UserAPI;
+	gameRoom: string;
+}
+
 export type UserAPI = {
 	id: number;
 	email: string;
@@ -20,16 +26,6 @@ export type UserAPI = {
 	matchs?: UserMatch[],
 	connected?: boolean,
   };
-
-//   const SimonUser: UserAPI = {
-// 	id: 1,
-// 	email: "test@test.com",
-// 	name: "Simon",
-// 	avatar: "onsenfou",
-// 	doubleAuth: false,
-// 	wins: 1,
-// 	gamesPlayed: 1,
-//   }
 
 export const UserContext = React.createContext<{
 		user: UserAPI | null;

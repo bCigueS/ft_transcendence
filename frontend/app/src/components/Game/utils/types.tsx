@@ -25,9 +25,9 @@ export type PongProp = {
 }
 
 export type SpectatorProp = {
-	mode: number;
-	user: UserAPI;
-	gameLevel: number;
+	userId: number;
+	playerId: number;
+	opponentId: number;
 	gameRoom: string;
 }
 
@@ -41,6 +41,7 @@ export type UpdatedInfo = {
 	opponentY: number;
 	pScore: number;
 	oScore: number;
+	isPaused: boolean;
 }
 
 export type BallInfo = {
@@ -80,9 +81,10 @@ export type ModalProps = {
 	buttonText: string;
 	closingText: string;
 	onStartPage(): void;
+	onRestart(): void;
 	onTool(mode: "keyboard" | "mouse"): void;
 	onDifficulty(level: 0 | 1 | 2 | 3): void;
-	onPlayerMode(mode: "single" | "double"): void;
+	onPlayerMode(mode: "single" | "double" | ""): void;
 }
 
 export type PausedProps = {
