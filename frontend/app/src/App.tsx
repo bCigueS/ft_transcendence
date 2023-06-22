@@ -23,7 +23,7 @@ const router = createBrowserRouter([
 		element: <RootLayout />,
 		errorElement: <ErrorPage />,
 		id: 'root',
-		loader: tokenLoader,
+		// loader: tokenLoader,
 		children: [
 			{
 				index: true,
@@ -58,7 +58,7 @@ const router = createBrowserRouter([
 	{
 		path: '/auth',
 		element: <AuthenticationPage />,
-		loader: checkTokenLoader,
+		// loader: checkTokenLoader,
 		action: logginAction
 	},
 ]);
