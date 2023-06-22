@@ -134,7 +134,14 @@ export class AuthService {
 			const data_response = await this.httpService.get(url_data, { headers: headersRequest }).toPromise();
 			if (user)
 				await this.prisma.user.update({ where: { id42: data_response.data['id'] }, data: {status: 1},});
+			
+			const accessToken = jwt.sign({
+				accessToken: token,
+				userId: user.id
+			}, `${process.env.NODE_ENV}`, { expiresIn: '1h' });
+			
 			return {
+				accessToken: accessToken,
 				userId: user.id,
 				doubleAuth: user.doubleAuth,
 				id: data_response.data['id'],
@@ -157,7 +164,7 @@ export class AuthService {
     };
   }
 
-  async aboutMe(token: string): Promise<any> 
+  async aboutMe(token: string): Promise<any>  
   {
     const url_data = 'https://api.intra.42.fr/v2/me';
     const headersRequest = { Authorization: `Bearer ${token}` };
@@ -173,7 +180,6 @@ export class AuthService {
 					status: 1
 				},
 			});
-			// const decryptedData = CryptoJS.AES.decrypt(CryptoJS.AES.encrypt(token, `${process.env.NODE_ENV}`).toString(), `${process.env.NODE_ENV}`).toString(CryptoJS.enc.Utf8);
 		}
 		if (user.doubleAuth == true)
 		{
