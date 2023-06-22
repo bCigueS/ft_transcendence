@@ -107,10 +107,10 @@
 	}
 }
 
-@mixin titleh1 {
-		width: 100%;
+@mixin titleh1($fontSize: 3rem, $width: 100%) {
+		width: $width;
 		text-align: center;
-		font-size: 3rem;
+		font-size: $fontSize;
 		font-weight: 800;
 		letter-spacing: -0.15rem;
 		padding: 0.5rem 1rem;
