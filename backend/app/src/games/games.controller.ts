@@ -7,7 +7,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { GameEntity } from './entities/game.entity';
 import { Game, GameState, UserGame } from '@prisma/client';
 
-@Controller('games') @ApiTags('game')
+@Controller('games') @ApiTags('games')
 export class GamesController {
   constructor(private readonly gamesService: GamesService, private prisma: PrismaService) {}
 
@@ -40,14 +40,12 @@ export class GamesController {
   //   return this.gamesService.update(id, updateGameDto);
   // }
 
-  @Get('/liveGames')
+  @Get(':id/liveGames')
   @ApiOkResponse({ type: GameEntity, isArray: true })
-  async getLiveGame() {
-	console.log('in getLiveGame');
-
+  async getLiveGame(@Param('id', ParseIntPipe) id: number) {
 	  const games = await this.gamesService.getLiveGame();
 	  if (!games)
-		  throw new NotFoundException(`Currently there is not any game live.`);
+		  throw new NotFoundException(`Currently there is not any live game.`);
 	  
 	  return games;
   }

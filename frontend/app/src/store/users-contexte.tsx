@@ -20,16 +20,6 @@ export type UserAPI = {
 	connected?: boolean,
   };
 
-const SimonUser: UserAPI = {
-    id: 1,
-    email: "test@test.com",
-    name: "Simon",
-    avatar: "onsenfou",
-    doubleAuth: false,
-    wins: 1,
-    gamesPlayed: 1,
-  }
-
 export const UserContext = React.createContext<{
 		user: UserAPI | null;
 		error: string | null;
@@ -294,32 +284,8 @@ type Props = {
 			return <div>Loading...</div>
 		}
 
-// 	const contextValue = {
-// 		user: user,
-// 		error: error,
-// 		token: undefined,
-// 		saveToken: saveToken,
-// 		deleteToken: deleteToken,
-// 		fetchUserFriends: fetchUserFriends,
-// 		fetchUserBlockings: fetchUserBlockings,
-// 		fetchUser: fetchUser,
-// 		fetchRemoveFriend: fetchRemoveFriend,
-// 		fetchBlockUser: fetchBlockUser,
-// 		fetchUnblockUser: fetchUnblockUser,
-// 		fetchUserById: fetchUserById,
-// 	};
-
-// 	return (
-// 		<div className={className}>
-// 			<UserContext.Provider value={contextValue}>{children}</UserContext.Provider>
-// 		</div>
-// 	);
-// };
-
-// export default UsersContextProvider;
-
 	const contextValue = {
-		user: SimonUser,
+		user: user,
 		error: error,
 		token: undefined,
 		saveToken: saveToken,
