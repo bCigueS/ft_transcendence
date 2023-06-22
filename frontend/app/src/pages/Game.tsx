@@ -5,11 +5,6 @@ import classes from '../sass/pages/Game.module.scss';
 import { UserContext } from '../store/users-contexte';
 import SpectatorBoard from '../components/Game/SpectatorBoard';
 import { useLocation } from 'react-router-dom';
-// import { useLocation } from 'react-router-dom';
-
-// board mode
-const PLAY_MODE = 0;
-const SPECTATOR_MODE = 1;
 
 export default function Game() {
 
@@ -18,16 +13,17 @@ export default function Game() {
 	const { state } = location;
 
 	// player info
-	const user = userCtx.user;
 	const userId = userCtx.user?.id;
 	const userName = userCtx.user?.name;
-	const opponentId = (state?.opponentId ? state?.opponentId : undefined);
-	const inviteMode = (state?.gameInvitation ? true : false);
-	const isInvited = (state?.isInvited && state?.isInvited === true ? true : false);
-	const gameRoom = (state?.gameRoom ? state?.gameRoom : undefined)
-	console.log('game invitation ', state?.gameInvitation);
-	console.log('isInvited ', state?.isInvited); 
-	console.log('gameRoom ', state?.gameRoom);
+	const playerId = state?.playerId;
+	const opponentId = state?.opponentId;
+	const inviteMode = state?.gameInvitation;
+	const isInvited = state?.isInvited;
+	const isSpectator = state?.isSpectator;
+	const gameRoom = state?.gameRoom;
+	console.log('game invitation ', inviteMode);
+	console.log('isInvited ', isInvited); 
+	console.log('gameRoom ', gameRoom);
 
 	// ---> to be checked
 	// // screen info
@@ -65,15 +61,15 @@ export default function Game() {
 
 	return (
 		<div className={classes.gamePage}>
-			{(user?.name === 'Yang Chi') && (
+			{(isSpectator) && (
 				<SpectatorBoard
-					mode ={SPECTATOR_MODE}
-					user={user}
-					gameLevel={0}
-					gameRoom={'pong2'}
+					userId={userId}
+					playerId={playerId}
+					opponentId={opponentId}
+					gameRoom={gameRoom}
 				/>
 			)}
-			{(user?.name !== 'Yang Chi') && (
+			{(!isSpectator) && (
 				<Pong
 					userId={userId}
 					userName={userName}
