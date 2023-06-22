@@ -4,21 +4,25 @@
 
 .container {
 	height: 100%;
-	width: 50rem;
-	padding: 3rem 0;
+	width: auto;
+	min-height: 100%;
+	@include flexBox($align: flex-start);
+
+	gap: 2rem;
 
 
 	h1 {
-		@include titleh1();
-		margin-bottom: 5rem;
+		@include titleh1($width: 30rem);
 	}
 
 	.matchs {
 		@include flexBox();
+		overflow: scroll !important;
+		overflow-x: hidden !important;
+		height: 100%;
+		width: 100%;
 		border: 0.2rem solid black;
-		height: 70%;
-		padding: 3rem;
-		overflow: hidden;
-		overflow-y: scroll;
+
+		padding: 2rem;
 	}
 }
