@@ -5,6 +5,8 @@ import LiveBoard from './LiveBoard';
 import PausedBoard from './PausedBoard';
 import classes from '../../sass/components/Game/Pong.module.scss';
 import io from 'socket.io-client';
+import PlayerSide from './PlayerSide';
+import OpponentSide from './OpponentSide';
 
 const socket = io('http://localhost:3000/pong', {
 		transports: ["websocket"],
@@ -61,7 +63,7 @@ export default function Pong(prop: PongProp) {
 	// game mode
 	const [toolMode, setToolMode] = useState(MOUSE_MODE);
 	const [level, setLevel] = useState(BEGINNER_LEVEL);
-	const [playerMode, setPlayerMode] = useState(SINGLE_MODE);
+	const [playerMode, setPlayerMode] = useState('');
 	// ball info
 	const [ballRadius, setBallRadius] = useState(0);
 	const [ballX, setBallX] = useState(0);
@@ -92,6 +94,9 @@ export default function Pong(prop: PongProp) {
 
 	// loop to emit a join request to the server
 	useEffect(() => {
+		if (playerMode === SINGLE_MODE) {
+			setOpponentName('Computer');
+		}
 		if (playerMode === DOUBLE_MODE && !prop.inviteMode) {
 			console.log('emit a join random game request');
 			socket.emit('joinRandom', { id: prop.userId, lvl: level });
@@ -710,6 +715,9 @@ export default function Pong(prop: PongProp) {
 					mode={'play'}
 				/>
 			)}
+			<PlayerSide
+				playerName={prop.userName}
+			/>
 			<div className={classes.container}>
 				<div className={classes.divider_line}></div>
 				<div className={classes.playground}>
@@ -720,6 +728,9 @@ export default function Pong(prop: PongProp) {
 					/>
 				</div>
 			</div>
+			<OpponentSide
+				opponentName={opponentName}
+			/>
 		</>
 	);
 }

@@ -37,6 +37,13 @@
 	color: $color;
 	font-weight: bold;
 }
+@mixin text-header-xxl($color: black) {
+	font-size: 7rem;
+	line-height: 7rem;
+	color: $color;
+	font-weight: bold;
+	font-style: italic;
+}
 
 
 @mixin flexBox($direction: column, $justify: space-between, $align: center) {
