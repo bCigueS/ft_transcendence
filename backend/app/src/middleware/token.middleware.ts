@@ -6,6 +6,7 @@ import * as jwt from 'jsonwebtoken';
 
 interface JwtPayload {
   userId: string;
+  accessToken: string;
   // other properties
 }
 
@@ -27,7 +28,7 @@ export class TokenMiddleware implements NestMiddleware {
     try {
       const decodedToken = await jwt.verify(token, `${process.env.NODE_ENV}`) as JwtPayload;
       const userId = decodedToken.userId;
-      console.log(`userId: ${userId}`);
+      const accessToken = decodedToken.accessToken;
       const user = await this.prisma.user.findFirst({ where: { id: parseInt(userId) }});
 
       if (!user) {
@@ -35,6 +36,7 @@ export class TokenMiddleware implements NestMiddleware {
       }
 
       req['userId'] = userId;
+      req['token'] = accessToken;
       next();
     } catch (error) {
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
