@@ -41,7 +41,8 @@ export const checkAuthLoader = () => {
 
 export const checkTokenLoader = () => {
 	const token = getAuthToken();
-	if (token) {
+	const isLogged = localStorage.getItem('isLogged');
+	if (token && isLogged === 'true') {
 		return redirect('/');
 	}
 	return null;
