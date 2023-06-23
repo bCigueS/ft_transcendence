@@ -299,6 +299,19 @@ export class UsersService {
 	});
   }
 
+//   async updatePlayerStatus(id: number) {
+// 	const user = await this.prisma.user.findUnique({ where: { id: id } });
+
+// 	if (!user) {
+// 		throw new NotFoundException(`User with id ${id} does not exist.`);
+// 	}
+
+// 	return this.prisma.user.update({
+// 		where: { id: id },
+// 		data: { state}
+// 	})
+//   }
+
   async seeUserGames(id: number) {
     const games = await this.prisma.game.findMany({
         where: {

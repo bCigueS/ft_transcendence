@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateChannelDto } from 'src/channels/dto/create-channel.dto';
+import { CreateChannelDto, CreateChannelMembershipDto } from 'src/channels/dto/create-channel.dto';
 
 @Injectable()
 export class MessagesService {
@@ -36,20 +36,44 @@ export class MessagesService {
 	}
 
 	async createChannel(createChannelDto: CreateChannelDto) {
-		const { name, members, creatorId } = createChannelDto;
+		const { creatorId, name, messages, members } = createChannelDto;
 
-		const newChannel = await this.prisma.channel.create({
-			data: {
-				name,
-				members: {
-					create: members.map(member => ({
-						userId: member.userId
-					}))
-				},
-				creatorId,
-			},
+		if (members.length < 2) {
+		  throw new Error("Invalid channel creation request: must include at least two members.");
+		}
+	
+		const channel = await this.prisma.channel.create({ 
+		  data: { creatorId, name },
 		});
-
-		return newChannel;
+	
+		if (messages && messages.length > 0)
+		{
+		  for (const msg of messages) {
+			const messageDto: CreateMessageDto = { 
+			  content: msg.content, 
+			  senderId: msg.senderId,
+			  channelId: channel.id
+			};
+		
+			await this.prisma.message.create({
+			  data: {
+				...messageDto,
+			  },
+			});
+		  }
+		}
+		  
+		for (const member of members) {
+		  const memberDto: CreateChannelMembershipDto = { userId: member.userId };
+		  await this.prisma.channelMembership.create({
+			data: {
+			  ...memberDto,
+			  channelId: channel.id,
+			},
+		  });
+		}
+	
+		return channel;
 	}
+
 }

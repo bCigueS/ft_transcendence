@@ -19,9 +19,9 @@ export type PongProp = {
 	userId: number;
 	userName: string;
 	opponentId: number | undefined;
+	gameRoom: string | undefined;
 	inviteMode: boolean;
 	isInvited: boolean;
-	gameRoom: string | undefined;
 }
 
 export type SpectatorProp = {
@@ -79,6 +79,7 @@ export type ModalProps = {
 	inviteMode: boolean;
 	isInvited: boolean;
 	buttonText: string;
+	cancelText: string;
 	closingText: string;
 	onStartPage(): void;
 	onRestart(): void;
