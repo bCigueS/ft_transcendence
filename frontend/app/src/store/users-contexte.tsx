@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { redirect } from 'react-router-dom';
+import { action as logout} from '../typescript/Auth';
 
 export type UserMatch = {
 	user?: UserAPI,
