@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from './../prisma/prisma.service';
-import { JwtService } from '@nestjs/jwt';
 import { AuthEntity } from './entity/auth.entity';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
@@ -9,15 +8,12 @@ import * as AuthUtils from './auth.utils';
 import axios from 'axios';
 import fs from 'fs';
 import * as jwt from 'jsonwebtoken';
-import * as speakeasy from 'speakeasy';
 import * as CryptoJS from 'crypto-js';
-import { authenticate } from 'passport';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
-    private jwtService: JwtService,
     private readonly httpService: HttpService
   ) {}
 
@@ -101,36 +97,28 @@ export class AuthService {
 		error.response.data.status = 403;
 		throw new HttpException(error.response.data, HttpStatus.FORBIDDEN, { cause: error });
     }
-    if (token['access_token']) response['user'] = await this.aboutMe(token['access_token']);
-	console.log(response);
+    if (token['access_token']) 
+		response['user'] = await this.aboutMe(token['access_token']);
     response['userId'] = response['user']['userId'];
     response['doubleAuth'] = response['user']['doubleAuth'];
 	if (response['user']['doubleAuth'] == false)
-	{
-		response['accessToken'] = jwt.sign({
-			accessToken: token['access_token'],
-			userId: response['userId']
-		}, `${process.env.NODE_ENV}`, { expiresIn: '1h' });
-	}
-	else {
+		response['accessToken'] = response['user']['accessToken'];
+	else
 		delete response["user"];
-		console.log(response);
-
-	}
-    return response;
+    return (response);
   }
 
-
-  async verifyTwoFactorAuthenticationCode(userId: number, code: string)
+  async verifyTwoFactor(userId: number, code: string)
   {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user)
     	throw new NotFoundException(`User with ${userId} does not exist.`);
-    const verified = AuthUtils.verifyTwoFactorAuthenticationCode(code, user.secert);
+    const verified = AuthUtils.verifyTwoFactor(code, user.secert);
 	if (verified)
 	{
 		let response = AuthUtils.getUserData(user);
 		response['accessToken'] = AuthUtils.signToken(user.id, user.token);
+		return response;
 	}
 	else
 		await this.prisma.user.update({ where: { id: userId}, data: {status: 0},});
@@ -163,20 +151,10 @@ export class AuthService {
 				doubleAuth: user.doubleAuth,
 			};
 		}
-		return {
-			userId: user.id,
-			doubleAuth: user.doubleAuth,
-			id: data_response.data['id'],
-			email: data_response.data['email'],
-			login: data_response.data['login'],
-			displayname: data_response.data['displayname'],
-			image: data_response.data['image_url'],
-			first_name: data_response.data['first_name'],
-			last_name: data_response.data['last_name'],
-		};
+		return AuthUtils.getUserData(user);
     } catch (error) {
-      error.status = 403;
-      throw new HttpException(error, HttpStatus.FORBIDDEN, { cause: error });
+		error.status = 403;
+		throw new HttpException(error, HttpStatus.FORBIDDEN, { cause: error });
     }
   }
 }

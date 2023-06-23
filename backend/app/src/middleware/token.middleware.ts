@@ -7,23 +7,21 @@ import * as jwt from 'jsonwebtoken';
 interface JwtPayload {
   userId: string;
   accessToken: string;
-  // other properties
 }
-
 
 @Injectable()
 export class TokenMiddleware implements NestMiddleware {
   constructor(private prisma: PrismaService, private usersService: UsersService) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
-    console.log('Executing request...');
+    // console.log('Executing request...');
 
     if (!req.headers.authorization) {
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     }
 
     const token = req.headers.authorization.replace('Bearer ', '');
-    console.log(`token: ${token}`);
+    // console.log(`token: ${token}`);
 
     try {
       const decodedToken = await jwt.verify(token, `${process.env.NODE_ENV}`) as JwtPayload;

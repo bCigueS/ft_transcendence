@@ -5,6 +5,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { User as UserEntity } from '.prisma/client';
 import { Friendship } from '@prisma/client';
 import { toSafeUser } from './user.utils';
+import * as AuthUtils from '../auth/auth.utils';
 
 import * as speakeasy from 'speakeasy';
 import * as QRCode from 'qrcode';
@@ -332,7 +333,7 @@ async logout(req: CustomRequest)
     };
   }
 
-  async  getTwoFactorAuthenticationCode(req: CustomRequest)
+  async  getTwoFactor(req: CustomRequest)
   {
 	const userId = parseInt(req.userId);
 	const user = await this.prisma.user.findUnique({ where: { id: userId } });
@@ -340,7 +341,7 @@ async logout(req: CustomRequest)
 		throw new NotFoundException(`User with ${req.userId} does not exist.`);
 	
 	const secretCode = speakeasy.generateSecret({
-		name: '42ykuo2',
+		name: `loliloliPong (${user.login})`,
 	});
 
 	await this.prisma.user.update({
@@ -354,43 +355,37 @@ async logout(req: CustomRequest)
 	};
   }
 
-  async verifyTwoFactorAuthenticationCode(req: CustomRequest, token: string)
+  async verifyTwoFactor(req: CustomRequest, code: string)
   {
     const userId = parseInt(req.userId);
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user)
     	throw new NotFoundException(`User with ${req.userId} does not exist.`);
-    const verified = speakeasy.totp.verify({
-		secret: user.secert,
-		encoding: 'base32',
-		token: token,
-    });
-    await this.prisma.user.update({
-		where: { id: userId },
-		data: { doubleAuth: true },
-    });
+	const verified = AuthUtils.verifyTwoFactor(code, user.secert);
+	if (verified)
+	{
+		await this.prisma.user.update({
+			where: { id: userId },
+			data: { doubleAuth: true },
+		});
+	}
     return {
       	result: verified,
     };
   }
 
-  async disableTwoFactor(req: CustomRequest, token: string)
+  async disableTwoFactor(req: CustomRequest)
   {
     const userId = parseInt(req.userId);
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user)
     	throw new NotFoundException(`User with ${req.userId} does not exist.`);
-    const verified = speakeasy.totp.verify({
-		secret: user.secert,
-		encoding: 'base32',
-		token: token,
-    });
     await this.prisma.user.update({
 		where: { id: userId },
 		data: { doubleAuth: false },
     });
     return {
-      	result: verified,
+      	result: true,
     };
   }
 

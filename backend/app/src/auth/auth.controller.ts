@@ -42,6 +42,7 @@ export class AuthController {
 	@Post('verify')
 	@ApiOkResponse({})
 	async verify2fa(@Body() { userId, code }: any): Promise<any> {
-	  return await this.authService.verifyTwoFactorAuthenticationCode(userId, code);
+    console.log(userId, code);  
+	  return await this.authService.verifyTwoFactor(userId, code);
 	}  
 }
