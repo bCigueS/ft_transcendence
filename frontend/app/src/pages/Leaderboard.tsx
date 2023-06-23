@@ -50,7 +50,8 @@ export default function Leaderboard() {
 					email: user.email,
 					avatar: user.avatar,
 					doubleAuth: user.doubleAuth,
-					wins: user.wins
+					wins: user.wins,
+					connected: user.status === 1 ? true : false,
 				}
 			})
 			setUserCommunity(UserData);
