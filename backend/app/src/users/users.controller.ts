@@ -20,6 +20,7 @@ import { constants } from 'buffer';
 export interface CustomRequest extends Request
 {
 	userId: string;
+	token: string;
 }
 
 @Controller('users') @ApiTags('users')
@@ -274,27 +275,32 @@ export class UsersController {
         return games;
     }
 
-
 	@Post('logout')
-	@ApiOkResponse({ type: UserEntity })
+	@ApiOkResponse({})
 	async logout(@Body() body: any, @Req() req: CustomRequest, @Res() res: any): Promise<any> {
 	  return this.usersService.logout(req);
 	}
   
-
 	@Post('2fa/add')
-	@ApiOkResponse({ type: UserEntity })
-	async add2fa(@Body() body: any, @Req() req: CustomRequest, @Res() res: any): Promise<any> {
-	const { otpauthUrl } = await this.usersService.getTwoFactorAuthenticationCode(req);
-	res.setHeader('Content-Type', 'image/png'); // Set the content type for the image
-	return this.usersService.pipeQrCodeStream(res, otpauthUrl);
+	@ApiOkResponse({})
+	async add2fa(@Body() body: any, @Req() req: CustomRequest, @Res() res: any): Promise<any>
+	{
+		const { otpauthUrl } = await this.usersService.getTwoFactorAuthenticationCode(req);
+		res.setHeader('Content-Type', 'image/png');
+		return this.usersService.pipeQrCodeStream(res, otpauthUrl);
 	}
   
 	@Post('2fa/verify')
-	@ApiOkResponse({ type: UserEntity })
+	@ApiOkResponse({})
 	async verify2fa(@Body() { token }: any,  @Req() req: CustomRequest): Promise<any> {
 		console.log(token);
 	  return await this.usersService.verifyTwoFactorAuthenticationCode(req, token);
+	}
+
+	@Post('2fa/disable')
+	@ApiOkResponse({ type: UserEntity })
+	async disable2fa(@Body() { token }: any,  @Req() req: CustomRequest): Promise<any> {
+	  return await this.usersService.disableTwoFactor(req, token);
 	}
 }
 
