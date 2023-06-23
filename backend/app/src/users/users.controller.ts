@@ -293,9 +293,9 @@ export class UsersController {
 	@Post('2fa/verify')
 	@ApiOkResponse({})
 	async verify2fa(@Body() { token }: any,  @Req() req: CustomRequest): Promise<any> {
-		console.log(token);
 	  return await this.usersService.verifyTwoFactorAuthenticationCode(req, token);
 	}
+	
 
 	@Post('2fa/disable')
 	@ApiOkResponse({ type: UserEntity })

@@ -100,6 +100,7 @@ export class AuthService {
 		throw new HttpException(error.response.data, HttpStatus.FORBIDDEN, { cause: error });
     }
     if (token['access_token']) response['user'] = await this.aboutMe(token['access_token']);
+	console.log(response);
     response['userId'] = response['user']['userId'];
     response['doubleAuth'] = response['user']['doubleAuth'];
 	if (response['user']['doubleAuth'] == false)
@@ -109,8 +110,11 @@ export class AuthService {
 			userId: response['userId']
 		}, `${process.env.NODE_ENV}`, { expiresIn: '1h' });
 	}
-	else
+	else {
 		delete response["user"];
+		console.log(response);
+
+	}
     return response;
   }
 
@@ -124,7 +128,8 @@ export class AuthService {
       secret: user.secert,
       encoding: 'base32',
       token: code,
-    });
+    })
+	console.log("Verify: ", verified);
 	if (verified)
 	{
 		try {

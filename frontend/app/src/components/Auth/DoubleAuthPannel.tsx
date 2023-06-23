@@ -16,6 +16,23 @@ const DoubleAuthPannel: React.FC = () => {
 	}, [userCtx.user?.doubleAuth]);
 
 
+	const fetchDisableDoubleAuth = async() => {
+		try { 
+			const response = await fetch('http://localhost:3000/users/2fa/disable', {
+				method: 'POST',
+				headers: {
+					'Authorization': 'Bearer ' + userCtx.logInfo?.token,
+				}
+			})
+
+			if (!response.ok)
+				throw new Error("Failed to disable 2fa");
+		} catch(error: any) {
+			console.error(error.message);
+		}
+		userCtx.fetchUser();
+	}
+
 	const fetchDoubleAuth = async() => {
 
 		try {
@@ -40,8 +57,13 @@ const DoubleAuthPannel: React.FC = () => {
 		}
 	}
 	const doubleAuthHandler = () => {
+		if (isChecked) {
+			fetchDisableDoubleAuth();
+		}
+		else {
+			fetchDoubleAuth();
+		}
 		setIsChecked(!isChecked);
-		fetchDoubleAuth();
 	}
 
 	const handleSubmit = async(event: FormEvent<HTMLFormElement>) => {
@@ -76,7 +98,6 @@ const DoubleAuthPannel: React.FC = () => {
 		}
 	}
 
-	// When i send the code back to the server i save the double auth status
 	return (
 		<div className={classes.container}>
 			

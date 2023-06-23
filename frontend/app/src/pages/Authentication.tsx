@@ -43,6 +43,7 @@ export const action = async({ request }: { request: Request }) => {
 	const userId = resData.userId;
 	localStorage.setItem('token', token);
 	localStorage.setItem('userId', userId);
+	localStorage.setItem('isLogged', 'true');
 	window.location.reload();
 
 	return redirect('/');
