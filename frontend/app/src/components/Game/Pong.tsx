@@ -4,14 +4,14 @@ import ModalBoard from './ModalBoard';
 import LiveBoard from './LiveBoard';
 import PausedBoard from './PausedBoard';
 import classes from '../../sass/components/Game/Pong.module.scss';
-import io from 'socket.io-client';
+import io, { Socket } from 'socket.io-client';
 import PlayerSide from './PlayerSide';
 import OpponentSide from './OpponentSide';
 
 const socket = io('http://localhost:3000/pong', {
-		transports: ["websocket"],
-		}
-	);
+	transports: ["websocket"],
+	}
+);
 
 // Modal's element
 const BEGINNER_LEVEL = 0;
@@ -50,6 +50,7 @@ const info: PongInfo = {
 }
 
 export default function Pong(props: PongProp) {
+	// const [ socket, setSocket ] = useState<Socket>();
 	// game play
 	const [isRunning, setIsRunning] = useState(false);
 	const [isPaused, setIsPaused] = useState(false);
@@ -118,10 +119,13 @@ export default function Pong(props: PongProp) {
 				});
 			});
 			// receive a welcome message from server informing that you are in a specific game room, and trigger a liveBoard
-			socket.on('welcome', ({ message, opponent, gameRoom }) => {
+			socket.on('welcome', ({ message, opponent, gameLevel, gameRoom }) => {
 				console.log({ message, opponent, gameRoom });
 				if (opponent) {
 					setOpponentName(opponent.name);
+				}
+				if (level !== gameLevel) {
+					setLevel(gameLevel);
 				}
 				setGameRoom(gameRoom);
 				setIsLive(true);
@@ -717,6 +721,7 @@ export default function Pong(props: PongProp) {
 					inviteMode={props.inviteMode}
 					isInvited={props.isInvited}
 					buttonText={gameOver ? "Play again" : "Start playing"}
+					cancelText={props.isInvited ? "Reject invitation" : "Cancel game"}
 					closingText={closingText}
 				/>
 			)}

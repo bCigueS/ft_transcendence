@@ -154,8 +154,6 @@ export class GamesService {
 
 	  const winner = updatedGame.winner;
 
-	  console.log('winner before is: ', winner);
-
 	  let updatedWins = winner.wins + 1;
 
 	  const updatedUser = await this.prisma.user.update({
@@ -164,8 +162,6 @@ export class GamesService {
 			wins: updatedWins
 		}
 	  })
-
-	  console.log('updated user after winning: ', updatedUser);
 
 	  return updatedGame;
   }

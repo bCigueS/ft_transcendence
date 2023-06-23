@@ -24,6 +24,7 @@ export default function Game() {
 	console.log('game invitation ', inviteMode);
 	console.log('isInvited ', isInvited); 
 	console.log('gameRoom ', gameRoom);
+	console.log('isSpectator ,', isSpectator);
 
 	// ---> to be checked
 	// // screen info

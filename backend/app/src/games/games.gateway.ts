@@ -20,7 +20,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 	private readonly logger = new Logger(GamesGateway.name);
 	static eventEmitter: EventEmitter = new EventEmitter();
 
-	constructor(private readonly gamesService: GamesService, private prisma: PrismaService) {}
+	constructor(private readonly gamesService: GamesService, private readonly usersService: UsersService, private prisma: PrismaService) {}
 
 	@WebSocketServer() io: Namespace;
 	@WebSocketServer() server: Server
@@ -33,7 +33,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 	// Receive connection from client
 	@SubscribeMessage('connection')
 	async handleConnection() {
-		console.log('a user is connected');
+		console.log('a user is connected in pong game');
 	}
 	
 /* -----> Player Mode <----- */
@@ -74,6 +74,8 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 				updatedGameDto.playerSocketIds.push(client.id);
 				
 				game = await this.gamesService.addPlayer(matchingGames[0].id, updatedGameDto);
+
+				GamesGateway.eventEmitter.emit('addLiveGame');
 
 			} else {
 				// if no player in pending game state with same level has been found, we create a new game
@@ -118,6 +120,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 				client.emit('welcome', {
 					message: `Hello ${player.name}, welcome to the game`,
 					opponent: opponent,
+					gameLevel: game.level,
 					gameRoom: game.room,
 				});
 				
@@ -173,8 +176,11 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 				}		
 			} else {
 				// if gameRoom is provided, then find the game based on the gameRoom
-				game = await this.prisma.game.findUnique({
-					where: { room: gameRoom }
+				game = await this.prisma.game.findFirst({
+					where: { 
+						room: gameRoom,
+						state: GameState.WAITING,
+					}
 				});
 
 				if (!game) {
@@ -197,6 +203,8 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 				updatedGameDto.playerSocketIds.push(client.id);
 
 				game = await this.gamesService.addPlayer(game.id, updatedGameDto);
+
+				GamesGateway.eventEmitter.emit('addLiveGame');
 			}
 
 			player = await this.prisma.user.findUnique({
@@ -212,6 +220,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 				client.emit('welcome', {
 					message: `Hello ${player.name}, welcome to the game`,
 					opponent: opponent,
+					gameLevel: game.level,
 					gameRoom: game.room,
 				});
 				
@@ -337,7 +346,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 			const dy = gameInfo.ballSpeed * Math.sin(angle);
 			const s = gameInfo.ballSpeed + 0.5;
 
-			const dist = (gameInfo.x > gameInfo.middleBoard ? gameInfo.x - gameInfo.middleBoard : gameInfo.middleBoard - (gameInfo.x - gameInfo.r));
+			const dist = (gameInfo.x > gameInfo.middleBoard ? gameInfo.x - gameInfo.middleBoard : gameInfo.middleBoard - gameInfo.x);
 			const opponentX = (gameInfo.x > gameInfo.middleBoard ? gameInfo.middleBoard - dist : gameInfo.middleBoard + dist);
 
 			// get the players in the room and send the ball direction to both players (horizontal direction is in reverse/mirror)
@@ -534,10 +543,6 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 				where: { room: gameRoom },
 			});
 
-			if (!game) {
-				throw new NotFoundException(`Game with room ${gameRoom} does not exist.`);
-			}
-
 			let player = await this.prisma.user.findUnique({
 				where: { id: gameInfo.playerId },
 			});
@@ -550,13 +555,15 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 				if (game.state === GameState.PLAYING) {
 					// change status of the game to FINISHED
 					game = await this.gamesService.gameOver(game.id, GameState.FINISHED);
+
+					GamesGateway.eventEmitter.emit('removeLiveGame');
 				}
 	
 				if (gameInfo.winner) {
 					// assign playerId as the winnerId in the game
 					game = await this.gamesService.assignWinner(game.id, gameInfo.playerId);
 					// update the win counts in the user
-					player = await this.prisma.usersService.updateWinsMatch(player.id, player.wins + 1);
+					player = await this.usersService.updateWinsMatch(player.id, player.wins + 1);
 				}
 	
 				// update the userGame with the score of the winner
@@ -621,13 +628,13 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 	async handleDisconnect(
 		@ConnectedSocket() client: Socket,
 		) {
-			console.log('a user is disconnected');
+			console.log('a user is disconnected in pong game');
 
 			// if the client is part of the players, get the the game that is not FINISHED
 			let playerGame = await this.prisma.game.findFirst({
 				where: {
 					state: {
-						in: [GameState.PENDING, GameState.PLAYING],
+						in: [GameState.PENDING, GameState.WAITING, GameState.PLAYING],
 					},
 					playerSocketIds: {
 						has: client.id,
@@ -652,10 +659,12 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 					message: `Sorry, one of the player has left!`,
 				});
 
-				if (playerGame.state === GameState.PLAYING) {
+				if (playerGame.state === GameState.PLAYING || playerGame.state === GameState.WAITING) {
 					// change status of the game to finished
 					console.log('change the state of the game');
 					playerGame = await this.gamesService.gameOver(playerGame.id, GameState.FINISHED);
+
+					GamesGateway.eventEmitter.emit('removeLiveGame');
 				} else {
 					// if game.state is still PENDING, delete the game from database
 					console.log('delete the curent game from database');
@@ -667,7 +676,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 			let spectatorGame = await this.prisma.game.findFirst({
 				where: {
 					state: {
-						in: [GameState.PENDING, GameState.PLAYING],
+						in: [GameState.PLAYING],
 					},
 					spectatorSocketIds: {
 						has: client.id,
