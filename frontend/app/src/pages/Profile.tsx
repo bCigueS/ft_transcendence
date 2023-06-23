@@ -32,6 +32,7 @@ const Profile: React.FC = () => {
 			doubleAuth: data.doubleAuth,
 			wins: data.wins,
 			gamesPlayed: 0,
+			connected: data.status === 1 ? true : false,
 		}
 		setDisplayedUser(dataUser);
 	}, [params.id, userCtx.logInfo?.token]);
