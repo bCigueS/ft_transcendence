@@ -2,8 +2,11 @@ import * as speakeasy from 'speakeasy';
 import * as jwt from 'jsonwebtoken';
 import * as CryptoJS from 'crypto-js';
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import { PrismaService } from './../prisma/prisma.service';
 
-export function verifyTwoFactorAuthenticationCode(
+
+export function verifyTwoFactor(
 	code: string,
 	secert: string
 ) {
@@ -35,21 +38,19 @@ export async function getUserData(
 	user: any,
 )
 {
+	const httpService = new HttpService();
+	const prisma = new PrismaService();
+
 	try {
 		const url_data = 'https://api.intra.42.fr/v2/me';
 		const token = CryptoJS.AES.decrypt(user.token, `${process.env.NODE_ENV}`).toString(CryptoJS.enc.Utf8);
 		const headersRequest = { Authorization: `Bearer ${token}` };
-		const data_response = await this.httpService.get(url_data, { headers: headersRequest }).toPromise();
+		
+		const data_response = await httpService.get(url_data, { headers: headersRequest }).toPromise();
 		if (user)
-			await this.prisma.user.update({ where: { id42: data_response.data['id'] }, data: {status: 1},});
-		
-		// const accessToken = jwt.sign({
-		// 	accessToken: token,
-		// 	userId: user.id
-		// }, `${process.env.NODE_ENV}`, { expiresIn: '1h' });
-		
+			await prisma.user.update({ where: { id42: data_response.data['id'] }, data: {status: 1},});
 		return {
-			// accessToken: accessToken,
+			accessToken: signToken(user.id, user.token),
 			userId: user.id,
 			doubleAuth: user.doubleAuth,
 			id: data_response.data['id'],
