@@ -51,6 +51,7 @@ const LeaderboardProfil: React.FC<{user: UserAPI}> = ( { user }) => {
 	}
 
 	const handleClickGame = () => {
+		console.log('in click game');
 		navigate('/pong', {
 			state: {
 				playerId: userCtx.user?.id,

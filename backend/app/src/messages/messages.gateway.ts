@@ -33,6 +33,7 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 		if (!sender) {
 			throw new NotFoundException(`User with ${senderId} does not exist.`);
 		}
+
 		let channel = await this.prisma.channel.findFirst({
 			where: {
 				name: "private",
@@ -57,13 +58,15 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 			this.handleJoin(receiverId, channel.id);
 		}
 
-		console.log(channel);
-
-		this.handleMessage(receiverId, {
-		content: `${sender.name} has invited you to a game! Click the link bellow>${link}`,
-		channelId: channel.id,
-		senderId: senderId,
-	  });
+		if (channel) {
+			console.log(channel);
+	
+			this.handleMessage(receiverId, {
+			content: `${sender.name} has invited you to a game! Click the link bellow>${link}`,
+			channelId: channel.id,
+			senderId: senderId,
+			});
+		}
 	});
   }
 
