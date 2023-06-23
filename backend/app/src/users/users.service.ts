@@ -332,7 +332,7 @@ async logout(req: CustomRequest)
     };
   }
 
-  async getTwoFactorAuthenticationCode(req: CustomRequest)
+  async  getTwoFactorAuthenticationCode(req: CustomRequest)
   {
 	const userId = parseInt(req.userId);
 	const user = await this.prisma.user.findUnique({ where: { id: userId } });

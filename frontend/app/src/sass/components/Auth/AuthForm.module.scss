@@ -15,6 +15,7 @@
 }
 
 .logginForm {
+	margin-bottom: 3rem;
 	width: 28rem;
 	@include flexBox();
 	gap: 2rem;
@@ -89,5 +90,24 @@
 			transition: all 0.3s;
 			opacity: 1;
 		}
+	}
+
+}
+
+
+.test {
+	font-size: 1.8rem;
+
+	.code {
+		width: 30rem;
+		@include flexBox($direction: column);
+		label {
+			@include titleh1();
+			margin-bottom: 3rem;
+		}
+		
+		input {
+			height: 3rem;			
+		}	
 	}
 }

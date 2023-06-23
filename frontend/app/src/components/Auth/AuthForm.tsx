@@ -1,8 +1,8 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { FormEvent, useContext, useEffect, useState } from 'react';
 import classes from '../../sass/components/Auth/AuthForm.module.scss';
 import { Form, useActionData } from 'react-router-dom';
 import { setTokenAuth } from '../../typescript/Auth';
-import { UserAPI, UserContext } from '../../store/users-contexte';
+import { UserContext } from '../../store/users-contexte';
 
 interface DataError {
 	statusCode?: number,
@@ -15,11 +15,9 @@ const AuthForm: React.FC = () => {
 
 	const data: DataError = useActionData() as DataError;
 	const userCtx = useContext(UserContext);
-	const [ isLogged, setIsLogged ] = useState<boolean>(false);
-	const [ user, setUser ] = useState<UserAPI | undefined>(undefined);
-	const [ userId, setUserId ] = useState<string>('');
 	const [ logCode, setLogCode ] = useState<string>("");
 	const [ token, setToken ] = useState<string>("");
+	const [ userId, setUserId ] = useState<string>('');
 	const [ doubleAuth, setDoubleAuth ] = useState<boolean>(false);
 		
 	useEffect(() => {
@@ -41,50 +39,58 @@ const AuthForm: React.FC = () => {
 					const data = await response.json();
 					setToken(data.accessToken);
 					setUserId(data.userId);
+					console.log(data);
+					setDoubleAuth(data.doubleAuth);
 				}
 			}
 			fetchToken();
 		}
 	}, [logCode])
+
+	const handleSubmit = async(event: FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		const formData = new FormData(event.currentTarget);
+		const codeData = {
+			userId: userId,
+			code: formData.get('code')
+		}
+		try	{
+		const response = await fetch('http://localhost:3000/auth/verify', {
+			method: 'POST',
+			headers: {
+				// 'Authorization' : 'Bearer ' + userCtx.logInfo?.token,
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(codeData)
+		})
+
+		if (!response.ok)
+			throw new Error("Failed to fetch 2fa");
+
+		const data = await response.json();
+		console.log(data);
+		if (data.result !== false) {
+			setToken(data.accessToken);
+			userCtx.login();
+			window.location.reload();
+		}
+
+		} catch (error: any) {
+			console.error(error.message);
+		}
+	}
+
 	
 	useEffect(() => {
-		const fetchUser = async() => {
-			const response = await fetch("http://localhost:3000/users/" + userId, {
-				method: 'GET',
-				headers: {
-					'Authorization': 'Bearer ' + token,
-				}
-			})
-			const data = await response.json();
-			const userConnect: UserAPI = {
-				id: data.id,
-				name: data.name,
-				email: data.email,
-				avatar: data.avatar,
-				doubleAuth: data.doubleAuth,
-				wins: data.wins
-			}
-			setUser(userConnect);
-		}
-		if (token)
-			fetchUser();
-	}, [token])
-
-	useEffect(() => {
-		if (token) {
-			console.log(user);
+		if (token || doubleAuth) {
 			setTokenAuth(token, userId);
-			setIsLogged(true);
-			if (user?.doubleAuth === true) {
-				setDoubleAuth(true);
-				console.log("je dois rediriger vers Double Factor")
-			}
-			else {
+			if (doubleAuth === false) {
+				console.log("Je log")
 				userCtx.login();
 				window.location.reload();
 			}
 		}
-	}, [user])
+	}, [token, doubleAuth])
 
 
 
@@ -124,7 +130,36 @@ const AuthForm: React.FC = () => {
 			}
 			{
 				doubleAuth && 
-				<p>CA MARCHE</p>
+				<div className={classes.test}>
+					<form action="post" onSubmit={handleSubmit} className={classes.code}>
+						<label htmlFor="code">Enter your <span>Google Authenticator</span> code</label>
+						<input type="text" name='code' />
+						<button type='submit'>Log in</button>
+					</form>
+
+					<form action="post">
+						<fieldset>
+							<legend>Validation Code</legend>
+							<label htmlFor="otc-1">Number 1</label>
+							<label htmlFor="otc-2">Number 2</label>
+							<label htmlFor="otc-3">Number 3</label>
+							<label htmlFor="otc-4">Number 4</label>
+							<label htmlFor="otc-5">Number 5</label>
+							<label htmlFor="otc-6">Number 6</label>
+
+							<div>
+								<input type="number" pattern="[0-9]*" value="" inputMode='numeric' name="number" id="otc-1" required />
+
+								<input type="number" pattern='[0-9]*' min="0" max="9" maxLength={1} value="" inputMode='numeric' id='otc-2' required />
+								<input type="number" pattern='[0-9]*' min="0" max="9" maxLength={1} value="" inputMode='numeric' id='otc-3' required />
+								<input type="number" pattern='[0-9]*' min="0" max="9" maxLength={1} value="" inputMode='numeric' id='otc-4' required />
+								<input type="number" pattern='[0-9]*' min="0" max="9" maxLength={1} value="" inputMode='numeric' id='otc-5' required />
+								<input type="number" pattern='[0-9]*' min="0" max="9" maxLength={1} value="" inputMode='numeric' id='otc-6' required />
+
+							</div>
+						</fieldset>
+					</form>
+				</div>
 			}
 		</>
 	)
@@ -133,4 +168,3 @@ const AuthForm: React.FC = () => {
 export default AuthForm;
 
 
-// https://api.intra.42.fr/oauth/authorize?client_id=your_very_long_client_id&redirect_uri=http%3A%2F%2Flocalhost%3A1919%2Fusers%2Fauth%2Fft%2Fcallback&response_type=code&scope=public&state=a_very_long_random_string_witchmust_be_unguessable'
