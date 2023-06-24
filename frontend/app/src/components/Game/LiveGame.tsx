@@ -17,7 +17,7 @@ const Livegame: React.FC = () => {
 		});
 
 		return () => {
-			newSocket.removeAllListeners();
+			newSocket.close();
 		}
 	}, [setSocket, userCtx.user?.id]);
 
