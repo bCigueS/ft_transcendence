@@ -1,3 +1,4 @@
+import { Socket } from "socket.io-client";
 import { UserAPI } from "../../../store/users-contexte";
 
 export type PongInfo = {
@@ -16,6 +17,7 @@ export type PongInfo = {
 }
 
 export type PongProp = {
+	socket: Socket;
 	userId: number;
 	userName: string;
 	opponentId: number | undefined;
@@ -25,6 +27,7 @@ export type PongProp = {
 }
 
 export type SpectatorProp = {
+	socket: Socket;
 	userId: number;
 	playerId: number;
 	opponentId: number;

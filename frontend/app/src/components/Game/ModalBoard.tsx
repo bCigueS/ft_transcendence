@@ -70,47 +70,63 @@ export default function ModalBoard({ onDifficulty, onTool, onPlayerMode, onStart
 				)}
 				{(isStarting && page === 1 && !isInvited) && (
 					<>
-						<button onClick={() => {onDifficulty(0); onNextPage();}}>Beginner level</button>
-						<button onClick={() => {onDifficulty(1); onNextPage();}}>Medium level</button>
-						<button onClick={() => {onDifficulty(2); onNextPage();}}>Hard level</button>
-						<button onClick={() => {onDifficulty(3); onNextPage();}}>Special level</button>
+						<div>
+							<button onClick={() => {onDifficulty(0); onNextPage();}}>Beginner level</button>
+							<button onClick={() => {onDifficulty(1); onNextPage();}}>Medium level</button>
+							<button onClick={() => {onDifficulty(2); onNextPage();}}>Hard level</button>
+							<button onClick={() => {onDifficulty(3); onNextPage();}}>Special level</button>
+						</div>
 						<button onClick={() => {setToPage(0); handlePlayAgain();}}>{cancelText}</button>
 					</>
 				)}
 				{(isStarting && page === 2 && !inviteMode) && (
 					<>
-						<button onClick={() => {onTool("keyboard"); onNextPage();}}>Play with keyboard</button>
-						<button onClick={() => {onTool("mouse"); onNextPage();}}>Play with mouse</button>
+						<div>
+							<button onClick={() => {onTool("keyboard"); onNextPage();}}>Play with keyboard</button>
+							<button onClick={() => {onTool("mouse"); onNextPage();}}>Play with mouse</button>
+						</div>
 						<button onClick={() => {setToPage(0);}}>{cancelText}</button>
 					</>
 				)}
 				{(isStarting && page === 2 && inviteMode) && (
 					<>
-						<button onClick={() => {onTool("keyboard"); onPlayerMode("double"); setIsDouble(true); onNextPage();}}>Play with keyboard</button>
-						<button onClick={() => {onTool("mouse"); onPlayerMode("double"); setIsDouble(true); onNextPage();}}>Play with mouse</button>
+						<div>
+							<button onClick={() => {onTool("keyboard"); onPlayerMode("double"); setIsDouble(true); onNextPage();}}>Play with keyboard</button>
+							<button onClick={() => {onTool("mouse"); onPlayerMode("double"); setIsDouble(true); onNextPage();}}>Play with mouse</button>
+						</div>
 						<button onClick={() => {setToPage(0); handlePlayAgain();}}>{cancelText}</button>
 					</>
 				)}
 				{(isStarting && page === 3 && !inviteMode) && (
 					<>
-						<button onClick={() => {onPlayerMode("single"); onNextPage();}}>1 player</button>
-						<button onClick={() => {onPlayerMode("double"); setIsDouble(true); onNextPage();}}>2 players</button>
+						<div>
+							<button onClick={() => {onPlayerMode("single"); onNextPage();}}>1 player</button>
+							<button onClick={() => {onPlayerMode("double"); setIsDouble(true); onNextPage();}}>2 players</button>
+						</div>
 						<button onClick={() => {setToPage(0);}}>{cancelText}</button>
 					</>
 				)}
 				{(isStarting && page === 4 && !isDouble) && (
 					<>
 						<h2>Are you ready?</h2>
-						<button onClick={onStartPage}>{buttonText}</button>
-						<button onClick={() => {setToPage(0);}}>{cancelText}</button>
+						<div>
+							<button onClick={onStartPage}>{buttonText}</button>
+						</div>
+						<div>
+							<button onClick={() => {setToPage(0);}}>{cancelText}</button>
+						</div>
 					</>
 				)}
 				{!isStarting && (
 					<>
 						<h2>{closingText}</h2>
 						<p>Do you want to start a new game?</p>
-						<button onClick={() => {setToPage(1); handlePlayAgain();}}>{buttonText}</button>
-						<button onClick={handleGoToHomepage}>Return to homepage</button>
+						<div>
+							<button onClick={() => {setToPage(1); handlePlayAgain();}}>{buttonText}</button>
+						</div>
+						<div>
+							<button onClick={handleGoToHomepage}>Return to homepage</button>
+						</div>
 					</>
 				)}
 			</div>

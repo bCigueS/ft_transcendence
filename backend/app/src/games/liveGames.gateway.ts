@@ -7,8 +7,8 @@ import { Namespace, Server, Socket } from "socket.io";
 import { LiveGamesInfo } from "./utils/types";
 import { GamesGateway } from "./games.gateway";
 
-@WebSocketGateway({ namespace: '/' })
-export class LiveGamesGateway implements OnGatewayInit, OnGatewayConnection {
+@WebSocketGateway({ namespace: '/', cors: '*' })
+export class LiveGamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 	private readonly logger = new Logger(LiveGamesGateway.name);
 	static eventEmitter: EventEmitter = new EventEmitter();
 
@@ -35,7 +35,6 @@ export class LiveGamesGateway implements OnGatewayInit, OnGatewayConnection {
 	}
 
 	// Receive connection from client
-	// @SubscribeMessage('connection')
 	async handleConnection(		
 		@ConnectedSocket() client: Socket,
 		) {
@@ -43,10 +42,6 @@ export class LiveGamesGateway implements OnGatewayInit, OnGatewayConnection {
 		client.on('connection', (userId: number) => {
 			this.userId = userId;
 			console.log(`User ${userId} is connected in live games`);
-		});
-
-		client.on('disconnect', () => {
-			console.log(`User ${this.userId} is disconnected in live games`);			
 		});
 	}
 
@@ -82,11 +77,11 @@ export class LiveGamesGateway implements OnGatewayInit, OnGatewayConnection {
 		}	
 
 
-	// // Receive disconnection from client
-	// @SubscribeMessage('disconnect')
-	// async handleDisconnect(
-	// 	@ConnectedSocket() client: Socket,
-	// 	) {
-	// 	console.log(`User ${this.userId} is disconnected in live games`);
-	// }
+	// Receive disconnection from client
+	@SubscribeMessage('disconnect')
+	async handleDisconnect(
+		@ConnectedSocket() client: Socket,
+		) {
+		console.log(`User ${this.userId} is disconnected in live games`);
+	}
 }
