@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useContext } from 'react';
 import { PongInfo, BallInfo, PongProp } from './utils/types';
 import ModalBoard from './ModalBoard';
 import LiveBoard from './LiveBoard';
@@ -7,11 +7,7 @@ import classes from '../../sass/components/Game/Pong.module.scss';
 import io, { Socket } from 'socket.io-client';
 import PlayerSide from './PlayerSide';
 import OpponentSide from './OpponentSide';
-
-const socket = io('http://localhost:3000/pong', {
-	transports: ["websocket"],
-	}
-);
+import { UserAPI, UserContext } from '../../store/users-contexte';
 
 // Modal's element
 const BEGINNER_LEVEL = 0;
@@ -50,7 +46,9 @@ const info: PongInfo = {
 }
 
 export default function Pong(props: PongProp) {
-	// const [ socket, setSocket ] = useState<Socket>();
+	const userCtx = useContext(UserContext);
+	// socket
+	const [ socket, setSocket ] = useState<Socket>();
 	// game play
 	const [isRunning, setIsRunning] = useState(false);
 	const [isPaused, setIsPaused] = useState(false);
@@ -93,33 +91,57 @@ export default function Pong(props: PongProp) {
 	const frameId = useRef(0);
 	const prevFrameId = useRef(0);
 
-	// loop to emit a join request to the server
+	// receive a connection signal from the server
+	useEffect(() => {
+		const newSocket = io('http://localhost:3000/pong');
+		setSocket(newSocket);
+		newSocket.on('connect', () => {
+			newSocket.emit('connection', userCtx.user?.id);
+		});
+
+		return () => {
+			newSocket.removeAllListeners();
+		}
+	}, [setSocket, userCtx.user?.id]);
+
+	// emit a join request to the server
 	useEffect(() => {
 		if (playerMode === SINGLE_MODE) {
 			setOpponentName('Computer');
 		}
 		if (playerMode === DOUBLE_MODE && !props.inviteMode) {
 			console.log('emit a join random game request');
-			socket.emit('joinRandom', { id: props.userId, lvl: level });
+			socket?.emit('joinRandom', { id: props.userId, lvl: level });
 		}
 		if (playerMode === DOUBLE_MODE && props.inviteMode) {
 			console.log('emit a join invitation game request');
-			socket.emit('joinInvitation', { playerId: props.userId, opponentId: props.opponentId, lvl: level, gameRoom: props.gameRoom })
+			socket?.emit('joinInvitation', { playerId: props.userId, opponentId: props.opponentId, lvl: level, gameRoom: props.gameRoom })
 		}
-	}, [playerMode, level, props.userId, props.inviteMode]);
+	}, [socket, playerMode, level, props.gameRoom, props.userId, props.opponentId, props.inviteMode]);
 
-	// loop to receive several game play events
+	// receive a signal to send an invitation
 	useEffect(() => {
 		if (playerMode === DOUBLE_MODE) {
-			socket.on('passGameRoom', ({ gameRoom }) => {
-				socket.emit('sendInvitation', {
+			const handlePassGameRoom = ({ gameRoom }: { gameRoom: string}) => {
+				socket?.emit('sendInvitation', {
 					playerId: props.userId,
 					opponentId: props.opponentId,
 					gameRoom: gameRoom,
 				});
-			});
-			// receive a welcome message from server informing that you are in a specific game room, and trigger a liveBoard
-			socket.on('welcome', ({ message, opponent, gameLevel, gameRoom }) => {
+			};
+
+			socket?.on('passGameRoom', handlePassGameRoom);
+			
+			return () => {
+				socket?.off('passGameRoom', handlePassGameRoom);
+			}
+		}
+	}, [socket, playerMode, props.userId, props.opponentId]);
+
+	// receive a welcome message from server informing that you are in a specific game room, and trigger a liveBoard
+	useEffect(() => {
+		if (playerMode === DOUBLE_MODE) {
+			const handleWelcome = ({ message, opponent, gameLevel, gameRoom }: { message: string, opponent: UserAPI, gameLevel: number, gameRoom: string }) => {
 				console.log({ message, opponent, gameRoom });
 				if (opponent) {
 					setOpponentName(opponent.name);
@@ -130,58 +152,139 @@ export default function Pong(props: PongProp) {
 				setGameRoom(gameRoom);
 				setIsLive(true);
 				setIsReady(false);
-			});
-			// receive an information about the opponent from server
-			socket.on('opponentJoin', ({ message, opponent }) => {
+			};
+
+			socket?.on('welcome', handleWelcome);
+			
+			return () => {
+				socket?.off('welcome', handleWelcome);
+			}
+		}
+	}, [socket, playerMode, level]);
+
+	// receive an information about the opponent from server
+	useEffect(() => {
+		if (playerMode === DOUBLE_MODE) {
+			const handleOpponentJoin = ({ message, opponent }: { message: string, opponent: UserAPI}) => {
 				console.log({ message, opponent });
 				setOpponentName(opponent.name);
-			});
-			// receive a confirmation from server to start the game, and trigger the liveBoard to start counting the countdown
-			socket.on('startGame', ({ message }) => {
+			};
+
+			socket?.on('opponentJoin', handleOpponentJoin);
+			
+			return () => {
+				socket?.off('opponentJoin', handleOpponentJoin);
+			}
+		}
+	}, [socket, playerMode]);
+
+	// receive a confirmation from server to start the game, and trigger the liveBoard to start counting the countdown
+	useEffect(() => {
+		if (playerMode === DOUBLE_MODE) {
+			const handleStartGame = ({ message }: { message: string }) => {
 				console.log({ message });
 				setIsReady(true);
-			});
-			// receiving the ball direction from server
-			socket.on('ballServe', ({ dx, dy }) => {
+			};
+
+			socket?.on('startGame', handleStartGame);
+
+			return () => {
+				socket?.off('startGame', handleStartGame);
+			}
+		}
+	}, [socket, playerMode]);
+
+	// receiving the new position of paddle from server
+	useEffect(() => {
+		if (playerMode === DOUBLE_MODE) {
+			const handlePaddleMove = ({ y }: { y: number }) => {
+				setOpponentY(y);
+			};
+
+			socket?.on('paddleMove', handlePaddleMove);
+			
+			return () => {
+				socket?.off('paddleMove', handlePaddleMove);
+			}
+		}
+	}, [socket, playerMode]);
+
+	// receiving the new ball direction from server
+	useEffect(() => {
+		if (playerMode === DOUBLE_MODE) {
+			const handleBallServe = ({ dx, dy }: { dx: number, dy: number }) => {
 				setDeltaX(dx);
 				setDeltaY(dy);
 				setBallX(info.boardWidth / 2);
 				setBallY(info.boardHeight / 2);
 				setBallSpeed(info.initialSpeed + level);
-			});
-			// receiving the new ball direction from server
-			socket.on('ballBounce', ({dx, dy, x, y, s}) => {
+			};
+
+			socket?.on('ballServe', handleBallServe);
+			
+			return () => {
+				socket?.off('ballServe', handleBallServe);
+			}
+		}
+	}, [socket, playerMode, level]);
+
+	// receiving the new ball direction after ball hit a paddle or obstacle
+	useEffect(() => {
+		if (playerMode === DOUBLE_MODE) {
+			const handleBallBounce = ({dx, dy, x, y, s}: BallInfo) => {
 				setDeltaX(dx);
 				setDeltaY(dy);
 				setBallX(x);
 				setBallY(y);
 				setBallSpeed(s);
-			});
-			// receive a pause signal
-			socket.on('makePause', ({ message }) => {
-				console.log({ message });
-				setIsPaused(current => !current);
-			});
-			// receive new score signal
-			socket.on('newScore', ({ pScore, oScore }) => {
+			};
+
+			socket?.on('ballBounce', handleBallBounce);
+			
+			return () => {
+				socket?.off('ballBounce', handleBallBounce);
+			}
+		}
+	}, [socket, playerMode]);
+
+	// receive a new updated score
+	useEffect(() => {
+		if (playerMode === DOUBLE_MODE) {
+			const handleNewScore = ({ pScore, oScore }: { pScore: number, oScore: number }) => {
 				setPlayerScore(pScore);
 				setOpponentScore(oScore);
-			});
+			}
+
+			socket?.on('newScore', handleNewScore);
+			
+			return () => {
+				socket?.off('newScore', handleNewScore);
+			}
 		}
-	}, [playerMode, level, props.inviteMode]);
+	}, [socket, playerMode]);
+
+	// receiving a pause signal
+	useEffect(() => {
+		if (playerMode === DOUBLE_MODE) {
+			const handleMakePause = ({ message }: { message: string }) => {
+				console.log({ message });
+				setIsPaused(current => !current);
+			};
+
+			socket?.on('makePause', handleMakePause);
+			
+			return () => {
+				socket?.off('makePause', handleMakePause);
+			}
+		}
+	}, [socket, playerMode]);
 
 	// function to stop the animation by toggling the isRunning bool, and send a leave request to the server
 	const stopGame = useCallback(() => {
 		setIsRunning(false);
-		// if (isPaused === true) {
-		// 	if (playerMode === DOUBLE_MODE) {
-		// 		socket.emit('pressPause', gameRoom);
-		// 	}
-		// 	setIsPaused(current => !current);
-		// }
 		console.log('in stop game, with gameRoom ', gameRoom);
 		if (playerMode === DOUBLE_MODE && winner !== OPPONENT_WIN) {
-			socket.emit('gameOver', {
+			socket?.emit('gameOver', {
 				gameInfo: {
 					playerId: props.userId,
 					winner: winner,
@@ -191,7 +294,7 @@ export default function Pong(props: PongProp) {
 				gameRoom: gameRoom,
 			});
 		}
-	}, [gameRoom, opponentScore, playerMode, playerScore, winner, props.userId]);
+	}, [socket, gameRoom, opponentScore, playerMode, playerScore, winner, props.userId]);
 
 	// loop to detect stopGame event from server
 	useEffect(() => {
@@ -205,18 +308,18 @@ export default function Pong(props: PongProp) {
 			};
 		
 			// receive a message from server to stop the game, and trigger the modalBoard
-			socket.on('stopGame', handleStopGame);
+			socket?.on('stopGame', handleStopGame);
 		
 			return () => {
-				socket.off('stopGame', handleStopGame);
+				socket?.off('stopGame', handleStopGame);
 			};
 		}
-	}, [playerMode, stopGame]);
+	}, [socket, playerMode, stopGame]);
 	
-	// loop to detect when we receive an update request from server
+	// loop to detect when we receive an update info request from server
 	useEffect(() => {
 		const handleUpdateGame = ({ socketId }: { socketId: string }) => {
-			socket.emit('lastUpdatedInfo', {
+			socket?.emit('lastUpdatedInfo', {
 				gameInfo: {
 				x: ballX,
 				y: ballY,
@@ -235,12 +338,12 @@ export default function Pong(props: PongProp) {
 			console.log('just emit updated info');
 		}
 
-		socket.on('updateGame', handleUpdateGame);
+		socket?.on('updateGame', handleUpdateGame);
 	
 		return () => {
-		socket.off('updateGame', handleUpdateGame);
+			socket?.off('updateGame', handleUpdateGame);
 		};
-	}, [ballSpeed, ballX, ballY, deltaX, deltaY, gameRoom, opponentScore, opponentY, playerScore, playerY]);
+	}, [socket, isPaused, ballSpeed, ballX, ballY, deltaX, deltaY, gameRoom, opponentScore, opponentY, playerScore, playerY]);
 
 	// function to set an initial ball position and direction to start the round
 	const ballServe = useCallback((side: number) => {
@@ -251,16 +354,6 @@ export default function Pong(props: PongProp) {
 			setBallX(info.boardWidth / 2);
 			setBallY(info.boardHeight / 2);
 			setBallSpeed(info.initialSpeed + level);
-		// if the game is against other player, calculation will be done by server
-		} else if (playerMode === DOUBLE_MODE) {
-			// receiving the ball direction from server
-			socket.on('ballServe', ({ dx, dy }) => {
-				setDeltaX(dx);
-				setDeltaY(dy);
-				setBallX(info.boardWidth / 2);
-				setBallY(info.boardHeight / 2);
-				setBallSpeed(info.initialSpeed + level);
-			});
 		}
 	}, [level, playerMode]);
 	
@@ -286,13 +379,13 @@ export default function Pong(props: PongProp) {
 			setOpponentY((info.boardHeight - paddleHeight) / 2);
 			setPlayerScore(0);
 			setOpponentScore(0);
-			// setIsPaused(false);
+			setIsPaused(false);
 			setGameOver(false);
 		}
 		
 		if (playerMode === DOUBLE_MODE) {
 			// send a signal to server to start a calculation of the ball direction to start the round
-			socket.emit('startBall', {
+			socket?.emit('startBall', {
 				gameInfo: {
 					initialDelta: info.initialDelta,
 					level: level,
@@ -324,25 +417,7 @@ export default function Pong(props: PongProp) {
 
 		return {dx, dy, x, y, s};
 	}, [ballRadius, ballX, ballY, ballSpeed]);
-
-	// a function to handle ballBounce event from socket
-	useEffect(() => {
-		const handleBallBounce = ({ dx, dy, x, y, s }: BallInfo) => {
-			setDeltaX(dx);
-			setDeltaY(dy);
-			setBallX(x);
-			setBallY(y);
-			setBallSpeed(s);
-		};
-	  
-		socket.on('ballBounce', handleBallBounce);
-	  
-		// Clean up the event listener when the component is unmounted
-		return () => {
-		  socket.off('ballBounce', handleBallBounce);
-		};
-	  }, []); 
-
+	
 	// function to detect when a ball hit the obstacle
 	const detectObstacleCollision = useCallback( async () => {
 		if (ballX + ballRadius >= info.obstacleX
@@ -363,7 +438,7 @@ export default function Pong(props: PongProp) {
 			&& ballY > obstacleY && ballY < obstacleY + info.obstacleHeight) {
 				if (playerMode === DOUBLE_MODE) {
 					// send a signal to server to start calculating a new direction of the ball
-					socket.emit('ballCollision', {
+					socket?.emit('ballCollision', {
 						gameInfo: {
 							x: ballX,
 							y: ballY,
@@ -386,7 +461,7 @@ export default function Pong(props: PongProp) {
 					setBallSpeed(s);
 				}
 		}
-	}, [ballCollision, ballRadius, ballX, ballY, gameRoom, obstacleY, playerMode, ballSpeed]);
+	}, [socket, ballCollision, ballRadius, ballX, ballY, gameRoom, obstacleY, playerMode, ballSpeed]);
 
 	// function to detect when a ball hit the paddle of the opponent side
 	const detectOpponentCollision = useCallback( async () => {
@@ -408,7 +483,7 @@ export default function Pong(props: PongProp) {
 		if (ballX - ballRadius <= info.playerX + info.paddleWidth && ballY > playerY && ballY < playerY + paddleHeight) {
 			if (playerMode === DOUBLE_MODE) {
 				// send a signal to server to start calculating a new direction of the ball
-				socket.emit('ballCollision', {
+				socket?.emit('ballCollision', {
 					gameInfo: {
 						x: ballX,
 						y: ballY,
@@ -431,7 +506,7 @@ export default function Pong(props: PongProp) {
 				setBallSpeed(s);
 			}
 		}
-	}, [ballCollision, ballRadius, ballX, ballY, gameRoom, paddleHeight, playerMode, playerY, ballSpeed]);
+	}, [socket, ballCollision, ballRadius, ballX, ballY, gameRoom, paddleHeight, playerMode, playerY, ballSpeed]);
 
 	// function to detect ball collision with all 4 part of the walls/borders
 	const detectWallCollision = useCallback(() => {
@@ -454,14 +529,14 @@ export default function Pong(props: PongProp) {
 				setOpponentScore(o => o += 1);
 			} else if (playerMode === DOUBLE_MODE) {
 				// send signal to server to calculate the ball direction for a new round
-				socket.emit('startBall', {
+				socket?.emit('startBall', {
 					gameInfo: {
 						initialDelta: info.initialDelta,
 						level: level,
 					}, gameRoom: gameRoom,
 				});
 				// send signal to server to inform am update on the scores
-				socket.emit('updateScore', {
+				socket?.emit('updateScore', {
 					gameInfo: {
 						playerScore: playerScore,
 						opponentScore: opponentScore,
@@ -477,7 +552,7 @@ export default function Pong(props: PongProp) {
 			}
 			ballServe(PLAYER_SIDE);
 		}
-	}, [ballRadius, ballServe, ballX, ballY, gameRoom, level, opponentScore, playerMode, playerScore]);
+	}, [socket, ballRadius, ballServe, ballX, ballY, gameRoom, level, opponentScore, playerMode, playerScore]);
 	
 	// function to calculate the movement of the ball based on its direction
 	const moveBall = useCallback(() => {
@@ -494,11 +569,6 @@ export default function Pong(props: PongProp) {
 			&& nextPos >= 0 
 			&& nextPos + paddleHeight <= info.boardHeight) {
 			setOpponentY(nextPos);
-		} else if (playerMode === DOUBLE_MODE) {
-			// receiving a new position from the server, based on the other player's input
-			socket.on('paddleMove', ({y}) => {
-				setOpponentY(y);
-			});
 		}
 	}, [ballY, level, paddleHeight, playerMode]);
 
@@ -512,18 +582,18 @@ export default function Pong(props: PongProp) {
 				setPlayerY(nextPostUp);
 				if (playerMode === DOUBLE_MODE) {
 					// send the new position to server to be forwarded to other player
-					socket.emit('moveInput', {y: nextPostUp, gameRoom: gameRoom});
+					socket?.emit('moveInput', {y: nextPostUp, gameRoom: gameRoom});
 				}
 			}
 			if (paddleDown && nextPostDown <= info.boardHeight) {
 				setPlayerY(nextPostDown - paddleHeight);
 				if (playerMode === DOUBLE_MODE) {
 					// send the new position to server to be forwarded to other player
-					socket.emit('moveInput', {y: nextPostDown - paddleHeight, gameRoom: gameRoom});
+					socket?.emit('moveInput', {y: nextPostDown - paddleHeight, gameRoom: gameRoom});
 				}
 			}
 		}
-	}, [gameRoom, isRunning, paddleDown, paddleHeight, paddleUp, playerMode, playerY, toolMode]);
+	}, [socket, gameRoom, isRunning, paddleDown, paddleHeight, paddleUp, playerMode, playerY, toolMode]);
 
 	// function to calculate the steady movement of the obstacle
 	const moveObstacle = useCallback(() => {
@@ -650,11 +720,10 @@ export default function Pong(props: PongProp) {
 				}
 				if (event.code === "Space") {
 					if (playerMode === DOUBLE_MODE) {
-						socket.emit('pressPause', gameRoom);
+						socket?.emit('pressPause', gameRoom);
 					}
-					// if (playerMode === SINGLE_MODE) {
+
 					setIsPaused(current => !current);
-					// }
 				}
 			}
 		}
@@ -670,7 +739,7 @@ export default function Pong(props: PongProp) {
 			}
 		}
 
-	}, [isRunning, toolMode, playerMode, gameRoom]);
+	}, [socket, isRunning, toolMode, playerMode, gameRoom]);
 	
 	// mouse event handler
 	useEffect(() => {
@@ -681,22 +750,22 @@ export default function Pong(props: PongProp) {
 				if ( nextPost >= 0 && nextPost + paddleHeight <= info.boardHeight) {
 						setPlayerY(nextPost);
 						if (playerMode === DOUBLE_MODE) {
-							socket.emit('moveInput', {y: nextPost, gameRoom: gameRoom});
+							socket?.emit('moveInput', {y: nextPost, gameRoom: gameRoom});
 						}
 				} else if (nextPost < 0) {
 					setPlayerY(0);
 					if (playerMode === DOUBLE_MODE) {
-						socket.emit('moveInput', {y: 0, gameRoom: gameRoom});
+						socket?.emit('moveInput', {y: 0, gameRoom: gameRoom});
 					}
 				} else if (nextPost + paddleHeight > info.boardHeight) {
 					setPlayerY(info.boardHeight - paddleHeight);
 					if (playerMode === DOUBLE_MODE) {
-						socket.emit('moveInput', {y: info.boardHeight - paddleHeight, gameRoom: gameRoom})
+						socket?.emit('moveInput', {y: info.boardHeight - paddleHeight, gameRoom: gameRoom})
 					}
 				}
 			}
 		}
-	}, [toolMode, isRunning, gameRoom, paddleHeight, playerMode]);
+	}, [socket, toolMode, isRunning, gameRoom, paddleHeight, playerMode]);
 
 	return (
 		<>
@@ -717,7 +786,7 @@ export default function Pong(props: PongProp) {
 					onTool={(mode) => {setToolMode(mode)}}
 					onPlayerMode={(mode) => {setPlayerMode(mode)}}
 					onStartPage={() => startGame(winner === PLAYER_WIN ? PLAYER_SIDE : OPPONENT_SIDE)}
-					onRestart={() => {setIsPaused(false); setOpponentName('');}}
+					onRestart={() => {setOpponentName(''); setPlayerScore(0); setOpponentScore(0);}}
 					inviteMode={props.inviteMode}
 					isInvited={props.isInvited}
 					buttonText={gameOver ? "Play again" : "Start playing"}

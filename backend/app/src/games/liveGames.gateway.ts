@@ -8,7 +8,7 @@ import { LiveGamesInfo } from "./utils/types";
 import { GamesGateway } from "./games.gateway";
 
 @WebSocketGateway({ namespace: '/' })
-export class LiveGamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+export class LiveGamesGateway implements OnGatewayInit, OnGatewayConnection {
 	private readonly logger = new Logger(LiveGamesGateway.name);
 	static eventEmitter: EventEmitter = new EventEmitter();
 
@@ -16,6 +16,8 @@ export class LiveGamesGateway implements OnGatewayInit, OnGatewayConnection, OnG
 
 	@WebSocketServer() io: Namespace;
 	@WebSocketServer() server: Server
+
+	private userId;
 
 	// Gateway initialized (provided in module and instantiated)
 	afterInit(
@@ -33,11 +35,19 @@ export class LiveGamesGateway implements OnGatewayInit, OnGatewayConnection, OnG
 	}
 
 	// Receive connection from client
-	@SubscribeMessage('connection')
-	async handleConnection(
+	// @SubscribeMessage('connection')
+	async handleConnection(		
 		@ConnectedSocket() client: Socket,
 		) {
-		console.log('a user is connected in live games');
+
+		client.on('connection', (userId: number) => {
+			this.userId = userId;
+			console.log(`User ${userId} is connected in live games`);
+		});
+
+		client.on('disconnect', () => {
+			console.log(`User ${this.userId} is disconnected in live games`);			
+		});
 	}
 
 	@SubscribeMessage('getLiveGames')
@@ -47,7 +57,6 @@ export class LiveGamesGateway implements OnGatewayInit, OnGatewayConnection, OnG
 			const games = await this.gamesService.getLiveGames();
 
 			if (games) {
-				console.log('games is exist');
 				let liveMatchArray: LiveGamesInfo[] = [];
 	
 				for (const game of games) {
@@ -67,19 +76,17 @@ export class LiveGamesGateway implements OnGatewayInit, OnGatewayConnection, OnG
 						gameRoom: game.room,
 					});
 				}
-	
-				console.log(liveMatchArray);
 		
 				client.emit('liveGames', ({ liveMatchArray }));
 			}
 		}	
 
 
-	// Receive disconnection from client
-	@SubscribeMessage('disconnect')
-	async handleDisconnect(
-		@ConnectedSocket() client: Socket,
-		) {
-		console.log('a user is disconnected in live games');
-	}
+	// // Receive disconnection from client
+	// @SubscribeMessage('disconnect')
+	// async handleDisconnect(
+	// 	@ConnectedSocket() client: Socket,
+	// 	) {
+	// 	console.log(`User ${this.userId} is disconnected in live games`);
+	// }
 }
