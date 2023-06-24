@@ -98,7 +98,7 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 		setShowModal(false);
 	}
 	
-	const handleClickJoinGame = (senderId: number, gameRoom: string) => {
+	const handleClickJoinGame = (senderId: number, gameRoom: string ) => {
 		console.log(senderId, gameRoom);
 		navigate('/pong', {
 			state: {
@@ -128,7 +128,6 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 			const info = message.content.split('/')[1];
 			const gameRoom = info.split('_')[0];
 			const senderId = info.split('_')[1];
-			// console.log('in message, gameRoom and senderId are ', gameRoom, senderId);
 			return (
 				<>
 					<p>{invitation}</p>

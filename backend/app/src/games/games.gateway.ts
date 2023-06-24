@@ -12,7 +12,7 @@ import { ServeInfo, CollisionInfo, GameOverInfo, ScoreInfo, UpdatedInfo } from '
 import { GameState } from '@prisma/client';
 import EventEmitter from 'events';
 
-@WebSocketGateway({ namespace: '/pong' })
+@WebSocketGateway({ namespace: '/pong', cors: '*' })
 export class GamesGateway implements OnGatewayInit, OnGatewayConnection {
 	private readonly logger = new Logger(GamesGateway.name);
 	static eventEmitter: EventEmitter = new EventEmitter();
@@ -30,7 +30,6 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection {
 	}
 
 	// Receive connection from client
-	// @SubscribeMessage('connection')
 	async handleConnection(
 		@ConnectedSocket() client: Socket,
 		) {
@@ -373,7 +372,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection {
 
 	// receiving a updateScore request to inform the server that one side gains one points
 	@SubscribeMessage('updateScore')
-	async handleUpdateScorelEvent(
+	async handleUpdateScoreEvent(
 		@MessageBody() { gameInfo, gameRoom }: { gameInfo: ScoreInfo, gameRoom: string },
 		@ConnectedSocket() client: Socket,
 		) {
@@ -422,7 +421,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection {
 			const dy = gameInfo.ballSpeed * Math.sin(angle);
 			const s = gameInfo.ballSpeed + 0.5;
 
-			const dist = (gameInfo.x > gameInfo.middleBoard ? gameInfo.x - gameInfo.middleBoard : gameInfo.middleBoard - gameInfo.x);
+			const dist = (gameInfo.x > gameInfo.middleBoard ? gameInfo.x - gameInfo.middleBoard : gameInfo.middleBoard - (gameInfo.x - (gameInfo.r / 2)));
 			const opponentX = (gameInfo.x > gameInfo.middleBoard ? gameInfo.middleBoard - dist : gameInfo.middleBoard + dist);
 
 			// get the players in the room and send the ball direction to both players (horizontal direction is in reverse/mirror)
@@ -704,7 +703,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection {
 	// async handleDisconnect(
 	// 	@ConnectedSocket() client: Socket,
 	// 	) {
-	// 		console.log('a user is disconnected in pong game');
+	// 		console.log(`User ${this.userId} is disconnected in pong game`);
 
 	// 		// if the client is part of the players, get the the game that is not FINISHED
 	// 		let playerGame = await this.prisma.game.findFirst({
