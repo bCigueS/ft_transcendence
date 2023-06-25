@@ -264,9 +264,11 @@ export default function Pong(props: PongProp) {
 
 	// function to stop the animation by toggling the isRunning bool, and send a leave request to the server
 	const stopGame = useCallback(() => {
+		setGameOver(current => !current);
 		setIsRunning(false);
 		console.log('in stop game, with gameRoom ', gameRoom);
 		if (playerMode === DOUBLE_MODE && winner !== OPPONENT_WIN) {
+			console.log ('emit gameOver, and winner is ', winner);
 			props.socket?.emit('gameOver', {
 				gameInfo: {
 					playerId: props.userId,
@@ -284,7 +286,6 @@ export default function Pong(props: PongProp) {
 		if (playerMode === DOUBLE_MODE) {
 			const handleStopGame = ({ message }: {message: string}) => {
 				console.log({ message });
-				setGameOver(true);
 				setWinner(TIE);
 				setClosingText(message);
 				stopGame();
@@ -645,6 +646,8 @@ export default function Pong(props: PongProp) {
 		
 			if (deltaTime >= frameDuration) {
 				prevFrameId.current = timestamp;
+
+				// console.log('gameOver is ', gameOver);
 				
 				drawBoard(context);
 				if (isRunning && !isPaused) {
@@ -662,9 +665,8 @@ export default function Pong(props: PongProp) {
 					}
 					// check game status
 					if (opponentScore > info.winnerScore || playerScore > info.winnerScore) {
-						playerScore > info.winnerScore ? setWinner(PLAYER_WIN) : setWinner(OPPONENT_WIN);
+						playerScore > info.winnerScore ? setWinner(current => PLAYER_WIN) : setWinner(current => OPPONENT_WIN);
 						playerScore > info.winnerScore ? setClosingText('You win!') : setClosingText('You lose!');
-						setGameOver(true);
 						stopGame();
 					}
 				}
