@@ -216,15 +216,13 @@ export default function SpectatorBoard(props: SpectatorProp) {
 	useEffect(() => {
 		const handlePlayerDisconnected = ({ message }: { message: string }) => {
 			console.log({ message });
-			setIsRunning(false);
-			setGameOver(true);
 		};
 
 		props.socket?.on('playerDisconnected', handlePlayerDisconnected);
 		
 		return () => {
 			props.socket?.off('playerDisconnected', handlePlayerDisconnected);
-			}
+		}
 	}, [props.socket]);
 
 	// loop to receive a message from server that game has ended
@@ -359,6 +357,7 @@ export default function SpectatorBoard(props: SpectatorProp) {
 			if (deltaTime >= frameDuration) {
 				prevFrameId.current = timestamp;
 				
+				console.log(isRunning);
 				drawBoard(context);
 				if (isRunning && !isPaused) {
 					drawElement(context);
@@ -382,7 +381,6 @@ export default function SpectatorBoard(props: SpectatorProp) {
 		};
 
 		}, [drawBoard, drawElement,
-			// ballServe, updateScore,
 			moveBall,
 			detectWallCollision,
 			moveObstacle,

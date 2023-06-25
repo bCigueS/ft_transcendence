@@ -41,6 +41,8 @@ export default function ModalBoard({ onDifficulty, onTool, onPlayerMode, onStart
 		setPage(p => p += 1);
 	}
 
+	console.log('isStarting is', isStarting, page);
+
 	return (
 		<div className={classes.container}>
 			<div className={classes.content}>

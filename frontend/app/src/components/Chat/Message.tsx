@@ -1,4 +1,4 @@
-import { MouseEventHandler, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import classes from '../../sass/components/Chat/Message.module.scss';
 import { UserAPI, UserContext } from '../../store/users-contexte';
@@ -109,11 +109,10 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 				isSpectator: false,
 				gameRoom: gameRoom,
 			}
-		})
+		});
 	}
 
 	const displayMessage = () => {
-
 		if (message.content.includes('join/')) {
 			const channelId = message.content.split('_')[1];
 			return (
@@ -128,12 +127,20 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 			const info = message.content.split('/')[1];
 			const gameRoom = info.split('_')[0];
 			const senderId = info.split('_')[1];
+
+			const linkStyles: React.CSSProperties = {
+				cursor: 'pointer',
+				textDecoration: 'underline',
+				color: 'blue',
+			};
+
 			return (
 				<>
 					<p>{invitation}</p>
-					<a href="#" onClick={() => handleClickJoinGame(+senderId, gameRoom)}>
+					<div role="button" tab-index="0" onClick={() => handleClickJoinGame(+senderId, gameRoom)} style={linkStyles}>
 						{link}
-					</a>
+					</div>
+				
 				</>
 			);
 		} else {

@@ -28,8 +28,8 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 
 	GamesGateway.eventEmitter.on('gameInvitation', async ({ senderId, receiverId, link }) => {
 		console.log('in event emitter');
-		const sender = await this.prisma.user.findUnique({ where: { id: senderId } });
 
+		const sender = await this.prisma.user.findUnique({ where: { id: senderId } });
 		if (!sender) {
 			throw new NotFoundException(`User with ${senderId} does not exist.`);
 		}
@@ -47,10 +47,20 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 			},
 		});
 
+		const senderUser = await this.prisma.channelMembership.findUnique({ where: { id: senderId } });
+		if (!senderUser) {
+			throw new NotFoundException(`User with ${senderId} does not exist.`);
+		}
+
+		const receiverUser = await this.prisma.channelMembership.findUnique({ where: { id: receiverId } });
+		if (!receiverUser) {
+			throw new NotFoundException(`User with ${receiverId} does not exist.`);
+		}
+
 		if (!channel) {
 			const createChannelDto: CreateChannelDto = {
 				name: "private", 
-				members: [senderId, receiverId],
+				members: [senderUser, receiverUser],
 				creatorId: senderId
 			}
 			channel = await this.messagesService.createChannel(createChannelDto);
@@ -58,9 +68,7 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 			this.handleJoin(receiverId, channel.id);
 		}
 
-		if (channel) {
-			console.log(channel);
-	
+		if (channel) {	
 			this.handleMessage(receiverId, {
 			content: `${sender.name} has invited you to a game! Click the link bellow>${link}`,
 			channelId: channel.id,
