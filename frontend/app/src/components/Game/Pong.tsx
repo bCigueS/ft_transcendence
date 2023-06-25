@@ -630,6 +630,15 @@ export default function Pong(props: PongProp) {
 		}
 	}, [ballRadius, ballX, ballY, playerY, opponentY, obstacleY, level, paddleHeight]);
 
+	const checkStatus = useCallback(() => {
+		// check game status
+		if (opponentScore > info.winnerScore || playerScore > info.winnerScore) {
+			playerScore > info.winnerScore ? setWinner(current => PLAYER_WIN) : setWinner(current => OPPONENT_WIN);
+			playerScore > info.winnerScore ? setClosingText('You win!') : setClosingText('You lose!');
+			stopGame();
+		}
+	}, [playerScore, opponentScore, stopGame]);
+
 	// render the game
 	useEffect(() => {
 		const canvas = canvasRef.current;
@@ -663,12 +672,7 @@ export default function Pong(props: PongProp) {
 						moveObstacle();
 						detectObstacleCollision();
 					}
-					// check game status
-					if (opponentScore > info.winnerScore || playerScore > info.winnerScore) {
-						playerScore > info.winnerScore ? setWinner(current => PLAYER_WIN) : setWinner(current => OPPONENT_WIN);
-						playerScore > info.winnerScore ? setClosingText('You win!') : setClosingText('You lose!');
-						stopGame();
-					}
+					checkStatus();
 				}
 			}
 			
@@ -686,8 +690,8 @@ export default function Pong(props: PongProp) {
 			moveBall, movePlayer, moveOpponent,
 			detectPlayerCollision, detectOpponentCollision, detectWallCollision,
 			moveObstacle, detectObstacleCollision,
-			stopGame,
-			level, playerScore, opponentScore,
+			checkStatus,
+			level,
 			isRunning, isPaused]);
 
 	// keyboard event handler
