@@ -36,43 +36,26 @@ export class MessagesService {
 	}
 
 	async createChannel(createChannelDto: CreateChannelDto) {
-		const { creatorId, name, messages, members } = createChannelDto;
+		const { creatorId, name, members } = createChannelDto;
 
 		if (members.length < 2) {
-		  throw new Error("Invalid channel creation request: must include at least two members.");
+			throw new Error("Invalid channel creation request: must include at least two members.");
 		}
-	
-		const channel = await this.prisma.channel.create({ 
-		  data: { creatorId, name },
-		});
-	
-		if (messages && messages.length > 0)
-		{
-		  for (const msg of messages) {
-			const messageDto: CreateMessageDto = { 
-			  content: msg.content, 
-			  senderId: msg.senderId,
-			  channelId: channel.id
-			};
-		
-			await this.prisma.message.create({
-			  data: {
-				...messageDto,
-			  },
-			});
-		  }
-		}
-		  
-		for (const member of members) {
-		  const memberDto: CreateChannelMembershipDto = { userId: member.userId };
-		  await this.prisma.channelMembership.create({
+	  
+		const channel = await this.prisma.channel.create({
 			data: {
-			  ...memberDto,
-			  channelId: channel.id,
+				creatorId,
+				name,
+				members: {
+					create: members.map((member) => ({ userId: member.userId })),
+				},
 			},
-		  });
-		}
-	
+				include: {
+				messages: true,
+				members: true,
+			},
+		});
+	  
 		return channel;
 	}
 
