@@ -45,6 +45,7 @@ export type UpdatedInfo = {
 	pScore: number;
 	oScore: number;
 	isPaused: boolean;
+	screenTooSmall: boolean;
 }
 
 export type BallInfo = {
@@ -92,5 +93,5 @@ export type ModalProps = {
 }
 
 export type PausedProps = {
-	mode: "spectator" | "play";
+	text: string;
 }

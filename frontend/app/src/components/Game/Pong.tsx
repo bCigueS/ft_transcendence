@@ -48,6 +48,7 @@ export default function Pong(props: PongProp) {
 	// game play
 	const [isRunning, setIsRunning] = useState(false);
 	const [isPaused, setIsPaused] = useState(false);
+	const [screenTooSmall, setScreenTooSmall] = useState(false);
 	const [isLive, setIsLive] = useState(false);
 	const [isReady, setIsReady] = useState(false);
 	const [gameOver, setGameOver] = useState(false);
@@ -81,11 +82,69 @@ export default function Pong(props: PongProp) {
 	// score
 	const [playerScore, setPlayerScore] = useState(0);
 	const [opponentScore, setOpponentScore] = useState(0);
+	// screen info
+	const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+	const [screenHeight, setScreenHeight] = useState(window.innerHeight);
 	// canvas
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	// animation
 	const frameId = useRef(0);
 	const prevFrameId = useRef(0);
+
+	useEffect(() => {
+		const handleResize = () => {
+			setScreenWidth(window.innerWidth);
+			setScreenHeight(window.innerHeight);
+		};
+
+		window.addEventListener('resize', handleResize);
+
+		// Clean up the event listener on unmount
+		return () => {
+			window.removeEventListener('resize', handleResize);
+		};
+	}, []);
+
+	useEffect(() => {
+		if (isRunning && !isPaused && !screenTooSmall && (screenWidth <= info.boardWidth + (110 * 2) || screenHeight <= 510)) {
+			if (playerMode === SINGLE_MODE) {
+				setScreenTooSmall(true);
+			}
+			if (playerMode === DOUBLE_MODE) { 
+				props.socket?.emit('screenSize', {
+					gameRoom: gameRoom,
+					screenTooSmall: true,
+				});
+			}
+		}
+		if (isRunning && !isPaused && screenTooSmall && (screenWidth > info.boardWidth + (110 * 2) && screenHeight > 510)){
+			if (playerMode === SINGLE_MODE) {
+				setScreenTooSmall(false);
+			}
+			if (playerMode === DOUBLE_MODE) { 
+				props.socket?.emit('screenSize', {
+					gameRoom: gameRoom,
+					screenTooSmall: false,
+				});
+			}
+		}
+
+	}, [props.socket, isRunning, isPaused, screenTooSmall, screenWidth, screenHeight]);
+
+	useEffect(() => {
+		if (playerMode === DOUBLE_MODE) {
+			const handleScreenTooSmall = ({ message, isTooSmall }: { message: string, isTooSmall: boolean }) => {
+				console.log({ message });
+				setScreenTooSmall(isTooSmall);
+			};
+
+			props.socket?.on('screenTooSmall', handleScreenTooSmall);
+			
+			return () => {
+				props.socket?.off('screenTooSmall', handleScreenTooSmall);
+			}
+		}
+	}, [props.socket, playerMode]);
 
 	// emit a join request to the server
 	useEffect(() => {
@@ -305,16 +364,17 @@ export default function Pong(props: PongProp) {
 		const handleUpdateGame = ({ socketId }: { socketId: string }) => {
 			props.socket?.emit('lastUpdatedInfo', {
 				gameInfo: {
-				x: ballX,
-				y: ballY,
-				dx: deltaX,
-				dy: deltaY,
-				s: ballSpeed,
-				playerY: playerY,
-				opponentY: opponentY,
-				pScore: playerScore,
-				oScore: opponentScore,
-				isPaused: isPaused,
+					x: ballX,
+					y: ballY,
+					dx: deltaX,
+					dy: deltaY,
+					s: ballSpeed,
+					playerY: playerY,
+					opponentY: opponentY,
+					pScore: playerScore,
+					oScore: opponentScore,
+					isPaused: isPaused,
+					screenTooSmall: screenTooSmall,
 				},
 				socketId: socketId,
 				gameRoom: gameRoom,
@@ -327,7 +387,7 @@ export default function Pong(props: PongProp) {
 		return () => {
 			props.socket?.off('updateGame', handleUpdateGame);
 		};
-	}, [props.socket, isPaused, ballSpeed, ballX, ballY, deltaX, deltaY, gameRoom, opponentScore, opponentY, playerScore, playerY]);
+	}, [props.socket, isPaused, screenTooSmall, ballSpeed, ballX, ballY, deltaX, deltaY, gameRoom, opponentScore, opponentY, playerScore, playerY]);
 
 	// function to set an initial ball position and direction to start the round
 	const ballServe = useCallback((side: number) => {
@@ -656,10 +716,10 @@ export default function Pong(props: PongProp) {
 			if (deltaTime >= frameDuration) {
 				prevFrameId.current = timestamp;
 
-				// console.log('gameOver is ', gameOver);
+				// console.log('winner is ', winner);
 				
 				drawBoard(context);
-				if (isRunning && !isPaused) {
+				if (isRunning && !isPaused && !screenTooSmall) {
 					drawElement(context);
 					moveBall();
 					movePlayer();
@@ -692,7 +752,7 @@ export default function Pong(props: PongProp) {
 			moveObstacle, detectObstacleCollision,
 			checkStatus,
 			level,
-			isRunning, isPaused]);
+			isRunning, isPaused, screenTooSmall]);
 
 	// keyboard event handler
 	useEffect(() => {
@@ -783,9 +843,9 @@ export default function Pong(props: PongProp) {
 					closingText={closingText}
 				/>
 			)}
-			{(isRunning && isPaused) && (
+			{(isRunning && (isPaused || screenTooSmall)) && (
 				<PausedBoard
-					mode={'play'}
+					text={isPaused ? "Press 'spacebar' to continue playing" : "One of player's screen is too small"}
 				/>
 			)}
 			<PlayerSide
