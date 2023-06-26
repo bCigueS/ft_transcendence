@@ -35,7 +35,7 @@ export class AuthService {
 	const token = jwt.sign({
 		accessToken: user.token,
 		userId: user.id
-	}, `${process.env.NODE_ENV}`, { expiresIn:'1m' });
+	}, `${process.env.NODE_ENV}`, { expiresIn:'1h' });
 
 	console.log(token);
 
@@ -108,7 +108,7 @@ export class AuthService {
 		response['accessToken'] = jwt.sign({
 			accessToken: token['access_token'],
 			userId: response['userId']
-		}, `${process.env.NODE_ENV}`, { expiresIn:'1m' });
+		}, `${process.env.NODE_ENV}`, { expiresIn:'1h' });
 	}
 	else {
 		delete response["user"];
@@ -143,7 +143,7 @@ export class AuthService {
 			const accessToken = jwt.sign({
 				accessToken: token,
 				userId: user.id
-			}, `${process.env.NODE_ENV}`, { expiresIn:'1m' });
+			}, `${process.env.NODE_ENV}`, { expiresIn:'1h' });
 			
 			return {
 				accessToken: accessToken,
