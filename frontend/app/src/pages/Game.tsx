@@ -46,34 +46,6 @@ export default function Game() {
 		}
 	}, [setSocket, userCtx.user?.id]);
 
-	// ---> to be checked
-	// // screen info
-	// const [screenWidth, setScreenWidth] = useState(window.innerWidth);
-	// const [screenHeight, setScreenHeight] = useState(window.innerHeight);
-	// const [ratio, setRatio] = useState(1);
-
-	// useEffect(() => {
-	// 	const handleResize = () => {
-	// 		setScreenWidth(window.innerWidth);
-	// 		setScreenHeight(window.innerHeight);
-	// 	};
-
-	// 	window.addEventListener('resize', handleResize);
-
-	// 	// Clean up the event listener on unmount
-	// 	return () => {
-	// 		window.removeEventListener('resize', handleResize);
-	// 	};
-	// }, []);
-
-	// useEffect(() => {
-	// 	if (info.boardWidth) {
-	// 		setRatio(info.boardWidth / screenWidth);
-	// 	} else if (info.boardHeight) {
-	// 		setRatio(info.boardHeight / screenHeight);
-	// 	}
-	// }, [info.boardWidth, info.boardHeight, screenWidth, screenHeight]);
-
 	if (!userId || !userName || !socket) {
 		return (
 			<></>
