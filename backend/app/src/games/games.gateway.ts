@@ -424,6 +424,31 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 	}
 
 	// receiving a request to pause the game
+	@SubscribeMessage('screenSize')
+	async handleScreenSizeeEvent(
+		@MessageBody() { gameRoom, screenTooSmall }:  { gameRoom: string, screenTooSmall: boolean },
+		@ConnectedSocket() client: Socket,
+		) {
+			const game = await this.prisma.game.findUnique({
+				where: { room: gameRoom },
+			});
+
+			if (game && game.playerSocketIds) {
+				game.playerSocketIds.forEach((socketId) => {
+					this.io.to(socketId).emit('screenTooSmall', {
+						message: `Receive screenSize events`,
+						isTooSmall: screenTooSmall,
+					});
+				});
+			}
+
+			this.io.in(gameRoom).emit('screenTooSmall', {
+				message: `Receive screenSize event`,
+				isTooSmall: screenTooSmall,
+			});
+	}
+
+	// receiving a request to pause the game
 	@SubscribeMessage('pressPause')
 	async handlePressPauseEvent(
 		@MessageBody() gameRoom: string,

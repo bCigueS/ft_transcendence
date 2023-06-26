@@ -31,6 +31,7 @@ export default function SpectatorBoard(props: SpectatorProp) {
 	// game play
 	const [isRunning, setIsRunning] = useState(false);
 	const [isPaused, setIsPaused] = useState(false);
+	const [screenTooSmall, setScreenTooSmall] = useState(false);
 	const [isLive, setIsLive] = useState(false);
 	const [isReady, setIsReady] = useState(false);
 	const [gameOver, setGameOver] = useState(false);
@@ -103,6 +104,7 @@ export default function SpectatorBoard(props: SpectatorProp) {
 			setPlayerScore(gameInfo.pScore);
 			setOpponentScore(gameInfo.oScore);
 			setIsPaused(gameInfo.isPaused);
+			setScreenTooSmall(gameInfo.screenTooSmall);
 		};
 
 		props.socket?.on('currentGameInfo', handleCurrentGameInfo);
@@ -196,6 +198,19 @@ export default function SpectatorBoard(props: SpectatorProp) {
 		return () => {
 			props.socket?.off('opponentMove', handleOpponentMove);
 		}
+	}, [props.socket]);
+
+	useEffect(() => {
+			const handleScreenTooSmall = ({ message, isTooSmall }: { message: string, isTooSmall: boolean }) => {
+				console.log({ message });
+				setScreenTooSmall(isTooSmall);
+			};
+
+			props.socket?.on('screenTooSmall', handleScreenTooSmall);
+			
+			return () => {
+				props.socket?.off('screenTooSmall', handleScreenTooSmall);
+			}
 	}, [props.socket]);
 
 	// receiving a pause signal
@@ -359,7 +374,7 @@ export default function SpectatorBoard(props: SpectatorProp) {
 				
 				console.log(isRunning);
 				drawBoard(context);
-				if (isRunning && !isPaused) {
+				if (isRunning && !isPaused && !screenTooSmall) {
 					drawElement(context);
 					moveBall();
 					detectWallCollision();
@@ -385,7 +400,7 @@ export default function SpectatorBoard(props: SpectatorProp) {
 			detectWallCollision,
 			moveObstacle,
 			level,
-			isRunning, isPaused]);
+			isRunning, isPaused, screenTooSmall]);
 	
 	return (
 		<>
@@ -400,9 +415,9 @@ export default function SpectatorBoard(props: SpectatorProp) {
 					closingText={closingText}
 				/>
 			)}
-			{(isPaused) && (
+			{(isPaused || screenTooSmall) && (
 				<PausedBoard
-					mode={'spectator'}
+					text={isPaused ? "Please wait for the players to continue the game" : "One of player's screen is too small"}
 				/>
 			)}
 			<div className={classes.container}>
