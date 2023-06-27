@@ -156,7 +156,6 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 		@MessageBody() { playerId, opponentId, lvl, gameRoom }: { playerId: number, opponentId: number, lvl: number, gameRoom?: string },
 		@ConnectedSocket() client: Socket,
 		) {
-			console.log('receive join invite event, from userId ', playerId);
 			let game, player, opponent;
 
 			if (!gameRoom || gameRoom === '') {
@@ -187,10 +186,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 					}
 				});
 				
-				console.log(game);
-
 				if (!game) {
-					console.log('game is not exist');
 					client.emit('expiredInvite', {
 						message: `Sorry, the invitation is already expired!`,
 					});
@@ -648,35 +644,6 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 						data: { score: gameInfo.opponentScore },
 					});
 				}
-	
-				// let opponent;
-	
-				// if (opponentUser) {
-				// 	opponent = await this.prisma.user.findUnique({
-				// 		where: { id: opponentUser.userId }
-				// 	});
-				// }
-	
-				// const [playerSocket, opponentSocket] = game.playerSocketIds;
-	
-				// let message;
-				// if (gameInfo.winner) {
-				// 	if (playerSocket === client.id) {
-				// 		message = player.name + ' wins!';
-				// 	} else {
-				// 		message = opponent.name + ' wins!';
-				// 	}
-				// } else {
-				// 	if (playerSocket === client.id) {
-				// 		message = opponent.name + ' has left the game!';
-				// 	} else {
-				// 		message = player.name + ' has left the game!';
-				// 	}
-				// }
-	
-				// this.io.in(gameRoom).emit('endWatch', {
-				// 	message: message,
-				// });
 
 				if (game.state === GameState.PLAYING) {
 					// change status of the game to FINISHED
@@ -708,6 +675,9 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 
 			// if the player is already inside a game
 			if (playerGame) {
+				// this.io.in(playerGame.room).emit('playerDisconnected', {
+				// 	message: `Sorry, one of the player has left the game!`,
+				// });
 				this.io.in(playerGame.room).emit('endWatch', {
 					message: `Sorry, one of the player has left the game!`,
 				});
