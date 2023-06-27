@@ -37,6 +37,13 @@
 	color: $color;
 	font-weight: bold;
 }
+@mixin text-header-xxl($color: black) {
+	font-size: 7rem;
+	line-height: 7rem;
+	color: $color;
+	font-weight: bold;
+	font-style: italic;
+}
 
 
 @mixin flexBox($direction: column, $justify: space-between, $align: center) {
@@ -65,7 +72,7 @@
 	background-size: cover;
 }
 
-@mixin buttonMixin($fontSize: 2rem) {
+@mixin buttonMixin($fontSize: 2rem, $color: $light-vermillon) {
 	padding: 0.5rem 1rem;
 	font-size: $fontSize;
 	font-weight: 800;
@@ -88,7 +95,7 @@
 		z-index: -1;
 		bottom: -0.8rem;
 		left: -0.8rem;
-		background-color: $light-vermillon;
+		background-color: $color;
 		opacity: 1;
 		transition: all 0.3s;
 	}

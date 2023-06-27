@@ -22,7 +22,6 @@ model User {
   status      Int          @default(0)
   token       String?
   games       UserGame[]
-  spectators  SpectatorGame[]
   haters      Block[]      @relation("haters")
   blocked     Block[]      @relation("blocked")
   following   Friendship[] @relation("followers")
@@ -30,7 +29,11 @@ model User {
   winnerGames Game[]       @relation("winnerGames")
 
   messages    Message[]
+  channelCreator  Channel[]
   channel     ChannelMembership[]
+  admin       AdminMembership[]
+  bannedUsers BannedUser[]
+  mutedUsers  MutedUser[]
 
   @@map("users")
 }
@@ -63,22 +66,11 @@ model Game {
   level     			Int
   players   			UserGame[]
   playerSocketIds		String[]
-  spectators			SpectatorGame[]
   spectatorSocketIds	String[]
   winnerId  			Int?		
   winner    			User?      @relation("winnerGames", fields: [winnerId], references: [id], onDelete: Cascade)
 
   @@map("games")
-}
-
-model SpectatorGame {
-  createdAt   DateTime @default(now())
-  userId      Int
-  gameId      Int
-  game        Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@id([userId, gameId])
 }
 
 model UserGame {
@@ -94,6 +86,7 @@ model UserGame {
 
 enum GameState {
   PENDING
+  WAITING
   PLAYING
   FINISHED
 }
@@ -111,13 +104,55 @@ model Message {
 }
 
 model Channel {
-  id        Int         @id @default(autoincrement())
-  name      String?     @default("private")
-  messages  Message[]
-  members   ChannelMembership[]
+  createdAt           DateTime    @default(now())
+  id                  Int         @id @default(autoincrement())
+  name                String?     @default("private")
+  messages            Message[]
+
+  creatorId           Int 
+  creator             User        @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  
+  members             ChannelMembership[]
+  admins              AdminMembership[]
+  banned              BannedUser[]
+  muted               MutedUser[]
+
+  isPasswordProtected Boolean     @default(false)
+  password            String?
+
 }
 
 model ChannelMembership {
+  id        Int      @id @default(autoincrement())
+  channelId Int
+  userId    Int
+  channel   Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([channelId, userId])
+}
+
+model AdminMembership {
+  id        Int      @id @default(autoincrement())
+  channelId Int
+  userId    Int
+  channel   Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([channelId, userId])
+}
+
+model BannedUser {
+  id        Int      @id @default(autoincrement())
+  channelId Int
+  userId    Int
+  channel   Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([channelId, userId])
+}
+
+model MutedUser {
   id        Int      @id @default(autoincrement())
   channelId Int
   userId    Int

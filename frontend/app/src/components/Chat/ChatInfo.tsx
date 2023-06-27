@@ -1,73 +1,107 @@
-import { useContext, useEffect, useState } from "react";
-import { Channel, MessageAPI } from "../../pages/Chat";
-import classes from '../../sass/components/Chat/ChatInfo.module.scss';
-import ProfilIcon from "../Profile/ProfilIcon";
-import { UserAPI, UserContext } from "../../store/users-contexte";
+import React, { useState } from "react";
+import classes from '../../sass/components/UI/Modal.module.scss';
+import { Fragment } from 'react';
+import ReactDOM from 'react-dom';
+import Card from "./../UI/Card";
+import { UserAPI } from "../../store/users-contexte";
+import { Channel, modifyChannel } from "./chatUtils";
+import GroupChat from "./GroupChat";
+import PrivateChat from "./PrivateChat";
 
-// const Searchbar: React.FC<{onSaveSearch: (input: string) => void}> = ( props ) => {
+type Props = {
+    children?: React.ReactNode,
+    className?: string,
+    chat: Channel,
+	onInfoClick: () => void,
+    onDelete: () => void,
+    onKick: (channelId: number, kickedId: number) => void
+};
 
-const ChatInfo: React.FC<{chats: Channel[], chat: Channel, isSelected: boolean, onSaveConversation: (channel: Channel) => void}> 
-	= ( props ) => {
+type BackdropProps = {
+    children?: React.ReactNode,
+    className?: string,
+	onInfoClick: () => void,
+};
 
-	const [sender, setSender] = useState<UserAPI | null>(null);
-	const [lastMessage, setLastMessage] = useState<MessageAPI | null>(null);
-	const [ conversation, setConversation ] = useState<number>(0);
-	const userCtx = useContext(UserContext);
+const Backdrop: React.FC<BackdropProps> = (props) => {
+	return <div className={classes.backdrop} onClick={props.onInfoClick}></div>
+}
 
-	const conversationHandler = () => {
-		setConversation(props.chat.id)
-		props.onSaveConversation(props.chat);
+const Overlay: React.FC<Props> = (props) => {
+    const [ groupName, setGroupName ] = useState<string>(''); 
+	const [ members, setMembers ] = useState<UserAPI[]>([]);
+	const [ admins, setAdmins ] = useState<UserAPI[]>([]);
+
+    const handleSubmit = () => {
+		props.onInfoClick();
+    }
+
+    const nameHandler = (event: any) => {
+		setGroupName(event.target.value);
 	}
 
-	const getSender = () => {
-		if (props.chat.name === "private")
-		{
-			props.chat.members.forEach((member) => {
-				if (member.id != userCtx.user?.id)
-					setSender(member);
-			})
-		}
+	const addMember = (member: UserAPI) => {
+		console.log('added member: ', member);
+		setMembers([...members, member]);
 	}
 
-	const getLastMessage = () => {
-
-		const messages = props.chat.messages;
-		let latestMessage = null;
-		if (messages.length > 0) {
-			latestMessage = messages.reduce((latest, current) => {
-				return new Date(latest.createdAt) > new Date(current.createdAt) ? latest : current;
-			}, messages[0]);
-
-		}
-		setLastMessage(latestMessage);
+	const removeMember = (member: UserAPI) => {
+		console.log('removed member: ', member);
+		setMembers(members.filter(m => m.id !== member.id));
 	}
 
-	useEffect(() => {
-		getSender();
-		getLastMessage();
-	}, [conversation, props.chats]);
-	
-	return (
-		<div className={`${classes.container} ${props.isSelected ? classes.selected : ''}`}>
-			<div className={classes.picture}>
-			<ProfilIcon user={sender} displayCo={false} size={["4rem", "4rem"]} />
-			</div>
-			<div className={classes.info} onClick={conversationHandler}>
-				<p className={classes.name}>
-					{ sender?.name}
-				</p>
+	const onAddAdmin = (member: UserAPI) => {
+
+		const chanData = {
+			admins: [
 				{
-					props.chat.messages.length > 0 ? 
-					<p className={classes.lastMessage}>
-						{lastMessage?.content}
-					</p> 
-					:
-					<p className={classes.lastMessage} style={{fontStyle: 'italic'}}>
-						draft...
-					</p>
+					userId: member.id
 				}
-			</div>
-		</div>
+			]
+		}
+		console.log('added admin: ', member);
+		setAdmins([...admins, member]);
+		modifyChannel(props.chat.id, chanData);
+	}
+
+	return (
+		<Card className={classes.modal}>
+            {
+				props.chat.name === 'private' ?
+				<PrivateChat
+					chat={props.chat}
+					onInfoClick={props.onInfoClick}
+					onDelete={props.onDelete}
+				/>
+				:
+				<GroupChat
+					chat={props.chat}
+					onInfoClick={props.onInfoClick}
+					onDelete={props.onDelete}
+					onRemove={removeMember}
+					onAddAdmin={onAddAdmin}
+					onKick={props.onKick}
+				/>
+			}
+		</Card>
+	);
+}
+
+const portalOverlays = document.getElementById('overlays');
+const portalBackdrop = document.getElementById('backdrop');
+
+const ChatInfo: React.FC<Props> = (props) => {
+
+	return (
+		<Fragment>
+			{portalBackdrop && ReactDOM.createPortal(<Backdrop 
+							onInfoClick={props.onInfoClick} />, portalBackdrop)}
+			{portalOverlays && ReactDOM.createPortal(<Overlay 
+							chat={props.chat}
+							onInfoClick={props.onInfoClick}
+							onDelete={props.onDelete}
+							onKick={props.onKick}>{props.children}</Overlay>, portalOverlays)}
+		</Fragment>
 	)
 }
 

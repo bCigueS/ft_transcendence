@@ -5,56 +5,49 @@ import classes from '../sass/pages/Game.module.scss';
 import { UserContext } from '../store/users-contexte';
 import SpectatorBoard from '../components/Game/SpectatorBoard';
 import { useLocation } from 'react-router-dom';
-// import { useLocation } from 'react-router-dom';
-
-// board mode
-const PLAY_MODE = 0;
-const SPECTATOR_MODE = 1;
+import { Socket, io } from 'socket.io-client';
 
 export default function Game() {
 
-	// Import the userContext Api (from React)
 	const userCtx = useContext(UserContext);
-	// const location = useLocation();
-	// const { state } = location;
+	const location = useLocation();
+	const { state } = location;
+
+	// socket
+	const [ socket, setSocket ] = useState<Socket>();
+
+	// clear location.state on page reload
+	window.history.replaceState({}, document.title);
 
 	// player info
 	const userId = userCtx.user?.id;
 	const userName = userCtx.user?.name;
-	const user = userCtx.user;
-	// const opponent = state?.opponent;
-	// const inviteMode = (state.gameInvitation ? true : false);
-	const inviteMode = false;
+	const playerId = state?.playerId;
+	const opponentId = state?.opponentId;
+	const inviteMode = state?.gameInvitation;
+	const isInvited = state?.isInvited;
+	const isSpectator = state?.isSpectator;
+	const gameRoom = state?.gameRoom;
+	// console.log('opponentId ', opponentId);
+	// console.log('game invitation ', inviteMode);
+	// console.log('isInvited ', isInvited); 
+	// console.log('gameRoom ', gameRoom);
+	// console.log('isSpectator ,', isSpectator);
 
-	// ---> to be checked
-	// // screen info
-	// const [screenWidth, setScreenWidth] = useState(window.innerWidth);
-	// const [screenHeight, setScreenHeight] = useState(window.innerHeight);
-	// const [ratio, setRatio] = useState(1);
+	// receive a connection signal from the server
+	useEffect(() => {
+		const newSocket = io('http://localhost:3000/pong');
+		setSocket(newSocket);
+		newSocket.on('connect', () => {
+			newSocket.emit('connection', userCtx.user?.id);
+		});
 
-	// useEffect(() => {
-	// 	const handleResize = () => {
-	// 		setScreenWidth(window.innerWidth);
-	// 		setScreenHeight(window.innerHeight);
-	// 	};
+		return () => {
+			newSocket.close();
+		}
+	}, [setSocket, userCtx.user?.id]);
 
-	// 	window.addEventListener('resize', handleResize);
-
-	// 	// Clean up the event listener on unmount
-	// 	return () => {
-	// 		window.removeEventListener('resize', handleResize);
-	// 	};
-	// }, []);
-
-	// useEffect(() => {
-	// 	if (info.boardWidth) {
-	// 		setRatio(info.boardWidth / screenWidth);
-	// 	} else if (info.boardHeight) {
-	// 		setRatio(info.boardHeight / screenHeight);
-	// 	}
-	// }, [info.boardWidth, info.boardHeight, screenWidth, screenHeight]);
-
-	if (!userId || !userName) {
+	if (!userId || !userName || !socket) {
 		return (
 			<></>
 		);
@@ -62,21 +55,24 @@ export default function Game() {
 
 	return (
 		<div className={classes.gamePage}>
-			{(user?.name === 'Faaaany') && (
+			{(isSpectator) && (
 				<SpectatorBoard
-					mode ={SPECTATOR_MODE}
-					user={user}
-					gameLevel={0}
-					gameRoom={'pong10'}
+					socket={socket}
+					userId={userId}
+					playerId={playerId}
+					opponentId={opponentId}
+					gameRoom={gameRoom}
 				/>
 			)}
-			{(user?.name !== 'Faaaany') && (
+			{(!isSpectator) && (
 				<Pong
+					socket={socket}
 					userId={userId}
 					userName={userName}
-					// user={user}
-					// opponent={opponent}
+					opponentId={opponentId}
+					gameRoom={gameRoom}
 					inviteMode={inviteMode}
+					isInvited={isInvited}
 				/>
 			)}
 		</div>
