@@ -1,0 +1,121 @@
+@import '../../abstracts/mixin.scss';
+@import '../../abstracts/variables.scss';
+
+
+.container {
+	width: 100%;
+	min-height: 7rem;
+	height: 7rem;
+	display: grid;
+	grid-template-columns: 8rem 8rem 1fr 1fr;
+	grid-template-rows: 1fr 0.5fr;
+	gap: 1.8rem 0;
+	justify-content: center;
+	align-items: center;
+	
+	overflow: hidden;
+	margin: 0.6rem;
+	padding: 1rem 2rem;
+	
+	transition: transform 0.3s ease-in-out, min-height 0.3s ease-in-out;
+	
+	.info {
+		@include flexBox($direction: row);
+		gap: 2rem;
+		h2 {
+			@include text-header-xs();
+			// margin-left: 3rem;
+		}
+	}
+	
+	.option {
+		@include flexBox($direction: row, $justify: center);
+		gap: 6rem;
+		width: 100%;
+		grid-column: 1 / 4;
+		grid-row: 2/3;
+		margin-bottom: 1rem;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding-left: 4rem;
+	}
+	i {
+		font-size: 2rem;
+		
+		&:hover {
+			animation: scaleButton 0.5s ease-in-out;
+			color: $light-vermillon;
+		}
+	}
+
+}
+
+.enhancedContainer {
+	width: 100%;
+	min-height: 7rem;
+	height: 7rem;
+	display: grid;
+	grid-template-columns:  8rem 8rem 1fr 1fr;
+	grid-template-rows: 1fr 0.5fr;
+	gap: 1.8rem 0;
+	justify-content: center;
+	align-items: center;
+	
+	overflow: hidden;
+	margin: 0.6rem;
+	padding: 1rem 2rem;
+	
+	transition: transform 0.3s ease-in-out, min-height 0.3s ease-in-out;
+	
+	&:hover {
+		transform: scale(1.1);
+		min-height: 11rem;
+	}
+	
+	.info {
+		@include flexBox($direction: row);
+		gap: 2rem;
+		h2 {
+			@include text-header-xs();
+			// margin-left: 3rem;
+		}
+	}
+	
+	.option {
+		@include flexBox($direction: row, $justify: center);
+		gap: 6rem;
+		width: 100%;
+		grid-column: 1 / 4;
+		grid-row: 2/3;
+		margin-bottom: 1rem;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding-left: 4rem;
+	}
+	i {
+		font-size: 2rem;
+		
+		&:hover {
+			animation: scaleButton 0.5s ease-in-out;
+			color: $light-vermillon;
+		}
+	}
+
+}
+
+@keyframes scaleButton {
+	0% {
+		transform: scale(1);
+	}
+
+	30% {
+		transform: scale(1.2);
+	}
+
+	100% {
+		transform: scale(1);
+	}
+}
+
