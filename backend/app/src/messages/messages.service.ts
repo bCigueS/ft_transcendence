@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CreateChannelDto, CreateChannelMembershipDto } from 'src/channels/dto/create-channel.dto';
 
 @Injectable()
 export class MessagesService {
@@ -18,8 +19,8 @@ export class MessagesService {
 		return newMessage;
 	}
 
-	findAll() {
-		return `This action returns all messages`;
+	async findAll () {
+		return await this.prisma.message.findMany();
 	}
 
 	findOne(id: number) {
@@ -33,4 +34,29 @@ export class MessagesService {
 	async remove(id: number) {
 		return await this.prisma.message.delete({ where: { id } });
 	}
+
+	async createChannel(createChannelDto: CreateChannelDto) {
+		const { creatorId, name, members } = createChannelDto;
+
+		if (members.length < 2) {
+			throw new Error("Invalid channel creation request: must include at least two members.");
+		}
+	  
+		const channel = await this.prisma.channel.create({
+			data: {
+				creatorId,
+				name,
+				members: {
+					create: members.map((member) => ({ userId: member.userId })),
+				},
+			},
+				include: {
+				messages: true,
+				members: true,
+			},
+		});
+	  
+		return channel;
+	}
+
 }

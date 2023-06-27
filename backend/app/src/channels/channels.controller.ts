@@ -3,6 +3,7 @@ import { ChannelsService } from './channels.service';
 import { CreateChannelDto } from './dto/create-channel.dto';
 import { UpdateChannelDto } from './dto/update-channel.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { JoinChannelDto } from './dto/join-channel.dto';
 
 @Controller('channels') @ApiTags('channels')
 export class ChannelsController {
@@ -55,8 +56,51 @@ export class ChannelsController {
 
 	if (!chan)
 		throw new NotFoundException(`User with ${id} is not part of any channel.`);
-	
-	return chan;
+		return chan;
 	}
+
+	@Delete(':channelId/members/:userId')
+	async removeMember(@Param('channelId', ParseIntPipe) channelId: number, @Param('userId', ParseIntPipe) userId: number) {
+		return this.channelsService.removeMember(channelId, userId);
+	}
+
+	@Delete(':channelId/admins/:userId')
+	async removeAdmin(@Param('channelId', ParseIntPipe) channelId: number, @Param('userId', ParseIntPipe) userId: number) {
+		return this.channelsService.removeAdmin(channelId, userId);
+	}
+
+	@Delete(':channelId/banned/:userId')
+	async removeBan(@Param('channelId', ParseIntPipe) channelId: number, @Param('userId', ParseIntPipe) userId: number) {
+		return this.channelsService.removeBan(channelId, userId);
+	}
+
+	@Delete(':channelId/muted/:userId')
+	async removeMute(@Param('channelId', ParseIntPipe) channelId: number, @Param('userId', ParseIntPipe) userId: number) {
+		return this.channelsService.removeMute(channelId, userId);
+	}
+
+	@Patch(':channelId/ban/:userId')
+	async banUser(
+		@Param('channelId', ParseIntPipe) channelId: number,
+		@Param('userId', ParseIntPipe) userId: number) {
+		return this.channelsService.banUser(channelId, userId);
+	}
+
+	@Delete(':channelId/kick/:userId')
+	async kickUser(
+		@Param('channelId', ParseIntPipe) channelId: number,
+		@Param('userId', ParseIntPipe) userId: number,
+	) {
+		return this.channelsService.kickUser(channelId, userId);
+	}
+
+	@Patch(':channelId/join')
+	async join(@Param('channelId', ParseIntPipe) channelId: number,
+				@Body() JoinChannelDto: JoinChannelDto) {
+		
+		
+		return this.channelsService.join(channelId, JoinChannelDto);
+	}
+
 
 }

@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { LiveBoardProps, State } from './utils/types';
 import classes from '../../sass/components/Game/Board.module.scss';
+import { useNavigate } from 'react-router-dom';
+import { UserContext } from '../../store/users-contexte';
 
 export default function LiveBoard({ isReady, playerName, opponentName, inviteMode, spectatorMode, closingText, start }: LiveBoardProps) {
 	const isEnded = (closingText === '' ? false : true);
@@ -8,6 +10,25 @@ export default function LiveBoard({ isReady, playerName, opponentName, inviteMod
 		time: 3,
 		seconds: 3,
 	});
+
+	const userCtx = useContext(UserContext);
+	const navigate = useNavigate();
+
+	const handlePlayPong = () => {
+		navigate('/pong', {
+			state: {
+				playerId: userCtx.user?.id,
+				opponentId: undefined,
+				gameInvitation: undefined,
+				isInvited: undefined,
+				isSpectator: undefined,
+			}
+		});
+	}
+
+	const handleGoToHomepage = () => {
+		navigate('/');
+	}
 
 	// set a countdown of 3 seconds
 	useEffect(() => {
@@ -50,7 +71,13 @@ export default function LiveBoard({ isReady, playerName, opponentName, inviteMod
 					<>
 						<p>The game has ended!</p>
 						<h2>{closingText}</h2>
-						{/* <button onClick={}>Return to hompage</button> */}
+						<p>Do you want to play a game?</p>
+						<div>
+							<button onClick={handlePlayPong}>Play Pong</button>
+						</div>
+						<div>
+							<button onClick={handleGoToHomepage}>Return to homepage</button>
+						</div>
 					</>
 				)}
 				{(!isReady && !spectatorMode && !inviteMode) && (

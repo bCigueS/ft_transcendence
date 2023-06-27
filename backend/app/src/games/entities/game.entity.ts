@@ -1,4 +1,4 @@
-import { Game, GameState, UserGame, SpectatorGame } from '@prisma/client';
+import { Game, GameState, UserGame } from '@prisma/client';
 
 import { ApiProperty } from '@nestjs/swagger';
 import { UserEntity } from '../../users/entities/user.entity';
@@ -25,9 +25,6 @@ export class GameEntity implements Game {
 
 	@ApiProperty()
 	playerSocketIds: string[];
-
-	@ApiProperty()
-	spectators: SpectatorGame[];
 
 	@ApiProperty()
 	spectatorSocketIds: string[];

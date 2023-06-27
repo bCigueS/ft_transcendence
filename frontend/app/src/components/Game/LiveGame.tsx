@@ -1,34 +1,47 @@
-import React from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import classes from '../../sass/components/Game/Livegame.module.scss';
-import { UserMatch } from '../../store/users-contexte';
+import { UserContext, UserLiveGames } from '../../store/users-contexte';
 import LiveGameCard from './LiveGameCard';
-
-// interface Props {
-// }
-
-
-const DUMMY_MATCHS: UserMatch[] = [
-	{playerScore: 0, opponentScore: 0},
-	{playerScore: 0, opponentScore: 0},
-	{playerScore: 0, opponentScore: 0},
-	{playerScore: 0, opponentScore: 0},
-	{playerScore: 0, opponentScore: 0},
-	{playerScore: 0, opponentScore: 0},
-	{playerScore: 0, opponentScore: 0},
-	{playerScore: 0, opponentScore: 0},
-	{playerScore: 0, opponentScore: 0},
-	{playerScore: 0, opponentScore: 0},
-	{playerScore: 0, opponentScore: 0},
-]
+import { Socket, io } from 'socket.io-client';
 
 const Livegame: React.FC = () => {
+	const [liveGames, setLiveGames] = useState<UserLiveGames[]>([]);
+	const [socket, setSocket] = useState<Socket>();
+	const userCtx = useContext(UserContext);
+
+	useEffect(() => {
+		const newSocket = io('http://localhost:3000/');
+		setSocket(newSocket);
+		newSocket.on('connect', () => {
+			newSocket.emit('connection', userCtx.user?.id);
+		});
+
+		return () => {
+			newSocket.close();
+		}
+	}, [setSocket, userCtx.user?.id]);
+
+	useEffect(() => {
+		const handleLiveGames = ({ liveMatchArray }: { liveMatchArray: UserLiveGames[] }) => {
+			setLiveGames(liveMatchArray);
+		}
+
+		socket?.emit('getLiveGames');
+		socket?.on('liveGames', handleLiveGames);
+
+		return () => {
+			socket?.off('liveGames', handleLiveGames);
+		};
+
+	}, [socket]);
+	
 	return (
 		<div className={classes.container}>
 			<h1>Live Games</h1>
 			<div className={classes.matchs}>
 				{
-					DUMMY_MATCHS.map((match, i) => (
-						<LiveGameCard key={i}/>
+					liveGames.map((match, i) => (
+						<LiveGameCard key={i} match={match}/>
 					))
 				}
 			</div>

@@ -262,10 +262,6 @@ export class UsersService {
   }
 
   async showCommunity(id: number) {
-  
-    const user = await this.prisma.user.findMany({ 
-      where: { id: id }
-    });
 
     const blocked = await this.showBlockedUsers(id);
 	const haters = await this.showHaters(id);
@@ -297,18 +293,43 @@ export class UsersService {
     });
   }
 
+  async updateWinsMatch(id: number, winsMatch: number) {
+	const user = await this.prisma.user.findUnique({ where: { id: id } });
+
+	if (!user) {
+		throw new NotFoundException(`User with ${id} does not exist.`);
+	}
+
+	return this.prisma.user.update({
+		where: { id: id },
+		data: { wins: winsMatch },
+	});
+  }
+
+//   async updatePlayerStatus(id: number) {
+// 	const user = await this.prisma.user.findUnique({ where: { id: id } });
+
+// 	if (!user) {
+// 		throw new NotFoundException(`User with id ${id} does not exist.`);
+// 	}
+
+// 	return this.prisma.user.update({
+// 		where: { id: id },
+// 		data: { state}
+// 	})
+//   }
+
   async seeUserGames(id: number) {
-  
     const games = await this.prisma.game.findMany({
         where: {
-            players: {
-                some: {
-                  userId: id
-                }
-            }
+			players: {
+				some: {
+				  userId: id
+				}
+			}
         },
         include: {
-          players: true,
+		  players: true,
         },
     });
     
@@ -331,6 +352,18 @@ async logout(req: CustomRequest)
     return {
       accessToken: '',
     };
+  }
+
+  async getWins(id: number) {
+    const user = await this.prisma.user.findUnique({
+        where: { id : id },
+    });
+
+	if (!user) {
+		throw new NotFoundException(`User with ${id} does not exist.`);
+	}
+    
+    return user.wins;
   }
 
   async  getTwoFactor(req: CustomRequest)
@@ -393,5 +426,5 @@ async logout(req: CustomRequest)
   {
     return QRCode.toFileStream(stream, otpauthUrl);
   }
-
+  
 }
