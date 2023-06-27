@@ -28,6 +28,7 @@ export default function Game() {
 	const isInvited = state?.isInvited;
 	const isSpectator = state?.isSpectator;
 	const gameRoom = state?.gameRoom;
+	// console.log('opponentId ', opponentId);
 	// console.log('game invitation ', inviteMode);
 	// console.log('isInvited ', isInvited); 
 	// console.log('gameRoom ', gameRoom);

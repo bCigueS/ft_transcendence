@@ -24,7 +24,7 @@ const info: PongInfo = {
 	playerX: 10,
 	opponentX: 620, // boardWidth - paddleWidth - 10,
 	obstacleX: 310, // (boardWidth - obstacleWidth) / 2,
-	winnerScore: 3,
+	winnerScore: 1,
 }
 
 export default function SpectatorBoard(props: SpectatorProp) {
@@ -202,6 +202,7 @@ export default function SpectatorBoard(props: SpectatorProp) {
 		}
 	}, [props.socket]);
 
+	// receiving an alert that one of the players screen is too small
 	useEffect(() => {
 			const handleScreenTooSmall = ({ message, isTooSmall }: { message: string, isTooSmall: boolean }) => {
 				console.log({ message });
@@ -241,23 +242,24 @@ export default function SpectatorBoard(props: SpectatorProp) {
 			props.socket?.off('playerDisconnected', handlePlayerDisconnected);
 		}
 	}, [props.socket]);
+	
+	const handleEndWatch = useCallback(({ message }: {message: string}) => {
+		console.log('in endWatch, ', { message });
+		setIsRunning(false);
+		setClosingText(message);
+		setGameOver(true);
+		props.socket?.emit('leaveGameRoom', props.gameRoom);
+	}, [props.gameRoom, props.socket]);
 
 	// loop to receive a message from server that game has ended
 	useEffect(() => {
-		const handleEndWatch = ({ message }: {message: string}) => {
-			console.log('in endWatch, ', { message });
-			setIsRunning(false);
-			setClosingText(message);
-			setGameOver(true);
-			props.socket?.emit('leaveGameRoom', props.gameRoom);
-		};
 
 		props.socket?.on('endWatch', handleEndWatch);
 
 		return () => {
 			props.socket?.off('endWatch', handleEndWatch);
 		}
-	}, [props.socket, props.gameRoom])
+	}, [props.socket, props.gameRoom, handleEndWatch])
 	
 	// function to set initial value to start the game
 	const startGame = () => {
@@ -374,7 +376,7 @@ export default function SpectatorBoard(props: SpectatorProp) {
 			if (deltaTime >= frameDuration) {
 				prevFrameId.current = timestamp;
 				
-				console.log(isRunning);
+				console.log('isRunning', isRunning);
 				drawBoard(context);
 				if (isRunning && !isPaused && !screenTooSmall) {
 					drawElement(context);

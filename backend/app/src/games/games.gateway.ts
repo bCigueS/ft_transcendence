@@ -389,6 +389,25 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 			}
 	}
 
+	// receiving an information of the winner of the game
+	@SubscribeMessage('assignWinner')
+	async handleAssignWinnerEvent(
+		@MessageBody() { gameRoom }: { gameRoom: string },
+		@ConnectedSocket() client: Socket,
+		) {
+			const game = await this.prisma.game.findUnique({
+				where: { room: gameRoom },
+			});
+
+			if (game && game.playerSocketIds) {
+				game.playerSocketIds.forEach((socketId) => {
+					this.io.to(socketId).emit('stopGame', {
+						message: (socketId === client.id ? 'You win!' : 'You lose!'),
+					});
+				});
+			}
+	}
+
 	// receiving a new position of the player paddle and send it to the other player (to sync the movement as an opponent movement)
 	@SubscribeMessage('moveInput')
 	async handleMoveInputEvent(
