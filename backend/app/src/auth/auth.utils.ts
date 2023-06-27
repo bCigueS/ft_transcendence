@@ -62,6 +62,7 @@ export async function getUserData(
 			last_name: data_response.data['last_name'],
 		};
 	} catch (error) {
+		// console.log(error);	
 		error.status = 403;
 		throw new HttpException(error, HttpStatus.FORBIDDEN, { cause: error });
 	}

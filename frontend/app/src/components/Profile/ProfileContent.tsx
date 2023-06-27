@@ -34,7 +34,8 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 			email: data.email,
 			avatar: data.avatar,
 			doubleAuth: data.doubleAuth,
-			wins: data.wins
+			wins: data.wins,
+			connected: data.status === 1 ? true : false,
 		}
 		return user;
 	},[userCtx.logInfo?.token])
