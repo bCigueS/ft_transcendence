@@ -33,7 +33,7 @@ export class AuthService {
 	const token = jwt.sign({
 		accessToken: user.token,
 		userId: user.id
-	}, `${process.env.NODE_ENV}`, { expiresIn: '1h' });
+	}, `${process.env.NODE_ENV}`, { expiresIn:'1h' });
 
 	console.log(token);
 
@@ -134,7 +134,7 @@ export class AuthService {
     try {
 		const data_response = await this.httpService.get(url_data, { headers: headersRequest }).toPromise();
 		let user = await this.prisma.user.findFirst({ where: { login: data_response.data.login } });
-		if (!user) user = await this.registerUser(data_response.data);
+		if (!user) await this.registerUser(data_response.data);
 		if (user) {
 			await this.prisma.user.update({
 				where: { id42: data_response.data['id'] },
@@ -153,6 +153,7 @@ export class AuthService {
 		}
 		return AuthUtils.getUserData(user);
     } catch (error) {
+		// console.log(error);	
 		error.status = 403;
 		throw new HttpException(error, HttpStatus.FORBIDDEN, { cause: error });
     }
