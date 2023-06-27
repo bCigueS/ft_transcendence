@@ -3,6 +3,7 @@ import classes from '../../sass/components/Auth/AuthForm.module.scss';
 import { Form, useActionData } from 'react-router-dom';
 import { setTokenAuth } from '../../typescript/Auth';
 import { UserContext } from '../../store/users-contexte';
+import OtpInput from './OtpInput';
 
 interface DataError {
 	statusCode?: number,
@@ -15,6 +16,8 @@ const AuthForm: React.FC = () => {
 
 	const data: DataError = useActionData() as DataError;
 	const userCtx = useContext(UserContext);
+	const [ otp, setOtp ] = useState('');
+	const onChange = (value: string) => setOtp(value);
 	const [ logCode, setLogCode ] = useState<string>("");
 	const [ token, setToken ] = useState<string>("");
 	const [ userId, setUserId ] = useState<string>('');
@@ -133,32 +136,30 @@ const AuthForm: React.FC = () => {
 				<div className={classes.test}>
 					<form action="post" onSubmit={handleSubmit} className={classes.code}>
 						<label htmlFor="code">Enter your <span>Google Authenticator</span> code</label>
-						<input type="text" name='code' />
+						<input type="text" name='code' maxLength={6} />
 						<button type='submit'>Log in</button>
 					</form>
-
-					<form action="post">
+					{/* <OtpInput value={otp} valueLength={6} onChange={onChange} /> */}
+					{/* <form action="post" className={classes.otc}>
 						<fieldset>
-							<legend>Validation Code</legend>
+							<legend>Google Validation code</legend>
 							<label htmlFor="otc-1">Number 1</label>
 							<label htmlFor="otc-2">Number 2</label>
 							<label htmlFor="otc-3">Number 3</label>
 							<label htmlFor="otc-4">Number 4</label>
 							<label htmlFor="otc-5">Number 5</label>
 							<label htmlFor="otc-6">Number 6</label>
+							<div className={classes.box}>
+								<input type="number" pattern='[0-9]*'  id="otc-1" maxLength={1} required placeholder='1'/>
 
-							<div>
-								<input type="number" pattern="[0-9]*" value="" inputMode='numeric' name="number" id="otc-1" required />
-
-								<input type="number" pattern='[0-9]*' min="0" max="9" maxLength={1} value="" inputMode='numeric' id='otc-2' required />
-								<input type="number" pattern='[0-9]*' min="0" max="9" maxLength={1} value="" inputMode='numeric' id='otc-3' required />
-								<input type="number" pattern='[0-9]*' min="0" max="9" maxLength={1} value="" inputMode='numeric' id='otc-4' required />
-								<input type="number" pattern='[0-9]*' min="0" max="9" maxLength={1} value="" inputMode='numeric' id='otc-5' required />
-								<input type="number" pattern='[0-9]*' min="0" max="9" maxLength={1} value="" inputMode='numeric' id='otc-6' required />
-
+								<input type="number" pattern='[0-9]*' min='0' max='9' maxLength={1}    id="otc-2" required placeholder='2'/>
+								<input type="number" pattern='[0-9]*' min='0' max='9' maxLength={1}    id="otc-3" required placeholder='3'/>
+								<input type="number" pattern='[0-9]*' min='0' max='9' maxLength={1}    id="otc-4" required placeholder='4'/>
+								<input type="number" pattern='[0-9]*' min='0' max='9' maxLength={1}    id="otc-5" required placeholder='5'/>
+								<input type="number" pattern='[0-9]*' min='0' max='9' maxLength={1}    id="otc-6" required placeholder='6'/>
 							</div>
 						</fieldset>
-					</form>
+					</form> */}
 				</div>
 			}
 		</>

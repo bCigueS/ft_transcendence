@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { redirect } from 'react-router-dom';
+import { action as logout} from '../typescript/Auth';
 
 export type UserMatch = {
 	user?: UserAPI,
@@ -344,7 +345,7 @@ type Props = {
 				friends: userFriends,
 				block: userBlockings,
 				matchs: [],
-				connected: true
+				connected: data.status === 1 ? true : false,
 				}
 				setUser(dataUser);
 			}
