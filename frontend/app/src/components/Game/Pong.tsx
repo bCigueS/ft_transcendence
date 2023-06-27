@@ -41,7 +41,7 @@ const info: PongInfo = {
 	playerX: 10,
 	opponentX: 620, // boardWidth - paddleWidth - 10,
 	obstacleX: 310, // (boardWidth - obstacleWidth) / 2,
-	winnerScore: 3,
+	winnerScore: 1,
 }
 
 export default function Pong(props: PongProp) {
@@ -54,7 +54,6 @@ export default function Pong(props: PongProp) {
 	const [winner, setWinner] = useState(TIE);
 	const [closingText, setClosingText] = useState('');
 	const [gameRoom, setGameRoom] = useState('');
-	// const [linkInvite, setLinkInvite] = useState('');
 	// game mode
 	const [toolMode, setToolMode] = useState(MOUSE_MODE);
 	const [level, setLevel] = useState(BEGINNER_LEVEL);
@@ -91,61 +90,6 @@ export default function Pong(props: PongProp) {
 	// animation
 	const frameId = useRef(0);
 	const prevFrameId = useRef(0);
-
-	// loop to detect an event listener where the size of the screen change
-	useEffect(() => {
-		const handleResize = () => {
-			setScreenWidth(window.innerWidth);
-			setScreenHeight(window.innerHeight);
-		};
-
-		window.addEventListener('resize', handleResize);
-
-		return () => {
-			window.removeEventListener('resize', handleResize);
-		};
-	}, []);
-
-	// loop to detect if a screen is too small to play the pong
-	useEffect(() => {
-		if (isRunning && !isPaused && !myScreenTooSmall && (screenWidth < info.boardWidth + (110 * 2) || screenHeight < info.boardHeight + (15 * 2))) {
-			setMyScreenTooSmall(true);
-
-			if (playerMode === DOUBLE_MODE) {
-				props.socket?.emit('screenSize', {
-					gameRoom: gameRoom,
-					screenTooSmall: true,
-				});
-			}
-		}
-		else if (isRunning && !isPaused && myScreenTooSmall && (screenWidth >= info.boardWidth + (110 * 2) && screenHeight >= info.boardHeight + (15 * 2))){
-			setMyScreenTooSmall(false);
-
-			if (playerMode === DOUBLE_MODE) { 
-				props.socket?.emit('screenSize', {
-					gameRoom: gameRoom,
-					screenTooSmall: false,
-				});
-			}
-		}
-
-	}, [props.socket, gameRoom, playerMode, isRunning, isPaused, myScreenTooSmall, screenWidth, screenHeight]);
-
-	// receive a signal that one of the player screen is too small
-	useEffect(() => {
-		if (playerMode === DOUBLE_MODE) {
-			const handleScreenTooSmall = ({ message, isTooSmall }: { message: string, isTooSmall: boolean }) => {
-				console.log({ message });
-				setOtherScreenTooSmall(isTooSmall);
-			};
-
-			props.socket?.on('screenTooSmall', handleScreenTooSmall);
-			
-			return () => {
-				props.socket?.off('screenTooSmall', handleScreenTooSmall);
-			}
-		}
-	}, [props.socket, playerMode]);
 
 	// emit a join request to the server
 	useEffect(() => {
@@ -289,14 +233,14 @@ export default function Pong(props: PongProp) {
 			}
 		}
 	}, [props.socket, playerMode]);
-
+	
 	// receive a new updated score
 	useEffect(() => {
 		if (playerMode === DOUBLE_MODE) {
 			const handleNewScore = ({ pScore, oScore }: { pScore: number, oScore: number }) => {
 				setPlayerScore(pScore);
 				setOpponentScore(oScore);
-			}
+			};
 
 			props.socket?.on('newScore', handleNewScore);
 			
@@ -324,9 +268,8 @@ export default function Pong(props: PongProp) {
 
 	// function to stop the animation by toggling the isRunning bool, and send a leave request to the server
 	const stopGame = useCallback(() => {
-		setGameOver(current => !current);
+		setGameOver(true);
 		setIsRunning(false);
-		console.log('in stop game, with gameRoom ', gameRoom);
 		if (playerMode === DOUBLE_MODE && winner !== OPPONENT_WIN) {
 			console.log ('emit gameOver, and winner is ', winner);
 			props.socket?.emit('gameOver', {
@@ -339,14 +282,14 @@ export default function Pong(props: PongProp) {
 				gameRoom: gameRoom,
 			});
 		}
+		setPlayerMode('');
 	}, [props.socket, gameRoom, opponentScore, playerMode, playerScore, winner, props.userId]);
 
 	// loop to detect stopGame event from server
 	useEffect(() => {
 		if (playerMode === DOUBLE_MODE) {
-			const handleStopGame = ({ message }: {message: string}) => {
+			const handleStopGame = ({ message }: { message: string }) => {
 				console.log({ message });
-				setWinner(TIE);
 				setClosingText(message);
 				stopGame();
 			};
@@ -694,12 +637,25 @@ export default function Pong(props: PongProp) {
 
 	const checkStatus = useCallback(() => {
 		// check game status
-		if (opponentScore > info.winnerScore || playerScore > info.winnerScore) {
-			playerScore > info.winnerScore ? setWinner(current => PLAYER_WIN) : setWinner(current => OPPONENT_WIN);
-			playerScore > info.winnerScore ? setClosingText('You win!') : setClosingText('You lose!');
-			stopGame();
+		if (playerMode === SINGLE_MODE) {
+			if (opponentScore > info.winnerScore || playerScore > info.winnerScore) {
+				playerScore > info.winnerScore ? setClosingText('You win!') : setClosingText('You lose!');
+				playerScore > info.winnerScore ? setWinner(PLAYER_WIN) : setWinner(OPPONENT_WIN);
+				stopGame();
+			}
 		}
-	}, [playerScore, opponentScore, stopGame]);
+		if (playerMode === DOUBLE_MODE) {
+			if (playerScore > info.winnerScore) {
+				setWinner(PLAYER_WIN);
+				props.socket?.emit('assignWinner', {
+					gameRoom: gameRoom,
+				});
+			}
+			if (opponentScore > info.winnerScore) {
+				setWinner(OPPONENT_WIN);
+			}
+		}
+	}, [props.socket, playerMode, playerScore, opponentScore, gameRoom, stopGame]);
 
 	// render the game
 	useEffect(() => {
@@ -718,7 +674,7 @@ export default function Pong(props: PongProp) {
 			if (deltaTime >= frameDuration) {
 				prevFrameId.current = timestamp;
 
-				// console.log('winner is ', winner);
+				// console.log('winner is', winner, 'isRunning', isRunning, 'gameOver', gameOver, 'isReady', isReady);
 				
 				drawBoard(context);
 				if (isRunning && !isPaused && !myScreenTooSmall && !otherScreenTooSmall) {
@@ -817,6 +773,61 @@ export default function Pong(props: PongProp) {
 			}
 		}
 	}, [props.socket, toolMode, isRunning, gameRoom, paddleHeight, playerMode]);
+
+	// loop to detect an event listener where the size of the screen change
+	useEffect(() => {
+		const handleResize = () => {
+			setScreenWidth(window.innerWidth);
+			setScreenHeight(window.innerHeight);
+		};
+
+		window.addEventListener('resize', handleResize);
+
+		return () => {
+			window.removeEventListener('resize', handleResize);
+		};
+	}, []);
+
+	// loop to detect if a screen is too small to play the pong
+	useEffect(() => {
+		if (isRunning && !isPaused && !myScreenTooSmall && (screenWidth < info.boardWidth + (110 * 2) || screenHeight < info.boardHeight + (15 * 2))) {
+			setMyScreenTooSmall(true);
+
+			if (playerMode === DOUBLE_MODE) {
+				props.socket?.emit('screenSize', {
+					gameRoom: gameRoom,
+					screenTooSmall: true,
+				});
+			}
+		}
+		else if (isRunning && !isPaused && myScreenTooSmall && (screenWidth >= info.boardWidth + (110 * 2) && screenHeight >= info.boardHeight + (15 * 2))){
+			setMyScreenTooSmall(false);
+
+			if (playerMode === DOUBLE_MODE) { 
+				props.socket?.emit('screenSize', {
+					gameRoom: gameRoom,
+					screenTooSmall: false,
+				});
+			}
+		}
+
+	}, [props.socket, gameRoom, playerMode, isRunning, isPaused, myScreenTooSmall, screenWidth, screenHeight]);
+
+	// receive a signal that one of the player screen is too small
+	useEffect(() => {
+		if (playerMode === DOUBLE_MODE) {
+			const handleScreenTooSmall = ({ message, isTooSmall }: { message: string, isTooSmall: boolean }) => {
+				console.log({ message });
+				setOtherScreenTooSmall(isTooSmall);
+			};
+
+			props.socket?.on('screenTooSmall', handleScreenTooSmall);
+			
+			return () => {
+				props.socket?.off('screenTooSmall', handleScreenTooSmall);
+			}
+		}
+	}, [props.socket, playerMode]);
 
 	return (
 		<>
