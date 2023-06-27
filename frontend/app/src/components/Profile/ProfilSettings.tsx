@@ -1,89 +1,70 @@
-import React, { useContext, useRef, useState } from 'react';
+import React, { useContext } from 'react';
 import { UserAPI, UserContext } from '../../store/users-contexte';
-import classes from '../../sass/components/Profile/ProfilSettings.module.scss';
-import { Form, useParams } from 'react-router-dom';
+import ProfilPatch from './ProfilPatch';
+import { json } from 'react-router-dom';
 
 
 const ProfilSettings: React.FC<{user: UserAPI | null}> = ( { user } ) => {
 
 	const userCtx = useContext(UserContext);
-	const params = useParams();
-	const [image, setImage] = useState<File>();
-	const [preview, setPreview] = useState<string | null>(user?.avatar || null);
 
-	const settingTextInput = useRef<HTMLInputElement>(null);
+	const handlePatchUser = async(DataForm: any) => {
 
-	const textInputEmpty = (input: string) => {
-		return input.trim().length === 0;
-	}
+		const patchData = {
+			name: DataForm.get('name') === '' ? userCtx.user?.name : DataForm.get('name'),			
+		}
 
-	const submitHandler = (event: React.FormEvent) => {
-		event.preventDefault();
-		const enteredText = settingTextInput.current!.value;
+		const avatarData = new FormData();
+		avatarData.append('file', DataForm.get('file'))
 
-		if (image !== null || !textInputEmpty(enteredText)) {
-			if (image !== null) {
-				// userCtx.updateImage(preview);
-				setPreview(preview);
+		if (DataForm.get('file').name) {
+			console.log(avatarData);
+			const avatarResponse = await fetch('http://localhost:3000/users/' + userCtx.user?.id + '/upload-avatar', {
+				method: 'POST',
+				headers: {
+					'Authorization' : 'Bearer ' + userCtx.logInfo?.token,
+				},
+				body: avatarData
+			})
+
+			if (avatarResponse.status === 422) {
+				return avatarResponse;
 			}
-			if (!textInputEmpty(enteredText)) {
-				// userCtx.changeNickname(enteredText);
-				settingTextInput.current!.value = '';
+
+			if (!avatarResponse.ok) {
+				throw new Error("Failed to upload Avatar");
 			}
 		}
-		if (enteredText.trim().length === 0 || enteredText.trim().length > 12) {
-			settingTextInput.current!.value = '';
-			return ;
+
+		if (patchData) {
+			const response = await fetch('http://localhost:3000/users/' + userCtx.user?.id, {
+				method: 'PATCH',
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization' : 'Bearer ' + userCtx.logInfo?.token,
+				},
+				body: JSON.stringify(patchData)
+			});
+			
+			if (response.status === 409 || response.status === 400) {
+				return response;
+			}
+			
+			if (!response.ok) {
+				throw json({message: 'Could not Patch User.'}, {status: 500});
+			}
 		}
+
+		window.location.reload();
+		userCtx.fetchUser();
 	}
 
-	const imageChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const selectedFiles = event.target.files as FileList;
-		setImage(selectedFiles?.[0]);
-		setPreview(URL.createObjectURL(selectedFiles?.[0]));
-	}
-
-	console.log("Params", params);
 
 	return (
-		// <form className={classes.container} onSubmit={submitHandler} autoComplete='off'>
-		// 	<div className={classes.grid}>
-		// 		<div className={classes.nickname}>
-		// 			<label htmlFor="text">Nickname</label>
-		// 			<input type="text" id="text" ref={settingTextInput} placeholder='12char max'/>
-		// 		</div>
-
-		// 		<div className={classes.image}>
-		// 			<label htmlFor="profil">
-		// 				Change picture
-		// 				<div className={classes.imageContent}>
-		// 					<img src={preview} alt="" />
-		// 				</div>
-		// 			</label>
-		// 			<input className={classes.file} type="file" name='file' id='profil' onChange={imageChangeHandler} multiple/>
-		// 		</div>
-
-		// 		<div className={classes.auth}>
-		// 			<label htmlFor="switch"> Double Auth</label>
-		// 			<input type="checkbox" id='switch'/>
-		// 		</div>
-		// 		<div className={classes.submit}>
-		// 			<button>Save Change</button>
-		// 		</div>
-		// 	</div>
-		// </form>
-		
-		<Form method='patch' className={classes.container}>
-			<div className={classes.grid}>
-				<div className={classes.name}>
-					<label htmlFor="text">Name</label>
-					<input id="name" type="text" name="name" />
-				</div>
-				<div className={classes.submit}>
-					<button>Save Change</button>
-				</div>
-			</div>
-		</Form>
+		<>
+			<ProfilPatch onPatchUser={handlePatchUser}/>
+			{/* <DoubleAuthPannel /> */}
+		</>
 	)
 }
 

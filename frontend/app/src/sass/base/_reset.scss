@@ -11,15 +11,18 @@ html, body {
 	// width: 120rem;
 	font-family: 'Inter', sans-serif;
 	font-size: 62.5%;
-	overflow: hidden;
+	// font-size: 72.5%;
+	overflow: auto;
 }
 
 /* Body */
 body {
+	min-width: 76.8rem;
 	padding: 14.5rem 2rem;
 	background-color: $background-color;
 	@include flexBox($justify: center);
 }
+
 
 /* Selector */
 li {
@@ -45,12 +48,14 @@ button {
 }
 
 main {
-	height: 50rem;
+	height: 60rem;
+	min-width: 76.8rem;
 	max-width: 110rem;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	margin: 1rem 3rem;
+	background-color: $almost-white;
 
 	border: 0.3rem black solid;
 

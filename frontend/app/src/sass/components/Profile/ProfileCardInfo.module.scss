@@ -2,13 +2,26 @@
 @import '../../abstracts/variables.scss';
 
 .container {
+	
 	padding: 2rem;
 	border: 0.2rem black solid;
 	background-color: $almost-white;
+	margin-top: 6rem;
+	
 	@include shadowBox();
 
 	@include flexBox($justify: top, $align: left);
 	gap: 1rem;
+	max-height: 40rem;
+
+	i {
+		font-size: 1.4rem;
+		width: 1rem;
+		&:hover {
+			animation: scaleButton 0.5s ease-in-out;
+			color: $light-vermillon;
+		}
+	}
 
 	.user {
 		padding: 0.5rem 0;
@@ -32,13 +45,28 @@
 			border-bottom: 0.2rem black solid;
 			font-size: 1.4rem;
 			@include flexBox($direction: row);
-			i {
-				width: 1rem;
-			}
 			p {
 				margin-left: 1.2rem;
 				font-weight: bold;
 			}
 		}
+	}
+
+	.icon {
+		@include flexBox($direction: row);
+	}
+}
+
+@keyframes scaleButton {
+	0% {
+		transform: scale(1);
+	}
+
+	30% {
+		transform: scale(1.2);
+	}
+
+	100% {
+		transform: scale(1);
 	}
 }
