@@ -180,9 +180,10 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 				}		
 			} else {
 				// if gameRoom is provided, then find the game based on the gameRoom
-				game = await this.prisma.game.findUnique({
+				game = await this.prisma.game.findFirst({
 					where: { 
 						room: gameRoom,
+						state: GameState.WAITING,
 					}
 				});
 				
@@ -190,8 +191,8 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 
 				if (!game) {
 					console.log('game is not exist');
-					client.emit('stopGame', {
-						message: `Sorry, your opponent has left!`,
+					client.emit('expiredInvite', {
+						message: `Sorry, the invitation is already expired!`,
 					});
 					return ;
 				}
@@ -392,18 +393,29 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 	// receiving an information of the winner of the game
 	@SubscribeMessage('assignWinner')
 	async handleAssignWinnerEvent(
-		@MessageBody() { gameRoom }: { gameRoom: string },
+		@MessageBody() { playerName, gameRoom }: { playerName: string, opponentName: string, gameRoom: string },
 		@ConnectedSocket() client: Socket,
 		) {
 			const game = await this.prisma.game.findUnique({
 				where: { room: gameRoom },
 			});
 
+			let playerSocket, opponentSocket;
+			if (game) {
+				[playerSocket, opponentSocket] = game.playerSocketIds;
+			}
+
 			if (game && game.playerSocketIds) {
 				game.playerSocketIds.forEach((socketId) => {
 					this.io.to(socketId).emit('stopGame', {
 						message: (socketId === client.id ? 'You win!' : 'You lose!'),
 					});
+				});
+			}
+
+			if (playerSocket) {
+				this.io.in(gameRoom).emit('endWatch', {
+					message: playerName + ' wins!',
 				});
 			}
 	}
@@ -603,14 +615,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 				throw new NotFoundException(`User with id ${gameInfo.playerId} does not exist.`);
 			}
 
-			if (game) {
-				if (game.state === GameState.PLAYING) {
-					// change status of the game to FINISHED
-					game = await this.gamesService.gameOver(game.id, GameState.FINISHED);
-
-					GamesGateway.eventEmitter.emit('removeLiveGame');
-				}
-	
+			if (game) {	
 				if (gameInfo.winner) {
 					// assign playerId as the winnerId in the game
 					game = await this.gamesService.assignWinner(game.id, gameInfo.playerId);
@@ -644,34 +649,41 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 					});
 				}
 	
-				let opponent;
+				// let opponent;
 	
-				if (opponentUser) {
-					opponent = await this.prisma.user.findUnique({
-						where: { id: opponentUser.userId }
-					});
+				// if (opponentUser) {
+				// 	opponent = await this.prisma.user.findUnique({
+				// 		where: { id: opponentUser.userId }
+				// 	});
+				// }
+	
+				// const [playerSocket, opponentSocket] = game.playerSocketIds;
+	
+				// let message;
+				// if (gameInfo.winner) {
+				// 	if (playerSocket === client.id) {
+				// 		message = player.name + ' wins!';
+				// 	} else {
+				// 		message = opponent.name + ' wins!';
+				// 	}
+				// } else {
+				// 	if (playerSocket === client.id) {
+				// 		message = opponent.name + ' has left the game!';
+				// 	} else {
+				// 		message = player.name + ' has left the game!';
+				// 	}
+				// }
+	
+				// this.io.in(gameRoom).emit('endWatch', {
+				// 	message: message,
+				// });
+
+				if (game.state === GameState.PLAYING) {
+					// change status of the game to FINISHED
+					game = await this.gamesService.gameOver(game.id, GameState.FINISHED);
+
+					GamesGateway.eventEmitter.emit('removeLiveGame');
 				}
-	
-				const [playerSocket, opponentSocket] = game.playerSocketIds;
-	
-				let message;
-				if (gameInfo.winner) {
-					if (playerSocket === client.id) {
-						message = player.name + ' wins!';
-					} else {
-						message = opponent.name + ' wins!';
-					}
-				} else {
-					if (playerSocket === client.id) {
-						message = opponent.name + ' has left the game!';
-					} else {
-						message = player.name + ' has left the game!';
-					}
-				}
-	
-				this.io.in(gameRoom).emit('endWatch', {
-					message: message,
-				});
 			}
 	}
 
@@ -695,9 +707,9 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 			});
 
 			// if the player is already inside a game
-			if (playerGame) {		
-				this.io.in(playerGame.room).emit('playerDisconnected', {
-					message: `Sorry, one of the player has left!`,
+			if (playerGame) {
+				this.io.in(playerGame.room).emit('endWatch', {
+					message: `Sorry, one of the player has left the game!`,
 				});
 
 				// send a message to other player in the room to stop the game

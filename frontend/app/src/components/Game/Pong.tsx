@@ -7,6 +7,7 @@ import classes from '../../sass/components/Game/Pong.module.scss';
 import PlayerSide from './PlayerSide';
 import OpponentSide from './OpponentSide';
 import { UserAPI } from '../../store/users-contexte';
+import DoubleAuthPannel from '../Auth/DoubleAuthPannel';
 
 // Modal's element
 const BEGINNER_LEVEL = 0;
@@ -50,7 +51,7 @@ export default function Pong(props: PongProp) {
 	const [isPaused, setIsPaused] = useState(false);
 	const [isLive, setIsLive] = useState(false);
 	const [isReady, setIsReady] = useState(false);
-	const [gameOver, setGameOver] = useState(false);
+	const [gameOver, setGameOver] = useState<boolean>(false);
 	const [winner, setWinner] = useState(TIE);
 	const [closingText, setClosingText] = useState('');
 	const [gameRoom, setGameRoom] = useState('');
@@ -302,6 +303,24 @@ export default function Pong(props: PongProp) {
 			};
 		}
 	}, [props.socket, playerMode, stopGame]);
+
+	// receive event that notified user that the invitation is already expired
+	useEffect(() => {
+		if (playerMode === DOUBLE_MODE) {
+			const handleExpiredInvite = ({ message }: { message: string }) => {
+				console.log({ message });
+				setClosingText(message);
+				setGameOver(true);
+				setPlayerMode('');
+			};
+
+			props.socket?.on('expiredInvite', handleExpiredInvite);
+
+			return () => {
+				props.socket?.off('expiredInvite', handleExpiredInvite);
+			};
+		}
+	}, [props.socket, playerMode]);
 	
 	// loop to detect when we receive an update info request from server
 	useEffect(() => {
@@ -648,6 +667,7 @@ export default function Pong(props: PongProp) {
 			if (playerScore > info.winnerScore) {
 				setWinner(PLAYER_WIN);
 				props.socket?.emit('assignWinner', {
+					playerName: props.userName,
 					gameRoom: gameRoom,
 				});
 			}
@@ -655,7 +675,7 @@ export default function Pong(props: PongProp) {
 				setWinner(OPPONENT_WIN);
 			}
 		}
-	}, [props.socket, playerMode, playerScore, opponentScore, gameRoom, stopGame]);
+	}, [props.socket, playerMode, playerScore, opponentScore, gameRoom, props.userName, stopGame]);
 
 	// render the game
 	useEffect(() => {
@@ -674,7 +694,7 @@ export default function Pong(props: PongProp) {
 			if (deltaTime >= frameDuration) {
 				prevFrameId.current = timestamp;
 
-				// console.log('winner is', winner, 'isRunning', isRunning, 'gameOver', gameOver, 'isReady', isReady);
+				// console.log('isRunning', isRunning, 'gameOver', gameOver, 'isLive', isLive);
 				
 				drawBoard(context);
 				if (isRunning && !isPaused && !myScreenTooSmall && !otherScreenTooSmall) {

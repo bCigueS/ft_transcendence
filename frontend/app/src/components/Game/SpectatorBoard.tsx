@@ -230,36 +230,36 @@ export default function SpectatorBoard(props: SpectatorProp) {
 			}
 	}, [props.socket]);
 
-	// receive a signal that one player has left the game
-	useEffect(() => {
-		const handlePlayerDisconnected = ({ message }: { message: string }) => {
-			console.log({ message });
-		};
+	// // receive a signal that one player has left the game
+	// useEffect(() => {
+	// 	const handlePlayerDisconnected = ({ message }: { message: string }) => {
+	// 		console.log({ message });
+	// 	};
 
-		props.socket?.on('playerDisconnected', handlePlayerDisconnected);
+	// 	props.socket?.on('playerDisconnected', handlePlayerDisconnected);
 		
-		return () => {
-			props.socket?.off('playerDisconnected', handlePlayerDisconnected);
-		}
-	}, [props.socket]);
+	// 	return () => {
+	// 		props.socket?.off('playerDisconnected', handlePlayerDisconnected);
+	// 	}
+	// }, [props.socket]);
 	
-	const handleEndWatch = useCallback(({ message }: {message: string}) => {
-		console.log('in endWatch, ', { message });
-		setIsRunning(false);
-		setClosingText(message);
-		setGameOver(true);
-		props.socket?.emit('leaveGameRoom', props.gameRoom);
-	}, [props.gameRoom, props.socket]);
-
+	
 	// loop to receive a message from server that game has ended
 	useEffect(() => {
+		const handleEndWatch = ({ message }: { message: string }) => {
+			console.log('in endWatch, ', { message });
+			props.socket?.emit('leaveGameRoom', props.gameRoom);
+			setClosingText(message);
+			setIsRunning(false);
+			setGameOver(true);
+		};
 
 		props.socket?.on('endWatch', handleEndWatch);
 
 		return () => {
 			props.socket?.off('endWatch', handleEndWatch);
 		}
-	}, [props.socket, props.gameRoom, handleEndWatch])
+	}, [props.socket, props.gameRoom])
 	
 	// function to set initial value to start the game
 	const startGame = () => {
@@ -376,7 +376,8 @@ export default function SpectatorBoard(props: SpectatorProp) {
 			if (deltaTime >= frameDuration) {
 				prevFrameId.current = timestamp;
 				
-				console.log('isRunning', isRunning);
+				console.log('isRunning', isRunning, 'gameOver', gameOver, 'isLive', isLive);
+
 				drawBoard(context);
 				if (isRunning && !isPaused && !screenTooSmall) {
 					drawElement(context);
