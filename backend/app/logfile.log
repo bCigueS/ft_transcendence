@@ -1,0 +1,68 @@
+
+> app@0.0.1 start:dev
+> nest start --watch
+
+c[[90m9:39:47 AM[0m] Starting compilation in watch mode...
+
+[[90m9:39:58 AM[0m] Found 0 errors. Watching for file changes.
+
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mPrismaModule dependencies initialized[39m[38;5;3m +15ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mMulterModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mPassportModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mHttpModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mJwtModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigHostModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mChannelsModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mMessagesModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mUsersModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mGamesModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAuthModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[GamesGateway] [39m[32mWebsocket Gateway initialized.[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[MessagesGateway] [39m[32mWebsocket chat gateway initialized.[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[WebSocketsController] [39m[32mMessagesGateway subscribed to the "join" message[39m[38;5;3m +0ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[WebSocketsController] [39m[32mMessagesGateway subscribed to the "message" message[39m[38;5;3m +0ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAppController {/}:[39m[38;5;3m +2ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mUsersController {/users}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users/:id, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users/:id, PATCH} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users/:id, DELETE} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users/:id/add-friend, PATCH} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users/:id/remove-friend, PATCH} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users/:id/show-friends, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users/:id/block-user, PATCH} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users/:id/unblock-user, PATCH} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users/:id/show-blocked-users, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users/:id/show-haters, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users/:id/show-community, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users/:id/upload-avatar, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users/:id/avatar, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAuthController {/auth}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/login, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/forty-two, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/me, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mGamesController {/games}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/games, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/games, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/games/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/games/:id, DELETE} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mMessagesController {/messages}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/messages, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/messages, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/messages/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/messages/:id, PATCH} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/messages/:id, DELETE} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mChannelsController {/channels}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/channels, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/channels, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/channels/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/channels/:id, PATCH} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/channels/:id, DELETE} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:01 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/channels/userId/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 394  - [39m06/15/2023, 9:40:02 AM [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +49ms[39m
+Segmentation fault
