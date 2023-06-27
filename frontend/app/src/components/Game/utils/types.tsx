@@ -45,7 +45,8 @@ export type UpdatedInfo = {
 	pScore: number;
 	oScore: number;
 	isPaused: boolean;
-	screenTooSmall: boolean;
+	playerScreenTooSmall: boolean;
+	opponentScreenTooSmall: boolean;
 }
 
 export type BallInfo = {
