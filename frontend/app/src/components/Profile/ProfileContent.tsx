@@ -1,26 +1,89 @@
-import React, { useState, useContext, useEffect } from 'react';
-import { json, redirect } from 'react-router-dom';
+import React, { useState, useContext, useEffect, useCallback } from 'react';
 import classes from '../../sass/components/Profile/ProfileContent.module.scss';
 import MatchSummary from './Matches/MatchSummary';
 import ProfileFriends from './ProfileFriends';
-import { UserAPI, UserContext } from '../../store/users-contexte';
+import { UserAPI, UserContext, UserMatch } from '../../store/users-contexte';
 import ProfilSettings from './ProfilSettings';
-import { useParams } from 'react-router-dom';
+import DoubleAuthPannel from '../Auth/DoubleAuthPannel';
 
 
 const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 
 	const userCtx = useContext(UserContext);
-	const [contentDisplay, setContentDisplay] = useState<string>('Settings');
+	const [contentDisplay, setContentDisplay] = useState<string>('Maths');
+	const [ matchesSummary, setMatchesSummary ] = useState<UserMatch[]>([]);
 
 	const tabHandler = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		const display: string = event.currentTarget.textContent || '';
 		setContentDisplay(display);
 	};
 
+	const fetchUser = useCallback(async(id: number) => {
+		const response = await fetch('http://localhost:3000/users/' + id, {
+			method: 'GET', 
+			headers: {
+				'Authorization' : 'Bearer ' + userCtx.logInfo?.token,
+			}
+		});
+		if (!response.ok)
+			throw new Error("Failed to fetch user");
+		const data = await response.json();
+		const user: UserAPI = {
+			id: data.id,
+			name: data.name,
+			email: data.email,
+			avatar: data.avatar,
+			doubleAuth: data.doubleAuth,
+			wins: data.wins,
+			connected: data.status === 1 ? true : false,
+		}
+		return user;
+	},[userCtx.logInfo?.token])
+
+	const parseMatchData = useCallback(async (match: any) => {
+
+		const idOfUser: number = match.players[0].userId === userCtx.user?.id ? 0 : 1;
+		const idOfOppo: number = match.players[0].userId === userCtx.user?.id ? 1 : 0;
+		const matchInfo: UserMatch = {
+			user: await fetchUser(match.players[idOfUser].userId),
+			opponent: await fetchUser(match.players[idOfOppo].userId),
+			playerScore: match.players[idOfUser].score,
+			opponentScore: match.players[idOfOppo].score
+		}
+
+		return matchInfo;
+	},[fetchUser, userCtx.user?.id]);
+
+	const fetchMatchSummary = useCallback(async() => {
+		if (user?.id === undefined)
+			return ;
+		const response = await fetch('http://localhost:3000/users/' + user?.id + '/games', {
+			method: 'GET',
+			headers: {
+				'Authorization' : 'Bearer ' + userCtx.logInfo?.token,
+			}
+		});
+		if (response.status === 404) {
+			console.error("Error in fetch data");
+			return ;
+		}
+		if (!response.ok)
+			throw new Error("Failed to fetch matchs Summary");
+		const data = await response.json();
+		let matchArray: UserMatch[] = [];
+
+		await Promise.all(data.map(async (match: UserMatch) => {
+			const parsedMatch = await parseMatchData(match);
+			matchArray = [...matchArray, parsedMatch];
+		  }));
+
+		setMatchesSummary(matchArray);
+	}, [user?.id, userCtx.logInfo?.token, parseMatchData])
+
 	useEffect(() => {
-		setContentDisplay('Settings');
-	}, [user?.name])
+		setContentDisplay('Matchs');
+		fetchMatchSummary();
+	}, [user?.name, user?.id, fetchMatchSummary]);
 
 	return (
 		<div className={classes.container}>
@@ -32,14 +95,14 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 					onClick={tabHandler}>
 						Matchs
 				</button>
-				{	user === userCtx.user &&
+				{	user?.id === userCtx.user?.id &&
 					<button 
 						className={`${classes.btn} ${contentDisplay === 'Friends' ? classes.active : ''}`} 
 						onClick={tabHandler}>
 							Friends
 					</button>
 				}
-				{	user === userCtx.user &&
+				{	user?.id === userCtx.user?.id &&
 					<button 
 						className={`${classes.btn} ${contentDisplay === 'Block' ? classes.active : ''}`} 
 						onClick={tabHandler}>
@@ -47,23 +110,30 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 					</button>
 				}
 				{
-					user === userCtx.user &&
+					user?.id === userCtx.user?.id &&
 					<button 
 						className={`${classes.btn} ${contentDisplay === 'Settings' ? classes.active : ''}`} 
 						onClick={tabHandler}>
 						Settings
 					</button>
 				}
+				{
+					user?.id === userCtx.user?.id &&
+					<button 
+						className={`${classes.btn} ${contentDisplay === 'Auth' ? classes.active : ''}`} 
+						onClick={tabHandler}>
+						Auth
+					</button>
+				}
 			</div>
-
-			{/* Content */}
+			
 			{
 				contentDisplay === 'Matchs' &&
 				<div className={classes.tabContent}>
 					<div className={classes.listContent}>
 						{
-							user?.matchs.map((match, index) => (
-								<MatchSummary key={index} summary={match} user={user} />
+							matchesSummary.map((match, index) => (
+								<MatchSummary key={index} summary={match} user={match.user}/>
 							))
 						}
 					</div>
@@ -71,7 +141,7 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 			}
 			
 			{
-				(contentDisplay === 'Friends' && user === userCtx.user) &&
+				(contentDisplay === 'Friends' && user?.id === userCtx.user?.id) &&
 				<div className={classes.tabContent}>
 					<div className={classes.listContent}>
 						{
@@ -89,7 +159,7 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 			}
 
 			{
-				(contentDisplay === 'Block' && user === userCtx.user) &&
+				(contentDisplay === 'Block' && user?.id === userCtx.user?.id) &&
 				<div className={classes.tabContent}>
 					<div className={classes.listContent}>
 						{
@@ -106,9 +176,15 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 				</div>
 			}
 			{
-				(contentDisplay === 'Settings' && user === userCtx.user) &&
+				(contentDisplay === 'Settings' && user?.id === userCtx.user?.id) &&
 				<div className={classes.tabContent}>
 					<ProfilSettings user={userCtx.user}/>
+				</div>
+			}
+			{
+				(contentDisplay === 'Auth' && user?.id === userCtx.user?.id) &&
+				<div className={classes.tabContent}>
+					<DoubleAuthPannel />
 				</div>
 			}
 		</div>

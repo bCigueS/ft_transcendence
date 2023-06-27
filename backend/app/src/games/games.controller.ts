@@ -1,12 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, NotFoundException, Res } from '@nestjs/common';
 import { GamesService } from './games.service';
 import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { GameEntity } from './entities/game.entity';
+import { Game, GameState, UserGame } from '@prisma/client';
 
-@Controller('games') @ApiTags('game')
+@Controller('games') @ApiTags('games')
 export class GamesController {
   constructor(private readonly gamesService: GamesService, private prisma: PrismaService) {}
 
@@ -39,9 +40,26 @@ export class GamesController {
   //   return this.gamesService.update(id, updateGameDto);
   // }
 
+  @Get(':id/liveGames')
+  @ApiOkResponse({ type: GameEntity, isArray: true })
+  async getLiveGames(@Param('id', ParseIntPipe) id: number) {
+	  const games = await this.gamesService.getLiveGames();
+	  if (!games)
+		  throw new NotFoundException(`Currently there is not any live game.`);
+	  
+	  return games;
+  }
+
   @Delete(':id')
   @ApiOkResponse({ type: GameEntity })
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.gamesService.remove(id);
   }
+
+  @Patch(':id')
+  @ApiOkResponse({ type: GameEntity })
+  assignWinner(@Param('id', ParseIntPipe) id: number, @Body() data: { winnerId: number }) {
+	return this.gamesService.assignWinner(id, data?.winnerId);
+  }
+
 }

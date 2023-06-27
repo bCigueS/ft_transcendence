@@ -37,6 +37,13 @@
 	color: $color;
 	font-weight: bold;
 }
+@mixin text-header-xxl($color: black) {
+	font-size: 7rem;
+	line-height: 7rem;
+	color: $color;
+	font-weight: bold;
+	font-style: italic;
+}
 
 
 @mixin flexBox($direction: column, $justify: space-between, $align: center) {
@@ -50,6 +57,11 @@
 	box-shadow: -0.8rem 0.5rem 0rem 0.1rem $color;
 }
 
+@mixin hashedShadowBox($color: $light-vermillon) {
+	box-shadow: -0.8rem 0.5rem 0rem 0.1rem $color;
+	// background: repeating-linear-gradient(-45deg, $color, $color 5px, white 5px, white 10px);
+}
+
 @mixin pictureProfil($url: $profile-pic, $width: 5rem, $height: 5rem) {
 	height: $width;
 	width: $height;
@@ -58,4 +70,70 @@
 	background-repeat: no-repeat;
 	background-position: center center;
 	background-size: cover;
+}
+
+@mixin buttonMixin($fontSize: 2rem, $color: $light-vermillon) {
+	padding: 0.5rem 1rem;
+	font-size: $fontSize;
+	font-weight: 800;
+	letter-spacing: -0.1rem;
+
+	color: $almost-white;
+	background: none;
+	border: 0.2rem solid black;
+	border-radius: none;
+
+	position:relative;
+	transform-style: preserve-3d;
+
+	&::before {
+		content: '';
+		position: absolute;
+		height: 100%;
+		width: 100%;
+		transform: translateZ(-0.1rem);
+		z-index: -1;
+		bottom: -0.8rem;
+		left: -0.8rem;
+		background-color: $color;
+		opacity: 1;
+		transition: all 0.3s;
+	}
+
+	&:hover::before {
+		bottom: 0.8rem;
+		left: 0.8rem;
+		opacity: 1;
+	}
+}
+
+@mixin titleh1($fontSize: 3rem, $width: 100%) {
+		width: $width;
+		text-align: center;
+		font-size: $fontSize;
+		font-weight: 800;
+		letter-spacing: -0.15rem;
+		padding: 0.5rem 1rem;
+
+		color: $almost-white;
+
+		border: 0.2rem solid black;
+		border-radius: none;
+	
+		position:relative;
+		transform-style: preserve-3d;
+	
+		&::before {
+			content: '';
+			position: absolute;
+			height: 100%;
+			width: 100%;
+			transform: translateZ(-0.1rem);
+			z-index: -1;
+			bottom: -0.8rem;
+			left: -0.8rem;
+			background-color: $light-vermillon;
+			opacity: 1;
+			transition: all 0.3s;
+		}
 }

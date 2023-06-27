@@ -1,29 +1,4 @@
-export type PlayerInfo = {
-	name: string;
-	playerId: string;
-	level: number;
-	gameId: string;
-}
-
-export type BallInfo = {
-	dx: number;
-	dy: number;
-}
-
-export type AddPlayerResult = {
-	player: PlayerInfo;
-	opponent: PlayerInfo | null;
-	message: string;
-}
-
-export type RemovePlayerResult = {
-	player: PlayerInfo | null;
-	message: string;
-}
-
-export type CallbackInfo = (message: string) => {
-	message: string;
-}
+import { User } from "@prisma/client";
 
 export type ServeInfo = {
 	initialDelta: number;
@@ -31,9 +6,41 @@ export type ServeInfo = {
 }
 
 export type CollisionInfo = {
+	x: number;
 	y: number;
 	r: number;
+	squareY: number;
+	squareHeight: number;
+	ballSpeed: number;
+	middleBoard: number;
+}
+
+export type ScoreInfo = {
+	playerScore: number;
+	opponentScore: number;
+}
+
+export type GameOverInfo = {
+	playerId: number;
+	winner: number;
+	playerScore: number;
+	opponentScore: number;
+}
+
+export type UpdatedInfo = {
+	x: number;
+	y: number;
+	dx: number;
+	dy:number;
+	s: number;
 	playerY: number;
-	paddleHeight: number;
-	speed: number;
+	opponentY: number;
+	pScore: number;
+	oScore: number;
+}
+
+export type LiveGamesInfo = {
+	player?: User;
+	opponent?: User;
+	gameRoom: string;
 }

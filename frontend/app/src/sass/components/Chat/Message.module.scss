@@ -1,0 +1,158 @@
+@import '../../abstracts/mixin.scss';
+@import '../../abstracts/variables.scss';
+
+.myBubble {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    max-width: 30rem;
+    border-radius: 2rem;
+    background-color: $gunmetal-light;
+    position: relative;
+    align-self: flex-end;
+    word-wrap: break-word;
+
+    .myMessage {
+        top: 0.5rem;
+        color: white;
+        margin-left: 1rem;
+        margin-right: 1rem;
+        margin-top: 0.7rem;
+        margin-bottom: 0.7rem;
+        text-align: right;
+    }
+
+}
+
+.myLastBubble {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    max-width: 30rem;
+    // min-width: 6rem;
+    border-radius: 2rem;
+    background-color: $gunmetal-light;
+    position: relative;
+    align-self: flex-end;
+    word-wrap: break-word;
+
+    .myMessage {
+        top: 0.5rem;
+
+        margin-left: 1rem;
+        margin-right: 0.5rem;
+        margin-top: 0.7rem;
+        margin-bottom: 0.7rem;
+        padding-right: 0.5rem;
+        color: white;
+        text-align: right;
+    }
+
+    ::after {
+        content: '';
+        position: absolute;
+        bottom: -0.7rem;
+        right: 1.4rem;
+        border-right: 0.5rem solid $gunmetal-light;
+        border-left: 0.5rem solid transparent;
+        border-top: 0.5rem solid $gunmetal-light;
+        border-bottom: 0.5rem solid transparent;
+        border-style: solid;
+    }
+
+}
+
+.yourBubble {
+    margin-bottom: 0.4rem;
+    margin-left: 2.4rem;
+    padding: 0.5rem;
+    max-width: 30rem;
+    border-radius: 2rem;
+    background-color: $light-vermillon;
+    position: relative;
+    align-self: flex-start;
+    word-wrap: break-word;
+
+    .sender {
+        font-weight: bold;
+        // color: red;
+    }
+
+    .yourMessage {
+        top: 0.5rem;
+        margin-left: 1rem;
+        margin-right: 1rem;
+        margin-top: 0.7rem;
+        margin-bottom: 0.7rem;
+        color: white;
+    }
+
+    .sender {
+        font-style: bold;
+    }
+
+}
+
+.yourLastBubble {
+    // margin-bottom: 1rem;
+    margin-left: 2.4rem;
+    padding: 0.5rem;
+    max-width: 30rem;
+    border-radius: 2rem;
+    background-color: $light-vermillon;
+    position: relative;
+    align-self: flex-start;
+    word-wrap: break-word;
+
+    .sender {
+        font-weight: bold;
+        // color: red;
+    }
+
+    .yourMessage {
+        top: 0.5rem;
+        margin-left: 1rem;
+        margin-right: 1rem;
+        margin-top: 0.7rem;
+        margin-bottom: 0.7rem;
+        color: white;
+    }
+
+    ::after {
+        content: ' ';
+        position: absolute;
+        bottom: -0.7rem;
+        left: 1.4rem;
+        border-left: 0.5rem solid $light-vermillon;
+        border-right: 0.5rem solid transparent;
+        border-top: 0.5rem solid $light-vermillon;
+        border-bottom: 0.5rem solid transparent;
+        border-style: solid;
+    }
+
+
+
+}
+
+.info {
+	font-size: 1rem;
+	display: flex;
+  	justify-content: space-between;
+	margin-top: 0.5rem;
+
+
+	.delete:hover {
+		stroke: white;
+		stroke-width: 1;
+	}
+}
+
+.date {
+	display: flex;
+    align-items: center;
+    justify-content: center;
+	color: $gunmetal-dark;
+}
+
+.senderProfile {
+    position: relative;
+    bottom: 1rem;
+}
