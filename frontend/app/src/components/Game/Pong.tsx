@@ -7,7 +7,6 @@ import classes from '../../sass/components/Game/Pong.module.scss';
 import PlayerSide from './PlayerSide';
 import OpponentSide from './OpponentSide';
 import { UserAPI } from '../../store/users-contexte';
-import DoubleAuthPannel from '../Auth/DoubleAuthPannel';
 
 // Modal's element
 const BEGINNER_LEVEL = 0;
@@ -771,7 +770,7 @@ export default function Pong(props: PongProp) {
 	// mouse event handler
 	useEffect(() => {
 		window.onmousemove = function(event) {
-			const nextPost = event.clientY - info.boardHeight + (paddleHeight / 2);
+			const nextPost = event.clientY - info.boardHeight + (paddleHeight / 2) + 125;
 		
 			if (toolMode === MOUSE_MODE && isRunning) {
 				if ( nextPost >= 0 && nextPost + paddleHeight <= info.boardHeight) {
@@ -859,7 +858,7 @@ export default function Pong(props: PongProp) {
 					inviteMode={props.inviteMode}
 					spectatorMode={false}
 					closingText={''}
-					start={() => {startGame(winner === PLAYER_WIN ? PLAYER_SIDE : OPPONENT_SIDE); setIsLive(false)}}
+					start={() => {startGame(winner === PLAYER_WIN ? PLAYER_SIDE : OPPONENT_SIDE); setIsLive(false);}}
 				/>
 			)}
 			{((!isRunning || gameOver) && !isLive) && (

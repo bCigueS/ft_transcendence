@@ -81,7 +81,7 @@ export default function SpectatorBoard(props: SpectatorProp) {
 				setOpponentName(opponent.name);
 			}
 			setLevel(level);
-			setIsLive(true);
+			setIsLive(current => !current);
 			setIsReady(false);
 		};
 
@@ -234,6 +234,9 @@ export default function SpectatorBoard(props: SpectatorProp) {
 	// useEffect(() => {
 	// 	const handlePlayerDisconnected = ({ message }: { message: string }) => {
 	// 		console.log({ message });
+	// 		setIsLive(current => !current);
+	// 		setIsRunning(current => !current);
+	// 		setGameOver(current => !current);
 	// 	};
 
 	// 	props.socket?.on('playerDisconnected', handlePlayerDisconnected);
@@ -250,8 +253,12 @@ export default function SpectatorBoard(props: SpectatorProp) {
 			console.log('in endWatch, ', { message });
 			props.socket?.emit('leaveGameRoom', props.gameRoom);
 			setClosingText(message);
-			setIsRunning(false);
-			setGameOver(true);
+			if (isRunning === true) {
+				setIsRunning(current => !current);
+			}
+			if (gameOver === false) {
+				setGameOver(current => !current);
+			}
 		};
 
 		props.socket?.on('endWatch', handleEndWatch);
@@ -259,7 +266,7 @@ export default function SpectatorBoard(props: SpectatorProp) {
 		return () => {
 			props.socket?.off('endWatch', handleEndWatch);
 		}
-	}, [props.socket, props.gameRoom])
+	}, [props.socket, props.gameRoom, isLive, isRunning, gameOver])
 	
 	// function to set initial value to start the game
 	const startGame = () => {
@@ -279,10 +286,9 @@ export default function SpectatorBoard(props: SpectatorProp) {
 					setPaddleHeight(40);
 					break ;
 			}
-			setGameOver(false);
+			// toggle isRunning boolean to start the animation of the game
+			setIsRunning(current => !current);
 		}		
-		// toggle isRunning boolean to start the animation of the game
-		setIsRunning(true);
 	}
 
 	// function to detect ball collision with all 4 part of the walls/borders
