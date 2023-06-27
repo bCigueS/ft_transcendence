@@ -1,0 +1,35 @@
+@import '../../abstracts/mixin.scss';
+@import '../../abstracts/variables.scss';
+
+.card {
+	width: 50rem;
+	// height: 45rem;
+	padding: 2rem 3rem;
+
+	// background-color: $almost-white;
+	border: 0.2rem solid black;
+	// position:relative;
+	transform-style: preserve-3d;
+	@include flexBox();
+	// @include shadowBox();
+
+
+
+	.button {
+		@include buttonMixin();
+		
+	}
+
+	.button-cancel {
+		@include buttonMixin($color: yellow);
+		
+	}
+
+	
+
+}
+
+.error {
+	font-weight: 800;
+	font-size: 1.2rem;
+}
