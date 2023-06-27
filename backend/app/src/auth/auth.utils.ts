@@ -48,7 +48,7 @@ export async function getUserData(
 		
 		const data_response = await httpService.get(url_data, { headers: headersRequest }).toPromise();
 		if (user)
-			await prisma.user.update({ where: { id42: data_response.data['id'] }, data: {status: 1},});
+			await prisma.user.update({ where: { login: data_response.data['login'] }, data: {status: 1},});
 		return {
 			accessToken: signToken(user.id, user.token),
 			userId: user.id,
