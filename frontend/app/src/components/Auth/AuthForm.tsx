@@ -1,64 +1,171 @@
-import React, { useEffect } from 'react';
-import { Form, useActionData, useNavigation } from 'react-router-dom';
+import React, { FormEvent, useContext, useEffect, useState } from 'react';
+import classes from '../../sass/components/Auth/AuthForm.module.scss';
+import { Form, useActionData } from 'react-router-dom';
+import { setTokenAuth } from '../../typescript/Auth';
+import { UserContext } from '../../store/users-contexte';
+import OtpInput from './OtpInput';
 
-type ActionData = {
-	error: string,
-	message: string,
-	statusCode: number
+interface DataError {
+	statusCode?: number,
+	errors?: string,
+	message?: string,
 }
 
-const AuthForm = () => {
 
-	const data = useActionData() as ActionData;
-	const navigation = useNavigation();
+const AuthForm: React.FC = () => {
 
-	const isSubmitting = navigation.state === 'submitting';
-
-	const mode: string = "42log";
+	const data: DataError = useActionData() as DataError;
+	const userCtx = useContext(UserContext);
+	const [ otp, setOtp ] = useState('');
+	const onChange = (value: string) => setOtp(value);
+	const [ logCode, setLogCode ] = useState<string>("");
+	const [ token, setToken ] = useState<string>("");
+	const [ userId, setUserId ] = useState<string>('');
+	const [ doubleAuth, setDoubleAuth ] = useState<boolean>(false);
+		
 	useEffect(() => {
+		if (window.location.href.includes("code="))
+			setLogCode(window.location.href.split("code=")[1])
+	}, [])
+
+	useEffect(() => {
+		if (logCode !== "") {
+			const fetchToken = async () => {
+				const response = await fetch("http://localhost:3000/auth/me", {
+					method: "POST",
+					headers: {
+					"Content-Type": "application/json"
+					},
+					body: JSON.stringify({code: logCode}),
+				});
+				if (response.ok) {
+					const data = await response.json();
+					setToken(data.accessToken);
+					setUserId(data.userId);
+					console.log(data);
+					setDoubleAuth(data.doubleAuth);
+				}
+			}
+			fetchToken();
+		}
+	}, [logCode])
+
+	const handleSubmit = async(event: FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		const formData = new FormData(event.currentTarget);
+		const codeData = {
+			userId: userId,
+			code: formData.get('code')
+		}
+		try	{
+		const response = await fetch('http://localhost:3000/auth/verify', {
+			method: 'POST',
+			headers: {
+				// 'Authorization' : 'Bearer ' + userCtx.logInfo?.token,
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(codeData)
+		})
+
+		if (!response.ok)
+			throw new Error("Failed to fetch 2fa");
+
+		const data = await response.json();
 		console.log(data);
-	}, [data]);
+		if (data.result !== false) {
+			setToken(data.accessToken);
+			userCtx.login();
+			window.location.reload();
+		}
+
+		} catch (error: any) {
+			console.error(error.message);
+		}
+	}
+
+	
+	useEffect(() => {
+		if (token || doubleAuth) {
+			setTokenAuth(token, userId);
+			if (doubleAuth === false) {
+				console.log("Je log")
+				userCtx.login();
+				window.location.reload();
+			}
+		}
+	}, [token, doubleAuth])
+
+
 
 	return (
-		<div>
-			{	mode !== "42log" &&
-				<Form method='post' >
-					<h1>Log in</h1>
-					<div>
-					<label htmlFor="username">Username</label>
-					<input type="text" id='username' name='username' placeholder='username' required/>
-					</div>
-					<div>
-					<label htmlFor="password">Password</label>
-					<input type="password" id='password' name='password' placeholder='password' required/>
+		<>
+			{
+				!doubleAuth &&
+				<Form className={classes.logginForm} method='post'>
+					<h1>Connect Debug</h1>
+					<p>Password is 'lolilolilol'</p>
+					<div className={classes.label}>
+						<label htmlFor="name">Username</label>
+						<input type="text" name="name" id="name" />
 					</div>
 
-					<p>
-					{
-						data && data.message && 
-						data.message
+					<div className={classes.label}>
+						<label htmlFor="password">Password</label>
+						<input type="password" name="password" id="password" />
+					</div>
+					<button>Connect</button>
+					{ data && data.message &&
+						<p className={classes.error}><span>Error {data.statusCode}</span>{data.message}</p>
 					}
-					</p>	{data && data.error && <ul>
-						{Object.values(data.error).map(err => <li></li>)}
-						</ul>}
-						
-						<button disabled={isSubmitting}>{isSubmitting ? 'Submitting...' : 'LogIn' }</button>
-				</Form>
+				</Form>		
 			}
 			{
-				mode === "42log" &&
-				<div>
-					<p>Log with 42 API</p>
-					<a href={`http://127.0.0.1:3000/auth/forty-two`}>
-						<button>Log in with 42</button>
-					</a>
+				!doubleAuth && 
+				<div className={classes.loggin}>
+				<a  href={`http://127.0.0.1:3000/auth/forty-two`}>
+				<button 
+					className = {classes.button}>
+						Log in with<br/>
+						<span>42</span>
+				</button>
+				</a>
+			</div>
+			}
+			{
+				doubleAuth && 
+				<div className={classes.test}>
+					<form action="post" onSubmit={handleSubmit} className={classes.code}>
+						<label htmlFor="code">Enter your <span>Google Authenticator</span> code</label>
+						<input type="text" name='code' maxLength={6} />
+						<button type='submit'>Log in</button>
+					</form>
+					{/* <OtpInput value={otp} valueLength={6} onChange={onChange} /> */}
+					{/* <form action="post" className={classes.otc}>
+						<fieldset>
+							<legend>Google Validation code</legend>
+							<label htmlFor="otc-1">Number 1</label>
+							<label htmlFor="otc-2">Number 2</label>
+							<label htmlFor="otc-3">Number 3</label>
+							<label htmlFor="otc-4">Number 4</label>
+							<label htmlFor="otc-5">Number 5</label>
+							<label htmlFor="otc-6">Number 6</label>
+							<div className={classes.box}>
+								<input type="number" pattern='[0-9]*'  id="otc-1" maxLength={1} required placeholder='1'/>
+
+								<input type="number" pattern='[0-9]*' min='0' max='9' maxLength={1}    id="otc-2" required placeholder='2'/>
+								<input type="number" pattern='[0-9]*' min='0' max='9' maxLength={1}    id="otc-3" required placeholder='3'/>
+								<input type="number" pattern='[0-9]*' min='0' max='9' maxLength={1}    id="otc-4" required placeholder='4'/>
+								<input type="number" pattern='[0-9]*' min='0' max='9' maxLength={1}    id="otc-5" required placeholder='5'/>
+								<input type="number" pattern='[0-9]*' min='0' max='9' maxLength={1}    id="otc-6" required placeholder='6'/>
+							</div>
+						</fieldset>
+					</form> */}
 				</div>
 			}
-		</div>
+		</>
 	)
 }
 
 export default AuthForm;
 
 
-// https://api.intra.42.fr/oauth/authorize?client_id=your_very_long_client_id&redirect_uri=http%3A%2F%2Flocalhost%3A1919%2Fusers%2Fauth%2Fft%2Fcallback&response_type=code&scope=public&state=a_very_long_random_string_witchmust_be_unguessable'

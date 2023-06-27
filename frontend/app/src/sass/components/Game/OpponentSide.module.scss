@@ -1,0 +1,52 @@
+@import '../../abstracts/mixin.scss';
+@import '../../abstracts/variables.scss';
+
+.container {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	grid-template-rows: 1fr;
+	grid-column-start: 3;
+	grid-column-end: 4;
+	grid-row-start: 1;
+	width: 100%;
+	height: 100%;
+	justify-content: center;
+	align-items: center;
+	z-index: 1;
+
+	.content {
+		margin: auto;
+		height: 80%;
+		grid-column-start: 2;
+		grid-column-end: 3;
+		grid-row-start: 1;
+		background-color: $almost-white;
+		align-items: start;
+		justify-content: end;
+		z-index: 1;
+
+	}
+
+	.divider_line {
+		// display: flex;
+		margin: auto;
+		width: 20%;
+		height: 80%;
+		background-image: linear-gradient(#2E3840 70%, rgba(255,255,255,0) 0%);
+		background-position: center;
+		background-size: 5px 25px;
+		background-repeat: repeat-y;
+		align-items: center;
+		justify-content: start;
+		grid-column-start: 1;
+		grid-column-end: 2;
+		grid-row-start: 1;
+		z-index: 1;
+
+	}
+	
+	h1 {
+		writing-mode: vertical-lr;
+		@include text-header-xxl($color: black)
+	}
+}
