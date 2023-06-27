@@ -1,16 +1,26 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import classes from '../../sass/components/Chat/Message.module.scss';
-import { UserContext } from '../../store/users-contexte';
-import { MessageAPI } from '../../pages/Chat';
+import { UserAPI, UserContext } from '../../store/users-contexte';
+import Modal from '../UI/Modal';
+import { Channel, MessageAPI } from './chatUtils';
+import ProfilIcon from '../Profile/ProfilIcon';
+import { useNavigate } from 'react-router-dom';
 
 
 const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean, 
 					message: MessageAPI, messages: MessageAPI[], 
-					onDelete: (message: MessageAPI) => void }> = ( { isMine, isLast, displayDay, message, messages, onDelete } ) => {
+					onDelete: (message: MessageAPI) => void,
+					chat: Channel,
+					onJoin: (channelId: number) => void }> = ( { isMine, isLast, displayDay, message, messages, onDelete, chat, onJoin } ) => {
 
 	const [ isHovering, setIsHovering ] = useState(false);
-	const [ isDeleted, setIsDeleted ] = useState(false);
+	const [ showModal, setShowModal ] = useState(false);
+	const [ sender, setSender ] = useState<UserAPI | null>(null);
+	const userCtx = useContext(UserContext);
+	const navigate = useNavigate();
+
+	const date = new Date(message.createdAt);
 
 	const whichBubble = () => {
 		if (isMine && isLast)
@@ -33,27 +43,141 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 		setIsHovering(false);
 	}
 
-	const handleClickDelete = () => 
-	{
-		onDelete(message);
+	const deleteMessage = async () => {
+		try {
+			const response = await fetch('http://localhost:3000/messages/' + message.id, {
+				method: 'DELETE',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+		
+			if (response.status === 400) {
+				throw new Error("Failed to delete message!") ;
+			}
+
+			if (!response.ok)
+				throw new Error("Failed to delete message!") ;
+
+			
+		} catch (error: any) {
+			console.log(error.message);
+		}
+
+		// if last message delete channel
+		
+	};
+
+	const displaySender = async () => {
+		let sender = null;
+		if (message.senderId)
+			sender = await userCtx.fetchUserById(message.senderId);
+		if (sender)
+		{
+			setSender(sender);
+		}
 	}
+
+	useEffect(() => {
+		displaySender();
+	});
+
+
+	const handleDeletion = () => 
+	{
+		deleteMessage();
+		onDelete(message);
+		setShowModal(false);
+	}
+
+	const handleClickDelete = () => {
+		setShowModal(true);
+	}
+
+	const handleUserConfirmation = () => {
+		setShowModal(false);
+	}
+	
+	const handleClickJoinGame = (senderId: number, gameRoom: string ) => {
+		console.log(senderId, gameRoom);
+		navigate('/pong', {
+			state: {
+				playerId: userCtx.user?.id,
+				opponentId: senderId,
+				gameInvitation: true,
+				isInvited: true,
+				isSpectator: false,
+				gameRoom: gameRoom,
+			}
+		});
+	}
+
+	const displayMessage = () => {
+		if (message.content.includes('join/')) {
+			const channelId = message.content.split('_')[1];
+			return (
+				<a href="#" onClick={() => onJoin(+channelId)}>
+					{message.content}
+				</a>
+			);
+		} else if (message.content.includes('joinGame/')) {
+			const invitation = message.content.split('>')[0];
+			const link = message.content.split('>')[1];
+
+			const info = message.content.split('/')[1];
+			const gameRoom = info.split('_')[0];
+			const senderId = info.split('_')[1];
+
+			const linkStyles: React.CSSProperties = {
+				cursor: 'pointer',
+				textDecoration: 'underline',
+				color: 'blue',
+			};
+
+			return (
+				<>
+					<p>{invitation}</p>
+					<div role="button" tab-index="0" onClick={() => handleClickJoinGame(+senderId, gameRoom)} style={linkStyles}>
+						{link}
+					</div>
+				
+				</>
+			);
+		} else {
+		return (
+			<p>{message.content}</p>
+			);
+		}
+	}
+		
 
 	return (
 		
 		<>
-		{ displayDay && <div className={classes.date}>{message.createdAt.toDateString()}</div> }
+		{showModal &&
+			<Modal
+				title="About to delete message"
+				message="Do you really wish to delete this message?"
+				onCloseClick={handleUserConfirmation}
+				onDelete={handleDeletion}
+			/>
+		}
+		{ displayDay && <div className={classes.date}>{message && date.toDateString()}</div> }
 		<div className={whichBubble()} 
 			onMouseOver={handleMouseOver}
 			onMouseOut={handleMouseOut}>
 			<div 
 				className={isMine ? classes.myMessage : classes.yourMessage}>
-				{ message.content }
+				<div className={classes.sender}>
+				{ sender && sender.id !== userCtx.user?.id && chat.name !== "private" && sender?.name}
+				</div>
+				{ displayMessage() }
 			{ isHovering && 
 				<div className={classes.info}>
 					<div className={classes.hour}>
-					{message.createdAt.getHours().toString()}
+					{date.getHours().toString()}
 					:
-					{message.createdAt.getMinutes().toString() + ' '} 
+					{date.getMinutes().toString() + ' '} 
 					</div>
 					{
 						isMine &&
@@ -64,7 +188,16 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 				</div>
 			}
 			</div>
+			
 		</div>
+		{
+			sender && sender.id !== userCtx.user?.id && isLast ?
+			<div className={classes.senderProfile}>
+			<ProfilIcon user={sender} displayCo={false} size={["2.5rem", "2.5rem"]}/>
+			</div>
+			:
+			<div></div>
+		}
 		</>
 	)
 }

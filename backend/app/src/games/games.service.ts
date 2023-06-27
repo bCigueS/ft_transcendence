@@ -10,7 +10,7 @@ export class GamesService {
 
   /* CRUD */
   async create(createGameDto: CreateGameDto) {
-    const { state, level, players, playerSocketIds, spectators, spectatorSocketIds } = createGameDto;
+    const { state, level, players, playerSocketIds, spectatorSocketIds } = createGameDto;
 
     const newGame = await this.prisma.game.create({
         data: {
@@ -22,11 +22,6 @@ export class GamesService {
                 }))
             },
 			playerSocketIds,
-			spectators: {
-				create: spectators?.map(spectator => ({
-					userId: spectator.userId
-				})) || []
-			},
 			spectatorSocketIds,
 		}
 	});
@@ -35,7 +30,7 @@ export class GamesService {
   }
 
   async update(id: number, updateGameDto: UpdateGameDto) {
-	const { state, players, playerSocketIds, spectators, spectatorSocketIds } = updateGameDto;
+	const { state, players, playerSocketIds, spectatorSocketIds } = updateGameDto;
 
 	const updatedGame = await this.prisma.game.update({
 	  where: { id },
@@ -47,11 +42,6 @@ export class GamesService {
 			}))
 		},
 		playerSocketIds,
-		spectators: {
-			create: spectators?.map(spectator => ({
-				userId: spectator.userId
-			})) || []
-		},
 		spectatorSocketIds,
 	  },
 	});
@@ -124,24 +114,6 @@ export class GamesService {
 	return updatedGame;
   }
 
-  async addSpectator(id: number, updateGameDto: UpdateGameDto) {
-	const { spectators, spectatorSocketIds } = updateGameDto;
-
-	const updatedGame = await this.prisma.game.update({
-	  where: { id },
-	  data: {
-		spectators: {
-			create: spectators.map(spectators => ({
-				userId: spectators.userId
-			}))
-		},
-		spectatorSocketIds,
-	  },
-	});
-
-	return updatedGame;
-  }
-
   async updateSpectatorSocketId(id: number, updateGameDto: UpdateGameDto) {
 	const { spectatorSocketIds } = updateGameDto;
 
@@ -182,8 +154,6 @@ export class GamesService {
 
 	  const winner = updatedGame.winner;
 
-	  console.log('winner before is: ', winner);
-
 	  let updatedWins = winner.wins + 1;
 
 	  const updatedUser = await this.prisma.user.update({
@@ -193,8 +163,21 @@ export class GamesService {
 		}
 	  })
 
-	  console.log('updated user after winning: ', updatedUser);
-
 	  return updatedGame;
   }
+
+  async getLiveGames() {
+	const games = await this.prisma.game.findMany({
+		where: {
+			state: GameState.PLAYING,
+		},
+		include: {
+			players: true,
+		},
+	});
+
+	return games;
+  }
+
+
 }

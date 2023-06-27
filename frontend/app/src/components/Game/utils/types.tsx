@@ -1,3 +1,4 @@
+import { Socket } from "socket.io-client";
 import { UserAPI } from "../../../store/users-contexte";
 
 export type PongInfo = {
@@ -16,17 +17,20 @@ export type PongInfo = {
 }
 
 export type PongProp = {
+	socket: Socket;
 	userId: number;
 	userName: string;
-	// user: UserAPI;
-	// opponent: UserAPI;
+	opponentId: number | undefined;
+	gameRoom: string | undefined;
 	inviteMode: boolean;
+	isInvited: boolean;
 }
 
 export type SpectatorProp = {
-	mode: number;
-	user: UserAPI;
-	gameLevel: number;
+	socket: Socket;
+	userId: number;
+	playerId: number;
+	opponentId: number;
 	gameRoom: string;
 }
 
@@ -40,6 +44,9 @@ export type UpdatedInfo = {
 	opponentY: number;
 	pScore: number;
 	oScore: number;
+	isPaused: boolean;
+	playerScreenTooSmall: boolean;
+	opponentScreenTooSmall: boolean;
 }
 
 export type BallInfo = {
@@ -75,14 +82,17 @@ export interface State {
 
 export type ModalProps = {
 	inviteMode: boolean;
+	isInvited: boolean;
 	buttonText: string;
+	cancelText: string;
 	closingText: string;
 	onStartPage(): void;
+	onRestart(): void;
 	onTool(mode: "keyboard" | "mouse"): void;
 	onDifficulty(level: 0 | 1 | 2 | 3): void;
-	onPlayerMode(mode: "single" | "double"): void;
+	onPlayerMode(mode: "single" | "double" | ""): void;
 }
 
 export type PausedProps = {
-	mode: "spectator" | "play";
+	text: string;
 }

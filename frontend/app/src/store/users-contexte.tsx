@@ -9,6 +9,12 @@ export type UserMatch = {
 	opponentScore: number
 }
 
+export type UserLiveGames = {
+	player?: UserAPI;
+	opponent?: UserAPI;
+	gameRoom: string;
+}
+
 export type UserAPI = {
 	id: number;
 	email: string;

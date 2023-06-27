@@ -1,7 +1,22 @@
 import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 async function main() {
-  const simon = await prisma.user.upsert({
+
+// User creation
+const alex = await prisma.user.upsert({
+    where: { name: 'Alex' },
+    update: {},
+    create: {
+      id42: 5,
+      email: 'achane-l@student.42.fr',
+      name: 'Alex',
+      login: 'achane-l',
+      password: 'lolilolilol',
+      avatar: 'achane-l.jpg',
+      token: '72b9f17ef081978d02e84bc259591cfdbd28fbcdaf1ddab3524b1929f78c30b4achane',
+    },
+  })
+const simon = await prisma.user.upsert({
     where: { name: 'Simon' },
     update: {},
     create: {
@@ -51,6 +66,81 @@ async function main() {
       password: 'lolilolilol',
       avatar: 'ykuo.jpg',
       token: '72b9f17ef081978d02e84bc259591cfdbd28fbcdaf1ddab3524b1929f78c30b4ykuo',
+    },
+});
+
+
+// Channel creation
+const channel1 = await prisma.channel.create({
+    data: {
+        name: 'private',
+        creatorId: simon.id,
+    },
+});
+
+const channel2 = await prisma.channel.create({
+    data: {
+        name: 'private',
+        creatorId: simon.id,
+    },
+});
+
+// ChannelMemberships creation
+await prisma.channelMembership.create({
+    data: {
+        user: {
+            connect: {
+                id: simon.id,
+            },
+        },
+        channel: {
+            connect: {
+                id: channel1.id,
+            },
+        },
+    },
+});
+
+await prisma.channelMembership.create({
+    data: {
+        user: {
+            connect: {
+                id: alex.id,
+            },
+        },
+        channel: {
+            connect: {
+                id: channel1.id,
+            },
+        },
+    },
+});
+await prisma.channelMembership.create({
+    data: {
+        user: {
+            connect: {
+                id: simon.id,
+            },
+        },
+        channel: {
+            connect: {
+                id: channel2.id,
+            },
+        },
+    },
+});
+await prisma.channelMembership.create({
+    data: {
+        user: {
+            connect: {
+                id: fany.id,
+            },
+        },
+        channel: {
+            connect: {
+                id: channel2.id,
+            },
+        },
     },
 });
 // await prisma.channelMembership.create({

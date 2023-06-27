@@ -1,3 +1,5 @@
+import { User } from "@prisma/client";
+
 export type ServeInfo = {
 	initialDelta: number;
 	level: number;
@@ -35,4 +37,10 @@ export type UpdatedInfo = {
 	opponentY: number;
 	pScore: number;
 	oScore: number;
+}
+
+export type LiveGamesInfo = {
+	player?: User;
+	opponent?: User;
+	gameRoom: string;
 }
