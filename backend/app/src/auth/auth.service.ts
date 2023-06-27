@@ -137,7 +137,7 @@ export class AuthService {
 		if (!user) await this.registerUser(data_response.data);
 		if (user) {
 			await this.prisma.user.update({
-				where: { id42: data_response.data['id'] },
+				where: { login: data_response.data.login },
 				data: { 
 					token: CryptoJS.AES.encrypt(token, `${process.env.NODE_ENV}`).toString(),
 					status: 1
@@ -153,7 +153,7 @@ export class AuthService {
 		}
 		return AuthUtils.getUserData(user);
     } catch (error) {
-		// console.log(error);	
+		console.log(error);	
 		error.status = 403;
 		throw new HttpException(error, HttpStatus.FORBIDDEN, { cause: error });
     }
