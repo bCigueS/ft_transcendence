@@ -91,8 +91,8 @@ export default function ModalBoard({ onDifficulty, onTool, onPlayerMode, onStart
 				{(isStarting && page === 2 && inviteMode) && (
 					<>
 						<div>
-							<button onClick={() => {onTool("keyboard"); onPlayerMode("double"); setIsDouble(true); onNextPage();}}>Play with keyboard</button>
-							<button onClick={() => {onTool("mouse"); onPlayerMode("double"); setIsDouble(true); onNextPage();}}>Play with mouse</button>
+							<button onClick={() => {onTool("keyboard"); onPlayerMode("double"); setIsDouble(true); onNextPage(); setIsStarting(false);}}>Play with keyboard</button>
+							<button onClick={() => {onTool("mouse"); onPlayerMode("double"); setIsDouble(true); onNextPage(); setIsStarting(false);}}>Play with mouse</button>
 						</div>
 						<button onClick={() => {setToPage(0); handlePlayAgain();}}>{cancelText}</button>
 					</>
