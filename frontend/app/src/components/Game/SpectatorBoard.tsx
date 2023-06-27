@@ -104,7 +104,9 @@ export default function SpectatorBoard(props: SpectatorProp) {
 			setPlayerScore(gameInfo.pScore);
 			setOpponentScore(gameInfo.oScore);
 			setIsPaused(gameInfo.isPaused);
-			setScreenTooSmall(gameInfo.screenTooSmall);
+			if (gameInfo.playerScreenTooSmall || gameInfo.opponentScreenTooSmall) {
+				setScreenTooSmall(true);
+			}
 		};
 
 		props.socket?.on('currentGameInfo', handleCurrentGameInfo);

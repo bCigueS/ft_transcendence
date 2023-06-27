@@ -28,10 +28,10 @@ export default function Game() {
 	const isInvited = state?.isInvited;
 	const isSpectator = state?.isSpectator;
 	const gameRoom = state?.gameRoom;
-	console.log('game invitation ', inviteMode);
-	console.log('isInvited ', isInvited); 
-	console.log('gameRoom ', gameRoom);
-	console.log('isSpectator ,', isSpectator);
+	// console.log('game invitation ', inviteMode);
+	// console.log('isInvited ', isInvited); 
+	// console.log('gameRoom ', gameRoom);
+	// console.log('isSpectator ,', isSpectator);
 
 	// receive a connection signal from the server
 	useEffect(() => {

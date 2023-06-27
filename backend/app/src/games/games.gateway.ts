@@ -435,10 +435,12 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 
 			if (game && game.playerSocketIds) {
 				game.playerSocketIds.forEach((socketId) => {
-					this.io.to(socketId).emit('screenTooSmall', {
-						message: `Receive screenSize events`,
-						isTooSmall: screenTooSmall,
-					});
+					if (socketId !== client.id) {
+						this.io.to(socketId).emit('screenTooSmall', {
+							message: `Receive screenSize events`,
+							isTooSmall: screenTooSmall,
+						});
+					}
 				});
 			}
 
