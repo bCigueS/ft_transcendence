@@ -6,10 +6,15 @@ import NoConvo from '../components/Chat/NoConvo';
 import io, { Socket } from 'socket.io-client';
 import { useLocation } from 'react-router-dom';
 import MessageList from '../components/Chat/MessageList';
-import { Channel, JoinChannelDTO, MessageAPI, createNewChannel, deleteChat } from '../components/Chat/chatUtils';
+import { Channel, JoinChannelDTO, MessageAPI, createNewChannel, deleteChat, fetchChannelById } from '../components/Chat/chatUtils';
 import ManageChats from '../components/Chat/ManageChats';
 import NoDiscussions from '../components/Chat/NoDiscussions';
 import React from 'react';
+
+type JoinResponse = {
+	status: number;
+	error?: string;
+  };
 
 export default function Chat() {
 	
@@ -18,6 +23,8 @@ export default function Chat() {
 	const [ chats, setChats ] = useState<Channel[]>([]);
 	const [ socket, setSocket ] = useState<Socket>();
 	const [ messages, setMessages ] = useState<MessageAPI[] >([]);
+	const [ joinError, setJoinError ] = useState('');
+	const [ joinWithPassword, setJoinWithPassword ] = useState(false);
 
 	const userCtx = useContext(UserContext);
 	const location = useLocation();
@@ -154,18 +161,10 @@ export default function Chat() {
 		
 	}, [socket, userCtx.user?.id])
 
-	const handleJoinLink = useCallback(async (channelId: number) => {
-		console.log('in handle join link');
+	const handleJoinLink = useCallback(async (joinData: JoinChannelDTO): Promise<JoinResponse> => {
 
-		if (!userCtx.user?.id)
-			return ;
-
-		const joinData: JoinChannelDTO = {
-			userId: userCtx.user?.id,
-		}
-		
 		try {
-		  const response = await fetch(`http://localhost:3000/channels/${channelId}/join`, {
+		  const response: Response = await fetch(`http://localhost:3000/channels/${joinData.channelId}/join`, {
 			method: 'PATCH',
 			headers: {
 			  'Content-Type': 'application/json'
@@ -173,18 +172,45 @@ export default function Chat() {
 			body: JSON.stringify(joinData)
 		  });
 	
-		  if (!response.ok) {
-			throw new Error("Failed to join channel!");
-		  }
-	
-		  await fetchChannels();
-		  setSelectedConversation(chats.find(chat => chat.id === channelId));
-		  handleJoinGroup(channelId, userCtx.user.id);
-		  
+
+			if (response?.status === 404) {
+				setJoinError("It appears that this channels does not exist anymore or link has expired!");
+				console.log("It appears that this channels does not exist anymore or link has expired!");
+				return { status: 404, error: "It appears that this channels does not exist anymore or link has expired!" };
+			}
+
+			if (response?.status === 400) {
+				setJoinError("It appears that you have already joined this group!");
+				console.log("It appears that you have already joined this group!");
+				return { status: 404, error: "It appears that you have already joined this group!" };
+			}
+
+			if (response?.status === 403) {
+				setJoinError("You have been banned from this group.");
+				console.log("You have been banned from this group.");
+				return { status: 403, error: "You have been banned from this group." };
+			}
+			
+			if (response?.status === 401) {
+				setJoinError("Wrong password provided");
+				console.log("Wrong password provided!");
+				return { status: 401, error: "Wrong password provided" };
+			}
+			
+			if (!response.ok) {
+				return { status: response.status, error: "An error occurred" };
+			}
+			
+			await fetchChannels();
+			setSelectedConversation(chats.find(chat => chat.id === joinData.channelId));
+			handleJoinGroup(joinData.channelId, joinData.userId);
+			return { status: response.status };
+			
 		} catch (error) {
-		  console.error(error);
+		  console.log(error);
 		}
-	}, [selectedConversation, fetchChannels, chats, handleJoinGroup, userCtx.user?.id]);
+		return { status: 200 };
+		}, [selectedConversation, fetchChannels, chats, handleJoinGroup, userCtx.user?.id]);
 	
 	const joinListener = useCallback((channelId: string) => {
 		console.log('client joined channel ', channelId);
@@ -201,7 +227,6 @@ export default function Chat() {
 	
 	const userJoinedListener = (userId: number) => {
 		console.log('user ', userId, ' joined the channel');
-
 	}
 
 	useEffect(() => {

@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateChannelDto, CreateChannelMembershipDto } from './dto/create-channel.dto';
 import { UpdateChannelDto } from './dto/update-channel.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -431,17 +431,36 @@ export class ChannelsService {
     const channel = await this.prisma.channel.findUnique({
         where: { id: channelId },
     });
+
     if (!channel)
     {
       console.log('did not find channel');
       throw new NotFoundException('Channel not found');
     }
 
+	const userId = JoinChannelDto.userId;
+
+	const isMember = await this.prisma.channelMembership.findUnique({
+        where: { channelId_userId: { channelId, userId } },
+	})
+
+	if (isMember) {
+	  throw new BadRequestException('You are already a member of this channel');
+	}  
+
+	const isBanned = await this.prisma.bannedUser.findUnique({
+        where: { channelId_userId: { channelId, userId } },
+    });
+
+	if (isBanned) {
+	  throw new ForbiddenException('You are banned from this channel');
+	}  
+
     if (channel.isPasswordProtected && (!JoinChannelDto.password || JoinChannelDto.password.length === 0))
-      throw new Error('You need to provide a password to enter that channel');
+      throw new UnauthorizedException('You need to provide a password to enter that channel');
 
     if (channel.isPasswordProtected && (channel.password !== JoinChannelDto.password))
-      throw new Error('Wrong password provided');
+      throw new UnauthorizedException('Wrong password provided');
     
     const memberDto: CreateChannelMembershipDto = { userId: JoinChannelDto.userId };
     await this.prisma.channelMembership.create({
@@ -452,8 +471,6 @@ export class ChannelsService {
     });
 
     return channel;
-
-
   }
 
 }
