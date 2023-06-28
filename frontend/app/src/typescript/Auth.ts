@@ -18,12 +18,20 @@ export const setTokenAuth = (token: string, userId: string) => {
 
 export const action = () => {
 	const logout = async() => {
-		const response = await fetch('http://localhost:3000/users/logout', {
-			method: 'POST',
-			headers: {
-				'Authorization': 'Bearer ' + getAuthToken(),
+		try {
+
+			const response = await fetch('http://localhost:3000/users/logout', {
+				method: 'POST',
+				headers: {
+					'Authorization': 'Bearer ' + getAuthToken(),
+				}
+			})
+			if (!response.ok) {
+				throw new Error('Failed to logout');
 			}
-		})
+		} catch(error: any) {
+			console.error(error.message);
+		}
 	}
 	logout();
 	localStorage.removeItem('token');
