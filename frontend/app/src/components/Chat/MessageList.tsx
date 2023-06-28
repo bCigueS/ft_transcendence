@@ -13,7 +13,6 @@ type JoinResponse = {
 const MessageList: React.FC<{send: (content: string, channelId: number) => {}, chat: Channel, chats: Channel[], msgs: MessageAPI[], onDelete: (message: MessageAPI) => void, onJoin: (joinData: JoinChannelDTO) => Promise<JoinResponse>}> = ({ send, chat, chats, msgs, onDelete, onJoin }) => {
 
     const [ messages, setMessages ] = useState<MessageAPI[]>(chat.messages);
-	const [ senderBlocked, setSenderBlocked ] = useState(false);
 	const messageInput = useRef<HTMLInputElement>(null);
 	const userCtx = useContext(UserContext);
 

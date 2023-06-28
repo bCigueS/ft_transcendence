@@ -1,5 +1,4 @@
-import { useCallback, useContext } from "react";
-import { UserAPI, UserContext } from "../../store/users-contexte";
+import { UserAPI } from "../../store/users-contexte";
 
 export interface Channel {
     createdAt: Date,

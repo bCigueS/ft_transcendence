@@ -67,7 +67,7 @@ const GroupChat: React.FC<Props> = (props) => {
             setMuted(props.chat.muted);
 		if (props.chat.isPasswordProtected)
 			setIsChatPasswordProtected(true);
-    }, [props.chat.admins, props.chat.banned, props.chat.muted, props.chat.creatorId, props.chat.members, props.chat.name, userCtx.user?.id]);
+    }, [props.chat.admins, props.chat.banned, props.chat.muted, props.chat.creatorId, props.chat.members, props.chat.name, userCtx.user?.id, props.chat.isPasswordProtected]);
 
     const channelCreatedOn = () => {
         let date = new Date(props.chat.createdAt);
@@ -201,13 +201,6 @@ const GroupChat: React.FC<Props> = (props) => {
 
 		handleKick(member);
         setBanned([...banned, member]);
-        const chanData = {
-            banned: [
-                {
-                    userId: member.id
-                }
-            ]
-        }
         banUser(props.chat.id, member.id);
     }
 

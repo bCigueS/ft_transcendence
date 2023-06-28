@@ -7,7 +7,6 @@ import Card from "./../UI/Card";
 import { UserAPI, UserContext } from "../../store/users-contexte";
 import AddToGroup from "./AddToGroup";
 import { createNewChannel } from "./chatUtils";
-import { useNavigate } from "react-router-dom";
 
 type Props = {
     children?: React.ReactNode,
@@ -28,7 +27,6 @@ const Overlay: React.FC<Props> = (props) => {
 	const [ typeError, setTypeError ] = useState<string>('');
 	
 	const userCtx = useContext(UserContext);
-	const navigate = useNavigate();
 
     const handleSubmit = () => {
 		if (groupName === '' || groupName.trim() === '')
@@ -92,7 +90,7 @@ const Overlay: React.FC<Props> = (props) => {
                             onChange={nameHandler}
                             maxLength={12}/>
                     </div>
-					<div className={formclasses["members-label"]}>
+					<div className={formclasses.membersLabel}>
                         <label>Add members to group</label>
 						{
 							(userCtx.user?.id) &&
@@ -111,8 +109,7 @@ const Overlay: React.FC<Props> = (props) => {
 										/>
 									))
 									:
-									<div className={formclasses.noFriends}>Go to <a href="#">
-									leaderbord</a> to add friends and create a group with them.</div>
+									<div className={formclasses.noFriends}>Go to <span>leaderbord</span> to add friends and create a group with them.</div>
 								}
 								</div>
 						}
