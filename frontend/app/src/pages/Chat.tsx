@@ -279,6 +279,7 @@ export default function Chat() {
 			if (chats.find(chat => chat.id === data.chatId)) {
 				setChats(chats => chats.filter(chat => chat.id !== data.chatId));
 			}
+			setSelectedConversation(undefined);
 		});
 	
 		return () => {
@@ -286,17 +287,37 @@ export default function Chat() {
 		};
 	}, [chats, socket]);
 
+	const handleCreateGroup = (channel: Channel) => {
+		console.log('on handleCreateGroup in Chat.tsx with channel: ', channel);
+		// socket?.emit()
+
+		// {
+
+		// }
+		
+		for (const member of channel.members)
+		{
+			const data = {
+				receiverId: member.id,
+				channelId: channel.id,
+			};
+
+			console.log(member);
+			socket?.emit("createJoin", data);
+		}
+
+	}
+
 	const handleChatDeletion = useCallback((id: number) => {
 		setChats(chats => chats.filter(chat => chat.id !== id));
+		setSelectedConversation(undefined);
 		socket?.emit('chatDeleted', { chatId: id, userId: userCtx.user?.id });
 	}, [socket, userCtx.user?.id]);
 
 	const handleKick = useCallback((channelId: number, kickedId: number) => {
 		// setChats(chats => chats.filter(chat => chat.id !== id));
 		socket?.emit('kickUser', { channelId: channelId, userId: kickedId });
-
 	}, [socket])
-
 
 	const checkLastMessageDeleted = useCallback((message: MessageAPI) => {
 		const chatMessage = chats.find(chat => chat.id === message.channelId);
@@ -421,7 +442,8 @@ export default function Chat() {
 	return (
 		<div className={classes.page}>
 			<div className={classes.conversations}>
-				< ManageChats />
+				< ManageChats 
+					onCreate={handleCreateGroup}/>
 				{
 					chats && chats.length > 0 ?
 					filteredChats().map((chat) => (
