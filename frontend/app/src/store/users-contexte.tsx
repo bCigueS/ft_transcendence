@@ -77,7 +77,7 @@ type Props = {
 		
 		const [ user, setUser ] = useState<UserAPI | null>(null);
 		const [ userId, setUserId ] = useState<number>(1);
-		const [ isLogged, setIsLogged ] = useState<boolean>(!localStorage.getItem('isLogged') ? false : true);
+		const [ isLogged, setIsLogged ] = useState<boolean>(!localStorage.getItem('isLogged') || localStorage.getItem('isLogged') === 'false' ? false : true);
 		const [ loading, setLoading ] = useState<boolean>(true);
 		const [ error, setError ] = useState<string | null>(null);
 
