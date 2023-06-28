@@ -23,17 +23,17 @@
         text-align: right;
     }
 
-    .link {
+	.link {
         display: flex;
         flex-direction: column;
 
-        a {
+        .click {
             color: white;
             text-decoration: none;
             font-weight: bold;
         }
         
-        a:hover {
+        .click:hover {
             color: $gunmetal-dark; 
             text-decoration:none; 
             cursor:pointer;
@@ -77,17 +77,17 @@
         border-style: solid;
     }
 
-    .link {
+	.link {
         display: flex;
         flex-direction: column;
 
-        a {
+        .click {
             color: white;
             text-decoration: none;
             font-weight: bold;
         }
         
-        a:hover {
+        .click:hover {
             color: $gunmetal-dark; 
             text-decoration:none; 
             cursor:pointer;
@@ -129,13 +129,13 @@
         display: flex;
         flex-direction: column;
 
-        a {
+        .click {
             color: white;
             text-decoration: none;
             font-weight: bold;
         }
         
-        a:hover {
+        .click:hover {
             color: $gunmetal-dark; 
             text-decoration:none; 
             cursor:pointer;
@@ -185,13 +185,13 @@
         display: flex;
         flex-direction: column;
 
-        a {
+        .click {
             color: white;
             text-decoration: none;
             font-weight: bold;
         }
         
-        a:hover {
+        .click:hover {
             color: $gunmetal-dark; 
             text-decoration:none; 
             cursor:pointer;

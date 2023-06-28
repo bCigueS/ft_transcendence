@@ -1,9 +1,9 @@
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 
 import classes from '../../sass/components/Chat/Message.module.scss';
 import { UserAPI, UserContext } from '../../store/users-contexte';
 import Modal from '../UI/Modal';
-import { Channel, JoinChannelDTO, MessageAPI, fetchChannelById, isMemberMuted } from './chatUtils';
+import { Channel, JoinChannelDTO, MessageAPI, fetchChannelById } from './chatUtils';
 import ProfilIcon from '../Profile/ProfilIcon';
 import JoinModal from './JoinModal';
 import ErrorModal from './ErrorModal';
@@ -79,19 +79,17 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 		
 	};
 
-	const displaySender = async () => {
+	const displaySender = useCallback(async () => {
 		let sender = null;
 		if (message.senderId)
 			sender = await userCtx.fetchUserById(message.senderId);
 		if (sender)
 		{
 			setSender(sender);
-			
-			// check if sender is blocked 
 		}
-	}
+	}, [message.senderId, userCtx])
 
-	const checkSenderBlocked = () => {
+	const checkSenderBlocked = useCallback(() => {
 		if (!userCtx.user?.id)
 			return ;
 
@@ -108,12 +106,12 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 				}
 			}
 		}
-	}
+	}, [message.senderId, userCtx]);
 
 	useEffect(() => {
 		displaySender();
 		checkSenderBlocked();
-	}, [message, userCtx.user?.id]);
+	}, [displaySender, checkSenderBlocked]);
 
 	const handleDeletion = () => 
 	{
@@ -184,6 +182,7 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 			return '🙅 ' + sender?.name + ' ⛔';
 		return sender?.name;
 	}
+	
 	const displayMessage = () => {
 
 		if (message.content.includes('join/')) {
@@ -191,9 +190,9 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 			return (
 				<div className={classes.link}>
 					You've been invited to join a group 👇 <br></br>
-					<a href="#" onClick={() => handleClickJoin(+channelId)}>
+					<div className={classes.click} onClick={() => handleClickJoin(+channelId)}>
 						{message.content}
-					</a>
+					</div>
 				</div>
 		);
 	} else {
