@@ -62,12 +62,6 @@ const Overlay: React.FC<Props> = (props) => {
 			console.error(error);
 		  }
 		  
-		// else if (!response.ok)
-
-
-
-		// window.location.reload();
-		// props.onCloseClick();
     }
 
     const passwordHandler = (event: any) => {

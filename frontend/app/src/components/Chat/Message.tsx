@@ -24,6 +24,7 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 	const [ sender, setSender ] = useState<UserAPI | null>(null);
 	const [ channel, setChannel ] = useState<Channel | null>(null);
 	const [ joinError, setJoinError ] = useState(false);
+	const [ errorType, setErrorType ] = useState('');
 	const [ joinWithPassword, setJoinWithPassword ] = useState(false);
 	 
 	const userCtx = useContext(UserContext);
@@ -121,6 +122,7 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 		if (!channel)
 		{
 			setJoinError(true);
+			setErrorType('It appears that this channel does not exist anymore or the link has expired.')
 			return ;
 		}
 
@@ -138,7 +140,20 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 			return ;
 		}
 
-		onJoin(joinData);
+		try {
+			console.log('about to call handleJoinLink when its not password protected');
+			const response: JoinResponse = await onJoin(joinData);
+
+			if (response.status !== 200 && response.error) {
+				setJoinError(true);
+				setErrorType(response.error);
+				return ;
+			}
+		  
+		  } catch (error) {
+			console.error(error);
+		  }
+		
 	}
 
 
@@ -163,7 +178,6 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 		
 
 	return (
-		
 		<>
 		{showModal &&
 			<Modal
@@ -176,7 +190,7 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 		{joinError &&
 			<ErrorModal
 				title="Error Joining this channel"
-				message="This link has expired."
+				message={errorType}
 				onCloseClick={handleUserJoinError}
 			/>
 		}
