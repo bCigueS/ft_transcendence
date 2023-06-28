@@ -82,6 +82,21 @@
             font-weight: 600;
         }
 
+		.noFriends {
+			padding-top: 2rem;
+			padding-bottom: 1.5rem;
+			font-size: 1.3rem;
+            font-weight: 600;
+			color: $gunmetal-dark;
+
+			a {
+				color: $light-vermillon; 
+				text-decoration:none; 
+				cursor:pointer;
+			}
+			
+		}
+
         .selected {
             h2 {
                 margin-top: 1rem;
