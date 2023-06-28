@@ -24,7 +24,6 @@ export default function Chat() {
 	const [ socket, setSocket ] = useState<Socket>();
 	const [ messages, setMessages ] = useState<MessageAPI[] >([]);
 	const [ joinError, setJoinError ] = useState('');
-	const [ joinWithPassword, setJoinWithPassword ] = useState(false);
 
 	const userCtx = useContext(UserContext);
 	const location = useLocation();
@@ -151,7 +150,34 @@ export default function Chat() {
 		}
 	}, [userCtx.user?.id])
 
-
+	const checkIsBlocked = (blockedId: number): boolean => {
+		if (!userCtx.user?.id) {
+		  return false;
+		}
+	  
+		const blockedUsers = userCtx.user?.block;
+	  
+		if (blockedUsers) {
+		  return blockedUsers.some((blockedUser) => blockedUser.id === blockedId);
+		}
+	  
+		console.log('other member is not blocked');
+		return false;
+	  };
+	  
+	const filteredChats = (): Channel[] => {
+		return chats.filter((chat) => {
+			if (chat.name === 'private' && chat.members.length === 2) {
+				const otherMember = chat.members.find((member) => member.id !== userCtx.user?.id);
+				if (otherMember) {
+					const isBlocked = checkIsBlocked(otherMember.id);
+				return !isBlocked;
+				}
+			}
+			return true;
+		});
+	};  
+	
 	const handleJoinGroup = useCallback((channelId: number, userId: number) => {
 		// setChats(chats => chats.filter(chat => chat.id !== id));
 		socket?.emit('handleJoinGroup', { channelId: channelId, userId: userId });
@@ -404,7 +430,7 @@ export default function Chat() {
 				< ManageChats />
 				{
 					chats && chats.length > 0 ?
-					chats.map((chat) => (
+					filteredChats().map((chat) => (
 						<ChatOverview key={chat.id}
 						chats={chats}
 						chat={chat}
