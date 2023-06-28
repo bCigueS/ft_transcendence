@@ -29,9 +29,6 @@ export default function Chat() {
 	const userCtx = useContext(UserContext);
 	const location = useLocation();
 
-	/*
-		FUNCTIONS FOR MESSAGING
-	*/
 
 	const send = async (content: string, selectedConversationId: number) => {
 
@@ -164,47 +161,46 @@ export default function Chat() {
 	const handleJoinLink = useCallback(async (joinData: JoinChannelDTO): Promise<JoinResponse> => {
 
 		try {
-		const response: Response = await fetch(`http://localhost:3000/channels/${joinData.channelId}/join`, {
-		method: 'PATCH',
-		headers: {
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify(joinData)
-		});
+			const response: Response = await fetch(`http://localhost:3000/channels/${joinData.channelId}/join`, {
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(joinData)
+			});
 
+			if (response?.status === 404) {
+				setJoinError("It appears that this channels does not exist anymore or link has expired!");
+				console.log("It appears that this channels does not exist anymore or link has expired!");
+				return { status: 404, error: "It appears that this channels does not exist anymore or link has expired!" };
+			}
 
-		if (response?.status === 404) {
-			setJoinError("It appears that this channels does not exist anymore or link has expired!");
-			console.log("It appears that this channels does not exist anymore or link has expired!");
-			return { status: 404, error: "It appears that this channels does not exist anymore or link has expired!" };
-		}
+			if (response?.status === 400) {
+				setJoinError("It appears that you have already joined this group!");
+				console.log("It appears that you have already joined this group!");
+				return { status: 404, error: "It appears that you have already joined this group!" };
+			}
 
-		if (response?.status === 400) {
-			setJoinError("It appears that you have already joined this group!");
-			console.log("It appears that you have already joined this group!");
-			return { status: 404, error: "It appears that you have already joined this group!" };
-		}
+			if (response?.status === 403) {
+				setJoinError("You have been banned from this group.");
+				console.log("You have been banned from this group.");
+				return { status: 403, error: "You have been banned from this group." };
+			}
 
-		if (response?.status === 403) {
-			setJoinError("You have been banned from this group.");
-			console.log("You have been banned from this group.");
-			return { status: 403, error: "You have been banned from this group." };
-		}
+			if (response?.status === 401) {
+				setJoinError("Wrong password provided");
+				console.log("Wrong password provided!");
+				return { status: 401, error: "Wrong password provided" };
+			}
 
-		if (response?.status === 401) {
-			setJoinError("Wrong password provided");
-			console.log("Wrong password provided!");
-			return { status: 401, error: "Wrong password provided" };
-		}
+			if (!response.ok) {
+				return { status: response.status, error: "An error occurred" };
+			}
 
-		if (!response.ok) {
-			return { status: response.status, error: "An error occurred" };
-		}
-
-		await fetchChannels();
-		setSelectedConversation(chats.find(chat => chat.id === joinData.channelId));
-		handleJoinGroup(joinData.channelId, joinData.userId);
-		return { status: response.status };
+			await fetchChannels();
+			setSelectedConversation(chats.find(chat => chat.id === joinData.channelId));
+			handleJoinGroup(joinData.channelId, joinData.userId);
+			return { status: response.status };
 			
 		} catch (error) {
 		  console.log(error);

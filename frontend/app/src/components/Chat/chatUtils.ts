@@ -272,3 +272,33 @@ export const fetchChannelById = async (channelId: number) => {
 	}
 	return channelFound;
 };
+
+export const isMemberMuted = async (channelId: number, memberId: number) =>
+{
+	try {
+		const channel = await fetchChannelById(channelId);
+
+		if (!channel) {
+			throw new Error('Channel not found');
+		}
+
+		const mutedMembers = channel.muted;
+
+		if (mutedMembers)
+		{
+			for (const mutedMember of mutedMembers) {
+				if (mutedMember.id === memberId) {
+					return true;
+				}
+			}
+		}
+			
+		return false;
+
+	} catch (error: any) {
+		console.error(error.message);
+		return false;
+	}
+}
+
+
