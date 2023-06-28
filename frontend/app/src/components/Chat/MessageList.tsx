@@ -16,7 +16,6 @@ const MessageList: React.FC<{send: (content: string, channelId: number) => {}, c
 	const messageInput = useRef<HTMLInputElement>(null);
 	const userCtx = useContext(UserContext);
 
-	// const messageContainerRef = useRef<HTMLDivElement>(null);
 	const lastMessageRef = useRef<HTMLDivElement>(null);
 	useEffect(() => {
 		const lastMessageElement = lastMessageRef.current;

@@ -407,9 +407,16 @@ export class ChannelsService {
     if (!channel) 
       throw new NotFoundException('Channel not found');
 
-    await this.prisma.channelMembership.delete({
+	
+	const member = await this.prisma.channelMembership.findUnique({
         where: { channelId_userId: { channelId, userId } },
-    });
+	});
+
+	if (member) {
+		await this.prisma.channelMembership.delete({
+			where: { channelId_userId: { channelId, userId } },
+		});
+	}
 
     const admin = await this.prisma.adminMembership.findUnique({
         where: { channelId_userId: { channelId, userId } },
