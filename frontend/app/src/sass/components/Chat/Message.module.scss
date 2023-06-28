@@ -1,6 +1,8 @@
 @import '../../abstracts/mixin.scss';
 @import '../../abstracts/variables.scss';
 
+
+
 .myBubble {
     margin-bottom: 0.5rem;
     padding: 0.5rem;
@@ -221,4 +223,9 @@
 .senderProfile {
     position: relative;
     bottom: 1rem;
+}
+
+.blockedMessage {
+	color: transparent;
+    text-shadow: 0 0 8px #000;
 }

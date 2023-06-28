@@ -26,8 +26,8 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 	const [ joinError, setJoinError ] = useState(false);
 	const [ errorType, setErrorType ] = useState('');
 	const [ joinWithPassword, setJoinWithPassword ] = useState(false);
-	const [ isSenderMuted, setIsSenderMuted ] = useState(false);
-	 
+	const [ senderBlocked, setSenderBlocked ] = useState(false);
+
 	const userCtx = useContext(UserContext);
 
 	const date = new Date(message.createdAt);
@@ -91,10 +91,29 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 		}
 	}
 
+	const checkSenderBlocked = () => {
+		if (!userCtx.user?.id)
+			return ;
+
+		const blockedUsers = userCtx.user?.block;
+
+		if (blockedUsers)
+		{
+			for (const blockedUser of blockedUsers)
+			{
+				if (blockedUser.id === message.senderId)
+				{
+					console.log('sender is blocked');
+					setSenderBlocked(true);
+				}
+			}
+		}
+	}
+
 	useEffect(() => {
 		displaySender();
-
-	});
+		checkSenderBlocked();
+	}, [message, userCtx.user?.id]);
 
 	const handleDeletion = () => 
 	{
@@ -160,6 +179,11 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 		
 	}
 
+	const displaySenderName = () => {
+		if (senderBlocked)
+			return '🙅 ' + sender?.name + ' ⛔';
+		return sender?.name;
+	}
 	const displayMessage = () => {
 
 		if (message.content.includes('join/')) {
@@ -213,9 +237,14 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 			<div 
 				className={isMine ? classes.myMessage : classes.yourMessage}>
 				<div className={classes.sender}>
-				{ sender && sender.id !== userCtx.user?.id && chat.name !== "private" && sender?.name}
+				{ sender && sender.id !== userCtx.user?.id && chat.name !== "private" && displaySenderName()}
 				</div>
-				{ displayMessage() }
+				<div 
+				className={senderBlocked ? classes.blockedMessage : ''}>
+				{
+					displayMessage()
+				}
+				</div>
 			{ isHovering && 
 				<div className={classes.info}>
 					<div className={classes.hour}>
