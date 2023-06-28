@@ -252,17 +252,17 @@ export class UsersController {
 		return res.sendFile(user.avatar, { root: './uploads'});
 	}
 
-	// @Get(':id/games')
-    // @ApiOkResponse({ type: GameEntity, isArray: true })
-    // async seeUserGames(
-    //     @Param('id', ParseIntPipe) id: number) {
+	@Get(':id/games')
+    @ApiOkResponse({ type: GameEntity, isArray: true })
+    async seeUserGames(
+        @Param('id', ParseIntPipe) id: number) {
 
-    //     const games = await this.usersService.seeUserGames(id);
-    //     if (!games)
-    //         throw new NotFoundException(`User with ${id} does not have any game.`);
+        const games = await this.usersService.seeUserGames(id);
+        if (!games)
+            throw new NotFoundException(`User with ${id} does not have any game.`);
         
-    //     return games;
-    // }
+        return games;
+    }
 
 	@Get(':id/getMatches')
     @ApiOkResponse({ type: isNumber })
@@ -270,8 +270,10 @@ export class UsersController {
         @Param('id', ParseIntPipe) id: number) {
 
 		const games = await this.usersService.seeUserGames(id);
-		if (!games || games.length === 0)
-			throw new NotFoundException(`User with ID ${id} does not have any games.`);
+		if (!games || games.length === 0) {
+			return 0
+		}
+			// throw new NotFoundException(`User with ID ${id} does not have any games.`);
 		
 		const totalMatches = games.length;
 		return totalMatches;

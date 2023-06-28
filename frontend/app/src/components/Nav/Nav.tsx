@@ -40,9 +40,7 @@ const Nav: React.FC = () => {
 								</NavLink>
 							)
 						})
-						: <NavLink to="/auth" className={({isActive}) => isActive ? classes.item + " " + classes.active : classes.item}>
-								<span className="nav-item_text">Authentication</span>
-						</NavLink>
+						: <></>
 					}
 					</ul>
 				

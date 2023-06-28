@@ -19,6 +19,7 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 	};
 
 	const fetchUser = useCallback(async(id: number) => {
+		let gamePlayed;
 		const response = await fetch('http://localhost:3000/users/' + id, {
 			method: 'GET', 
 			headers: {
@@ -27,6 +28,7 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 		});
 		if (!response.ok)
 			throw new Error("Failed to fetch user");
+		gamePlayed = await userCtx.fetchGamePlayed(id);
 		const data = await response.json();
 		const user: UserAPI = {
 			id: data.id,
@@ -35,10 +37,11 @@ const ProfileContent: React.FC<{ user?: UserAPI | null }> = ({ user }) => {
 			avatar: data.avatar,
 			doubleAuth: data.doubleAuth,
 			wins: data.wins,
+			gamesPlayed: gamePlayed,
 			connected: data.status === 1 ? true : false,
 		}
 		return user;
-	},[userCtx.logInfo?.token])
+	},[userCtx])
 
 	const parseMatchData = useCallback(async (match: any) => {
 
