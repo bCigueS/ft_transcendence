@@ -116,11 +116,35 @@ export default function SpectatorBoard(props: SpectatorProp) {
 		}
 	}, [props.socket]);
 
+	// function to set initial value to start the game
+	const startGame = useCallback(() => {
+		if (!isRunning) {
+			switch (level) {
+				case BEGINNER_LEVEL:
+					setBallRadius(10);
+					setPaddleHeight(120);
+					break ;
+				case MEDIUM_LEVEL:
+					setBallRadius(10);
+					setPaddleHeight(80);
+					break ;
+				case HARD_LEVEL:
+				case SPECIAL_LEVEL:
+					setBallRadius(6);
+					setPaddleHeight(40);
+					break ;
+			}
+		}		
+		// toggle isRunning boolean to start the animation of the game
+		setIsRunning(current => !current);
+	}, [isRunning, level]);
+
 	// receive a confirmation from server that game is ready to be displayed
 	useEffect(() => {
 		const handleStartWatch = ({ message }: { message: string }) => {
 			console.log({ message });
 			setIsReady(true);
+			startGame();
 		};
 
 		props.socket?.on('startWatch', handleStartWatch);
@@ -128,7 +152,7 @@ export default function SpectatorBoard(props: SpectatorProp) {
 		return () => {
 			props.socket?.off('startWatch', handleStartWatch);
 		}
-	}, [props.socket]);
+	}, [props.socket, startGame]);
 
 	// receiving the new ball direction from server
 	useEffect(() => {
@@ -253,12 +277,8 @@ export default function SpectatorBoard(props: SpectatorProp) {
 			console.log('in endWatch, ', { message });
 			props.socket?.emit('leaveGameRoom', props.gameRoom);
 			setClosingText(message);
-			if (isRunning === true) {
-				setIsRunning(current => !current);
-			}
-			if (gameOver === false) {
-				setGameOver(current => !current);
-			}
+			setIsRunning(current => !current);
+			setGameOver(current => !current);
 		};
 
 		props.socket?.on('endWatch', handleEndWatch);
@@ -267,29 +287,6 @@ export default function SpectatorBoard(props: SpectatorProp) {
 			props.socket?.off('endWatch', handleEndWatch);
 		}
 	}, [props.socket, props.gameRoom, isLive, isRunning, gameOver])
-	
-	// function to set initial value to start the game
-	const startGame = () => {
-		if (!isRunning) {
-			switch (level) {
-				case BEGINNER_LEVEL:
-					setBallRadius(10);
-					setPaddleHeight(120);
-					break ;
-				case MEDIUM_LEVEL:
-					setBallRadius(10);
-					setPaddleHeight(80);
-					break ;
-				case HARD_LEVEL:
-				case SPECIAL_LEVEL:
-					setBallRadius(6);
-					setPaddleHeight(40);
-					break ;
-			}
-			// toggle isRunning boolean to start the animation of the game
-			setIsRunning(current => !current);
-		}		
-	}
 
 	// function to detect ball collision with all 4 part of the walls/borders
 	const detectWallCollision = useCallback(() => {
@@ -382,7 +379,7 @@ export default function SpectatorBoard(props: SpectatorProp) {
 			if (deltaTime >= frameDuration) {
 				prevFrameId.current = timestamp;
 				
-				console.log('isRunning', isRunning, 'gameOver', gameOver, 'isLive', isLive);
+				// console.log('isRunning', isRunning, 'gameOver', gameOver, 'isLive', isLive);
 
 				drawBoard(context);
 				if (isRunning && !isPaused && !screenTooSmall) {
@@ -422,7 +419,7 @@ export default function SpectatorBoard(props: SpectatorProp) {
 					opponentName={opponentName}
 					inviteMode={false}
 					spectatorMode={true}
-					start={() => {startGame()}}
+					start={() => {}}
 					closingText={closingText}
 				/>
 			)}
