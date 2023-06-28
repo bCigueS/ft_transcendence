@@ -138,6 +138,13 @@ export class ChannelsService {
       });
     }
 
+	await this.prisma.channel.update({
+		where: { id },
+		data: {
+			isPasswordProtected: isPasswordProtected,
+		}
+	});
+
     if (isPasswordProtected)
     {
       await this.prisma.channel.update({
@@ -214,8 +221,9 @@ export class ChannelsService {
         });
       }
     }
-      
-    return channel;
+	
+    const updatedChannel = await this.findOne(id); 
+    return updatedChannel;
   }
 
   async remove(id: number) {

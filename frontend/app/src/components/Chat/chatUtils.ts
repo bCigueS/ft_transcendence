@@ -267,10 +267,8 @@ export const fetchChannelById = async (channelId: number) => {
 			muted: data.muted,
 		}
 
-	}
-	catch (error: any) {
-		console.log(error.message);
+	} catch (error: any) {
+		console.error(error.message);
 	}
 	return channelFound;
-	// return null;	
 };
