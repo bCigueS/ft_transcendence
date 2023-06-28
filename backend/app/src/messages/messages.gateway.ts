@@ -52,6 +52,13 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 				content: string,
 				channelId: number,
 				senderId: number }): Promise<void> {
+	const chan = await this.prisma.channel.findUnique({
+		where: {id: message.channelId}
+	});
+
+	if (!chan)
+		return ;
+	
 	const existingMessages = await this.prisma.message.findMany({
 		where: {
 			channelId: message.channelId
@@ -83,13 +90,22 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 			const receiverSocketId = this.onlineUsers[receiver.userId];
 			console.log('emitting join to user ', receiver.userId.toString());
 			this.io.to(receiverSocketId).emit('join', message.channelId.toString());
-		  }
-		  
+		}
 	}
 
 	console.log('sending message: ', message.content, ' to all clients in room ', message.channelId);
 	this.io.in(message.channelId.toString()).emit('message', newMessage);
 
+	}
+
+	@SubscribeMessage('createJoin')
+		async makeInstantJoin(@ConnectedSocket() client: Socket, 
+		@MessageBody() data: { 
+			receiverId: number, 
+			channelId: number}) {
+		const receiverSocketId = this.onlineUsers[data.receiverId];
+		console.log('emitting join to user ', data.receiverId.toString());
+		this.io.to(receiverSocketId).emit('join', data.channelId.toString());
 	}
   
 	@SubscribeMessage('chatDeleted')

@@ -12,13 +12,13 @@
 
     .conversations {
 		width: 100%;
-		max-height: 100%;
+		max-height: 55rem;
 		grid-column: 1 / 2;
 		grid-row: 1 / 2;
 		background-color: $almost-white;
 		border: 0.2rem solid black;
-        // overflow: scroll;
-		// overflow-x: hidden;
+        overflow: scroll;
+		overflow-x: hidden;
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
