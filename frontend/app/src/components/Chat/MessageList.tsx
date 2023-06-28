@@ -74,7 +74,6 @@ const MessageList: React.FC<{send: (content: string, channelId: number) => {}, c
         messageInput.current!.value = '';
     }
 
-
     return (
         <div className={classes.message}>
 			{ messages && 
