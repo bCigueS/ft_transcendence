@@ -130,18 +130,25 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 	}
 
 	@SubscribeMessage('handleJoinGroup')
-	async handleJoinGroup(@ConnectedSocket() client: Socket, 
-							@MessageBody() data: { 
-								channelId: number, 
-								userId: number
-							}): Promise<void> {
-		console.log('in message gateway, user ', data.userId, ' just joined : ', data.channelId);
-		// const joinSocketId = this.onlineUsers[data.userId];
-		// this.io.to(kickedSocketId).emit('handleKick', data.channelId.toString());
-		this.io.to(data.channelId.toString()).emit('userJoined', data.userId);
-		// client.broadcast.emit('chatDeleted', data);
-	}
+	async handleJoinGroup(@ConnectedSocket() client: Socket, @MessageBody() data: { channelId: number, userId: number }): Promise<void> {
+		console.log('In message gateway, user ', data.userId, ' just joined:', data.channelId);
 
+		const channel = await this.prisma.channel.findUnique({
+			where: { id: data.channelId },
+			include: { members: true },
+		});
+
+		if (!channel) {
+			return;
+		}
+
+		const returnedData = {
+			channelId: data.channelId,
+			updatedMembers: channel.members, 
+		}
+
+		this.io.to(data.channelId.toString()).emit('userJoined', returnedData);
+	}
 
 	@SubscribeMessage('messageDeleted')
 	async handleMessageDeletion(@ConnectedSocket() client: Socket, 
