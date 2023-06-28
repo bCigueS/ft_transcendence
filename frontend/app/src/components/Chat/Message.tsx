@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from 'react';
 import classes from '../../sass/components/Chat/Message.module.scss';
 import { UserAPI, UserContext } from '../../store/users-contexte';
 import Modal from '../UI/Modal';
-import { Channel, JoinChannelDTO, MessageAPI, fetchChannelById } from './chatUtils';
+import { Channel, JoinChannelDTO, MessageAPI, fetchChannelById, isMemberMuted } from './chatUtils';
 import ProfilIcon from '../Profile/ProfilIcon';
 import JoinModal from './JoinModal';
 import ErrorModal from './ErrorModal';
@@ -26,6 +26,7 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 	const [ joinError, setJoinError ] = useState(false);
 	const [ errorType, setErrorType ] = useState('');
 	const [ joinWithPassword, setJoinWithPassword ] = useState(false);
+	const [ isSenderMuted, setIsSenderMuted ] = useState(false);
 	 
 	const userCtx = useContext(UserContext);
 
@@ -85,11 +86,14 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 		if (sender)
 		{
 			setSender(sender);
+			
+			// check if sender is blocked 
 		}
 	}
 
 	useEffect(() => {
 		displaySender();
+
 	});
 
 	const handleDeletion = () => 
@@ -156,7 +160,6 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 		
 	}
 
-
 	const displayMessage = () => {
 
 		if (message.content.includes('join/')) {
@@ -175,7 +178,6 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 			);
 		}
 	}
-		
 
 	return (
 		<>

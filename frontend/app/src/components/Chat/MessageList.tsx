@@ -3,7 +3,7 @@ import Message from "./Message";
 import classes from './../../sass/pages/Chat.module.scss';
 import { useContext, useEffect, useRef, useState } from "react";
 import { UserContext } from "../../store/users-contexte";
-import { Channel, JoinChannelDTO, MessageAPI } from "./chatUtils";
+import { Channel, JoinChannelDTO, MessageAPI, isMemberMuted } from "./chatUtils";
 
 type JoinResponse = {
 	status: number;
@@ -57,14 +57,21 @@ const MessageList: React.FC<{send: (content: string, channelId: number) => {}, c
 		return false;
 	}
 
-    const handleSubmit = (event: { preventDefault: () => void; }) => {
+    const handleSubmit = async (event: { preventDefault: () => void; }) => {
         event.preventDefault();
         const enteredText = messageInput.current!.value;
 
         if (enteredText.trim().length === 0) {
             return ;
         }
-        send(enteredText, chat.id);
+
+		let userIsMuted = false;
+		if (userCtx.user?.id)
+			userIsMuted = await isMemberMuted(chat.id, userCtx.user?.id);
+		if (!userIsMuted)
+		{
+        	send(enteredText, chat.id);
+		}
         messageInput.current!.value = '';
     }
 
