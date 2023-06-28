@@ -16,7 +16,7 @@ import { ChannelsService } from 'src/channels/channels.service';
 export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
   private readonly logger = new Logger(MessagesGateway.name);
 
-  constructor(private readonly messagesService: MessagesService, private prisma: PrismaService) {}
+  constructor(private readonly messagesService: MessagesService, private readonly channelsService: ChannelsService, private prisma: PrismaService) {}
 
   @WebSocketServer() io: Namespace;
   @WebSocketServer() server: Server
@@ -47,23 +47,14 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 			},
 		});
 
-		const senderUser = await this.prisma.channelMembership.findUnique({ where: { id: senderId } });
-		if (!senderUser) {
-			throw new NotFoundException(`User with ${senderId} does not exist.`);
-		}
-
-		const receiverUser = await this.prisma.channelMembership.findUnique({ where: { id: receiverId } });
-		if (!receiverUser) {
-			throw new NotFoundException(`User with ${receiverId} does not exist.`);
-		}
-
+		
 		if (!channel) {
 			const createChannelDto: CreateChannelDto = {
 				name: "private", 
-				members: [senderUser, receiverUser],
+				members: [senderId, receiverId],
 				creatorId: senderId
 			}
-			channel = await this.messagesService.createChannel(createChannelDto);
+			channel = await this.channelsService.create(createChannelDto);
 
 			this.handleJoin(receiverId, channel.id);
 		}
