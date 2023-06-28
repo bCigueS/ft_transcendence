@@ -41,9 +41,9 @@ export const action = async({ request }: { request: Request }) => {
 	const resData = await response.json();
 	const token = resData.accessToken;
 	const userId = resData.userId;
-	localStorage.setItem('token', token);
-	localStorage.setItem('userId', userId);
-	localStorage.setItem('isLogged', 'true');
+	sessionStorage.setItem('token', token);
+	sessionStorage.setItem('userId', userId);
+	sessionStorage.setItem('isLogged', 'true');
 	window.location.reload();
 
 	return redirect('/');

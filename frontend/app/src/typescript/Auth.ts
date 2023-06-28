@@ -2,7 +2,7 @@ import { redirect } from "react-router-dom";
 
 export const getAuthToken = () => {
 
-	const token = localStorage.getItem('token');
+	const token = sessionStorage.getItem('token');
 	return token;
 }
 
@@ -11,8 +11,8 @@ export const tokenLoader = () => {
 }
 
 export const setTokenAuth = (token: string, userId: string) => {
-	localStorage.setItem('token', token);
-	localStorage.setItem('userId', userId)
+	sessionStorage.setItem('token', token);
+	sessionStorage.setItem('userId', userId)
 	return redirect('/');
 }
 
@@ -26,9 +26,9 @@ export const action = () => {
 		})
 	}
 	logout();
-	localStorage.removeItem('token');
-	localStorage.removeItem('userId');
-	localStorage.removeItem('isLogged');
+	sessionStorage.removeItem('token');
+	sessionStorage.removeItem('userId');
+	sessionStorage.removeItem('isLogged');
 	return redirect('/auth');
 }
 
@@ -41,7 +41,7 @@ export const checkAuthLoader = () => {
 
 export const checkTokenLoader = () => {
 	const token = getAuthToken();
-	const isLogged = localStorage.getItem('isLogged');
+	const isLogged = sessionStorage.getItem('isLogged');
 	if (token && isLogged === 'true') {
 		return redirect('/');
 	}

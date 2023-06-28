@@ -550,14 +550,18 @@ export default function Pong(props: PongProp) {
 					}, gameRoom: gameRoom,
 				});
 			}
-			ballServe(OPPONENT_SIDE);
+			if (playerScore <= info.winnerScore && opponentScore <= info.winnerScore) {
+				ballServe(OPPONENT_SIDE);
+			}
 		}
 		//right collision / ball passing the opponent's paddle, so player gains a point
 		if (ballX >= info.boardWidth) {
 			if (playerMode === SINGLE_MODE) {
 				setPlayerScore(p => p += 1);
 			}
-			ballServe(PLAYER_SIDE);
+			if (playerScore <= info.winnerScore && opponentScore <= info.winnerScore) {
+				ballServe(PLAYER_SIDE);
+			}
 		}
 	}, [props.socket, ballRadius, ballServe, ballX, ballY, gameRoom, level, opponentScore, playerMode, playerScore]);
 	

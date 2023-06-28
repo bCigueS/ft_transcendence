@@ -80,7 +80,7 @@ const ProfileCard: React.FC<{ user?: UserAPI | null}> = ( { user } ) => {
 
 				<div className={classes.info}>
 					<i className="fa-sharp fa-solid fa-chart-simple"></i>
-					<p>{ user?.gamesPlayed }</p>
+					<p>{user?.gamesPlayed}</p>
 				</div>
 			</div>
 			{
