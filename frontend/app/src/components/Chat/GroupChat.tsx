@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { Channel, banUser, kickUser, modifyChannel, removeAdmin, removeBan, removeMute } from "./chatUtils";
+import { Channel, UpdateChannelDTO, banUser, kickUser, modifyChannel, removeAdmin, removeBan, removeMute } from "./chatUtils";
 import classes from '../../sass/components/Chat/ChatInfo.module.scss';
 import AddToGroup from "./AddToGroup";
 import { UserAPI, UserContext } from "../../store/users-contexte";
@@ -65,17 +65,14 @@ const GroupChat: React.FC<Props> = (props) => {
             setBanned(props.chat.banned);
         if (props.chat.muted)
             setMuted(props.chat.muted);
+		if (props.chat.isPasswordProtected)
+			setIsChatPasswordProtected(true);
     }, [props.chat.admins, props.chat.banned, props.chat.muted, props.chat.creatorId, props.chat.members, props.chat.name, userCtx.user?.id]);
 
     const channelCreatedOn = () => {
         let date = new Date(props.chat.createdAt);
         return date.toDateString();
     }
-
-    // const removeMember = (member: UserAPI) => {
-	// 	console.log('removed member: ', member);
-	// 	setMembers(members.filter(m => m.id !== member.id));
-	// }
 
     const handleClickLeave = () => {
         console.log(userCtx.user?.name, ' left channel ', props.chat.name);
@@ -134,7 +131,7 @@ const GroupChat: React.FC<Props> = (props) => {
         return false; 
     }
 
-    const handlePasswordProtect = (event: any) => {
+    const handlePasswordProtect = async(event: any) => {
 		event.preventDefault();
         if (!isChatPasswordProtected && (chatPassword.length === 0 || chatPassword.trim().length === 0))
         {
@@ -143,6 +140,14 @@ const GroupChat: React.FC<Props> = (props) => {
         }
         setIsChatPasswordProtected(!isChatPasswordProtected);
         console.log('about to cange channel setting to be protected with password: ', chatPassword);
+
+		const updatedChan: UpdateChannelDTO = {
+			isPasswordProtected: true,
+			password: chatPassword,
+		}
+
+		await modifyChannel(props.chat.id, updatedChan);
+
         // update chat settings in backend.
         setChatPassword('');
     }

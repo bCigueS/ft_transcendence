@@ -35,7 +35,7 @@ type CreateChannelDTO = {
   muted?: User[],
 };
 
-type UpdateChannelDTO = {
+export type UpdateChannelDTO = {
     name?: string,
     members?: User[],
     isPasswordProtected?: boolean,
@@ -46,6 +46,7 @@ type UpdateChannelDTO = {
   };
 
 export type JoinChannelDTO = {
+	channelId: number,
     userId: number,
     password?: string,
 }
@@ -239,5 +240,37 @@ export const banUser = async (channelId: number, userId: number) => {
 
 };
 
+export const fetchChannelById = async (channelId: number) => {
 
+	let channelFound: Channel | null = null;
+	
+	try {
+		const response = await fetch('http://localhost:3000/channels/' + channelId);
 
+		if (!response.ok)
+			throw new Error('Failed to fetch channel with id ' + channelId);
+
+		const data = await response.json();
+
+		channelFound = {
+			id: data.id,
+			createdAt: data.createdAt,
+			name: data.name,
+			creatorId: data.creatorId,
+			creator: data.creator,
+			isPasswordProtected: data.isPasswordProtected,
+			password: data.password,
+			messages: data.messages,
+			members: data.members,
+			admins: data.admins,
+			banned: data.banned,
+			muted: data.muted,
+		}
+
+	}
+	catch (error: any) {
+		console.log(error.message);
+	}
+	return channelFound;
+	// return null;	
+};
