@@ -1,6 +1,7 @@
 import React from 'react';
 import { json, redirect } from 'react-router-dom';
 import AuthForm from '../components/Auth/AuthForm';
+import { setTokenAuth } from '../typescript/Auth';
 
 const AuthenticationPage = () => {
 
@@ -40,9 +41,10 @@ export const action = async({ request }: { request: Request }) => {
 	const resData = await response.json();
 	const token = resData.accessToken;
 	const userId = resData.userId;
-	localStorage.setItem('token', token);
-	localStorage.setItem('userId', userId);
+	// localStorage.setItem('token', token);
+	// localStorage.setItem('userId', userId);
 	localStorage.setItem('isLogged', 'true');
+	setTokenAuth(token, userId);
 	window.location.reload();
 
 	return redirect('/');
