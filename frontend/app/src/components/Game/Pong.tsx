@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useContext } from 'react';
 import { PongInfo, BallInfo, PongProp } from './utils/types';
 import ModalBoard from './ModalBoard';
 import LiveBoard from './LiveBoard';
@@ -6,7 +6,7 @@ import PausedBoard from './PausedBoard';
 import classes from '../../sass/components/Game/Pong.module.scss';
 import PlayerSide from './PlayerSide';
 import OpponentSide from './OpponentSide';
-import { UserAPI } from '../../store/users-contexte';
+import { UserAPI, UserContext } from '../../store/users-contexte';
 
 // Modal's element
 const BEGINNER_LEVEL = 0;
@@ -74,6 +74,7 @@ export default function Pong(props: PongProp) {
 	const [playerY, setPlayerY] = useState((info.boardHeight - paddleHeight) / 2);
 	const [opponentY, setOpponentY] = useState((info.boardHeight - paddleHeight) / 2);
 	const [opponentName, setOpponentName] = useState('');
+	const [opponent, setOpponent] = useState<UserAPI>();
 	// obstacle info
 	const [obstacleY, setObstacleY] = useState(info.boardHeight);
 	const [obstacleDir, setObstacleDir] = useState(true);
@@ -90,6 +91,9 @@ export default function Pong(props: PongProp) {
 	// animation
 	const frameId = useRef(0);
 	const prevFrameId = useRef(0);
+	// user info
+	const userCtx = useContext(UserContext);
+
 
 	// emit a join request to the server
 	useEffect(() => {
@@ -131,6 +135,7 @@ export default function Pong(props: PongProp) {
 			const handleWelcome = ({ message, opponent, gameLevel, gameRoom }: { message: string, opponent: UserAPI, gameLevel: number, gameRoom: string }) => {
 				console.log({ message, opponent, gameRoom });
 				if (opponent) {
+					setOpponent(opponent);
 					setOpponentName(opponent.name);
 				}
 				if (level !== gameLevel) {
@@ -154,6 +159,7 @@ export default function Pong(props: PongProp) {
 		if (playerMode === DOUBLE_MODE) {
 			const handleOpponentJoin = ({ message, opponent }: { message: string, opponent: UserAPI}) => {
 				console.log({ message, opponent });
+				setOpponent(opponent);
 				setOpponentName(opponent.name);
 			};
 
@@ -673,8 +679,7 @@ export default function Pong(props: PongProp) {
 					playerName: props.userName,
 					gameRoom: gameRoom,
 				});
-			}
-			if (opponentScore > info.winnerScore) {
+			} else if (opponentScore > info.winnerScore) {
 				setWinner(OPPONENT_WIN);
 			}
 		}
@@ -871,7 +876,7 @@ export default function Pong(props: PongProp) {
 					onTool={(mode) => {setToolMode(mode)}}
 					onPlayerMode={(mode) => {setPlayerMode(mode)}}
 					onStartPage={() => startGame(winner === PLAYER_WIN ? PLAYER_SIDE : OPPONENT_SIDE)}
-					onRestart={() => {setOpponentName(''); setPlayerScore(0); setOpponentScore(0);}}
+					onRestart={() => {setGameOver(false); setOpponent(undefined); setOpponentName(''); setPlayerScore(0); setOpponentScore(0);}}
 					inviteMode={props.inviteMode}
 					isInvited={props.isInvited}
 					buttonText={gameOver ? "Play again" : "Start playing"}
@@ -885,7 +890,7 @@ export default function Pong(props: PongProp) {
 				/>
 			)}
 			<PlayerSide
-				playerName={props.userName}
+				player={userCtx.user}
 			/>
 			<div className={classes.container}>
 				<div className={classes.divider_line}></div>
@@ -898,6 +903,7 @@ export default function Pong(props: PongProp) {
 				</div>
 			</div>
 			<OpponentSide
+				opponent={opponent}
 				opponentName={opponentName}
 			/>
 		</>

@@ -67,8 +67,8 @@ export type CollisionInfo = {
 
 export type LiveBoardProps = {
 	isReady: boolean;
-	playerName: string;
-	opponentName: string;
+	playerName: string | undefined;
+	opponentName: string | undefined;
 	inviteMode: boolean;
 	spectatorMode: boolean;
 	closingText: string;
