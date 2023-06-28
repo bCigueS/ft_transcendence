@@ -6,10 +6,9 @@ import NoConvo from '../components/Chat/NoConvo';
 import io, { Socket } from 'socket.io-client';
 import { useLocation } from 'react-router-dom';
 import MessageList from '../components/Chat/MessageList';
-import { Channel, JoinChannelDTO, MessageAPI, createNewChannel, deleteChat, fetchChannelById } from '../components/Chat/chatUtils';
+import { Channel, JoinChannelDTO, MessageAPI, createNewChannel, deleteChat } from '../components/Chat/chatUtils';
 import ManageChats from '../components/Chat/ManageChats';
 import NoDiscussions from '../components/Chat/NoDiscussions';
-import React from 'react';
 
 type JoinResponse = {
 	status: number;
@@ -23,7 +22,6 @@ export default function Chat() {
 	const [ chats, setChats ] = useState<Channel[]>([]);
 	const [ socket, setSocket ] = useState<Socket>();
 	const [ messages, setMessages ] = useState<MessageAPI[] >([]);
-	const [ joinError, setJoinError ] = useState('');
 
 	const userCtx = useContext(UserContext);
 	const location = useLocation();
@@ -182,7 +180,7 @@ export default function Chat() {
 		// setChats(chats => chats.filter(chat => chat.id !== id));
 		socket?.emit('handleJoinGroup', { channelId: channelId, userId: userId });
 		
-	}, [socket, userCtx.user?.id])
+	}, [socket])
 
 	const handleJoinLink = useCallback(async (joinData: JoinChannelDTO): Promise<JoinResponse> => {
 
@@ -196,26 +194,22 @@ export default function Chat() {
 			});
 
 			if (response?.status === 404) {
-				setJoinError("It appears that this channels does not exist anymore or link has expired!");
-				console.log("It appears that this channels does not exist anymore or link has expired!");
+				// console.log("It appears that this channels does not exist anymore or link has expired!");
 				return { status: 404, error: "It appears that this channels does not exist anymore or link has expired!" };
 			}
 
 			if (response?.status === 400) {
-				setJoinError("It appears that you have already joined this group!");
-				console.log("It appears that you have already joined this group!");
+				// console.log("It appears that you have already joined this group!");
 				return { status: 404, error: "It appears that you have already joined this group!" };
 			}
 
 			if (response?.status === 403) {
-				setJoinError("You have been banned from this group.");
-				console.log("You have been banned from this group.");
+				// console.log("You have been banned from this group.");
 				return { status: 403, error: "You have been banned from this group." };
 			}
 
 			if (response?.status === 401) {
-				setJoinError("Wrong password provided");
-				console.log("Wrong password provided!");
+				// console.log("Wrong password provided!");
 				return { status: 401, error: "Wrong password provided" };
 			}
 
@@ -232,7 +226,7 @@ export default function Chat() {
 		  console.log(error);
 		}
 		return { status: 200 };
-		}, [selectedConversation, fetchChannels, chats, handleJoinGroup, userCtx.user?.id]);
+		}, [fetchChannels, chats, handleJoinGroup]);
 	
 	const joinListener = useCallback((channelId: string) => {
 		console.log('client joined channel ', channelId);
@@ -245,7 +239,7 @@ export default function Chat() {
 		if (selectedConversation && +channelId === selectedConversation.id)
 			setSelectedConversation(undefined);
 		fetchChannels();
-	}, [fetchChannels, socket, selectedConversation]);
+	}, [fetchChannels, selectedConversation]);
 	
 	const userJoinedListener = (userId: number) => {
 		console.log('user ', userId, ' joined the channel');
@@ -301,7 +295,7 @@ export default function Chat() {
 		// setChats(chats => chats.filter(chat => chat.id !== id));
 		socket?.emit('kickUser', { channelId: channelId, userId: kickedId });
 
-	}, [socket, userCtx.user?.id])
+	}, [socket])
 
 
 	const checkLastMessageDeleted = useCallback((message: MessageAPI) => {
