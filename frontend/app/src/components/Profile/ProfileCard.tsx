@@ -60,7 +60,12 @@ const ProfileCard: React.FC<{ user?: UserAPI | null}> = ( { user } ) => {
 	const handleClickGame = () => {
 		navigate('/pong', {
 			state: {
-				username: userCtx.user?.name
+				playerId: userCtx.user?.id,
+				opponentId: user?.id,
+				gameInvitation: true,
+				isInvited: false,
+				isSpectator: false,
+				gameRoom: undefined,
 			}
 		})
 	}
