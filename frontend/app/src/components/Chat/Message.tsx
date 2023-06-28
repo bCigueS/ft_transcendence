@@ -81,12 +81,24 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 
 	const displaySender = useCallback(async () => {
 		let sender = null;
-		if (message.senderId)
+		if (message.senderId === -1)
+		{
+			sender = {
+				id: -1,
+				name: 'bot',
+				email: 'bot@student.42.fr',
+				avatar: 'bot.jpg',
+				doubleAuth: false,
+				wins: 0,
+			}
+		}
+		else if (message.senderId)
 			sender = await userCtx.fetchUserById(message.senderId);
 		if (sender)
 		{
 			setSender(sender);
 		}
+
 	}, [message.senderId, userCtx])
 
 	const checkSenderBlocked = useCallback(() => {
