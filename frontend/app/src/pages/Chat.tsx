@@ -1,7 +1,7 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
 import ChatOverview from '../components/Chat/ChatOverview';
 import classes from '../sass/pages/Chat.module.scss';
-import { UserContext } from '../store/users-contexte';
+import { UserAPI, UserContext } from '../store/users-contexte';
 import NoConvo from '../components/Chat/NoConvo';
 import io, { Socket } from 'socket.io-client';
 import { useLocation } from 'react-router-dom';
@@ -234,16 +234,19 @@ export default function Chat() {
 		fetchChannels();
 	  }, [fetchChannels, socket]);
 
-	const kickListener = useCallback((channelId: string) => {
+	  const kickListener = useCallback(async (channelId: string) => {
 		console.log('client was kicked from channel ', channelId);
-		if (selectedConversation && +channelId === selectedConversation.id)
-			setSelectedConversation(undefined);
-		fetchChannels();
-	}, [fetchChannels, selectedConversation]);
+		if (selectedConversation && +channelId === selectedConversation.id) {
+		  setSelectedConversation(undefined);
+		}
+		setChats(prevChats => prevChats.filter(chat => chat.id !== +channelId));
+	  }, [selectedConversation]);
 	
-	const userJoinedListener = (userId: number) => {
-		console.log('user ', userId, ' joined the channel');
-	}
+	const userJoinedListener = useCallback((data : {
+			channelId: number, 
+			updatedMembers: UserAPI[]}) => {
+		fetchChannels();
+	}, [fetchChannels]);
 
 	useEffect(() => {
 		socket?.on('userJoined', userJoinedListener)
@@ -251,7 +254,7 @@ export default function Chat() {
 		return () => {
 		  socket?.off('userJoined');
 		}
-	  }, [socket]);
+	  }, [socket, userJoinedListener]);
 
 	useEffect(() => {
 		socket?.on("message", messageListener);
@@ -288,13 +291,7 @@ export default function Chat() {
 	}, [chats, socket]);
 
 	const handleCreateGroup = (channel: Channel) => {
-		console.log('on handleCreateGroup in Chat.tsx with channel: ', channel);
-		// socket?.emit()
 
-		// {
-
-		// }
-		
 		for (const member of channel.members)
 		{
 			const data = {
