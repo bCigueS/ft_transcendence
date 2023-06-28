@@ -164,14 +164,14 @@ export default function Chat() {
 	const handleJoinLink = useCallback(async (joinData: JoinChannelDTO): Promise<JoinResponse> => {
 
 		try {
-		  const response: Response = await fetch(`http://localhost:3000/channels/${joinData.channelId}/join`, {
+			const response: Response = await fetch(`http://localhost:3000/channels/${joinData.channelId}/join`, {
 			method: 'PATCH',
 			headers: {
-			  'Content-Type': 'application/json'
+				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify(joinData)
-		  });
-	
+			});
+
 
 			if (response?.status === 404) {
 				setJoinError("It appears that this channels does not exist anymore or link has expired!");
@@ -190,17 +190,17 @@ export default function Chat() {
 				console.log("You have been banned from this group.");
 				return { status: 403, error: "You have been banned from this group." };
 			}
-			
+
 			if (response?.status === 401) {
 				setJoinError("Wrong password provided");
 				console.log("Wrong password provided!");
 				return { status: 401, error: "Wrong password provided" };
 			}
-			
+
 			if (!response.ok) {
 				return { status: response.status, error: "An error occurred" };
 			}
-			
+
 			await fetchChannels();
 			setSelectedConversation(chats.find(chat => chat.id === joinData.channelId));
 			handleJoinGroup(joinData.channelId, joinData.userId);

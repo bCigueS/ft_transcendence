@@ -39,16 +39,16 @@ const GroupChat: React.FC<Props> = (props) => {
         everyone can:
             leave channel ✅
             access members profile ✅
-            invite them for a pong duel ✅
+            invite them for a pong duel 
         creator can:
             ban users 
             mute users
             kick users ✅
             set new administrators ✅
-            add a password to protect the channel 
+            add a password to protect the channel ✅
             delete chat ✅
         administrator can
-            kick, ban, mute other users, except the channel administrator
+            kick, ban, mute other users, except the channel administrator ✅
     */
 
     useEffect(() => {
@@ -138,17 +138,26 @@ const GroupChat: React.FC<Props> = (props) => {
             setTypeError('Provide a password to protect channel.')
             return ;
         }
-        setIsChatPasswordProtected(!isChatPasswordProtected);
-        console.log('about to cange channel setting to be protected with password: ', chatPassword);
 
-		const updatedChan: UpdateChannelDTO = {
-			isPasswordProtected: true,
-			password: chatPassword,
+		let updatedChan: UpdateChannelDTO;
+
+		if (isChatPasswordProtected)
+		{
+			updatedChan = {
+				isPasswordProtected: false,
+			}
 		}
-
+		else
+		{
+			updatedChan = {
+				isPasswordProtected: true,
+				password: chatPassword,
+			}
+			
+		}
+        console.log('about to cange channel protection setting : ', updatedChan);
 		await modifyChannel(props.chat.id, updatedChan);
-
-        // update chat settings in backend.
+        setIsChatPasswordProtected(!isChatPasswordProtected);
         setChatPassword('');
     }
 
@@ -190,6 +199,7 @@ const GroupChat: React.FC<Props> = (props) => {
     const handleAddBanned = (member: UserAPI) => {
         console.log('about to add member as banned: ', member);
 
+		handleKick(member);
         setBanned([...banned, member]);
         const chanData = {
             banned: [
@@ -198,7 +208,6 @@ const GroupChat: React.FC<Props> = (props) => {
                 }
             ]
         }
-        // modifyChannel(props.chat.id, chanData);
         banUser(props.chat.id, member.id);
     }
 
