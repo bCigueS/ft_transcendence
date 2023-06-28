@@ -41,7 +41,7 @@ const GroupChat: React.FC<Props> = (props) => {
             access members profile ✅
             invite them for a pong duel 
         creator can:
-            ban users 
+            ban users ✅
             mute users
             kick users ✅
             set new administrators ✅

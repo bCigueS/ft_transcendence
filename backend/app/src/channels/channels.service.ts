@@ -83,39 +83,40 @@ export class ChannelsService {
   async findOne(id: number) {
 
     const chan = await this.prisma.channel.findUnique({
-		where: { 
-			id
-			},
-			include: {
-        creator: true,
-			  messages: true,
-			  members: {
-				  select: {
-				    user: true
+		where: { id },
+		include: {
+        	creator: true,
+			messages: true,
+			members: {
+				select: {
+					user: true
 				},
-        }, 
-        admins: {
-          select: {
-            user: true
-          }
-        },
-        banned: {
-          select: {
-            user: true
-          }
-        },
-        muted: {
-          select: {
-            user: true
-          }
-        },
-			},
-		});
+        	}, 
+        	admins: {
+          		select: {
+    				user: true
+          		}
+        	},
+        	banned: {
+          		select: {
+            		user: true
+          		}
+        	},
+        	muted: {
+          		select: {
+            		user: true
+          		}
+        	},
+		},
+	});
 		
 	if (chan) {
 		return {
-		...chan,
-		members: chan.members.map(member => member.user)
+			...chan,
+			members: chan.members.map(member => member.user),
+			admins: chan.admins.map(admin => admin.user),
+			banned: chan.banned.map(ban => ban.user),
+			muted: chan.muted.map(mute => mute.user)
 		};
 	}
 		
