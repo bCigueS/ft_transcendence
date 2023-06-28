@@ -3,9 +3,14 @@ import Message from "./Message";
 import classes from './../../sass/pages/Chat.module.scss';
 import { useContext, useEffect, useRef, useState } from "react";
 import { UserContext } from "../../store/users-contexte";
-import { Channel, MessageAPI } from "./chatUtils";
+import { Channel, JoinChannelDTO, MessageAPI } from "./chatUtils";
 
-const MessageList: React.FC<{send: (content: string, channelId: number) => {}, chat: Channel, chats: Channel[], msgs: MessageAPI[], onDelete: (message: MessageAPI) => void, onJoin: (channelId: number) => void}> = ({ send, chat, chats, msgs, onDelete, onJoin }) => {
+type JoinResponse = {
+	status: number;
+	error?: string;
+  };
+
+const MessageList: React.FC<{send: (content: string, channelId: number) => {}, chat: Channel, chats: Channel[], msgs: MessageAPI[], onDelete: (message: MessageAPI) => void, onJoin: (joinData: JoinChannelDTO) => Promise<JoinResponse>}> = ({ send, chat, chats, msgs, onDelete, onJoin }) => {
 
     const [ messages, setMessages ] = useState<MessageAPI[]>(chat.messages);
 	const messageInput = useRef<HTMLInputElement>(null);
