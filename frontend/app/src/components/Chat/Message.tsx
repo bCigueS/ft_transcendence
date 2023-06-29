@@ -206,11 +206,11 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 						{message.content}
 					</div>
 				</div>
-		);
-	} else {
-		return (
-			<p>{message.content}</p>
 			);
+		} else {
+			return (
+				<p>{message.content}</p>
+				);
 		}
 	}
 
