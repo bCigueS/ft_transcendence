@@ -49,14 +49,23 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 
 		
 		if (!channel) {
+			const membersData = [
+				{
+					userId: senderId,
+				},
+				{
+					userId: receiverId,
+				}
+			]
+
 			const createChannelDto: CreateChannelDto = {
 				name: "private", 
-				members: [senderId, receiverId],
+				members: membersData,
 				creatorId: senderId
 			}
 			channel = await this.channelsService.create(createChannelDto);
-
-			this.handleJoin(receiverId, channel.id);
+			const receiverSocketId = this.onlineUsers[receiverId];
+			this.io.to(receiverSocketId).emit('join', channel.id.toString());
 		}
 
 		if (channel) {	
@@ -120,7 +129,8 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 		});
 
 		const receiver = channelMembers.find(member => member.userId !== message.senderId);
-		console.log('receive is: ', receiver.userId);
+
+		// console.log('receive is: ', receiver.userId);
 
 		if (receiver) {
 			const receiverSocketId = this.onlineUsers[receiver.userId];

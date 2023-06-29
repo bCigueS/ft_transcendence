@@ -104,11 +104,19 @@ export default function Pong(props: PongProp) {
 			console.log('emit a join random game request');
 			props.socket?.emit('joinRandom', { id: props.userId, lvl: level });
 		}
-		if (playerMode === DOUBLE_MODE && props.inviteMode) {
+		if (playerMode === DOUBLE_MODE && props.inviteMode && !props.isInvited) {
 			console.log('emit a join invitation game request');
 			props.socket?.emit('joinInvitation', { playerId: props.userId, opponentId: props.opponentId, lvl: level, gameRoom: props.gameRoom })
 		}
-	}, [props.socket, playerMode, level, props.gameRoom, props.userId, props.opponentId, props.inviteMode]);
+	}, [props.socket, playerMode, level, props.gameRoom, props.userId, props.opponentId, props.inviteMode, props.isInvited]);
+
+	// emit a join request to the server
+	useEffect(() => {
+		if (playerMode === DOUBLE_MODE && props.inviteMode && props.isInvited) {
+			console.log('emit a join invitation game request');
+			props.socket?.emit('joinInvitation', { playerId: props.userId, opponentId: props.opponentId, lvl: undefined, gameRoom: props.gameRoom })
+		}
+	}, [props.socket, playerMode, props.gameRoom, props.userId, props.opponentId, props.inviteMode, props.isInvited]);
 
 	// receive a signal to send an invitation
 	useEffect(() => {
@@ -703,6 +711,7 @@ export default function Pong(props: PongProp) {
 				prevFrameId.current = timestamp;
 
 				// console.log('isRunning', isRunning, 'gameOver', gameOver, 'isLive', isLive);
+				// console.log('winner is', winner);
 				
 				drawBoard(context);
 				if (isRunning && !isPaused && !myScreenTooSmall && !otherScreenTooSmall) {
