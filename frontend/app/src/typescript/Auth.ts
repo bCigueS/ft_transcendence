@@ -1,4 +1,4 @@
-import { ActionFunction, redirect } from "react-router-dom";
+import { redirect } from "react-router-dom";
 
 export const getTokenDuration = () => {
 	const storedExpirationData = sessionStorage.getItem('expiration');

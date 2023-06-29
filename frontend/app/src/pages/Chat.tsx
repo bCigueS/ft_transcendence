@@ -6,7 +6,7 @@ import NoConvo from '../components/Chat/NoConvo';
 import io, { Socket } from 'socket.io-client';
 import { useLocation, useNavigate } from 'react-router-dom';
 import MessageList from '../components/Chat/MessageList';
-import { Channel, JoinChannelDTO, MessageAPI, createNewChannel, deleteChat, fetchChannelById } from '../components/Chat/chatUtils';
+import { Channel, JoinChannelDTO, MessageAPI, createNewChannel, deleteChat } from '../components/Chat/chatUtils';
 import ManageChats from '../components/Chat/ManageChats';
 import NoDiscussions from '../components/Chat/NoDiscussions';
 

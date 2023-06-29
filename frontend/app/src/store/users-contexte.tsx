@@ -183,7 +183,7 @@ type Props = {
 			let userFound: UserAPI | null = null;
 
 			try {
-				const response = await fetch('http://localhost:3000/users/' + logInfo.userId, {
+				const response = await fetch('http://localhost:3000/users/' + userId, {
 					method: 'GET',
 					headers: {
 						'Authorization' : 'Bearer ' + logInfo.token,
@@ -208,7 +208,7 @@ type Props = {
 			}
 			return userFound;
 			
-		}, [logInfo.token, logInfo.userId])
+		}, [logInfo.token])
 
 		const fetchUserFriends = useCallback(async (id: number) => {
 			setError(null);
@@ -283,6 +283,7 @@ type Props = {
 		const isSelf = (otherUser: UserAPI) => {
 			return user?.id === otherUser.id;
 		}
+
 
 		const fetchAddFriend = async(otherUser: UserAPI) => {
 			setError(null);
