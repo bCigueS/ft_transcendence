@@ -70,7 +70,7 @@ const MessageList: React.FC<{send: (content: string, channelId: number) => {}, c
         }
 
 		let userIsMuted = false;
-		if (userCtx.user?.id)
+		if (userCtx.user?.id && chat.name !== "private")
 			userIsMuted = await isMemberMuted(chat.id, userCtx.user?.id);
 		if (!userIsMuted)
 		{
@@ -80,8 +80,8 @@ const MessageList: React.FC<{send: (content: string, channelId: number) => {}, c
     }
 
 	const reversedMessageList = () => {
-		console.log('messages: ', messages);
-		console.log('reversed messages: ', messages.slice().reverse());
+		// console.log('messages: ', messages);
+		// console.log('reversed messages: ', messages.slice().reverse());
 		return messages.slice().reverse();
 	}
 

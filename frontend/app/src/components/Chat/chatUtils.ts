@@ -243,6 +243,7 @@ export const fetchChannelById = async (channelId: number) => {
 
 	let channelFound: Channel | null = null;
 	
+    console.log('in fetchChannelById with id: ', channelId);
 	try {
 		const response = await fetch('http://localhost:3000/channels/' + channelId);
 
@@ -265,6 +266,8 @@ export const fetchChannelById = async (channelId: number) => {
 			banned: data.banned,
 			muted: data.muted,
 		}
+    	return channelFound;
+
 
 	} catch (error: any) {
 		console.error(error.message);

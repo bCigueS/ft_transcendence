@@ -6,7 +6,7 @@ import NoConvo from '../components/Chat/NoConvo';
 import io, { Socket } from 'socket.io-client';
 import { useLocation } from 'react-router-dom';
 import MessageList from '../components/Chat/MessageList';
-import { Channel, JoinChannelDTO, MessageAPI, createNewChannel, deleteChat } from '../components/Chat/chatUtils';
+import { Channel, JoinChannelDTO, MessageAPI, createNewChannel, deleteChat, fetchChannelById } from '../components/Chat/chatUtils';
 import ManageChats from '../components/Chat/ManageChats';
 import NoDiscussions from '../components/Chat/NoDiscussions';
 
@@ -26,7 +26,6 @@ export default function Chat() {
 	const userCtx = useContext(UserContext);
 	const location = useLocation();
 
-
 	const send = async (content: string, selectedConversationId: number) => {
 
 		const message = {
@@ -35,6 +34,7 @@ export default function Chat() {
 		  senderId: userCtx.user?.id
 		};
 
+		console.log('in send function with selected conversation id = ', selectedConversationId);
 		if (selectedConversationId === -1)
 		{
 			let senderId;
@@ -72,6 +72,10 @@ export default function Chat() {
 			}
 			onSaveConversation(newChan);
 		}
+
+		// const chan = await fetchChannelById(selectedConversationId);
+		// if (chan)
+		// 	onSaveConversation(chan);
 		socket?.emit("message", message);
 	}
 
