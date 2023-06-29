@@ -39,9 +39,14 @@ const MessageList: React.FC<{send: (content: string, channelId: number) => {}, c
 		const messageIndex = messages.findIndex(m => m.id === message.id);
 		if (messageIndex === messages.length - 1
 			|| messages[messageIndex + 1].senderId !== message.senderId)
+		
 			return (true);
-			return false;
+		return false;
+			// return false;
+		// return (true);
+
 	}
+
 			
 	const displayDay = (message: MessageAPI) => {
 		
@@ -74,28 +79,37 @@ const MessageList: React.FC<{send: (content: string, channelId: number) => {}, c
         messageInput.current!.value = '';
     }
 
+	const reversedMessageList = () => {
+		console.log('messages: ', messages);
+		console.log('reversed messages: ', messages.slice().reverse());
+		return messages.slice().reverse();
+	}
+
     return (
-        <div className={classes.message}>
-			{ messages && 
-				messages.map((message) => 
-					<Message key={message.id}
-							isMine={isMine(message)}
-							isLast={isLast(message)}
-							displayDay={displayDay(message)}
-							message={message}
-							messages={messages}
-							onDelete={onDelete}
-							chat={chat}
-							onJoin={onJoin}/>)
-			}
-			<form  onSubmit={handleSubmit}>
-				<input className={classes.sendInput} 
-						type="text"
-						ref={messageInput}
-						placeholder='type here...' />
-			<div ref={lastMessageRef}></div>
-			</form>
-		</div>
+        <>
+            <div className={classes.message}>
+                { messages && 
+                    reversedMessageList().map((message) => 
+                    <Message
+						key={message.id}
+						isMine={isMine(message)}
+						isLast={isLast(message)}
+						displayDay={displayDay(message)}
+						message={message}
+						messages={messages}
+						onDelete={onDelete}
+						chat={chat}
+						onJoin={onJoin}/>)
+                }
+            </div>
+            <form  onSubmit={handleSubmit} className={classes.input}>
+                <input className={classes.sendInput} 
+                        type="text"
+                        ref={messageInput}
+                        placeholder='type here...' />
+            <div ref={lastMessageRef}></div>
+            </form>
+        </>
     );
 }
 
