@@ -2,8 +2,15 @@ import { useState } from "react";
 import classes from './../../sass/components/Chat/ManageChats.module.scss';
 
 import CreateGroup from "./CreateGroup";
+import { Channel } from "./chatUtils";
 
-const ManageChats = () => {
+type Props = {
+    children?: React.ReactNode,
+    className?: string,
+	onCreate?: (channel: Channel) => void
+};
+
+const ManageChats: React.FC<Props> = (props) => {
 
     const [ showAddModal, setShowAddModal ] = useState(false);
 
@@ -24,6 +31,7 @@ const ManageChats = () => {
 				message="Select user for your group"
 				onCloseClick={handleUserConfirmation}
 				onDelete={handleUserConfirmation}
+				onCreate={props.onCreate}
             />
         }
             <div className={classes.container}>
