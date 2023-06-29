@@ -818,7 +818,7 @@ export default function Pong(props: PongProp) {
 
 	// loop to detect if a screen is too small to play the pong
 	useEffect(() => {
-		if (isRunning && !isPaused && !myScreenTooSmall && (screenWidth < info.boardWidth + (110 * 2) || screenHeight < info.boardHeight + (15 * 2))) {
+		if (isRunning && !isPaused && !myScreenTooSmall && (screenWidth < info.boardWidth || screenHeight < info.boardHeight)) {
 			setMyScreenTooSmall(true);
 
 			if (playerMode === DOUBLE_MODE) {
@@ -828,7 +828,7 @@ export default function Pong(props: PongProp) {
 				});
 			}
 		}
-		else if (isRunning && !isPaused && myScreenTooSmall && (screenWidth >= info.boardWidth + (110 * 2) && screenHeight >= info.boardHeight + (15 * 2))){
+		else if (isRunning && !isPaused && myScreenTooSmall && (screenWidth >= info.boardWidth && screenHeight >= info.boardHeight)){
 			setMyScreenTooSmall(false);
 
 			if (playerMode === DOUBLE_MODE) { 

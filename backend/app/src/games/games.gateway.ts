@@ -182,7 +182,9 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 				game = await this.prisma.game.findFirst({
 					where: { 
 						room: gameRoom,
-						state: GameState.WAITING,
+						NOT: {
+							state: GameState.FINISHED,
+						}
 					}
 				});
 				
