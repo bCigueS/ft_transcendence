@@ -344,6 +344,70 @@ export default function Chat() {
 		}
 	}, [socket, removeAdminListener]);
 
+	const addMutedListener = useCallback(
+		async (data: { channelId: number, userId: number }) => {
+		console.log('Channel that you belong to has a new muted: ', data.userId);
+
+		const newMuted = await userCtx.fetchUserById(data.userId);
+		setChats((prevChats: Channel[]) => {
+		return prevChats.map(chat => {
+			if (chat.id === data.channelId) {
+			const muted = chat.muted;
+			if (muted && newMuted !== undefined)
+			{
+				const updatedChat: Channel = {
+					...chat,
+					muted: [...muted, newMuted]
+				};
+				return updatedChat;
+			}
+			return chat;
+			} else {
+			return chat;
+			}
+		});
+		});
+	}, []);
+
+	useEffect(() => {
+		socket?.on("handleAddMuted", addMutedListener);
+		return () => {
+		  socket?.off("handleAddMuted", addMutedListener);
+		}
+	}, [socket, addMutedListener]);
+
+	const removeMutedListener = useCallback(
+	async (data: { channelId: number, userId: number }) => {
+		console.log('Channel that you belong to removed this admin: ', data.userId);
+
+		setChats((prevChats: Channel[]) => {
+		return prevChats.map(chat => {
+			if (chat.id === data.channelId) {
+			const muted = chat.muted;
+			if (muted) {
+				const updatedMuted = muted.filter(mute => mute.id !== data.userId);
+				const updatedChat: Channel = {
+				...chat,
+				muted: updatedMuted
+				};
+				return updatedChat;
+			}
+			return chat;
+			} else {
+			return chat;
+			}
+		});
+		});
+	}, []);
+	  
+
+	useEffect(() => {
+		socket?.on("handleRemoveMuted", removeMutedListener);
+		return () => {
+		  socket?.off("handleRemoveMuted", removeMutedListener);
+		}
+	}, [socket, removeMutedListener]);
+
 	useEffect(() => {
 		socket?.on('chatDeleted', (data) => {
 			if (chats.find(chat => chat.id === data.chatId)) {
@@ -391,6 +455,14 @@ export default function Chat() {
 	const handleRemoveAdmin = useCallback((channelId: number, userId: number) => {
 		// setChats(chats => chats.filter(chat => chat.id !== id));
 		socket?.emit('removeAdmin', { channelId: channelId, userId: userId });
+	}, [socket])
+
+	const handleAddMuted = useCallback((channelId: number, userId: number) => {
+		socket?.emit('addMuted', { channelId: channelId, userId: userId });
+	}, [socket])
+
+	const handleRemoveMuted = useCallback((channelId: number, userId: number) => {
+		socket?.emit('removeMuted', { channelId: channelId, userId: userId });
 	}, [socket])
 
 	const checkLastMessageDeleted = useCallback((message: MessageAPI) => {
@@ -531,6 +603,8 @@ export default function Chat() {
 						onKick={handleKick}
 						onAddAdmin={handleAddAdmin}
 						onRemoveAdmin={handleRemoveAdmin}
+						onAddMuted={handleAddMuted}
+						onRemoveMuted={handleRemoveMuted}
 						/>
 						))
 					:

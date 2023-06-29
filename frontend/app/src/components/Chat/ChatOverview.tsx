@@ -16,8 +16,9 @@ const ChatOverview: React.FC<{
 	onDeleteChat: (channelId: number) => void, 
 	onKick: (channelId: number, kickedId: number) => void, 
 	onAddAdmin: (channelId: number, userId: number) => void,
-	onRemoveAdmin: (channelId: number, userId: number) => void
-
+	onRemoveAdmin: (channelId: number, userId: number) => void,
+	onAddMuted: (channelId: number, userId: number) => void,
+	onRemoveMuted: (channelId: number, userId: number) => void
 	}> = ( props ) => {
 
 	const [sender, setSender] = useState<UserAPI | null>(null);
@@ -82,6 +83,8 @@ const ChatOverview: React.FC<{
 				onKick={props.onKick}
 				onAddAdmin={props.onAddAdmin}
 				onRemoveAdmin={props.onRemoveAdmin}
+				onAddMuted={props.onAddMuted}
+				onRemoveMuted={props.onRemoveMuted}
 			/>
 		}
 		<div className={`${classes.container} ${props.isSelected ? classes.selected : ''}`}>

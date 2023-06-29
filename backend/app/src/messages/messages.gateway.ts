@@ -204,6 +204,26 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 		this.io.in(data.channelId.toString()).emit('handleRemoveAdmin', data);
 	}
 
+	@SubscribeMessage('addMuted')
+	async handleAddMuted(@ConnectedSocket() client: Socket, 
+							@MessageBody() data: { 
+								channelId: number, 
+								userId: number
+							}): Promise<void> {
+		console.log('in message gateway, received add muted of user ', data.userId, 'from channel: ', data.channelId);
+		this.io.in(data.channelId.toString()).emit('handleAddMuted', data);
+	}
+
+	@SubscribeMessage('removeMuted')
+	async handleRemoveMuted(@ConnectedSocket() client: Socket, 
+							@MessageBody() data: { 
+								channelId: number, 
+								userId: number
+							}): Promise<void> {
+		console.log('in message gateway, received remove muted of user ', data.userId, 'from channel: ', data.channelId);
+		this.io.in(data.channelId.toString()).emit('handleRemoveMuted', data);
+	}
+
 	@SubscribeMessage('handleJoinGroup')
 	async handleJoinGroup(@ConnectedSocket() client: Socket, @MessageBody() data: { channelId: number, userId: number }): Promise<void> {
 		console.log('In message gateway, user ', data.userId, ' just joined:', data.channelId);
