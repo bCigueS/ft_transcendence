@@ -9,7 +9,7 @@ export default function PlayerSide({ player }: { player: UserAPI | null | undefi
 				<h1>{player?.name}</h1>
 			</div>
 			<div className={classes.icon}>
-				<ProfilIcon user={player} />
+				<ProfilIcon user={player} displayCo={false}/>
 			</div>
 		</div>
 	);

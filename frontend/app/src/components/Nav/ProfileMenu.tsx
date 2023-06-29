@@ -1,6 +1,8 @@
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { Form, Link } from "react-router-dom";
 import { UserContext } from "../../store/users-contexte";
+import DefaultImage from '../../assets/images/default.jpg';
+
 // import { UserContext } from "../../store/users-contexte";
 
 interface menuOption {
@@ -70,7 +72,7 @@ const ProfilMenu: React.FC = () => {
 			<div
 				className="picture"
 				onClick={() => setMenuOpen((prev) => !prev)}>
-					<img src={imageUrl} alt="" />
+					<img src={imageUrl ? imageUrl : DefaultImage} alt="" />
 			</div>
 			{ menuOpen && (
 				<div className="profile-menu__items">

@@ -16,19 +16,19 @@ const alex = await prisma.user.upsert({
       token: '72b9f17ef081978d02e84bc259591cfdbd28fbcdaf1ddab3524b1929f78c30b4achane',
     },
   })
-const simon = await prisma.user.upsert({
-    where: { name: 'Simon' },
-    update: {},
-    create: {
-      id42: 1,
-      email: 'sbeylot@student.42.fr',
-      name: 'Simon',
-      login: 'sbeylot',
-      password: 'lolilolilol',
-      avatar: 'sbeylot.jpg',
-      token: '72b9f17ef081978d02e84bc259591cfdbd28fbcdaf1ddab3524b1929f78c30b4sbeylot',
-    },
-  })
+// const simon = await prisma.user.upsert({
+//     where: { name: 'Simon' },
+//     update: {},
+//     create: {
+//       id42: 1,
+//       email: 'sbeylot@student.42.fr',
+//       name: 'Simon',
+//       login: 'sbeylot',
+//       password: 'lolilolilol',
+//       avatar: 'sbeylot.jpg',
+//       token: '72b9f17ef081978d02e84bc259591cfdbd28fbcdaf1ddab3524b1929f78c30b4sbeylot',
+//     },
+//   })
   const fany = await prisma.user.upsert({
     where: { name: 'Faaaany' },
     update: {},
@@ -71,78 +71,78 @@ const simon = await prisma.user.upsert({
 
 
 // Channel creation
-const channel1 = await prisma.channel.create({
-    data: {
-        name: 'private',
-        creatorId: simon.id,
-    },
-});
+// const channel1 = await prisma.channel.create({
+//     data: {
+//         name: 'private',
+//         creatorId: simon.id,
+//     },
+// });
 
-const channel2 = await prisma.channel.create({
-    data: {
-        name: 'private',
-        creatorId: simon.id,
-    },
-});
+// const channel2 = await prisma.channel.create({
+//     data: {
+//         name: 'private',
+//         creatorId: simon.id,
+//     },
+// });
 
 // ChannelMemberships creation
-await prisma.channelMembership.create({
-    data: {
-        user: {
-            connect: {
-                id: simon.id,
-            },
-        },
-        channel: {
-            connect: {
-                id: channel1.id,
-            },
-        },
-    },
-});
+// await prisma.channelMembership.create({
+//     data: {
+//         user: {
+//             connect: {
+//                 id: simon.id,
+//             },
+//         },
+//         channel: {
+//             connect: {
+//                 id: channel1.id,
+//             },
+//         },
+//     },
+// });
 
-await prisma.channelMembership.create({
-    data: {
-        user: {
-            connect: {
-                id: alex.id,
-            },
-        },
-        channel: {
-            connect: {
-                id: channel1.id,
-            },
-        },
-    },
-});
-await prisma.channelMembership.create({
-    data: {
-        user: {
-            connect: {
-                id: simon.id,
-            },
-        },
-        channel: {
-            connect: {
-                id: channel2.id,
-            },
-        },
-    },
-});
-await prisma.channelMembership.create({
-    data: {
-        user: {
-            connect: {
-                id: fany.id,
-            },
-        },
-        channel: {
-            connect: {
-                id: channel2.id,
-            },
-        },
-    },
-});
+// await prisma.channelMembership.create({
+//     data: {
+//         user: {
+//             connect: {
+//                 id: alex.id,
+//             },
+//         },
+//         channel: {
+//             connect: {
+//                 id: channel1.id,
+//             },
+//         },
+//     },
+// });
+// await prisma.channelMembership.create({
+//     data: {
+//         user: {
+//             connect: {
+//                 id: simon.id,
+//             },
+//         },
+//         channel: {
+//             connect: {
+//                 id: channel2.id,
+//             },
+//         },
+//     },
+// });
+// await prisma.channelMembership.create({
+//     data: {
+//         user: {
+//             connect: {
+//                 id: fany.id,
+//             },
+//         },
+//         channel: {
+//             connect: {
+//                 id: channel2.id,
+//             },
+//         },
+//     },
+// });
 // await prisma.channelMembership.create({
 //     data: {
 //         user: {

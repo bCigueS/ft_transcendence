@@ -10,7 +10,7 @@ export default function OpponentSide({ opponent, opponentName }: { opponent: Use
 			</div>
 			<div className={classes.icon}>
 				{(opponent || opponentName === 'Computer') && (
-					<ProfilIcon user={opponent} />
+					<ProfilIcon user={opponent} displayCo={false}/>
 				)}
 			</div>
 		</div>

@@ -71,6 +71,9 @@
 
 		.info {
 			text-align: right;
+			max-height: 3rem;
+			overflow: hidden;
+			text-align: center;
 		}
 	}
 
@@ -78,6 +81,16 @@
 		@include text-body();
 		color: $dark-space-blue;
 
+	}
+
+	.name {
+		max-height: 3rem;
+		overflow: hidden;
+		text-align: center;
+		h1 {
+			@include text-header-xs();
+			color: $dark-space-blue;
+		}
 	}
 
 	h1 {
