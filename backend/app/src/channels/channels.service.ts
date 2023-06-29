@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateChannelDto, CreateChannelMembershipDto } from './dto/create-channel.dto';
 import { UpdateChannelDto } from './dto/update-channel.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -56,7 +56,7 @@ export class ChannelsService {
     return await this.prisma.channel.findMany({
       include: {
         creator: true,
-        messages: true,
+        // messages: true,
         members: {
           select: {
             user: true
@@ -84,39 +84,40 @@ export class ChannelsService {
   async findOne(id: number) {
 
     const chan = await this.prisma.channel.findUnique({
-		where: { 
-			id
-			},
-			include: {
-        creator: true,
-			  messages: true,
-			  members: {
-				  select: {
-				    user: true
+		where: { id },
+		include: {
+        	creator: true,
+			messages: true,
+			members: {
+				select: {
+					user: true
 				},
-        }, 
-        admins: {
-          select: {
-            user: true
-          }
-        },
-        banned: {
-          select: {
-            user: true
-          }
-        },
-        muted: {
-          select: {
-            user: true
-          }
-        },
-			},
-		});
+        	}, 
+        	admins: {
+          		select: {
+    				user: true
+          		}
+        	},
+        	banned: {
+          		select: {
+            		user: true
+          		}
+        	},
+        	muted: {
+          		select: {
+            		user: true
+          		}
+        	},
+		},
+	});
 		
 	if (chan) {
 		return {
-		...chan,
-		members: chan.members.map(member => member.user)
+			...chan,
+			members: chan.members.map(member => member.user),
+			admins: chan.admins.map(admin => admin.user),
+			banned: chan.banned.map(ban => ban.user),
+			muted: chan.muted.map(mute => mute.user)
 		};
 	}
 		
@@ -138,6 +139,13 @@ export class ChannelsService {
         }
       });
     }
+
+	await this.prisma.channel.update({
+		where: { id },
+		data: {
+			isPasswordProtected: isPasswordProtected,
+		}
+	});
 
     if (isPasswordProtected)
     {
@@ -215,8 +223,9 @@ export class ChannelsService {
         });
       }
     }
-      
-    return channel;
+	
+    const updatedChannel = await this.findOne(id); 
+    return updatedChannel;
   }
 
   async remove(id: number) {
@@ -400,9 +409,16 @@ export class ChannelsService {
     if (!channel) 
       throw new NotFoundException('Channel not found');
 
-    await this.prisma.channelMembership.delete({
+	
+	const member = await this.prisma.channelMembership.findUnique({
         where: { channelId_userId: { channelId, userId } },
-    });
+	});
+
+	if (member) {
+		await this.prisma.channelMembership.delete({
+			where: { channelId_userId: { channelId, userId } },
+		});
+	}
 
     const admin = await this.prisma.adminMembership.findUnique({
         where: { channelId_userId: { channelId, userId } },
@@ -432,17 +448,36 @@ export class ChannelsService {
     const channel = await this.prisma.channel.findUnique({
         where: { id: channelId },
     });
+
     if (!channel)
     {
       console.log('did not find channel');
       throw new NotFoundException('Channel not found');
     }
 
+	const userId = JoinChannelDto.userId;
+
+	const isMember = await this.prisma.channelMembership.findUnique({
+        where: { channelId_userId: { channelId, userId } },
+	})
+
+	if (isMember) {
+	  throw new BadRequestException('You are already a member of this channel');
+	}  
+
+	const isBanned = await this.prisma.bannedUser.findUnique({
+        where: { channelId_userId: { channelId, userId } },
+    });
+
+	if (isBanned) {
+	  throw new ForbiddenException('You are banned from this channel');
+	}  
+
     if (channel.isPasswordProtected && (!JoinChannelDto.password || JoinChannelDto.password.length === 0))
-      throw new Error('You need to provide a password to enter that channel');
+      throw new UnauthorizedException('You need to provide a password to enter that channel');
 
     if (channel.isPasswordProtected && (channel.password !== JoinChannelDto.password))
-      throw new Error('Wrong password provided');
+      throw new UnauthorizedException('Wrong password provided');
     
     const memberDto: CreateChannelMembershipDto = { userId: JoinChannelDto.userId };
     await this.prisma.channelMembership.create({
@@ -453,8 +488,6 @@ export class ChannelsService {
     });
 
     return channel;
-
-
   }
 
 }

@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { Channel, banUser, kickUser, modifyChannel, removeAdmin, removeBan, removeMute } from "./chatUtils";
+import { Channel, UpdateChannelDTO, banUser, kickUser, modifyChannel, removeAdmin, removeBan, removeMute } from "./chatUtils";
 import classes from '../../sass/components/Chat/ChatInfo.module.scss';
 import AddToGroup from "./AddToGroup";
 import { UserAPI, UserContext } from "../../store/users-contexte";
@@ -31,24 +31,24 @@ const GroupChat: React.FC<Props> = (props) => {
     const [ displayAdmin, setDisplayAdmin ] = useState(false);
     const [ displayBanned, setDisplayBanned ] = useState(false);
     const [ displayMuted, setDisplayMuted ] = useState(false);
-    const [joinLink, setJoinLink] = useState('');
+    const [ joinLink, setJoinLink ] = useState('');
 	const userCtx = useContext(UserContext);
     
 
     /*
         everyone can:
-            leave channel
+            leave channel ✅
             access members profile ✅
-            invite them for a pong duel ✅
+            invite them for a pong duel 
         creator can:
-            ban users 
-            mute users
-            kick users
+            ban users ✅
+            mute users ✅
+            kick users ✅
             set new administrators ✅
-            add a password to protect the channel
-            delete chat
+            add a password to protect the channel ✅
+            delete chat ✅
         administrator can
-            kick, ban, mute other users, except the channel administrator
+            kick, ban, mute other users, except the channel administrator ✅
     */
 
     useEffect(() => {
@@ -65,7 +65,9 @@ const GroupChat: React.FC<Props> = (props) => {
             setBanned(props.chat.banned);
         if (props.chat.muted)
             setMuted(props.chat.muted);
-    }, [props.chat.admins, props.chat.banned, props.chat.muted, props.chat.creatorId, props.chat.members, props.chat.name, userCtx.user?.id]);
+		if (props.chat.isPasswordProtected)
+			setIsChatPasswordProtected(true);
+    }, [props.chat.admins, props.chat.banned, props.chat.muted, props.chat.creatorId, props.chat.members, props.chat.name, userCtx.user?.id, props.chat.isPasswordProtected]);
 
     const channelCreatedOn = () => {
         let date = new Date(props.chat.createdAt);
@@ -74,7 +76,20 @@ const GroupChat: React.FC<Props> = (props) => {
 
     const handleClickLeave = () => {
         console.log(userCtx.user?.name, ' left channel ', props.chat.name);
+        if (userCtx.user)
+            handleRemoveAdmin(userCtx.user);
+        if (userCtx.user)
+            handleRemoveBan(userCtx.user);
+        if (userCtx.user)
+            handleRemoveMute(userCtx.user);
+        const newMembers = members.filter(m => m.id !== userCtx.user?.id);
+        setMembers(newMembers);
+        if (userCtx.user)
+            kickUser(props.chat.id, userCtx.user?.id);
+        if (userCtx.user)
+            props.onKick(props.chat.id, userCtx.user.id);
     }
+
     const handleClickDelete = () => {
         setUserConfirm(true);
     }
@@ -116,16 +131,33 @@ const GroupChat: React.FC<Props> = (props) => {
         return false; 
     }
 
-    const handlePasswordProtect = (event: any) => {
+    const handlePasswordProtect = async(event: any) => {
 		event.preventDefault();
         if (!isChatPasswordProtected && (chatPassword.length === 0 || chatPassword.trim().length === 0))
         {
             setTypeError('Provide a password to protect channel.')
             return ;
         }
+
+		let updatedChan: UpdateChannelDTO;
+
+		if (isChatPasswordProtected)
+		{
+			updatedChan = {
+				isPasswordProtected: false,
+			}
+		}
+		else
+		{
+			updatedChan = {
+				isPasswordProtected: true,
+				password: chatPassword,
+			}
+			
+		}
+        console.log('about to cange channel protection setting : ', updatedChan);
+		await modifyChannel(props.chat.id, updatedChan);
         setIsChatPasswordProtected(!isChatPasswordProtected);
-        console.log('about to cange channel setting to be protected with password: ', chatPassword);
-        // update chat settings in backend.
         setChatPassword('');
     }
 
@@ -167,15 +199,8 @@ const GroupChat: React.FC<Props> = (props) => {
     const handleAddBanned = (member: UserAPI) => {
         console.log('about to add member as banned: ', member);
 
+		handleKick(member);
         setBanned([...banned, member]);
-        const chanData = {
-            banned: [
-                {
-                    userId: member.id
-                }
-            ]
-        }
-        // modifyChannel(props.chat.id, chanData);
         banUser(props.chat.id, member.id);
     }
 
@@ -221,8 +246,8 @@ const GroupChat: React.FC<Props> = (props) => {
         handleRemoveMute(member);
         const newMembers = members.filter(m => m.id !== member.id);
         setMembers(newMembers);
-        props.onKick(props.chat.id, member.id);
         kickUser(props.chat.id, member.id);
+        props.onKick(props.chat.id, member.id);
     }
 
     useEffect(() => {
@@ -364,26 +389,31 @@ const GroupChat: React.FC<Props> = (props) => {
                     <p className={classes.error}>There are no muted users in this group.</p>
                 }
                     </div>
-                    <div className={classes.passwordLabel}>
-                    <h2>
-                    Password protection
-                    </h2>
-                    <i 
-                        title={isChatPasswordProtected ? "block" : "unblock"}
-                        onClick={handlePasswordProtect}
-                        className={isChatPasswordProtected ? 'fa-solid fa-lock' : 'fa-solid fa-lock-open'}>
-                    </i>
-                </div>
-                <div>
-                        Invite your friends
-                        <p>Join link: {joinLink}</p>
+                    <div className={classes.invite}>
+                        <h2>
+                            Invite your friends
+                        </h2>
+                        {/* <p>Join link: {joinLink}</p> */}
                         <button onClick={copyToClipboard}>Copy Join Link</button>
-                </div>
-                {
-                    !isChatPasswordProtected && 
-                    <div className={classes.label}>
-                        <form onSubmit={handlePasswordProtect}>
-                        <input 
+                    </div>
+                    {
+                        isCreator &&
+                        <div>
+                            <div className={classes.passwordLabel}>
+                                <h2>
+                                Password protection
+                                </h2>
+                                <i 
+                                    title={isChatPasswordProtected ? "block" : "unblock"}
+                                    onClick={handlePasswordProtect}
+                                    className={isChatPasswordProtected ? 'fa-solid fa-lock' : 'fa-solid fa-lock-open'}>
+                                </i>
+                            </div>
+                        {
+                            !isChatPasswordProtected && 
+                            <div className={classes.label}>
+                            <form onSubmit={handlePasswordProtect}>
+                            <input 
                             type="password" 
                             id='name' 
                             name='name'
@@ -391,30 +421,36 @@ const GroupChat: React.FC<Props> = (props) => {
                             onChange={passwordHandler}
                             maxLength={12}/>
                             <br></br>
-                        </form>
-                        { 
-                            typeError &&
-                            <p className={classes.error}>{typeError}</p>
+                            </form>
+                            { 
+                                typeError &&
+                                <p className={classes.error}>{typeError}</p>
+                            }
+                            </div>
                         }
-                    </div>
+                </div>
                 }
-                {
-                    <button className={classes.deleteButton} onClick={handleClickLeave}>Leave {chatName}</button>
-                }
-                {
-                    userConfirm &&
-                    <div className={classes.clickDelete}>
-                    <h3>Are you sure you wish to leave this chat?</h3>
-                    <div className={classes.actions}>
-                    <button className={classes.cancelButton} onClick={handleCancelDelete}>Cancel</button>
-                    <button className={classes.button} onClick={handleConfirmDelete}>Confirm</button>
-                    </div>
-                    </div>
-                }
+                <div className={classes.actions}>
                 {
                     isCreator && 
                     <button className={classes.deleteButton} onClick={handleClickDelete}>Delete {chatName}</button>
                 }
+                {
+                    <button className={classes.leaveButton} onClick={handleClickLeave}>Leave {chatName}</button>
+                }
+                </div>
+                <div className={classes.actions}>
+                    {
+                        userConfirm &&
+                        <div className={classes.clickDelete}>
+                            <h3>Are you sure you wish to delete this chat?</h3>
+                            <div className={classes.actions}>
+                                <button className={classes.cancelButton} onClick={handleCancelDelete}>Cancel</button>
+                                <button className={classes.button} onClick={handleConfirmDelete}>Confirm</button>
+                            </div>
+                        </div>
+                    }
+                </div>
         </div>
         </div>
     );
