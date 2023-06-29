@@ -59,9 +59,9 @@ const Overlay: React.FC<Props> = (props) => {
 		const newChan = await createNewChannel(chanData);
 		console.log('newChan created: ', newChan);
 		// window.location.reload();
-		// props.onCloseClick();
 		if (props.onCreate)
 			props.onCreate(newChan);
+		props.onCloseClick();
     }
 
     const nameHandler = (event: any) => {
