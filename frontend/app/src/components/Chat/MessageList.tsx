@@ -106,7 +106,8 @@ const MessageList: React.FC<{send: (content: string, channelId: number) => {}, c
                 <input className={classes.sendInput} 
                         type="text"
                         ref={messageInput}
-                        placeholder='type here...' />
+                        placeholder='type here...'
+						maxLength={150} />
             <div ref={lastMessageRef}></div>
             </form>
         </>
