@@ -11,8 +11,9 @@ type Props = {
 	onInfoClick: () => void,
     onDelete: () => void,
     onRemove: (member: UserAPI) => void,
-    onAddAdmin: (member: UserAPI) => void,
-    onKick: (channelId: number, kickedId: number) => void
+    onKick: (channelId: number, kickedId: number) => void,
+    onAddAdmin: (channelId: number, userId: number) => void,
+    onRemoveAdmin: (channelId: number, userId: number) => void
 };
 
 const GroupChat: React.FC<Props> = (props) => {
@@ -194,6 +195,7 @@ const GroupChat: React.FC<Props> = (props) => {
             ]
         }
         modifyChannel(props.chat.id, chanData);
+        props.onAddAdmin(props.chat.id, member.id);
     }
 
     const handleAddBanned = (member: UserAPI) => {
@@ -223,6 +225,7 @@ const GroupChat: React.FC<Props> = (props) => {
         const newAdmins = admins.filter(a => a.id !== admin.id);
         setAdmins(newAdmins);
         removeAdmin(props.chat.id, admin.id);
+        props.onRemoveAdmin(props.chat.id, admin.id);
     }
 
     const handleRemoveBan = (ban: UserAPI) => {
