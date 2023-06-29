@@ -1,19 +1,27 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User as UserEntity } from '.prisma/client';
 import { Friendship } from '@prisma/client';
 import { toSafeUser } from './user.utils';
+import * as AuthUtils from '../auth/auth.utils';
+
+import * as speakeasy from 'speakeasy';
+import * as QRCode from 'qrcode';
+import { Response } from 'express'; // Add this import
+import { CustomRequest } from './users.controller';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class UsersService {
+	httpService: any;
   constructor(private prisma: PrismaService) { }
 
   async create(data: CreateUserDto) {
 
     const newUser = await this.prisma.user.create({ data });
-    return toSafeUser(newUser);
+    return newUser;
   }
 
   async findAll() {
@@ -35,8 +43,7 @@ export class UsersService {
 
     if (!user)
       return null;
-
-    return toSafeUser(user);
+    return user;
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
@@ -163,10 +170,21 @@ export class UsersService {
         followingId: blockId,
       },
     });
+
+	const existingBlock = await this.prisma.block.findFirst({
+		where: {
+			MyId: id,
+			blockedId: blockId,
+		},
+	});
   
     if (existingFriendship) {
       this.removeFriend(id, blockId);
     }
+
+	if (existingBlock) {
+		throw new BadRequestException('User is already block');
+	}
 
     const block = await this.prisma.block.create({
       data: {
@@ -249,11 +267,11 @@ export class UsersService {
 	const haters = await this.showHaters(id);
 
     const blockedUserIds = blocked.map((block) => block.id);
-	const hatersUserIds = haters
+	const hatersUserIds = haters.map((hater) => hater.id);
 
     const community = await this.prisma.user.findMany({
       where: {
-        id: { notIn: blockedUserIds.concat(id) },
+        id: { notIn: [...blockedUserIds, ...hatersUserIds, id] },
       },
     });
     
@@ -275,4 +293,138 @@ export class UsersService {
     });
   }
 
+  async updateWinsMatch(id: number, winsMatch: number) {
+	const user = await this.prisma.user.findUnique({ where: { id: id } });
+
+	if (!user) {
+		throw new NotFoundException(`User with ${id} does not exist.`);
+	}
+
+	return this.prisma.user.update({
+		where: { id: id },
+		data: { wins: winsMatch },
+	});
+  }
+
+//   async updatePlayerStatus(id: number) {
+// 	const user = await this.prisma.user.findUnique({ where: { id: id } });
+
+// 	if (!user) {
+// 		throw new NotFoundException(`User with id ${id} does not exist.`);
+// 	}
+
+// 	return this.prisma.user.update({
+// 		where: { id: id },
+// 		data: { state}
+// 	})
+//   }
+
+  async seeUserGames(id: number) {
+    const games = await this.prisma.game.findMany({
+        where: {
+			players: {
+				some: {
+				  userId: id
+				}
+			}
+        },
+        include: {
+		  players: true,
+        },
+    });
+    
+    return games;
+}
+
+async logout(req: CustomRequest)
+{
+	const userId = parseInt(req.userId);
+	const user = await this.prisma.user.findUnique({ where: { id: userId } });
+	if (!user)
+		throw new NotFoundException(`User with ${req.userId} does not exist.`);
+	await this.prisma.user.update({
+		where: { id: userId },
+		data: { 
+			token: "",
+			status: 0
+		},
+	});
+    return {
+      accessToken: '',
+    };
+  }
+
+  async getWins(id: number) {
+    const user = await this.prisma.user.findUnique({
+        where: { id : id },
+    });
+
+	if (!user) {
+		throw new NotFoundException(`User with ${id} does not exist.`);
+	}
+    
+    return user.wins;
+  }
+
+  async  getTwoFactor(req: CustomRequest)
+  {
+	const userId = parseInt(req.userId);
+	const user = await this.prisma.user.findUnique({ where: { id: userId } });
+	if (!user)
+		throw new NotFoundException(`User with ${req.userId} does not exist.`);
+	
+	const secretCode = speakeasy.generateSecret({
+		name: `loliloliPong (${user.login})`,
+	});
+
+	await this.prisma.user.update({
+		where: { id: userId },
+		data: { secert: secretCode.base32 },
+	});
+
+	return {
+		otpauthUrl: secretCode.otpauth_url,
+		base32: secretCode.base32,
+	};
+  }
+
+  async verifyTwoFactor(req: CustomRequest, code: string)
+  {
+    const userId = parseInt(req.userId);
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user)
+    	throw new NotFoundException(`User with ${req.userId} does not exist.`);
+	const verified = AuthUtils.verifyTwoFactor(code, user.secert);
+	if (verified)
+	{
+		await this.prisma.user.update({
+			where: { id: userId },
+			data: { doubleAuth: true },
+		});
+	}
+    return {
+      	result: verified,
+    };
+  }
+
+  async disableTwoFactor(req: CustomRequest)
+  {
+    const userId = parseInt(req.userId);
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user)
+    	throw new NotFoundException(`User with ${req.userId} does not exist.`);
+    await this.prisma.user.update({
+		where: { id: userId },
+		data: { doubleAuth: false },
+    });
+    return {
+      	result: true,
+    };
+  }
+
+  public async pipeQrCodeStream(stream: Response, otpauthUrl: string)
+  {
+    return QRCode.toFileStream(stream, otpauthUrl);
+  }
+  
 }

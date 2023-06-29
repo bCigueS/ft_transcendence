@@ -1,7 +1,6 @@
-import React, { FormEvent, useContext, useEffect, useState } from 'react';
+import React, { FormEvent, useState } from 'react';
 import classes from '../../sass/components/Profile/ProfilPatch.module.scss';
-import ProfilIcon from './ProfilIcon';
-import { UserContext } from '../../store/users-contexte';
+import DefaultPreview from '../../assets/images/default.jpg';
 
 interface PatchUser {
 	onPatchUser: (formData: FormData) => Promise<void | Response>;
@@ -9,25 +8,16 @@ interface PatchUser {
 
 const PatchForm: React.FC<PatchUser> = ({ onPatchUser }) => {
 
-	const userCtx = useContext(UserContext);
 	const [ enteredText, setEnteredText ] = useState<string>(''); 
-	const [ isChecked, setIsChecked ] = useState<boolean>(false);
 	const [ placeholder, setPlaceholder ] = useState<string>('');
 	const [ typeError, setTypeError ] = useState<string>('');
+	const [ filePreview, setFilePreview ] = useState<string | null>('');
 
-	useEffect(() => {
-		if (userCtx.user?.doubleAuth === true)
-			setIsChecked(true);
-	}, []);
 
-	const doubleAuthHandler = () => {
-		setIsChecked(!isChecked);
-	}
 
 	const handleSubmit = async(event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		const formData = new FormData(event.currentTarget);
-		formData.append('auth', String(isChecked));
 		const response = await onPatchUser(formData);
 		setEnteredText('');
 		
@@ -50,6 +40,19 @@ const PatchForm: React.FC<PatchUser> = ({ onPatchUser }) => {
 	const nameHandler = (event: any) => {
 		setEnteredText(event.target.value);
 	}
+	
+	const imageChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
+		const file = event.target.files?.[0];
+		if (file) {
+			const reader = new FileReader();
+			reader.onload = () => {
+				setFilePreview(reader.result as string);
+			};
+			reader.readAsDataURL(file);
+		} else {
+			setFilePreview(null);
+		}
+	}
 
 	return (
 		<form method='patch' className={classes.container} onSubmit={handleSubmit}>
@@ -65,16 +68,22 @@ const PatchForm: React.FC<PatchUser> = ({ onPatchUser }) => {
 					placeholder={placeholder} 
 					maxLength={12}/>
 			</div>
-			<div className={classes.label}>
-				<h2>Double Authentication</h2>
-				<label htmlFor="switch" className={classes.switch}>
-					<input type="checkbox" id='switch' name='auth' checked={isChecked} onChange={doubleAuthHandler} value={isChecked ? 'true' : 'false'}/>
-					<span className={classes.slider}></span>
-				</label>
-			</div>
 			<div className={classes.label} style={{flexDirection: 'column', gap:'1.5rem', justifyContent:'flex-start'}}>
 				<div style={{ width: '100%', display: 'flex' , flexDirection: "row", justifyContent: 'space-between', alignItems: 'center'}}>
-					<ProfilIcon user={userCtx.user} displayCo={false} />
+					{/* <ProfilIcon user={userCtx.user} displayCo={false} /> */}
+					<div className={classes.picture}>
+						{
+							filePreview ? 
+							<img 
+							src={filePreview} 
+							alt=""
+							/> 
+							: <img 
+							src={DefaultPreview} 
+							alt=""
+							/>
+						}
+					</div>
 					<label htmlFor="avatar" className={classes.fileLabel}>Change your avatar</label>
 					<input 
 						type="file" 
@@ -82,6 +91,7 @@ const PatchForm: React.FC<PatchUser> = ({ onPatchUser }) => {
 						name='file'
 						accept=".png, .jpg, .jpeg"
 						className={classes.file}
+						onChange={imageChangeHandler}
 					/>
 				</div>
 				{

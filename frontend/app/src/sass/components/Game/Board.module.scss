@@ -1,0 +1,133 @@
+@import '../../abstracts/mixin.scss';
+@import '../../abstracts/variables.scss';
+
+.container {
+	display: flex;
+	grid-row-start: 1;
+	grid-column-start: 1;
+	grid-column-end: 4;
+	z-index: 3;
+	width: 100%;
+	height: 100%;
+	justify-content: center;
+	align-items: center;
+	background-color: rgba(0, 0, 0, 0.4);
+
+	
+	.content {
+		@include flexBox();
+		@include text-body();
+		max-width: 55%;
+		max-height: 100%;
+		padding: 4.5%;
+		gap: 1.8rem;
+		background-color: $almost-white;
+		border: 0.3rem solid black;
+
+		.subcontent {
+			@include flexBox($justify: center);
+			width: 90%;
+			background-color: $almost-white;
+			// border: 0.2rem solid black;
+			// padding: 3rem 2rem;
+
+			position: relative;
+			transform-style: preserve-3d;
+			animation: 0.5s ease-in-out infinite changePadding;
+			
+			&::before {
+				content: '';
+				position: absolute;
+				height: 100%;
+				width: 100%;
+				// border: 0.1rem solid $light-vermillon;
+				// background: repeating-linear-gradient(-45deg, $light-vermillon, $light-vermillon 3px, white 2px, white 6px);
+				transform: translateZ(-0.1rem);
+				z-index: -1;
+				bottom: 1rem;
+				left: 1rem;
+				// animation: movingBefore 3s ease infinite;
+				// transition: all 0.3s;
+			}
+	
+
+			h2 {
+				&::before {
+					position: absolute;
+					content: '';
+					background-color: $almost-white;
+					transform: translateZ(-0.1rem);
+					z-index: 19;
+
+					animation-name: movingBefore;
+					animation-duration: 4.5s;
+					animation-timing-function: ease;
+					animation-fill-mode: forwards;
+				}
+			}
+
+			i {
+				z-index: 20;
+				position: absolute;
+				color: $light-vermillon;
+				font-size: 3.5rem;
+				// top: 0;
+				right: 0;
+				animation-name: movingPaddle;
+				animation-duration: 2s;
+				animation-timing-function: ease;
+				animation-fill-mode: forwards;
+			}
+		}
+	}
+
+	// @keyframes movingBefore {
+	// 	0% {
+	// 		transform: translateX(0);
+	// 	}
+	
+	// 	70% {
+	// 		width: 0rem;
+	// 	}
+	// 	100% {
+	// 		width: 0rem;
+	// 		transform: translateX(-10rem);
+	
+	// 	}
+	// }
+	
+	// @keyframes movingPaddle {
+	// 	0% {
+	// 		transform: translateX(0);
+	// 	}
+	
+	// 	100% {
+	// 		transform: translateX(-20rem);
+	
+	// 	}
+	// }
+	
+	// @keyframes changePadding {
+	// 	0% {
+	// 		padding: 0rem;
+	// 	}
+	
+	// 	100% {
+	// 		padding: 30rem;
+	// 	}
+	// }
+
+	.option {
+		@include flexBox($direction: row);
+		gap: 1rem;
+	}
+
+	button {
+		@include modalButtonMixin($fontSize: 1.5rem);
+	}
+
+	.button-cancel {
+		@include modalButtonMixin($fontSize: 1.5rem, $color: $gunmetal-dark)
+	}
+}
+

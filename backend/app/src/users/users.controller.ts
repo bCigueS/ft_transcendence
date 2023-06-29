@@ -1,19 +1,28 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, NotFoundException, UseGuards, UseInterceptors, UploadedFile, Res, ParseFilePipeBuilder, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, NotFoundException, UseGuards, UseInterceptors, UploadedFile, Res, ParseFilePipeBuilder, HttpStatus, Req } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { UserEntity } from './entities/user.entity';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+// import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AddFriendDto } from './dto/add-friend.dto';
 import { BlockingDto } from './dto/blocking.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
 import { Express } from 'express'
 import { toSafeUser } from './user.utils';
 import { Observable } from 'rxjs';
 import { fileURLToPath } from 'url';
+import { unlink } from 'fs';
+import { GameEntity } from 'src/games/entities/game.entity';
+import { constants } from 'buffer';
+
+export interface CustomRequest extends Request
+{
+	userId: string;
+	token: string;
+}
+import { isNumber } from 'class-validator';
 
 @Controller('users') @ApiTags('users')
 export class UsersController {
@@ -202,7 +211,7 @@ export class UsersController {
 		@UploadedFile(
 			new ParseFilePipeBuilder()
 				.addFileTypeValidator({
-					fileType: /(jpg|jpeg|png|gif)$/,
+					fileType: /(jpg|jpeg|png)$/,
 				})
 				.addMaxSizeValidator({
 					maxSize: 1000000
@@ -211,8 +220,20 @@ export class UsersController {
 					errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
 			}),
 		) file: Express.Multer.File) {
-		
 		console.log("This is the file: ", file);
+
+		const validExtension = ['jpg', 'png', 'jpeg'];
+		const fileExtension = file.originalname.split('.').pop().toLowerCase();
+
+		console.log(validExtension);
+		console.log(fileExtension);
+
+		if (!validExtension.includes(fileExtension)) {
+			await unlink(file.path, (err) => {
+				if (err) throw err;
+				console.error(`${file.filename} delete`)
+			});
+		}
 
 		// const avatarPath = './uploads/' + file.filename;
 		const avatarPath = file.filename;
@@ -230,5 +251,68 @@ export class UsersController {
 		const user = await this.usersService.findOne(id);
 		return res.sendFile(user.avatar, { root: './uploads'});
 	}
-	
+
+	// @Get(':id/games')
+    // @ApiOkResponse({ type: GameEntity, isArray: true })
+    // async seeUserGames(
+    //     @Param('id', ParseIntPipe) id: number) {
+
+    //     const games = await this.usersService.seeUserGames(id);
+    //     if (!games)
+    //         throw new NotFoundException(`User with ${id} does not have any game.`);
+        
+    //     return games;
+    // }
+
+	@Get(':id/getMatches')
+    @ApiOkResponse({ type: isNumber })
+    async getMatches(
+        @Param('id', ParseIntPipe) id: number) {
+
+		const games = await this.usersService.seeUserGames(id);
+		if (!games || games.length === 0)
+			throw new NotFoundException(`User with ID ${id} does not have any games.`);
+		
+		const totalMatches = games.length;
+		return totalMatches;
+    }
+
+	@Get(':id/getWins')
+    @ApiOkResponse({ type: isNumber })
+    async getWins(
+        @Param('id', ParseIntPipe) id: number) {
+
+        const wins = await this.usersService.getWins(id);
+        
+        return wins;
+    }
+
+	@Post('logout')
+	@ApiOkResponse({})
+	async logout(@Body() body: any, @Req() req: CustomRequest, @Res() res: any): Promise<any> {
+	  return this.usersService.logout(req);
+	}
+  
+	@Post('2fa/add')
+	@ApiOkResponse({})
+	async add2fa(@Body() body: any, @Req() req: CustomRequest, @Res() res: any): Promise<any>
+	{
+		const { otpauthUrl } = await this.usersService.getTwoFactor(req);
+		res.setHeader('Content-Type', 'image/png');
+		return this.usersService.pipeQrCodeStream(res, otpauthUrl);
+	}
+  
+	@Post('2fa/verify')
+	@ApiOkResponse({})
+	async verify2fa(@Body() { token }: any,  @Req() req: CustomRequest): Promise<any> {
+	  return await this.usersService.verifyTwoFactor(req, token);
+	}
+
+	@Post('2fa/disable')
+	@ApiOkResponse({ type: UserEntity })
+	async disable2fa(@Body() { token }: any,  @Req() req: CustomRequest): Promise<any> {
+	  return await this.usersService.disableTwoFactor(req);
+	}
 }
+
+
