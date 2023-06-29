@@ -66,14 +66,6 @@ onDeleteChat: (channelId: number) => void, onKick: (channelId: number, kickedId:
 
 	return (
 		<Fragment>
-		{/* {showModal &&
-			<Modal
-				title="About to delete chat"
-				message="Do you really wish to delete this chat?"
-				onCloseClick={handleUserConfirmation}
-				onDelete={handleDeleteChat}
-			/>
-		} */}
 		{showModal &&
 			<ChatInfo
 				chat={props.chat}
