@@ -24,61 +24,61 @@
 		background-color: $almost-white;
 		border: 0.3rem solid black;
 
-		.subcontent {
-			@include flexBox($justify: center);
-			width: 90%;
-			background-color: $almost-white;
-			// border: 0.2rem solid black;
-			// padding: 3rem 2rem;
+		// .subcontent {
+		// 	@include flexBox($justify: center);
+		// 	width: 90%;
+		// 	background-color: $almost-white;
+		// 	// border: 0.2rem solid black;
+		// 	// padding: 3rem 2rem;
 
-			position: relative;
-			transform-style: preserve-3d;
-			animation: 0.5s ease-in-out infinite changePadding;
+		// 	position: relative;
+		// 	transform-style: preserve-3d;
+		// 	animation: 0.5s ease-in-out infinite changePadding;
 			
-			&::before {
-				content: '';
-				position: absolute;
-				height: 100%;
-				width: 100%;
-				// border: 0.1rem solid $light-vermillon;
-				// background: repeating-linear-gradient(-45deg, $light-vermillon, $light-vermillon 3px, white 2px, white 6px);
-				transform: translateZ(-0.1rem);
-				z-index: -1;
-				bottom: 1rem;
-				left: 1rem;
-				// animation: movingBefore 3s ease infinite;
-				// transition: all 0.3s;
-			}
+		// 	&::before {
+		// 		content: '';
+		// 		position: absolute;
+		// 		height: 100%;
+		// 		width: 100%;
+		// 		// border: 0.1rem solid $light-vermillon;
+		// 		// background: repeating-linear-gradient(-45deg, $light-vermillon, $light-vermillon 3px, white 2px, white 6px);
+		// 		transform: translateZ(-0.1rem);
+		// 		z-index: -1;
+		// 		bottom: 1rem;
+		// 		left: 1rem;
+		// 		// animation: movingBefore 3s ease infinite;
+		// 		// transition: all 0.3s;
+		// 	}
 	
 
-			h2 {
-				&::before {
-					position: absolute;
-					content: '';
-					background-color: $almost-white;
-					transform: translateZ(-0.1rem);
-					z-index: 19;
+		// 	h2 {
+		// 		&::before {
+		// 			position: absolute;
+		// 			content: '';
+		// 			background-color: $almost-white;
+		// 			transform: translateZ(-0.1rem);
+		// 			z-index: 19;
 
-					animation-name: movingBefore;
-					animation-duration: 4.5s;
-					animation-timing-function: ease;
-					animation-fill-mode: forwards;
-				}
-			}
+		// 			animation-name: movingBefore;
+		// 			animation-duration: 4.5s;
+		// 			animation-timing-function: ease;
+		// 			animation-fill-mode: forwards;
+		// 		}
+		// 	}
 
-			i {
-				z-index: 20;
-				position: absolute;
-				color: $light-vermillon;
-				font-size: 3.5rem;
-				// top: 0;
-				right: 0;
-				animation-name: movingPaddle;
-				animation-duration: 2s;
-				animation-timing-function: ease;
-				animation-fill-mode: forwards;
-			}
-		}
+		// 	i {
+		// 		z-index: 20;
+		// 		position: absolute;
+		// 		color: $light-vermillon;
+		// 		font-size: 3.5rem;
+		// 		// top: 0;
+		// 		right: 0;
+		// 		animation-name: movingPaddle;
+		// 		animation-duration: 2s;
+		// 		animation-timing-function: ease;
+		// 		animation-fill-mode: forwards;
+		// 	}
+		// }
 	}
 
 	// @keyframes movingBefore {

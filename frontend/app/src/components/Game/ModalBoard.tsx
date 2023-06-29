@@ -45,26 +45,31 @@ export default function ModalBoard({ onDifficulty, onTool, onPlayerMode, onStart
 		<div className={classes.container}>
 			<div className={classes.content}>
 				{(isStarting && page === 0 && !inviteMode && !isInvited) && (
-					<div className={classes.subcontent} onClick={onNextPage}>
-						<h2>Let's Pong!</h2>
-						<i className='fa-solid fa-table-tennis-paddle-ball'></i>
-					</div>
+					<>
+						{/* <div className={classes.subcontent} onClick={onNextPage}>
+							<h2>Let's Pong!</h2>
+							
+						</div> */}
+						<button onClick={onNextPage}>Let's Pong <i className='fa-solid fa-table-tennis-paddle-ball'></i></button>
+					</>
 				)}
 				{(isStarting && page === 0 && inviteMode && !isInvited) && (
 					<>
-						<div className={classes.subcontent} onClick={onNextPage}>
+						{/* <div className={classes.subcontent} onClick={onNextPage}>
 							<h2>Let's Pong!</h2>
 							<i className='fa-solid fa-table-tennis-paddle-ball'></i>
-						</div>
+						</div> */}
+						<button onClick={onNextPage}>Let's Pong <i className='fa-solid fa-table-tennis-paddle-ball'></i></button>
 						<button className={classes["button-cancel"]} onClick={() => {setToPage(0); handlePlayAgain();}}>{cancelText}</button>
 					</>
 				)}
 				{(isStarting && page === 0 && inviteMode && isInvited) && (
 					<>
-						<div className={classes.subcontent} onClick={() => {onNextPage(); onNextPage();}}>
+						{/* <div className={classes.subcontent} onClick={() => {onNextPage(); onNextPage();}}>
 							<h2>Let's Pong!</h2>
 							<i className='fa-solid fa-table-tennis-paddle-ball'></i>
-						</div>
+						</div> */}
+						<button onClick={() => {onNextPage(); onNextPage();}}>Let's Pong <i className='fa-solid fa-table-tennis-paddle-ball'></i></button>
 						<button className={classes["button-cancel"]} onClick={() => {setToPage(0); handlePlayAgain();}}>{cancelText}</button>
 					</>
 				)}
