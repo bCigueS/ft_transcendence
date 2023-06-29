@@ -442,7 +442,7 @@ export class ChannelsService {
 
   async join(channelId: number, JoinChannelDto: JoinChannelDto)
   {
-    console.log('in join channels service');
+    // console.log('in join channels service');
 
     const channel = await this.prisma.channel.findUnique({
         where: { id: channelId },
@@ -450,7 +450,7 @@ export class ChannelsService {
 
     if (!channel)
     {
-      console.log('did not find channel');
+      // console.log('did not find channel');
       throw new NotFoundException('Channel not found');
     }
 
