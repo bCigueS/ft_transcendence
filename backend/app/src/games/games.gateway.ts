@@ -153,7 +153,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 	// receive a create game invitation request from client
 	@SubscribeMessage('joinInvitation')
 	async handleJoinInviteEvent(
-		@MessageBody() { playerId, opponentId, lvl, gameRoom }: { playerId: number, opponentId: number, lvl: number, gameRoom?: string },
+		@MessageBody() { playerId, opponentId, lvl, gameRoom }: { playerId: number, opponentId: number, lvl: number | undefined, gameRoom?: string },
 		@ConnectedSocket() client: Socket,
 		) {
 			let game, player, opponent;
@@ -182,13 +182,10 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 				game = await this.prisma.game.findFirst({
 					where: { 
 						room: gameRoom,
-						NOT: {
-							state: GameState.FINISHED,
-						}
 					}
 				});
 				
-				if (!game) {
+				if (!game || game.state === GameState.FINISHED) {
 					client.emit('expiredInvite', {
 						message: `Sorry, the invitation is already expired!`,
 					});
