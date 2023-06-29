@@ -1,6 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { UserAPI } from '../../store/users-contexte';
+import React, { useCallback, useEffect, useState, useContext } from 'react';
+import { UserAPI, UserContext } from '../../store/users-contexte';
 import { NavigateOptions, useNavigate } from 'react-router-dom';
+import DefaultImage from '../../assets/images/default.jpg';
 import classes from '../../sass/components/Profile/ProfilIcon.module.scss';
 
 const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: string[]; border?: boolean}> = ( { user, displayCo = true, size = [], border = false}) => {
@@ -8,8 +9,9 @@ const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: s
 	const [ imageUrl, setImageUrl ] = useState<string>('');
 	const [ loading , setLoading ] = useState<boolean>(false);
 	const [ error, setError ] = useState<string | null>(null);
-	const [ inGame, setInGame ] = useState<boolean>(false);
+	// const [ inGame, setInGame ] = useState<boolean>(false);
 	const navigate = useNavigate();
+	const userCtx = useContext(UserContext);
 
 	const stylePicture: React.CSSProperties = {
 		content: '',
@@ -34,7 +36,12 @@ const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: s
 		if (user?.id === undefined)
 			return ;
 		try {
-			const response = await fetch('http://localhost:3000/users/' + user?.id + '/avatar');
+			const response = await fetch('http://localhost:3000/users/' + user?.id + '/avatar', {
+				method: 'GET',
+				headers: {
+					'Authorization' : 'Bearer ' + userCtx.logInfo?.token,
+				}
+			});
 			if (response.ok) {
 				const blob = await response.blob();
 				const url = URL.createObjectURL(blob);
@@ -48,7 +55,7 @@ const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: s
 			setError(error.message);
 			setLoading(false);
 		}
-	}, [user?.id]);
+	}, [user?.id, userCtx.logInfo?.token]);
 
 	useEffect(() => {
 		fetchAvatar();
@@ -67,14 +74,15 @@ const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: s
 				className={classes.picture}
 				style={size.length > 0 ? {width: size[0], height: size[1] } : {}}>
 				<img 
-					src={!loading ? imageUrl : ''} 
+					src={!loading ? imageUrl : DefaultImage} 
 					alt={user?.name} 
 				/>
 			</div>
 			{
 				displayCo &&
 				<i 
-					className={!inGame ? "fa-solid fa-circle" : "fa-solid fa-table-tennis-paddle-ball"} 
+					// className={!inGame ? "fa-solid fa-circle" : "fa-solid fa-table-tennis-paddle-ball"} 
+					className="fa-solid fa-circle"
 					style={{color: user?.connected ? 'green' : 'red' }
 					}>
 				</i>

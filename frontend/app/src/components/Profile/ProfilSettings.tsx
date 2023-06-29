@@ -11,9 +11,7 @@ const ProfilSettings: React.FC<{user: UserAPI | null}> = ( { user } ) => {
 	const handlePatchUser = async(DataForm: any) => {
 
 		const patchData = {
-			name: DataForm.get('name') === '' ? userCtx.user?.name : DataForm.get('name'),
-			doubleAuth: DataForm.get('auth') === 'true' ? true : false,
-			
+			name: DataForm.get('name') === '' ? userCtx.user?.name : DataForm.get('name'),			
 		}
 
 		const avatarData = new FormData();
@@ -23,6 +21,9 @@ const ProfilSettings: React.FC<{user: UserAPI | null}> = ( { user } ) => {
 			console.log(avatarData);
 			const avatarResponse = await fetch('http://localhost:3000/users/' + userCtx.user?.id + '/upload-avatar', {
 				method: 'POST',
+				headers: {
+					'Authorization' : 'Bearer ' + userCtx.logInfo?.token,
+				},
 				body: avatarData
 			})
 
@@ -39,7 +40,8 @@ const ProfilSettings: React.FC<{user: UserAPI | null}> = ( { user } ) => {
 			const response = await fetch('http://localhost:3000/users/' + userCtx.user?.id, {
 				method: 'PATCH',
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
+					'Authorization' : 'Bearer ' + userCtx.logInfo?.token,
 				},
 				body: JSON.stringify(patchData)
 			});
@@ -59,7 +61,10 @@ const ProfilSettings: React.FC<{user: UserAPI | null}> = ( { user } ) => {
 
 
 	return (
-		<ProfilPatch onPatchUser={handlePatchUser}/>
+		<>
+			<ProfilPatch onPatchUser={handlePatchUser}/>
+			{/* <DoubleAuthPannel /> */}
+		</>
 	)
 }
 

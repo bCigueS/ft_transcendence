@@ -12,11 +12,12 @@ html, body {
 	font-family: 'Inter', sans-serif;
 	font-size: 62.5%;
 	// font-size: 72.5%;
-	overflow: hidden;
+	overflow: auto;
 }
 
 /* Body */
 body {
+	min-width: 76.8rem;
 	padding: 14.5rem 2rem;
 	background-color: $background-color;
 	@include flexBox($justify: center);
@@ -48,7 +49,7 @@ button {
 
 main {
 	height: 60rem;
-	width: 110rem;
+	min-width: 76.8rem;
 	max-width: 110rem;
 	display: flex;
 	justify-content: center;

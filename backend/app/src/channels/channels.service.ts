@@ -3,6 +3,7 @@ import { CreateChannelDto, CreateChannelMembershipDto } from './dto/create-chann
 import { UpdateChannelDto } from './dto/update-channel.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateMessageDto } from 'src/messages/dto/create-message.dto';
+import { MessagesService } from 'src/messages/messages.service';
 import { JoinChannelDto } from './dto/join-channel.dto';
 import { MessagesGateway } from 'src/messages/messages.gateway';
 

@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useContext, useState } from 'react';
 import { json, redirect } from 'react-router-dom';
 import AuthForm from '../components/Auth/AuthForm';
+import { UserContext } from '../store/users-contexte';
 
 const AuthenticationPage = () => {
 
+	const userCtx = useContext(UserContext);
+	
 	return (
 		<AuthForm />
 	)
@@ -38,8 +41,9 @@ export const action = async({ request }: { request: Request }) => {
 	const resData = await response.json();
 	const token = resData.accessToken;
 	const userId = resData.userId;
-	localStorage.setItem('tokenDebug', token);
-	localStorage.setItem('userId', userId);
+	sessionStorage.setItem('token', token);
+	sessionStorage.setItem('userId', userId);
+	sessionStorage.setItem('isLogged', 'true');
 	window.location.reload();
 
 	return redirect('/');

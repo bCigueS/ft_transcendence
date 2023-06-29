@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CreateChannelDto, CreateChannelMembershipDto } from 'src/channels/dto/create-channel.dto';
 
 @Injectable()
 export class MessagesService {

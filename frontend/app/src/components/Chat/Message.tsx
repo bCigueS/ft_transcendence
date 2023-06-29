@@ -7,6 +7,7 @@ import { Channel, JoinChannelDTO, MessageAPI, fetchChannelById } from './chatUti
 import ProfilIcon from '../Profile/ProfilIcon';
 import JoinModal from './JoinModal';
 import ErrorModal from './ErrorModal';
+import { useNavigate } from 'react-router-dom';
 
 type JoinResponse = {
 	status: number;
@@ -29,6 +30,7 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 	const [ senderBlocked, setSenderBlocked ] = useState(false);
 
 	const userCtx = useContext(UserContext);
+	const navigate = useNavigate();
 
 	const date = new Date(message.createdAt);
 
@@ -97,8 +99,8 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 		if (sender)
 		{
 			setSender(sender);
-		}
 
+		}
 	}, [message.senderId, userCtx])
 
 	const checkSenderBlocked = useCallback(() => {
@@ -138,6 +140,20 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 
 	const handleUserConfirmation = () => {
 		setShowModal(false);
+	}
+	
+	const handleClickJoinGame = (senderId: number, gameRoom: string ) => {
+		console.log(senderId, gameRoom);
+		navigate('/pong', {
+			state: {
+				playerId: userCtx.user?.id,
+				opponentId: senderId,
+				gameInvitation: true,
+				isInvited: true,
+				isSpectator: false,
+				gameRoom: gameRoom,
+			}
+		});
 	}
 
 	const handleUserJoinError = () => {
@@ -196,7 +212,6 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 	}
 	
 	const displayMessage = () => {
-
 		if (message.content.includes('join/')) {
 			const channelId = message.content.split('_')[1];
 			return (
@@ -207,10 +222,27 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 					</div>
 				</div>
 			);
-		} else {
+		} else if (message.content.includes('joinGame/')) {
+			const invitation = message.content.split('>')[0];
+			const link = message.content.split('>')[1];
+
+			const info = message.content.split('/')[1];
+			const gameRoom = info.split('_')[0];
+			const senderId = info.split('_')[1];
+
 			return (
-				<p>{message.content}</p>
-				);
+				<div className={classes.link}>
+					{invitation} 👇 <br></br>
+					{/* <p>{invitation}</p> */}
+					<div className={classes.click} role="button" tab-index="0" onClick={() => handleClickJoinGame(+senderId, gameRoom) }>
+						{link}
+					</div>
+				</div>
+			);
+		} else {
+		return (
+			<p>{message.content}</p>
+			);
 		}
 	}
 

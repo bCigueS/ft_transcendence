@@ -8,12 +8,15 @@ import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { MessageEntity } from './entities/message.entity';
+import { GamesGateway } from '../games/games.gateway';
+import { CreateChannelDto } from 'src/channels/dto/create-channel.dto';
+import { ChannelsService } from 'src/channels/channels.service';
 
 @WebSocketGateway({ namespace: '/chat', cors: '*' })
 export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
   private readonly logger = new Logger(MessagesGateway.name);
 
-  constructor(private readonly messagesService: MessagesService, private prisma: PrismaService) {}
+  constructor(private readonly messagesService: MessagesService, private readonly channelsService: ChannelsService, private prisma: PrismaService) {}
 
   @WebSocketServer() io: Namespace;
   @WebSocketServer() server: Server
@@ -22,6 +25,57 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 
   afterInit(): void {
     this.logger.log(`Websocket chat gateway initialized.`);
+
+	GamesGateway.eventEmitter.on('gameInvitation', async ({ senderId, receiverId, link }) => {
+		console.log('in event emitter');
+
+		const sender = await this.prisma.user.findUnique({ where: { id: senderId } });
+		if (!sender) {
+			throw new NotFoundException(`User with ${senderId} does not exist.`);
+		}
+
+		let channel = await this.prisma.channel.findFirst({
+			where: {
+				name: "private",
+				members: {
+					every: {
+						userId: {
+							in: [senderId, receiverId]
+						}
+					},
+				},
+			},
+		});
+
+		
+		if (!channel) {
+			const membersData = [
+				{
+					userId: senderId,
+				},
+				{
+					userId: receiverId,
+				}
+			]
+
+			const createChannelDto: CreateChannelDto = {
+				name: "private", 
+				members: membersData,
+				creatorId: senderId
+			}
+			channel = await this.channelsService.create(createChannelDto);
+			const receiverSocketId = this.onlineUsers[receiverId];
+			this.io.to(receiverSocketId).emit('join', channel.id.toString());
+		}
+
+		if (channel) {	
+			this.handleMessage(receiverId, {
+			content: `${sender.name} has invited you to a game! Click the link bellow>${link}`,
+			channelId: channel.id,
+			senderId: senderId,
+			});
+		}
+	});
   }
 
   async handleConnection(client: Socket) {
@@ -46,7 +100,7 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 	// const receiverSocketId = this.onlineUsers[receiver.userId];
 	// this.io.to(channelId.toString()).emit('userJoined', client.id);
   }
-
+  
   @SubscribeMessage('message')
   async handleMessage(client: Socket, message: { 
 				content: string,
@@ -84,7 +138,8 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 		});
 
 		const receiver = channelMembers.find(member => member.userId !== message.senderId);
-		console.log('receive is: ', receiver.userId);
+
+		// console.log('receive is: ', receiver.userId);
 
 		if (receiver) {
 			const receiverSocketId = this.onlineUsers[receiver.userId];

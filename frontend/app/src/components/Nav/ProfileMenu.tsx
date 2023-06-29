@@ -18,7 +18,6 @@ const ProfilMenu: React.FC = () => {
 
 	const logoutHandler = () => {
 		userCtx.deleteToken();
-		console.log(userCtx.token);
 	}
 
 	useEffect(() => {
@@ -43,7 +42,12 @@ const ProfilMenu: React.FC = () => {
 		if (userCtx.user?.id === undefined)
 			return ;
 		try {
-			const response = await fetch('http://localhost:3000/users/' + userCtx.user?.id + '/avatar');
+			const response = await fetch('http://localhost:3000/users/' + userCtx.user?.id + '/avatar', {
+				method: 'GET',
+				headers: {
+					'Authorization' : 'Bearer ' + userCtx.logInfo?.token,
+				}
+			});
 			if (response.ok) {
 				const blob = await response.blob();
 				const url = URL.createObjectURL(blob);
@@ -55,11 +59,11 @@ const ProfilMenu: React.FC = () => {
 			}
 		} catch (error: any) {
 		}
-	}, [userCtx.user?.id]);
+	}, [userCtx.user?.id, userCtx.logInfo?.token]);
 
 	useEffect(() => {
 		fetchAvatar();
-	}, [fetchAvatar]);
+	}, [fetchAvatar, userCtx.user?.id]);
 
 	return (
 		<div className="profile-menu" ref={menuRef}>
