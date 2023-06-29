@@ -51,7 +51,7 @@ export const UserContext = React.createContext<{
 	user: null,
 	error: null,
 	token: undefined,
-	logInfo: {userId: localStorage.getItem('userId'), token: localStorage.getItem('token')},
+	logInfo: {userId: sessionStorage.getItem('userId'), token: sessionStorage.getItem('token')},
 	isLogged: false,
 	login: () => {},
 	deleteToken: () => {},
@@ -77,19 +77,19 @@ type Props = {
 		
 		const [ user, setUser ] = useState<UserAPI | null>(null);
 		const [ userId, setUserId ] = useState<number>(1);
-		const [ isLogged, setIsLogged ] = useState<boolean>(!localStorage.getItem('isLogged') || localStorage.getItem('isLogged') === 'false' ? false : true);
+		const [ isLogged, setIsLogged ] = useState<boolean>(!sessionStorage.getItem('isLogged') || sessionStorage.getItem('isLogged') === 'false' ? false : true);
 		const [ loading, setLoading ] = useState<boolean>(true);
 		const [ error, setError ] = useState<string | null>(null);
 
 		
 		let logInfo = {
-			userId: localStorage.getItem('userId') ? localStorage.getItem('userId') : String(userId),
-			token: localStorage.getItem('token') || ''
+			userId: sessionStorage.getItem('userId') ? sessionStorage.getItem('userId') : String(userId),
+			token: sessionStorage.getItem('token') || ''
 		}
 
 		const login = () => {
 			setIsLogged(true);
-			localStorage.setItem('isLogged', 'true');
+			sessionStorage.setItem('isLogged', 'true');
 		}
 
 		const deleteToken = () => {
@@ -397,7 +397,7 @@ type Props = {
 		  }, [fetchUser, userId, user?.name]);
 
 		useEffect(() => {
-			localStorage.setItem('isLogged', String(isLogged));
+			sessionStorage.setItem('isLogged', String(isLogged));
 		}, [isLogged])
 
 		if (loading) {
