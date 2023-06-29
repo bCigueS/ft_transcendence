@@ -215,36 +215,6 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 		if (message.content.includes('join/')) {
 			const channelId = message.content.split('_')[1];
 			return (
-<<<<<<< HEAD
-				<a href="#" onClick={() => onJoin(+channelId)}>
-					{message.content}
-				</a>
-			);
-		} else if (message.content.includes('joinGame/')) {
-			const invitation = message.content.split('>')[0];
-			const link = message.content.split('>')[1];
-
-			const info = message.content.split('/')[1];
-			const gameRoom = info.split('_')[0];
-			const senderId = info.split('_')[1];
-
-			const linkStyles: React.CSSProperties = {
-				cursor: 'pointer',
-				textDecoration: 'underline',
-				color: 'blue',
-			};
-
-			return (
-				<>
-					<p>{invitation}</p>
-					<div role="button" tab-index="0" onClick={() => handleClickJoinGame(+senderId, gameRoom)} style={linkStyles}>
-						{link}
-					</div>
-				
-				</>
-			);
-		} else {
-=======
 				<div className={classes.link}>
 					You've been invited to join a group 👇 <br></br>
 					<div className={classes.click} onClick={() => handleClickJoin(+channelId)}>
@@ -253,7 +223,6 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 				</div>
 		);
 	} else {
->>>>>>> origin/olivia/chat
 		return (
 			<p>{message.content}</p>
 			);
