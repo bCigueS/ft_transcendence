@@ -14,7 +14,9 @@ type Props = {
     chat: Channel,
 	onInfoClick: () => void,
     onDelete: () => void,
-    onKick: (channelId: number, kickedId: number) => void
+    onKick: (channelId: number, kickedId: number) => void,
+    onAddAdmin: (channelId: number, userId: number) => void,
+    onRemoveAdmin: (channelId: number, userId: number) => void,
 };
 
 type BackdropProps = {
@@ -29,25 +31,10 @@ const Backdrop: React.FC<BackdropProps> = (props) => {
 
 const Overlay: React.FC<Props> = (props) => {
 	const [ members, setMembers ] = useState<UserAPI[]>([]);
-	const [ admins, setAdmins ] = useState<UserAPI[]>([]);
 
 	const removeMember = (member: UserAPI) => {
 		console.log('removed member: ', member);
 		setMembers(members.filter(m => m.id !== member.id));
-	}
-
-	const onAddAdmin = (member: UserAPI) => {
-
-		const chanData = {
-			admins: [
-				{
-					userId: member.id
-				}
-			]
-		}
-		console.log('added admin: ', member);
-		setAdmins([...admins, member]);
-		modifyChannel(props.chat.id, chanData);
 	}
 
 	return (
@@ -65,8 +52,9 @@ const Overlay: React.FC<Props> = (props) => {
 					onInfoClick={props.onInfoClick}
 					onDelete={props.onDelete}
 					onRemove={removeMember}
-					onAddAdmin={onAddAdmin}
 					onKick={props.onKick}
+					onAddAdmin={props.onAddAdmin}
+					onRemoveAdmin={props.onRemoveAdmin}
 				/>
 			}
 		</Card>
@@ -86,7 +74,10 @@ const ChatInfo: React.FC<Props> = (props) => {
 							chat={props.chat}
 							onInfoClick={props.onInfoClick}
 							onDelete={props.onDelete}
-							onKick={props.onKick}>{props.children}</Overlay>, portalOverlays)}
+							onKick={props.onKick}
+							onAddAdmin={props.onAddAdmin}
+							onRemoveAdmin={props.onRemoveAdmin}
+							>{props.children}</Overlay>, portalOverlays)}
 		</Fragment>
 	)
 }
