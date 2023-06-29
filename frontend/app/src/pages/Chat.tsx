@@ -237,13 +237,13 @@ export default function Chat() {
 		fetchChannels();
 	  }, [fetchChannels, socket]);
 
-	  const kickListener = useCallback(async (channelId: string) => {
+	const kickListener = useCallback(async (channelId: string) => {
 		console.log('client was kicked from channel ', channelId);
 		if (selectedConversation && +channelId === selectedConversation.id) {
-		  setSelectedConversation(undefined);
+			setSelectedConversation(undefined);
 		}
 		setChats(prevChats => prevChats.filter(chat => chat.id !== +channelId));
-	  }, [selectedConversation]);
+	}, [selectedConversation]);
 	
 	const userJoinedListener = useCallback((data : {
 			channelId: number, 
@@ -279,6 +279,70 @@ export default function Chat() {
 		  socket?.off("handleKick", kickListener);
 		}
 	}, [socket, kickListener]);
+
+	const addAdminListener = useCallback(
+		async (data: { channelId: number, userId: number }) => {
+		console.log('Channel that you belong to has a new admin: ', data.userId);
+
+		const newAdmin = await userCtx.fetchUserById(data.userId);
+		setChats((prevChats: Channel[]) => {
+		return prevChats.map(chat => {
+			if (chat.id === data.channelId) {
+			const admins = chat.admins;
+			if (admins && newAdmin !== undefined)
+			{
+				const updatedChat: Channel = {
+					...chat,
+					admins: [...admins, newAdmin]
+				};
+				return updatedChat;
+			}
+			return chat;
+			} else {
+			return chat;
+			}
+		});
+		});
+	}, []);
+
+	useEffect(() => {
+		socket?.on("handleAddAdmin", addAdminListener);
+		return () => {
+		  socket?.off("handleAddAdmin", addAdminListener);
+		}
+	}, [socket, addAdminListener]);
+
+	const removeAdminListener = useCallback(
+	async (data: { channelId: number, userId: number }) => {
+		console.log('Channel that you belong to removed this admin: ', data.userId);
+
+		setChats((prevChats: Channel[]) => {
+		return prevChats.map(chat => {
+			if (chat.id === data.channelId) {
+			const admins = chat.admins;
+			if (admins) {
+				const updatedAdmins = admins.filter(admin => admin.id !== data.userId);
+				const updatedChat: Channel = {
+				...chat,
+				admins: updatedAdmins
+				};
+				return updatedChat;
+			}
+			return chat;
+			} else {
+			return chat;
+			}
+		});
+		});
+	}, []);
+	  
+
+	useEffect(() => {
+		socket?.on("handleRemoveAdmin", removeAdminListener);
+		return () => {
+		  socket?.off("handleRemoveAdmin", removeAdminListener);
+		}
+	}, [socket, removeAdminListener]);
 
 	useEffect(() => {
 		socket?.on('chatDeleted', (data) => {
@@ -317,6 +381,16 @@ export default function Chat() {
 	const handleKick = useCallback((channelId: number, kickedId: number) => {
 		// setChats(chats => chats.filter(chat => chat.id !== id));
 		socket?.emit('kickUser', { channelId: channelId, userId: kickedId });
+	}, [socket])
+
+	const handleAddAdmin = useCallback((channelId: number, userId: number) => {
+		// setChats(chats => chats.filter(chat => chat.id !== id));
+		socket?.emit('addAdmin', { channelId: channelId, userId: userId });
+	}, [socket])
+
+	const handleRemoveAdmin = useCallback((channelId: number, userId: number) => {
+		// setChats(chats => chats.filter(chat => chat.id !== id));
+		socket?.emit('removeAdmin', { channelId: channelId, userId: userId });
 	}, [socket])
 
 	const checkLastMessageDeleted = useCallback((message: MessageAPI) => {
@@ -454,7 +528,10 @@ export default function Chat() {
 						isSelected={chat.id === selectedConversation?.id ? true : false}
 						onSaveConversation={onSaveConversation}
 						onDeleteChat={handleChatDeletion}
-						onKick={handleKick}/>
+						onKick={handleKick}
+						onAddAdmin={handleAddAdmin}
+						onRemoveAdmin={handleRemoveAdmin}
+						/>
 						))
 					:
 					<NoDiscussions/>

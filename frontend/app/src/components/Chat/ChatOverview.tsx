@@ -8,9 +8,17 @@ import ChatInfo from "./ChatInfo";
 
 // const Searchbar: React.FC<{onSaveSearch: (input: string) => void}> = ( props ) => {
 
-const ChatOverview: React.FC<{chats: Channel[], chat: Channel, isSelected: boolean, onSaveConversation: (channel: Channel) => void,
-onDeleteChat: (channelId: number) => void, onKick: (channelId: number, kickedId: number) => void}> 
-	= ( props ) => {
+const ChatOverview: React.FC<{
+	chats: Channel[], 
+	chat: Channel, 
+	isSelected: boolean, 		
+	onSaveConversation: (channel: Channel) => void,
+	onDeleteChat: (channelId: number) => void, 
+	onKick: (channelId: number, kickedId: number) => void, 
+	onAddAdmin: (channelId: number, userId: number) => void,
+	onRemoveAdmin: (channelId: number, userId: number) => void
+
+	}> = ( props ) => {
 
 	const [sender, setSender] = useState<UserAPI | null>(null);
 	const [lastMessage, setLastMessage] = useState<MessageAPI | null>(null);
@@ -72,6 +80,8 @@ onDeleteChat: (channelId: number) => void, onKick: (channelId: number, kickedId:
 				onInfoClick={handleUserConfirmation}
 				onDelete={handleDeleteChat}
 				onKick={props.onKick}
+				onAddAdmin={props.onAddAdmin}
+				onRemoveAdmin={props.onRemoveAdmin}
 			/>
 		}
 		<div className={`${classes.container} ${props.isSelected ? classes.selected : ''}`}>
