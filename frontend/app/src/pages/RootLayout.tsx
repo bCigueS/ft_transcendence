@@ -47,7 +47,7 @@ export default function RootLayout() {
 		return () => {
 			window.removeEventListener('storage', handleStorageChange);
 		};
-	}, [])
+	}, [userCtx.logInfo?.token])
 
 	useEffect(() => {
 		if (!token) {

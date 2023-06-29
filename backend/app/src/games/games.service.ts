@@ -75,17 +75,7 @@ export class GamesService {
       throw new NotFoundException(`Game with ${id} does not exist.`);
 
     return game;
-  }
-
-	// async update(id: number, updateGameDto: UpdateGameDto) {
-	// 	const updatedGame = await this.prisma.game.update({
-	// 	where: { id },
-	// 	...updateGameDto,
-	// 	});
-	
-	// 	return updatedGame;
-	// }
-	
+  }	
 	
   async remove(id: number) {
 		

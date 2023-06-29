@@ -4,6 +4,8 @@ import LiveBoard from './LiveBoard';
 import PausedBoard from './PausedBoard';
 import classes from '../../sass/components/Game/Pong.module.scss';
 import { UserAPI } from '../../store/users-contexte';
+import PlayerSide from './PlayerSide';
+import OpponentSide from './OpponentSide';
 
 // Modal's element
 const BEGINNER_LEVEL = 0;
@@ -47,9 +49,9 @@ export default function SpectatorBoard(props: SpectatorProp) {
 	// paddle info
 	const [paddleHeight, setPaddleHeight] = useState(0);
 	// players info
-	const [playerName, setPlayerName] = useState('');
+	const [player, setPlayer] = useState<UserAPI>();
+	const [opponent, setOpponent] = useState<UserAPI>();
 	const [playerY, setPlayerY] = useState((info.boardHeight - paddleHeight) / 2);
-	const [opponentName, setOpponentName] = useState('');
 	const [opponentY, setOpponentY] = useState((info.boardHeight - paddleHeight) / 2);
 	// obstacle info
 	const [obstacleY, setObstacleY] = useState(info.boardHeight);
@@ -75,10 +77,12 @@ export default function SpectatorBoard(props: SpectatorProp) {
 		const handleWelcomeSpectator = ({ message, player, opponent, level }: { message: string, player: UserAPI, opponent: UserAPI, level: number }) => {
 			console.log({ message });
 			if (player) {
-				setPlayerName(player.name);
+				setPlayer(player);
+				// setPlayerName(player.name);
 			}
 			if (opponent) {
-				setOpponentName(opponent.name);
+				setOpponent(opponent);
+				// setOpponentName(opponent.name);
 			}
 			setLevel(level);
 			setIsLive(current => !current);
@@ -116,11 +120,35 @@ export default function SpectatorBoard(props: SpectatorProp) {
 		}
 	}, [props.socket]);
 
+	// function to set initial value to start the game
+	const startGame = useCallback(() => {
+		if (!isRunning) {
+			switch (level) {
+				case BEGINNER_LEVEL:
+					setBallRadius(10);
+					setPaddleHeight(120);
+					break ;
+				case MEDIUM_LEVEL:
+					setBallRadius(10);
+					setPaddleHeight(80);
+					break ;
+				case HARD_LEVEL:
+				case SPECIAL_LEVEL:
+					setBallRadius(6);
+					setPaddleHeight(40);
+					break ;
+			}
+		}		
+		// toggle isRunning boolean to start the animation of the game
+		setIsRunning(current => !current);
+	}, [isRunning, level]);
+
 	// receive a confirmation from server that game is ready to be displayed
 	useEffect(() => {
 		const handleStartWatch = ({ message }: { message: string }) => {
 			console.log({ message });
 			setIsReady(true);
+			startGame();
 		};
 
 		props.socket?.on('startWatch', handleStartWatch);
@@ -128,7 +156,7 @@ export default function SpectatorBoard(props: SpectatorProp) {
 		return () => {
 			props.socket?.off('startWatch', handleStartWatch);
 		}
-	}, [props.socket]);
+	}, [props.socket, startGame]);
 
 	// receiving the new ball direction from server
 	useEffect(() => {
@@ -229,23 +257,6 @@ export default function SpectatorBoard(props: SpectatorProp) {
 			props.socket?.off('makePause', handleMakePause);
 			}
 	}, [props.socket]);
-
-	// // receive a signal that one player has left the game
-	// useEffect(() => {
-	// 	const handlePlayerDisconnected = ({ message }: { message: string }) => {
-	// 		console.log({ message });
-	// 		setIsLive(current => !current);
-	// 		setIsRunning(current => !current);
-	// 		setGameOver(current => !current);
-	// 	};
-
-	// 	props.socket?.on('playerDisconnected', handlePlayerDisconnected);
-		
-	// 	return () => {
-	// 		props.socket?.off('playerDisconnected', handlePlayerDisconnected);
-	// 	}
-	// }, [props.socket]);
-	
 	
 	// loop to receive a message from server that game has ended
 	useEffect(() => {
@@ -253,12 +264,8 @@ export default function SpectatorBoard(props: SpectatorProp) {
 			console.log('in endWatch, ', { message });
 			props.socket?.emit('leaveGameRoom', props.gameRoom);
 			setClosingText(message);
-			if (isRunning === true) {
-				setIsRunning(current => !current);
-			}
-			if (gameOver === false) {
-				setGameOver(current => !current);
-			}
+			setIsRunning(current => !current);
+			setGameOver(current => !current);
 		};
 
 		props.socket?.on('endWatch', handleEndWatch);
@@ -267,29 +274,6 @@ export default function SpectatorBoard(props: SpectatorProp) {
 			props.socket?.off('endWatch', handleEndWatch);
 		}
 	}, [props.socket, props.gameRoom, isLive, isRunning, gameOver])
-	
-	// function to set initial value to start the game
-	const startGame = () => {
-		if (!isRunning) {
-			switch (level) {
-				case BEGINNER_LEVEL:
-					setBallRadius(10);
-					setPaddleHeight(120);
-					break ;
-				case MEDIUM_LEVEL:
-					setBallRadius(10);
-					setPaddleHeight(80);
-					break ;
-				case HARD_LEVEL:
-				case SPECIAL_LEVEL:
-					setBallRadius(6);
-					setPaddleHeight(40);
-					break ;
-			}
-			// toggle isRunning boolean to start the animation of the game
-			setIsRunning(current => !current);
-		}		
-	}
 
 	// function to detect ball collision with all 4 part of the walls/borders
 	const detectWallCollision = useCallback(() => {
@@ -382,7 +366,7 @@ export default function SpectatorBoard(props: SpectatorProp) {
 			if (deltaTime >= frameDuration) {
 				prevFrameId.current = timestamp;
 				
-				console.log('isRunning', isRunning, 'gameOver', gameOver, 'isLive', isLive);
+				// console.log('isRunning', isRunning, 'gameOver', gameOver, 'isLive', isLive);
 
 				drawBoard(context);
 				if (isRunning && !isPaused && !screenTooSmall) {
@@ -418,11 +402,11 @@ export default function SpectatorBoard(props: SpectatorProp) {
 			{((!isRunning || gameOver) && isLive) && (
 				<LiveBoard
 					isReady={isReady}
-					playerName={playerName}
-					opponentName={opponentName}
+					playerName={player?.name}
+					opponentName={opponent?.name}
 					inviteMode={false}
 					spectatorMode={true}
-					start={() => {startGame()}}
+					start={() => {}}
 					closingText={closingText}
 				/>
 			)}
@@ -431,6 +415,9 @@ export default function SpectatorBoard(props: SpectatorProp) {
 					text={isPaused ? "Please wait for the players to continue the game" : "One of player's screen is too small"}
 				/>
 			)}
+			<PlayerSide
+				player={player}
+			/>
 			<div className={classes.container}>
 				<div className={classes.divider_line}></div>
 				<div className={classes.playground}>
@@ -441,6 +428,10 @@ export default function SpectatorBoard(props: SpectatorProp) {
 					/>
 				</div>
 			</div>
+			<OpponentSide
+				opponent={opponent}
+				opponentName={opponent?.name}
+			/>
 		</>
 	);
 }
