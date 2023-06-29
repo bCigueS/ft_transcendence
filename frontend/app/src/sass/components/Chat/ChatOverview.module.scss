@@ -2,7 +2,7 @@
 @import '../../abstracts/variables.scss';
 
 .container {
-    height: 5.5rem;
+    min-height: 5.5rem;
     width: 100%;
 
     display: grid;
