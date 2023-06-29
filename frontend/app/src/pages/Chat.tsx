@@ -4,7 +4,7 @@ import classes from '../sass/pages/Chat.module.scss';
 import { UserAPI, UserContext } from '../store/users-contexte';
 import NoConvo from '../components/Chat/NoConvo';
 import io, { Socket } from 'socket.io-client';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import MessageList from '../components/Chat/MessageList';
 import { Channel, JoinChannelDTO, MessageAPI, createNewChannel, deleteChat, fetchChannelById } from '../components/Chat/chatUtils';
 import ManageChats from '../components/Chat/ManageChats';
@@ -22,10 +22,12 @@ export default function Chat() {
 	const [ chats, setChats ] = useState<Channel[]>([]);
 	const [ socket, setSocket ] = useState<Socket>();
 	const [ messages, setMessages ] = useState<MessageAPI[] >([]);
-
 	const userCtx = useContext(UserContext);
 	const location = useLocation();
+	const navigate = useNavigate();
 
+	let state = location.state?.newChat;
+	
 	const send = async (content: string, selectedConversationId: number) => {
 
 		const message = {
@@ -34,7 +36,6 @@ export default function Chat() {
 		  senderId: userCtx.user?.id
 		};
 
-		console.log('in send function with selected conversation id = ', selectedConversationId);
 		if (selectedConversationId === -1)
 		{
 			let senderId;
@@ -71,11 +72,10 @@ export default function Chat() {
 			  setChats([...chats, newChan]);
 			}
 			onSaveConversation(newChan);
+			socket?.emit("message", message);
+			navigate('/chat');
+			return ;
 		}
-
-		// const chan = await fetchChannelById(selectedConversationId);
-		// if (chan)
-		// 	onSaveConversation(chan);
 		socket?.emit("message", message);
 	}
 
@@ -163,7 +163,6 @@ export default function Chat() {
 		  return blockedUsers.some((blockedUser) => blockedUser.id === blockedId);
 		}
 	  
-		console.log('other member is not blocked');
 		return false;
 	  };
 	  
@@ -391,9 +390,9 @@ export default function Chat() {
 
 	const checkPreviousPage = useCallback(() => {
 
-		if (location?.state?.newChat) {
+		if (state) {
 
-			const user = location?.state?.newChat;
+			const user = state;
 			const chatExist = chats.find(chat =>
 				chat.name === 'private' && chat.members.some(member => member.id === user.id));
 	
@@ -411,9 +410,10 @@ export default function Chat() {
 					}
 				setChats([...chats, newChat]);
 				onSaveConversation(newChat);
+
 			}
 		}
-	}, [chats, location?.state?.newChat, onSaveConversation, userCtx.user])
+	}, [chats, state, onSaveConversation, userCtx.user])
 
 	useEffect(() => {
 		if (chats) {
