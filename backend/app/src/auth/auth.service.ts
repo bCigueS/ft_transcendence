@@ -50,7 +50,7 @@ export class AuthService {
 
     const targetPath = `./uploads/${filePath}`;
 
-    fs.writeFileSync(filePath, Buffer.from(response.data, 'binary'));
+    fs.writeFileSync(targetPath, Buffer.from(response.data, 'binary'));
   }
 
   async registerUser(apiResponse: any) {
