@@ -10,60 +10,29 @@ const LeaderboardProfil: React.FC<{user: UserAPI}> = ( { user }) => {
 	const userCtx = useContext(UserContext);
 	const navigate = useNavigate();
 
-	const fetchAddFriend = async () => {
-		const friendId = {
-			friendId: user.id
-		};
-
-		try {
-			const response = await fetch('http://localhost:3000/users/' + userCtx.user?.id + '/add-friend', {
-				method: 'PATCH',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(friendId)
-			});
-		
-			if (response.status === 400) {
-				throw new Error("Failed to add friend!") ;
-			}
-
-			if (!response.ok)
-				throw new Error("Failed to add friend!") ;
-			
-			userCtx.fetchUser();
-		} catch (error: any) {
-			console.log(error.message);
-		}
-	};
-
 	const removeFriendHandler = (event: React.MouseEvent<HTMLIFrameElement, MouseEvent>) => {
 		userCtx.fetchRemoveFriend(user);
 	}
 
 	const addFriendHandler = (event: React.MouseEvent<HTMLIFrameElement, MouseEvent>) => {
-		fetchAddFriend();
+		userCtx.fetchAddFriend(user);
 	}
 
-	const isFriend = () => {
-		return userCtx.user?.friends?.some(friend => user.id === friend.id) || false;
-	}
-
-	const isSelf = () => {
-		return userCtx.user?.id === user.id;
+	const addBlockHandler = (event: React.MouseEvent<HTMLIFrameElement, MouseEvent>) => {
+		userCtx.fetchBlockUser(user);
 	}
 	  
 	const friendIconDisplay = () => {
-		if (isSelf()) {
+		if (userCtx.isSelf(user)) {
 			return (<i className='fa-solid fa-user' style={{color: 'gray'}}></i>);	
 		}
-		else if (isFriend()) {
+		else if (userCtx.isFriend(user)) {
 			return (<i 
 						className='fa-solid fa-user-minus'
 						onClick={removeFriendHandler}
 					></i>);
 		}
-		else if (!isFriend()) {
+		else if (!userCtx.isFriend(user)) {
 			return (<i 
 						className='fa-solid fa-user-plus'
 						onClick={addFriendHandler}
@@ -81,6 +50,19 @@ const LeaderboardProfil: React.FC<{user: UserAPI}> = ( { user }) => {
 		
 	}
 
+	const handleClickGame = () => {
+		navigate('/pong', {
+			state: {
+				playerId: userCtx.user?.id,
+				opponentId: user.id,
+				gameInvitation: true,
+				isInvited: false,
+				isSpectator: false,
+				gameRoom: undefined,
+			}
+		})
+	}
+
 	return (
 		<div className={classes.container}>
 			<ProfilIcon user={user}/>
@@ -89,12 +71,17 @@ const LeaderboardProfil: React.FC<{user: UserAPI}> = ( { user }) => {
 				<i className='fa-solid fa-trophy'>: {user.wins}</i>
 				<i onClick={handleClickMessage}
 					className='fa-solid fa-message'
-					style={ isSelf() ? {color: 'gray'} : {}} 
+					style={ userCtx.isSelf(user) ? {color: 'gray'} : {}} 
 				></i>
 				{ friendIconDisplay() }
+				<i
+					className='fa-solid fa-unlock'
+					onClick={addBlockHandler}
+				></i>
 				<i 
+					onClick={handleClickGame}
 					className='fa-solid fa-table-tennis-paddle-ball'
-					style={ isSelf() ? {color: 'gray'} : {}} 
+					style={ userCtx.isSelf(user) ? {color: 'gray'} : {}} 
 				></i>
 				
 			</div>

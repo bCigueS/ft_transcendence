@@ -1,0 +1,68 @@
+@import '../abstracts/mixin.scss';
+@import '../abstracts/variables.scss';
+
+
+.main {
+	
+	height: 100%;
+	width: 100%;
+	display: grid;
+	padding: 5rem;
+	grid-template-columns: 2fr 1.5fr;
+	grid-template-rows: 1fr;
+	gap: 5rem;
+	
+	.rules {		
+		gap: 1rem;
+		@include flexBox($align: flex-start);
+		
+		h1 {
+			@include titleh1($width: 30rem);
+		}
+		
+		.info {
+			height: 100%;
+			width: 100%;
+			padding: 2rem;
+			@include flexBox($justify: flex-start, $align: flex-start);
+
+
+			span {
+				color: $light-vermillon;
+				font-weight: 800;
+			}
+
+			p {
+				@include text-body();
+				margin-bottom: 1rem;
+			}
+
+			.level {
+				h2 {
+					@include titleh1($fontSize: 2rem, $width: 20rem);
+				}
+			}
+
+			.control {
+				h2 {
+					@include titleh1($fontSize: 2rem, $width: 24rem);
+				}
+			}
+
+			.play {
+				h2 {
+					@include titleh1($fontSize: 2rem, $width: 18rem);
+				}
+
+			}
+			h2 {
+				margin-bottom: 2rem;
+			}
+		}
+	}
+
+	.other {
+		background-color:aquamarine;
+	}
+
+}

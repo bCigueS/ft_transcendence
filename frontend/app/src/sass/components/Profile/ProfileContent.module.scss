@@ -3,7 +3,7 @@
 
 .container {
 	width: auto;
-	height: auto;
+	height: 100%;
 	min-height: 100%;
 	display: grid;
 	grid-template-columns: 1fr;
@@ -37,12 +37,11 @@
 		@include flexBox($justify: flex-start);
 		@include shadowBox();
 		overflow: scroll !important;
-		background-color: $almost-white;
-		min-height: 100%;
-		padding: 2rem;
-		// overflow: hidden;
 		overflow-x: hidden !important;
-		// overflow-y: hidden !important;
+		background-color: $almost-white;
+		height: 100%;
+		width: 100%;
+		padding: 2rem;
 		border: 0.2rem solid black;
 		
 		.listContent {

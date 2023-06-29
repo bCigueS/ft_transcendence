@@ -10,18 +10,23 @@ datasource db {
 
 model User {
   id          Int          @id @default(autoincrement())
+  id42        Int          @unique
   email       String
   name        String       @unique
+  login       String       @unique
   password    String
   avatar      String?      @default("default.jpg")
   doubleAuth  Boolean      @default(false)
   wins        Int          @default(0)
+  secert      String?
+  status      Int          @default(0)
+  token       String?
   games       UserGame[]
   haters      Block[]      @relation("haters")
   blocked     Block[]      @relation("blocked")
   following   Friendship[] @relation("followers")
   followers   Friendship[] @relation("following")
-  winnerGames Game[]       @relation("WinnerGames")
+  winnerGames Game[]       @relation("winnerGames")
 
   messages    Message[]
   channelCreator  Channel[]
@@ -54,14 +59,16 @@ model Block {
 }
 
 model Game {
-  id        Int        @id @default(autoincrement())
-  createdAt DateTime   @default(now())
-  type      GameType
-  level     Int
-  winnerId  Int?
-  duration  Int?
-  players   UserGame[]
-  winner    User?      @relation("WinnerGames", fields: [winnerId], references: [id], onDelete: Cascade)
+  id        			Int        @id @default(autoincrement())
+  room					String?    @unique
+  createdAt 			DateTime   @default(now())
+  state					GameState  @default(PENDING)
+  level     			Int
+  players   			UserGame[]
+  playerSocketIds		String[]
+  spectatorSocketIds	String[]
+  winnerId  			Int?		
+  winner    			User?      @relation("winnerGames", fields: [winnerId], references: [id], onDelete: Cascade)
 
   @@map("games")
 }
@@ -70,21 +77,16 @@ model UserGame {
   createdAt   DateTime @default(now())
   userId      Int
   gameId      Int
-  playerIndex Int      @default(1)
-  score       Int      @default(0)
   game        Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  score       Int      @default(0)
 
   @@id([userId, gameId])
 }
 
-enum GameType {
-  PLAYER
-  COMPUTER
-}
-
 enum GameState {
   PENDING
+  WAITING
   PLAYING
   FINISHED
 }

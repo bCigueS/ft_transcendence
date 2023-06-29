@@ -37,6 +37,13 @@
 	color: $color;
 	font-weight: bold;
 }
+@mixin text-header-xxl($color: black) {
+	font-size: 7rem;
+	line-height: 7rem;
+	color: $color;
+	font-weight: bold;
+	font-style: italic;
+}
 
 
 @mixin flexBox($direction: column, $justify: space-between, $align: center) {
@@ -100,10 +107,45 @@
 	}
 }
 
-@mixin titleh1 {
+@mixin modalButtonMixin($fontSize: 2rem, $color: $light-vermillon) {
+	padding: 0.5rem 1rem;
+	font-size: $fontSize;
+	font-weight: 800;
+	letter-spacing: -0.1rem;
+
+	color: $almost-white;
+	background: none;
+	border: 0.2rem solid black;
+	border-radius: none;
+
+	position:relative;
+	transform-style: preserve-3d;
+
+	&::before {
+		content: '';
+		position: absolute;
+		height: 100%;
 		width: 100%;
+		transform: translateZ(-0.1rem);
+		z-index: -1;
+		bottom: -0.5rem;
+		left: -0.5rem;
+		background-color: $color;
+		opacity: 1;
+		transition: all 0.3s;
+	}
+
+	&:hover::before {
+		bottom: 0.5rem;
+		left: 0.5rem;
+		opacity: 1;
+	}
+}
+
+@mixin titleh1($fontSize: 3rem, $width: 100%) {
+		width: $width;
 		text-align: center;
-		font-size: 3rem;
+		font-size: $fontSize;
 		font-weight: 800;
 		letter-spacing: -0.15rem;
 		padding: 0.5rem 1rem;
