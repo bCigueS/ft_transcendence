@@ -241,7 +241,14 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 				onCloseClick={handleUserJoinWithPassword}
 			/>
 		}
-		{ displayDay && <div className={classes.date}>{message && date.toDateString()}</div> }
+		{
+			sender && sender.id !== userCtx.user?.id && isLast ?
+			<div className={classes.senderProfile}>
+			<ProfilIcon user={sender} displayCo={false} size={["2.5rem", "2.5rem"]}/>
+			</div>
+			:
+			<div></div>
+		}
 		<div className={whichBubble()} 
 			onMouseOver={handleMouseOver}
 			onMouseOut={handleMouseOut}>
@@ -274,14 +281,8 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 			</div>
 			
 		</div>
-		{
-			sender && sender.id !== userCtx.user?.id && isLast ?
-			<div className={classes.senderProfile}>
-			<ProfilIcon user={sender} displayCo={false} size={["2.5rem", "2.5rem"]}/>
-			</div>
-			:
-			<div></div>
-		}
+
+		{ displayDay && <div className={classes.date}>{message && date.toDateString()}</div> }
 		</>
 	)
 }
