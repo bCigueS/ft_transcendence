@@ -16,7 +16,7 @@ import { ChannelsService } from 'src/channels/channels.service';
 export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
   private readonly logger = new Logger(MessagesGateway.name);
 
-  constructor(private readonly messagesService: MessagesService, private prisma: PrismaService) {}
+  constructor(private readonly messagesService: MessagesService, private readonly channelsService: ChannelsService, private prisma: PrismaService) {}
 
   @WebSocketServer() io: Namespace;
   @WebSocketServer() server: Server
@@ -47,25 +47,25 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 			},
 		});
 
-		const senderUser = await this.prisma.channelMembership.findUnique({ where: { id: senderId } });
-		if (!senderUser) {
-			throw new NotFoundException(`User with ${senderId} does not exist.`);
-		}
-
-		const receiverUser = await this.prisma.channelMembership.findUnique({ where: { id: receiverId } });
-		if (!receiverUser) {
-			throw new NotFoundException(`User with ${receiverId} does not exist.`);
-		}
-
+		
 		if (!channel) {
+			const membersData = [
+				{
+					userId: senderId,
+				},
+				{
+					userId: receiverId,
+				}
+			]
+
 			const createChannelDto: CreateChannelDto = {
 				name: "private", 
-				members: [senderUser, receiverUser],
+				members: membersData,
 				creatorId: senderId
 			}
-			channel = await this.messagesService.createChannel(createChannelDto);
-
-			this.handleJoin(receiverId, channel.id);
+			channel = await this.channelsService.create(createChannelDto);
+			const receiverSocketId = this.onlineUsers[receiverId];
+			this.io.to(receiverSocketId).emit('join', channel.id.toString());
 		}
 
 		if (channel) {	
@@ -138,7 +138,8 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 		});
 
 		const receiver = channelMembers.find(member => member.userId !== message.senderId);
-		console.log('receive is: ', receiver.userId);
+
+		// console.log('receive is: ', receiver.userId);
 
 		if (receiver) {
 			const receiverSocketId = this.onlineUsers[receiver.userId];

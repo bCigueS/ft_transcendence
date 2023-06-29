@@ -11,18 +11,21 @@ const Homepage: React.FC = () => {
 				<div className={classes.info}>
 					<div className={classes.level}>
 						<h2>Choose your level</h2>
-						<p>Choose the <span>difficulty level</span>, between one to 3, to change the <span>size</span> of the paddle and the <span>speed</span> of the game !</p>
+						<p>There are 3 difficulty levels, <span>easy, medium, hard</span>. The different levels will change <span>paddle size</span> and <span>ball speed</span> of the game!
+						There is also a <span>special level</span> for your surprise!</p>
 					</div>
 
 					<div className={classes.control}>
 						<h2>Choose your control</h2>
-						<p>Use <span>Placeholder</span> and <span>Placeholder</span> or your <span>Placeholder</span> to control the paddle!</p>
+						<p>Play with either <span>mouse</span> or <span>keyboard</span> to control your paddle!
+						If you choose <span>play with keyboard</span>, use <span>up</span> and <span>down arrows</span> to move.
+						You can pause the game with <span>spacebar</span>.</p>
 
 					</div>
 
 					<div className={classes.play}>
 						<h2>Play the Game</h2>
-						<p>The first player to <span>11</span> win the game!</p>
+						<p>The first player to get <span>11</span> points, wins the game!</p>
 					</div>
 				</div>
 			</div>

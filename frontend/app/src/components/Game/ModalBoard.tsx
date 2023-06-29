@@ -1,6 +1,6 @@
 import { useContext, useState } from 'react';
 import { ModalProps } from './utils/types';
-import classes from  '../../sass/components/Game/Modal.module.scss';
+import classes from  '../../sass/components/Game/Board.module.scss';
 import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../../store/users-contexte';
 
@@ -56,7 +56,7 @@ export default function ModalBoard({ onDifficulty, onTool, onPlayerMode, onStart
 							<h2>Let's Pong!</h2>
 							<i className='fa-solid fa-table-tennis-paddle-ball'></i>
 						</div>
-						<button onClick={() => {setToPage(0); handlePlayAgain();}}>{cancelText}</button>
+						<button className={classes["button-cancel"]} onClick={() => {setToPage(0); handlePlayAgain();}}>{cancelText}</button>
 					</>
 				)}
 				{(isStarting && page === 0 && inviteMode && isInvited) && (
@@ -65,45 +65,45 @@ export default function ModalBoard({ onDifficulty, onTool, onPlayerMode, onStart
 							<h2>Let's Pong!</h2>
 							<i className='fa-solid fa-table-tennis-paddle-ball'></i>
 						</div>
-						<button onClick={() => {setToPage(0); handlePlayAgain();}}>{cancelText}</button>
+						<button className={classes["button-cancel"]} onClick={() => {setToPage(0); handlePlayAgain();}}>{cancelText}</button>
 					</>
 				)}
 				{(isStarting && page === 1 && !isInvited) && (
 					<>
-						<div>
-							<button onClick={() => {onDifficulty(0); onNextPage();}}>Beginner level</button>
+						<div className={classes.option}>
+							<button onClick={() => {onDifficulty(0); onNextPage();}}>Easy level</button>
 							<button onClick={() => {onDifficulty(1); onNextPage();}}>Medium level</button>
 							<button onClick={() => {onDifficulty(2); onNextPage();}}>Hard level</button>
 							<button onClick={() => {onDifficulty(3); onNextPage();}}>Special level</button>
 						</div>
-						<button onClick={() => {setToPage(0); handlePlayAgain();}}>{cancelText}</button>
+						<button className={classes["button-cancel"]} onClick={() => {setToPage(0); handlePlayAgain();}}>{cancelText}</button>
 					</>
 				)}
 				{(isStarting && page === 2 && !inviteMode) && (
 					<>
-						<div>
+						<div className={classes.option}>
 							<button onClick={() => {onTool("keyboard"); onNextPage();}}>Play with keyboard</button>
 							<button onClick={() => {onTool("mouse"); onNextPage();}}>Play with mouse</button>
 						</div>
-						<button onClick={() => {setToPage(0);}}>{cancelText}</button>
+						<button className={classes["button-cancel"]} onClick={() => {setToPage(0);}}>{cancelText}</button>
 					</>
 				)}
 				{(isStarting && page === 2 && inviteMode) && (
 					<>
-						<div>
+						<div className={classes.option}>
 							<button onClick={() => {onTool("keyboard"); onPlayerMode("double"); setIsDouble(true); onNextPage(); setIsStarting(false);}}>Play with keyboard</button>
 							<button onClick={() => {onTool("mouse"); onPlayerMode("double"); setIsDouble(true); onNextPage(); setIsStarting(false);}}>Play with mouse</button>
 						</div>
-						<button onClick={() => {setToPage(0); handlePlayAgain();}}>{cancelText}</button>
+						<button className={classes["button-cancel"]} onClick={() => {setToPage(0); handlePlayAgain();}}>{cancelText}</button>
 					</>
 				)}
 				{(isStarting && page === 3 && !inviteMode) && (
 					<>
-						<div>
-							<button onClick={() => {onPlayerMode("single"); onNextPage();}}>1 player</button>
-							<button onClick={() => {onPlayerMode("double"); setIsDouble(true); onNextPage();}}>2 players</button>
+						<div className={classes.option}>
+							<button onClick={() => {onPlayerMode("single"); onNextPage();}}>Practice Round</button>
+							<button onClick={() => {onPlayerMode("double"); setIsDouble(true); onNextPage();}}>Live Battle!</button>
 						</div>
-						<button onClick={() => {setToPage(0);}}>{cancelText}</button>
+						<button className={classes["button-cancel"]} onClick={() => {setToPage(0);}}>{cancelText}</button>
 					</>
 				)}
 				{(isStarting && page === 4 && !isDouble) && (
@@ -113,7 +113,7 @@ export default function ModalBoard({ onDifficulty, onTool, onPlayerMode, onStart
 							<button onClick={onStartPage}>{buttonText}</button>
 						</div>
 						<div>
-							<button onClick={() => {setToPage(0);}}>{cancelText}</button>
+							<button className={classes["button-cancel"]} onClick={() => {setToPage(0);}}>{cancelText}</button>
 						</div>
 					</>
 				)}

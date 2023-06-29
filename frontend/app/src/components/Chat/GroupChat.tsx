@@ -235,7 +235,7 @@ const GroupChat: React.FC<Props> = (props) => {
     const handleRemoveMute = (mute: UserAPI) => {
         console.log('about to remove mute: ', mute);
         const newMuted = muted.filter(m => m.id !== mute.id);
-        setAdmins(newMuted);
+        setMuted(newMuted);
         removeMute(props.chat.id, mute.id);
     }
 

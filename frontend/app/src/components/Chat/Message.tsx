@@ -99,8 +99,8 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 		if (sender)
 		{
 			setSender(sender);
-		}
 
+		}
 	}, [message.senderId, userCtx])
 
 	const checkSenderBlocked = useCallback(() => {
@@ -222,10 +222,27 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 					</div>
 				</div>
 			);
-		} else {
+		} else if (message.content.includes('joinGame/')) {
+			const invitation = message.content.split('>')[0];
+			const link = message.content.split('>')[1];
+
+			const info = message.content.split('/')[1];
+			const gameRoom = info.split('_')[0];
+			const senderId = info.split('_')[1];
+
 			return (
-				<p>{message.content}</p>
-				);
+				<div className={classes.link}>
+					{invitation} 👇 <br></br>
+					{/* <p>{invitation}</p> */}
+					<div className={classes.click} role="button" tab-index="0" onClick={() => handleClickJoinGame(+senderId, gameRoom) }>
+						{link}
+					</div>
+				</div>
+			);
+		} else {
+		return (
+			<p>{message.content}</p>
+			);
 		}
 	}
 

@@ -13,7 +13,7 @@
 	gap: 5rem;
 	
 	.rules {		
-		gap: 3rem;
+		gap: 1rem;
 		@include flexBox($align: flex-start);
 		
 		h1 {
@@ -39,19 +39,19 @@
 
 			.level {
 				h2 {
-					@include titleh1($fontSize: 2.4rem, $width: 22rem);
+					@include titleh1($fontSize: 2rem, $width: 20rem);
 				}
 			}
 
 			.control {
 				h2 {
-					@include titleh1($fontSize: 2.4rem, $width: 26rem);
+					@include titleh1($fontSize: 2rem, $width: 24rem);
 				}
 			}
 
 			.play {
 				h2 {
-					@include titleh1($fontSize: 2.4rem, $width: 19rem);
+					@include titleh1($fontSize: 2rem, $width: 18rem);
 				}
 
 			}

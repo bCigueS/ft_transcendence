@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useState } from "react";
+import { Fragment, useCallback, useContext, useEffect, useState } from "react";
 import classes from '../../sass/components/Chat/ChatOverview.module.scss';
 import ProfilIcon from "../Profile/ProfilIcon";
 import { UserAPI, UserContext } from "../../store/users-contexte";
@@ -23,7 +23,7 @@ onDeleteChat: (channelId: number) => void, onKick: (channelId: number, kickedId:
 		props.onSaveConversation(props.chat);
 	}
 
-	const getSender = () => {
+	const getSender = useCallback(() => {
 		if (props.chat.members && props.chat.name === "private")
 		{
 			props.chat.members.forEach((member) => {
@@ -31,9 +31,9 @@ onDeleteChat: (channelId: number) => void, onKick: (channelId: number, kickedId:
 					setSender(member);
 			})
 		}
-	}
+	}, [props.chat.members, props.chat.name, userCtx.user?.id])
 
-	const getLastMessage = () => {
+	const getLastMessage = useCallback(() => {
 		const messages = props.chat.messages;
 		let latestMessage = null;
 		if (messages && messages.length > 0) {
@@ -42,12 +42,12 @@ onDeleteChat: (channelId: number) => void, onKick: (channelId: number, kickedId:
 			}, messages[0]);
 		}
 		setLastMessage(latestMessage);
-	}
+	}, [props.chat.messages])
 	
 	useEffect(() => {
 		getSender();
 		getLastMessage();
-	}, [conversation, props.chats]);
+	}, [conversation, props.chats, getLastMessage, getSender]);
 
 
 	const handleUserConfirmation = () => {
