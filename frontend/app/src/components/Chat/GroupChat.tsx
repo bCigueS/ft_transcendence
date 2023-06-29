@@ -13,7 +13,9 @@ type Props = {
     onRemove: (member: UserAPI) => void,
     onKick: (channelId: number, kickedId: number) => void,
     onAddAdmin: (channelId: number, userId: number) => void,
-    onRemoveAdmin: (channelId: number, userId: number) => void
+    onRemoveAdmin: (channelId: number, userId: number) => void,
+    onAddMuted: (channelId: number, userId: number) => void,
+    onRemoveMuted: (channelId: number, userId: number) => void
 };
 
 const GroupChat: React.FC<Props> = (props) => {
@@ -218,6 +220,7 @@ const GroupChat: React.FC<Props> = (props) => {
             ]
         }
         modifyChannel(props.chat.id, chanData);
+        props.onAddMuted(props.chat.id, member.id);
     }
 
     const handleRemoveAdmin = (admin: UserAPI) => {
@@ -240,6 +243,7 @@ const GroupChat: React.FC<Props> = (props) => {
         const newMuted = muted.filter(m => m.id !== mute.id);
         setMuted(newMuted);
         removeMute(props.chat.id, mute.id);
+        props.onRemoveMuted(props.chat.id, mute.id);
     }
 
     const handleKick = (member: UserAPI) => {

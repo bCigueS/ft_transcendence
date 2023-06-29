@@ -17,6 +17,8 @@ type Props = {
     onKick: (channelId: number, kickedId: number) => void,
     onAddAdmin: (channelId: number, userId: number) => void,
     onRemoveAdmin: (channelId: number, userId: number) => void,
+    onAddMuted: (channelId: number, userId: number) => void,
+    onRemoveMuted: (channelId: number, userId: number) => void,
 };
 
 type BackdropProps = {
@@ -55,6 +57,8 @@ const Overlay: React.FC<Props> = (props) => {
 					onKick={props.onKick}
 					onAddAdmin={props.onAddAdmin}
 					onRemoveAdmin={props.onRemoveAdmin}
+					onAddMuted={props.onAddMuted}
+					onRemoveMuted={props.onRemoveMuted}
 				/>
 			}
 		</Card>
@@ -77,6 +81,8 @@ const ChatInfo: React.FC<Props> = (props) => {
 							onKick={props.onKick}
 							onAddAdmin={props.onAddAdmin}
 							onRemoveAdmin={props.onRemoveAdmin}
+							onAddMuted={props.onAddMuted}
+							onRemoveMuted={props.onRemoveMuted}
 							>{props.children}</Overlay>, portalOverlays)}
 		</Fragment>
 	)
