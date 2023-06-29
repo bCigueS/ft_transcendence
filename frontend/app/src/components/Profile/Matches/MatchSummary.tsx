@@ -11,7 +11,7 @@ const MatchSummary: React.FC<{summary: UserMatch; user?: UserAPI}> = (props) => 
 
 			<div className={classes.card}>
 				<ProfilIcon user={props.user} />
-				<div>
+				<div className={classes.name}>
 					<h1>{props.user?.name}</h1>
 				</div>
 			</div>

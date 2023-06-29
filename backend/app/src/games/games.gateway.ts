@@ -346,7 +346,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 
 			const dx = gameInfo.ballSpeed * Math.cos(angle);
 			const dy = gameInfo.ballSpeed * Math.sin(angle);
-			const s = gameInfo.ballSpeed + 0.5;
+			const s = gameInfo.ballSpeed;
 
 			const dist = (gameInfo.x > gameInfo.middleBoard ? gameInfo.x - gameInfo.middleBoard : gameInfo.middleBoard - (gameInfo.x - (gameInfo.r / 2)));
 			const opponentX = (gameInfo.x > gameInfo.middleBoard ? gameInfo.middleBoard - dist : gameInfo.middleBoard + dist);

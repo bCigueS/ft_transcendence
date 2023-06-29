@@ -434,7 +434,7 @@ export default function Pong(props: PongProp) {
 		dy = ballSpeed * Math.sin(angle);
 		x = (add === true ? ballX + ballRadius : ballX - ballRadius);
 		y = ballY;
-		s = ballSpeed + 0.5
+		s = ballSpeed
 
 		return {dx, dy, x, y, s};
 	}, [ballRadius, ballX, ballY, ballSpeed]);
