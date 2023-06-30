@@ -4,7 +4,7 @@ import { Fragment } from 'react';
 import ReactDOM from 'react-dom';
 import Card from "./../UI/Card";
 import { UserAPI } from "../../store/users-contexte";
-import { Channel, modifyChannel } from "./chatUtils";
+import { Channel } from "./chatUtils";
 import GroupChat from "./GroupChat";
 import PrivateChat from "./PrivateChat";
 
