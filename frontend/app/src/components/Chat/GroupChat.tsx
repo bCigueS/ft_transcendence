@@ -418,22 +418,19 @@ const GroupChat: React.FC<Props> = (props) => {
 								</div>
 							}
 						</div>
-                        {/* <button onClick={copyToClipboard}>Copy Join Link 
-						 
-						 </button> */}
                     </div>
                     {
                         isCreator &&
                         <div>
                             <div className={classes.passwordLabel}>
-                                <h2>
-                                Password protection
-                                </h2>
                                 <i 
                                     title={isChatPasswordProtected ? "block" : "unblock"}
                                     onClick={handlePasswordProtect}
                                     className={isChatPasswordProtected ? 'fa-solid fa-lock' : 'fa-solid fa-lock-open'}>
                                 </i>
+                                <h2>
+                                Password protection
+                                </h2>
                             </div>
                         {
                             !isChatPasswordProtected && 
@@ -445,7 +442,9 @@ const GroupChat: React.FC<Props> = (props) => {
                             name='name'
                             value={chatPassword} 
                             onChange={passwordHandler}
-                            maxLength={12}/>
+                            maxLength={12}
+							placeholder="Set pass to protect channel..."
+							/>
                             <br></br>
                             </form>
                             { 
