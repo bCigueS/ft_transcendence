@@ -130,7 +130,6 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 		});
 
 		if (isFirstMessage) {
-			console.log('this is the first message ever in this convo.');
 			const channelMembers = await this.prisma.channelMembership.findMany({
 				where: {
 					channelId: message.channelId
@@ -139,18 +138,12 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 
 			const receiver = channelMembers.find(member => member.userId !== message.senderId);
 
-			// console.log('receive is: ', receiver.userId);
-
 			if (receiver) {
 				const receiverSocketId = this.onlineUsers[receiver.userId];
-				console.log('emitting join to user ', receiver.userId.toString());
 				this.io.to(receiverSocketId).emit('join', message.channelId.toString());
 			}
 		}
-
-		console.log('sending message: ', message.content, ' to all clients in room ', message.channelId);
 		this.io.in(message.channelId.toString()).emit('message', newMessage);
-
 	}
 
 	@SubscribeMessage('createJoin')
@@ -181,7 +174,8 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 		console.log('in message gateway, received kickUser of user ', data.userId, 'from channel: ', data.channelId);
 		const kickedSocketId = this.onlineUsers[data.userId];
 		this.io.to(kickedSocketId).emit('handleKick', data.channelId.toString());
-			// client.broadcast.emit('chatDeleted', data);
+		this.io.in(data.channelId.toString()).emit('handleRemoveMember', data);
+		// client.broadcast.emit('chatDeleted', data);
 	}
 
 	@SubscribeMessage('addAdmin')
