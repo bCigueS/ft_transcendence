@@ -243,6 +243,7 @@ export default function Chat() {
 			setSelectedConversation(undefined);
 		}
 		setChats(prevChats => prevChats.filter(chat => chat.id !== +channelId));
+
 	}, [selectedConversation]);
 	
 	const userJoinedListener = useCallback((data : {
@@ -275,8 +276,10 @@ export default function Chat() {
 
 	useEffect(() => {
 		socket?.on("handleKick", kickListener);
+		socket?.on("handleRemoveMember", removeMemberListener);
 		return () => {
 		  socket?.off("handleKick", kickListener);
+		  socket?.off("handleRemoveMember", removeMemberListener);
 		}
 	}, [socket, kickListener]);
 
@@ -335,6 +338,30 @@ export default function Chat() {
 		});
 		});
 	}, []);
+
+	const removeMemberListener = useCallback(
+		async (data: { channelId: number, userId: number }) => {
+			console.log('Channel that you belong to removed this member: ', data.userId);
+	
+			setChats((prevChats: Channel[]) => {
+			return prevChats.map(chat => {
+				if (chat.id === data.channelId) {
+				const members = chat.members;
+				if (members) {
+					const updatedMembers = members.filter(member => member.id !== data.userId);
+					const updatedChat: Channel = {
+					...chat,
+					members: updatedMembers
+					};
+					return updatedChat;
+				}
+				return chat;
+				} else {
+				return chat;
+				}
+			});
+			});
+		}, []);
 	  
 
 	useEffect(() => {

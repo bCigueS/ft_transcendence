@@ -30,7 +30,7 @@ const GroupChat: React.FC<Props> = (props) => {
     const [ members, setMembers ] = useState<UserAPI[]>([]);
     const [ banned, setBanned ] = useState<UserAPI[]>([]);
     const [ muted, setMuted ] = useState<UserAPI[]>([]);
-    const [ displayMembers, setDisplayMembers ] = useState(true);
+    const [ displayMembers, setDisplayMembers ] = useState(false);
     const [ displayAdmin, setDisplayAdmin ] = useState(false);
     const [ displayBanned, setDisplayBanned ] = useState(false);
     const [ displayMuted, setDisplayMuted ] = useState(false);
