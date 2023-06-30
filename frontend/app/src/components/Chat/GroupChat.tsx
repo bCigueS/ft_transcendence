@@ -79,7 +79,6 @@ const GroupChat: React.FC<Props> = (props) => {
     }
 
     const handleClickLeave = () => {
-        console.log(userCtx.user?.name, ' left channel ', props.chat.name);
         if (userCtx.user)
             handleRemoveAdmin(userCtx.user);
         if (userCtx.user)
@@ -159,7 +158,6 @@ const GroupChat: React.FC<Props> = (props) => {
 			}
 			
 		}
-        console.log('about to cange channel protection setting : ', updatedChan);
 		await modifyChannel(props.chat.id, updatedChan);
         setIsChatPasswordProtected(!isChatPasswordProtected);
         setChatPassword('');
@@ -187,8 +185,6 @@ const GroupChat: React.FC<Props> = (props) => {
     }
 
     const handleAddAdmin = (member: UserAPI) => {
-        console.log('about to add member as admin: ', member);
-
         setAdmins([...admins, member]);
         const chanData = {
             admins: [
@@ -202,15 +198,12 @@ const GroupChat: React.FC<Props> = (props) => {
     }
 
     const handleAddBanned = (member: UserAPI) => {
-        console.log('about to add member as banned: ', member);
-
 		handleKick(member);
         setBanned([...banned, member]);
         banUser(props.chat.id, member.id);
     }
 
     const handleAddMuted = (member: UserAPI) => {
-        console.log('about to add member as muted user: ', member);
 
         setMuted([...muted, member]);
         const chanData = {
@@ -225,7 +218,6 @@ const GroupChat: React.FC<Props> = (props) => {
     }
 
     const handleRemoveAdmin = (admin: UserAPI) => {
-        console.log('about to remove admin: ', admin);
         const newAdmins = admins.filter(a => a.id !== admin.id);
         setAdmins(newAdmins);
         removeAdmin(props.chat.id, admin.id);
@@ -233,14 +225,12 @@ const GroupChat: React.FC<Props> = (props) => {
     }
 
     const handleRemoveBan = (ban: UserAPI) => {
-        console.log('about to remove ban: ', ban);
         const newBanned = banned.filter(b => b.id !== ban.id);
         setBanned(newBanned);
         removeBan(props.chat.id, ban.id);
     }
 
     const handleRemoveMute = (mute: UserAPI) => {
-        console.log('about to remove mute: ', mute);
         const newMuted = muted.filter(m => m.id !== mute.id);
         setMuted(newMuted);
         removeMute(props.chat.id, mute.id);
@@ -248,7 +238,6 @@ const GroupChat: React.FC<Props> = (props) => {
     }
 
     const handleKick = (member: UserAPI) => {
-        console.log('about to remove user from chat: ', member);
         handleRemoveAdmin(member);
         handleRemoveBan(member);
         handleRemoveMute(member);
@@ -304,7 +293,6 @@ const GroupChat: React.FC<Props> = (props) => {
                         handleKick={true}
                         handleBan={canBan(member)}
                         handleMute={canMute(member)}
-                        handleDM={true}
                         handleAddAdmin={canAddAsAdmin(member)}
                         />
                         ) : 
@@ -334,8 +322,6 @@ const GroupChat: React.FC<Props> = (props) => {
                         onRemove={handleRemoveAdmin}
                         handleAddRemove={true}
                         isSelected={true}
-                        // handleKickBanMute={canKickBanMute(administrator)}
-                        handleDM={true}
                         />
                         ))
                     :
@@ -363,7 +349,6 @@ const GroupChat: React.FC<Props> = (props) => {
                         onRemove={handleRemoveBan}
                         handleAddRemove={true}
                         isSelected={true}
-                        handleDM={true}
                         />
                         ))
                     :
@@ -391,7 +376,6 @@ const GroupChat: React.FC<Props> = (props) => {
                             onRemove={handleRemoveMute}
                             handleAddRemove={true}
                             isSelected={true}
-                            handleDM={true}
                         />
                         ))
                     :
