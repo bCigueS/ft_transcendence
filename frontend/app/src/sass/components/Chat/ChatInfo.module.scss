@@ -5,9 +5,6 @@
 	width: 100%;
 	padding: 2rem 3rem;
     justify-content: space-between;
-	// max-height: 70rem;
-	// overflow: scroll;
-	// overflow-x: hidden;
 
     .userList {
         max-height: 25rem;
@@ -96,8 +93,8 @@
 			.copiedClipboard {
 				display: flex;
 				position: absolute;
-				right: 9.5rem;
-				bottom: 17rem;
+				right: 9.2rem;
+				bottom: 19.5rem;
 				background-color: $light-vermillon;
 				padding: 1rem;
 				border-radius: 0.5rem;
