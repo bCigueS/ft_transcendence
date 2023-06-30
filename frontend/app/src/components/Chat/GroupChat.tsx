@@ -93,6 +93,12 @@ const GroupChat: React.FC<Props> = (props) => {
             props.onKick(props.chat.id, userCtx.user.id);
     }
 
+	const isMemberCreator = (member: UserAPI) => {
+		if (member.id === props.chat.creatorId)
+            return true;
+		return false;
+	}
+
     const handleClickDelete = () => {
         setUserConfirm(true);
     }
@@ -283,23 +289,25 @@ const GroupChat: React.FC<Props> = (props) => {
                         members.map((member) => 
                         member.id !== userCtx.user?.id ? (
                         <AddToGroup 
-                        key={member.id} 
-                        user={member}
-                        onRemove={handleKick}
-                        onAddAdmin={handleAddAdmin}
-                        onAddBanned={handleAddBanned}
-                        onAddMuted={handleAddMuted}
-                        handleKickBanMute={canKickBanMute(member)}
-                        handleKick={true}
-                        handleBan={canBan(member)}
-                        handleMute={canMute(member)}
-                        handleAddAdmin={canAddAsAdmin(member)}
+							key={member.id} 
+							user={member}
+							onRemove={handleKick}
+							onAddAdmin={handleAddAdmin}
+							onAddBanned={handleAddBanned}
+							onAddMuted={handleAddMuted}
+							handleKickBanMute={canKickBanMute(member)}
+							handleKick={true}
+							handleBan={canBan(member)}
+							handleMute={canMute(member)}
+							handleAddAdmin={canAddAsAdmin(member)}
+							superUser={isMemberCreator(member)}
                         />
                         ) : 
                         <AddToGroup 
-                        key={member.id} 
-                        user={member}
-                        />)
+							key={member.id} 
+							user={member}
+							superUser={isMemberCreator(member)}
+						/>)
                     }
                 </div>
                 <div className={classes.display}>
@@ -317,12 +325,13 @@ const GroupChat: React.FC<Props> = (props) => {
                         displayAdmin && admins.length > 0 ?
                             admins.map((admin) => (
                         <AddToGroup 
-                        key={admin.id} 
-                        user={admin}
-                        onRemove={handleRemoveAdmin}
-                        handleAddRemove={true}
-                        isSelected={true}
-                        />
+							key={admin.id} 
+							user={admin}
+							onRemove={handleRemoveAdmin}
+							handleAddRemove={true}
+							isSelected={true}
+							superUser={isMemberCreator(admin)}
+						/>
                         ))
                     :
                     displayAdmin && admins.length === 0 &&
@@ -344,11 +353,11 @@ const GroupChat: React.FC<Props> = (props) => {
                         displayBanned && banned.length > 0 ?
                             banned.map((ban) => (
                         <AddToGroup 
-                        key={ban.id} 
-                        user={ban}
-                        onRemove={handleRemoveBan}
-                        handleAddRemove={true}
-                        isSelected={true}
+							key={ban.id} 
+							user={ban}
+							onRemove={handleRemoveBan}
+							handleAddRemove={true}
+							isSelected={true}
                         />
                         ))
                     :
