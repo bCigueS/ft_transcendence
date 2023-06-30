@@ -274,6 +274,30 @@ export default function Chat() {
 		}
 	}, [socket, joinListener]);
 
+	const removeMemberListener = useCallback(
+		async (data: { channelId: number, userId: number }) => {
+			console.log('Channel that you belong to removed this member: ', data.userId);
+	
+			setChats((prevChats: Channel[]) => {
+			return prevChats.map(chat => {
+				if (chat.id === data.channelId) {
+				const members = chat.members;
+				if (members) {
+					const updatedMembers = members.filter(member => member.id !== data.userId);
+					const updatedChat: Channel = {
+					...chat,
+					members: updatedMembers
+					};
+					return updatedChat;
+				}
+				return chat;
+				} else {
+				return chat;
+				}
+			});
+		});
+	}, []);
+
 	useEffect(() => {
 		socket?.on("handleKick", kickListener);
 		socket?.on("handleRemoveMember", removeMemberListener);
@@ -281,7 +305,7 @@ export default function Chat() {
 		  socket?.off("handleKick", kickListener);
 		  socket?.off("handleRemoveMember", removeMemberListener);
 		}
-	}, [socket, kickListener]);
+	}, [socket, kickListener, removeMemberListener]);
 
 	const addAdminListener = useCallback(
 		async (data: { channelId: number, userId: number }) => {
@@ -306,7 +330,7 @@ export default function Chat() {
 			}
 		});
 		});
-	}, []);
+	}, [userCtx]);
 
 	useEffect(() => {
 		socket?.on("handleAddAdmin", addAdminListener);
@@ -337,32 +361,7 @@ export default function Chat() {
 			}
 		});
 		});
-	}, []);
-
-	const removeMemberListener = useCallback(
-		async (data: { channelId: number, userId: number }) => {
-			console.log('Channel that you belong to removed this member: ', data.userId);
-	
-			setChats((prevChats: Channel[]) => {
-			return prevChats.map(chat => {
-				if (chat.id === data.channelId) {
-				const members = chat.members;
-				if (members) {
-					const updatedMembers = members.filter(member => member.id !== data.userId);
-					const updatedChat: Channel = {
-					...chat,
-					members: updatedMembers
-					};
-					return updatedChat;
-				}
-				return chat;
-				} else {
-				return chat;
-				}
-			});
-			});
-		}, []);
-	  
+	}, []);	  
 
 	useEffect(() => {
 		socket?.on("handleRemoveAdmin", removeAdminListener);
@@ -394,7 +393,7 @@ export default function Chat() {
 			}
 		});
 		});
-	}, []);
+	}, [userCtx]);
 
 	useEffect(() => {
 		socket?.on("handleAddMuted", addMutedListener);
