@@ -16,7 +16,8 @@ const AddToGroup: React.FC<{user: UserAPI, 	onAdd?: (member: UserAPI) => void,
 	handleKick?: boolean,
 	handleBan?: boolean,
 	handleMute?: boolean,
-	handleAddAdmin?: boolean}> = ({
+	handleAddAdmin?: boolean,
+	superUser?: boolean}> = ({
 		user, 
 		onAdd, 
 		onRemove,
@@ -30,7 +31,8 @@ const AddToGroup: React.FC<{user: UserAPI, 	onAdd?: (member: UserAPI) => void,
 		handleKick = false,
 		handleBan = false,
 		handleMute = false,
-		handleAddAdmin = false}) => {
+		handleAddAdmin = false,
+		superUser= false}) => {
 	
 	const userCtx = useContext(UserContext);
 	const navigate = useNavigate();
@@ -77,7 +79,7 @@ const AddToGroup: React.FC<{user: UserAPI, 	onAdd?: (member: UserAPI) => void,
     return (
 		<div className={handleKickBanMute ? classes.enhancedContainer : classes.container}>
 
-			<ProfilIcon user={user} />
+			<ProfilIcon user={user} superUser={superUser}/>
 			<h2>{user?.name}</h2>
 
 			{
