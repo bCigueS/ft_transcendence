@@ -56,7 +56,7 @@
 
     .invite {
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
         justify-content: space-between;
         width: 100%;
         margin-bottom: 0.5rem;
@@ -66,8 +66,60 @@
             top: 2rem;
         }
 
+		.link {
+			margin-left: 1rem;
+			display: flex;
+			justify-content: space-between;
+			border: 0.1rem solid black;
+			border-radius: 0.5rem;
+			width: 70%;
+
+			p {
+				color: black;
+				padding: 1rem;
+				font-size: medium;
+			}
+			
+			i {
+				color: black;
+				font-size: 2rem;
+				padding: 1rem;
+			
+				&:hover {
+				  color: $light-vermillon;
+				}
+			  }
+		
+			.copiedClipboard {
+				display: flex;
+				position: absolute;
+				right: 9.5rem;
+				bottom: 17rem;
+				background-color: $light-vermillon;
+				padding: 1rem;
+				border-radius: 0.5rem;
+				color: white;
+				font-weight: bold;
+			}
+
+			.copiedClipboard::after {
+				content: "";
+				position: absolute;
+				top: 100%;
+				left: 50%;
+				width: 0;
+				height: 0;
+				border-left: 0.5rem solid transparent; 
+				border-right: 0.5rem solid transparent; 
+				border-top: 0.5rem solid $light-vermillon; 
+				transform: translateX(-50%);
+			}
+
+		}
+
         
     }
+
 
     .passwordLabel {
         display: flex;

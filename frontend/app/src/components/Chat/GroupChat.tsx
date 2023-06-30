@@ -35,6 +35,7 @@ const GroupChat: React.FC<Props> = (props) => {
     const [ displayBanned, setDisplayBanned ] = useState(false);
     const [ displayMuted, setDisplayMuted ] = useState(false);
     const [ joinLink, setJoinLink ] = useState('');
+	const [ showCopiedToClipboard, setShowCopiedToClipboard ] = useState(false);
 	const userCtx = useContext(UserContext);
     
 
@@ -265,6 +266,8 @@ const GroupChat: React.FC<Props> = (props) => {
     
       const copyToClipboard = (e: any) => {
         navigator.clipboard.writeText(joinLink);
+		setShowCopiedToClipboard(true);
+		setTimeout(() => setShowCopiedToClipboard(false), 1500);
         e.target.focus();
       };
 
@@ -400,8 +403,24 @@ const GroupChat: React.FC<Props> = (props) => {
                         <h2>
                             Invite your friends
                         </h2>
-                        {/* <p>Join link: {joinLink}</p> */}
-                        <button onClick={copyToClipboard}>Copy Join Link</button>
+						<div className={classes.link}>
+
+							<p>{joinLink} </p>
+							{
+								!showCopiedToClipboard &&
+								<i onClick={copyToClipboard} className="fa-solid fa-copy"> </i>
+							} 
+							{
+								showCopiedToClipboard && 
+								<div>
+									<i className="fa-solid fa-check"></i>
+									<div className={classes.copiedClipboard}>Copied!</div>
+								</div>
+							}
+						</div>
+                        {/* <button onClick={copyToClipboard}>Copy Join Link 
+						 
+						 </button> */}
                     </div>
                     {
                         isCreator &&
