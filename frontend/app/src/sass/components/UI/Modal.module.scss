@@ -20,6 +20,9 @@
 		overflow: hidden;
 		background: white;
 		display: flex;
+		max-height: 70rem;
+		overflow: scroll;
+		overflow-x: hidden;
 
 	.header {
 		padding: 1rem;
