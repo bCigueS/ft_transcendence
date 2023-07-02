@@ -92,6 +92,7 @@ export default function Chat() {
 		  content: message.content,
 		  channelId: message.channelId,
 		};
+
 	  
 		const newChats = [...chats];
 		const chatIndex = newChats.findIndex(chat => chat.id === newMessage.channelId);
@@ -229,7 +230,7 @@ export default function Chat() {
 		  console.log(error);
 		}
 		return { status: 200 };
-		}, [fetchChannels, chats, handleJoinGroup]);
+	}, [fetchChannels, chats, handleJoinGroup]);
 	
 	const joinListener = useCallback((channelId: string) => {
 		console.log('client joined channel ', channelId);
@@ -426,7 +427,6 @@ export default function Chat() {
 		});
 	}, []);
 	  
-
 	useEffect(() => {
 		socket?.on("handleRemoveMuted", removeMutedListener);
 		return () => {

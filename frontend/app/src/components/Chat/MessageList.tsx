@@ -13,6 +13,7 @@ type JoinResponse = {
 const MessageList: React.FC<{send: (content: string, channelId: number) => {}, chat: Channel, chats: Channel[], msgs: MessageAPI[], onDelete: (message: MessageAPI) => void, onJoin: (joinData: JoinChannelDTO) => Promise<JoinResponse>}> = ({ send, chat, chats, msgs, onDelete, onJoin }) => {
 
     const [ messages, setMessages ] = useState<MessageAPI[]>(chat.messages);
+    const [ isMuted, setIsMuted ] = useState(false);
 	const messageInput = useRef<HTMLInputElement>(null);
 	const userCtx = useContext(UserContext);
 
@@ -24,9 +25,20 @@ const MessageList: React.FC<{send: (content: string, channelId: number) => {}, c
 		}
 	}, []);
 
-    useEffect(() => {
-        setMessages(chat.messages);
-    }, [chat, chats, msgs]);
+	useEffect(() => {
+		setMessages(msgs);
+	  }, [msgs]);
+
+	useEffect(() => {
+		const fetchUserMuteStatus = async () => {
+			if(userCtx.user?.id && chat.name !== "private") {
+				const userIsMuted = await isMemberMuted(chat.id, userCtx.user?.id);
+				setIsMuted(userIsMuted);
+			}
+		}
+		// setMessages(chat.messages);
+		fetchUserMuteStatus();
+	}, [chat, chats, msgs, userCtx.user?.id]);
     
     const isMine = (message: MessageAPI) => {
 		if (message.senderId === userCtx.user?.id)
@@ -42,11 +54,7 @@ const MessageList: React.FC<{send: (content: string, channelId: number) => {}, c
 		
 			return (true);
 		return false;
-			// return false;
-		// return (true);
-
 	}
-
 			
 	const displayDay = (message: MessageAPI) => {
 		
@@ -61,21 +69,15 @@ const MessageList: React.FC<{send: (content: string, channelId: number) => {}, c
 		return false;
 	}
 
-    const handleSubmit = async (event: { preventDefault: () => void; }) => {
-        event.preventDefault();
+    const handleSubmit = (event: { preventDefault: () => void; }) => {
+		event.preventDefault();
         const enteredText = messageInput.current!.value;
-
+		
         if (enteredText.trim().length === 0) {
-            return ;
+			return ;
         }
-
-		let userIsMuted = false;
-		if (userCtx.user?.id && chat.name !== "private")
-			userIsMuted = await isMemberMuted(chat.id, userCtx.user?.id);
-		if (!userIsMuted)
-		{
-        	send(enteredText, chat.id);
-		}
+		console.log('in handle submit to send message');
+		send(enteredText, chat.id);
         messageInput.current!.value = '';
     }
 
@@ -103,12 +105,22 @@ const MessageList: React.FC<{send: (content: string, channelId: number) => {}, c
                 }
             </div>
             <form  onSubmit={handleSubmit} className={classes.input}>
-                <input className={classes.sendInput} 
-                        type="text"
-                        ref={messageInput}
-                        placeholder='type here...'
+				{
+					!isMuted ?
+					<input className={classes.sendInput} 
+						type="text"
+						ref={messageInput}
+						placeholder='type here...'
 						maxLength={150} />
-            <div ref={lastMessageRef}></div>
+					:
+					<input className={classes.sendInput} 
+						type="text"
+						ref={messageInput}
+						placeholder='You are not authorized to talk in this channel 🫢'
+						maxLength={150}
+						disabled/>
+				}
+					<div ref={lastMessageRef}></div>
             </form>
         </>
     );
