@@ -220,13 +220,9 @@ export class UsersController {
 					errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
 			}),
 		) file: Express.Multer.File) {
-		console.log("This is the file: ", file);
 
 		const validExtension = ['jpg', 'png', 'jpeg'];
 		const fileExtension = file.originalname.split('.').pop().toLowerCase();
-
-		console.log(validExtension);
-		console.log(fileExtension);
 
 		if (!validExtension.includes(fileExtension)) {
 			await unlink(file.path, (err) => {
