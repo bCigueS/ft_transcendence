@@ -27,7 +27,7 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
     this.logger.log(`Websocket chat gateway initialized.`);
 
 	GamesGateway.eventEmitter.on('gameInvitation', async ({ senderId, receiverId, link }) => {
-		console.log('in event emitter');
+		// console.log('in event emitter');
 
 		const sender = await this.prisma.user.findUnique({ where: { id: senderId } });
 		if (!sender) {
@@ -82,14 +82,14 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 
     client.on('user_connected', (userId) => {
       this.onlineUsers[userId] = client.id;
-      console.log('User connected: ', userId);
+    //   console.log('User connected: ', userId);
     });
 
     client.on('disconnect', () => {
       const userToDisconnect = Object.keys(this.onlineUsers).find(key => this.onlineUsers[key] === client.id);
       if (userToDisconnect) {
         delete this.onlineUsers[userToDisconnect];
-        console.log('User disconnected: ', userToDisconnect);
+        // console.log('User disconnected: ', userToDisconnect);
       }
     });
   }
@@ -152,7 +152,7 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 			receiverId: number, 
 			channelId: number}) {
 		const receiverSocketId = this.onlineUsers[data.receiverId];
-		console.log('emitting join to user ', data.receiverId.toString());
+		// console.log('emitting join to user ', data.receiverId.toString());
 		this.io.to(receiverSocketId).emit('join', data.channelId.toString());
 	}
   
@@ -171,7 +171,7 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 								channelId: number, 
 								userId: number
 							}): Promise<void> {
-		console.log('in message gateway, received kickUser of user ', data.userId, 'from channel: ', data.channelId);
+		// console.log('in message gateway, received kickUser of user ', data.userId, 'from channel: ', data.channelId);
 		const kickedSocketId = this.onlineUsers[data.userId];
 		this.io.to(kickedSocketId).emit('handleKick', data.channelId.toString());
 		this.io.in(data.channelId.toString()).emit('handleRemoveMember', data);
@@ -184,7 +184,7 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 								channelId: number, 
 								userId: number
 							}): Promise<void> {
-		console.log('in message gateway, received add admin of user ', data.userId, 'from channel: ', data.channelId);
+		// console.log('in message gateway, received add admin of user ', data.userId, 'from channel: ', data.channelId);
 		this.io.in(data.channelId.toString()).emit('handleAddAdmin', data);
 	}
 
@@ -194,7 +194,7 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 								channelId: number, 
 								userId: number
 							}): Promise<void> {
-		console.log('in message gateway, received remove admin of user ', data.userId, 'from channel: ', data.channelId);
+		// console.log('in message gateway, received remove admin of user ', data.userId, 'from channel: ', data.channelId);
 		this.io.in(data.channelId.toString()).emit('handleRemoveAdmin', data);
 	}
 
@@ -204,7 +204,7 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 								channelId: number, 
 								userId: number
 							}): Promise<void> {
-		console.log('in message gateway, received add muted of user ', data.userId, 'from channel: ', data.channelId);
+		// console.log('in message gateway, received add muted of user ', data.userId, 'from channel: ', data.channelId);
 		this.io.in(data.channelId.toString()).emit('handleAddMuted', data);
 	}
 
@@ -214,13 +214,13 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 								channelId: number, 
 								userId: number
 							}): Promise<void> {
-		console.log('in message gateway, received remove muted of user ', data.userId, 'from channel: ', data.channelId);
+		// console.log('in message gateway, received remove muted of user ', data.userId, 'from channel: ', data.channelId);
 		this.io.in(data.channelId.toString()).emit('handleRemoveMuted', data);
 	}
 
 	@SubscribeMessage('handleJoinGroup')
 	async handleJoinGroup(@ConnectedSocket() client: Socket, @MessageBody() data: { channelId: number, userId: number }): Promise<void> {
-		console.log('In message gateway, user ', data.userId, ' just joined:', data.channelId);
+		// console.log('In message gateway, user ', data.userId, ' just joined:', data.channelId);
 
 		const channel = await this.prisma.channel.findUnique({
 			where: { id: data.channelId },
@@ -250,7 +250,7 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 									senderId: number }, 
 								userId: number
 							}): Promise<void> {
-		console.log(' in message gateway, about to delete message: ', data.message.content);
+		// console.log(' in message gateway, about to delete message: ', data.message.content);
 		this.io.in(data.message.channelId.toString()).emit('messageDeleted', data.message);
 	// client.broadcast.emit('messageDeleted', data.message);
 	}

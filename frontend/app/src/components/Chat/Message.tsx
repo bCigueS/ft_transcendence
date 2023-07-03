@@ -115,7 +115,7 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 			{
 				if (blockedUser.id === message.senderId)
 				{
-					console.log('sender is blocked');
+					// console.log('sender is blocked');
 					setSenderBlocked(true);
 				}
 			}
@@ -143,7 +143,7 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 	}
 	
 	const handleClickJoinGame = (senderId: number, gameRoom: string ) => {
-		console.log(senderId, gameRoom);
+		// console.log(senderId, gameRoom);
 		navigate('/pong', {
 			state: {
 				playerId: userCtx.user?.id,
@@ -190,7 +190,7 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 		}
 
 		try {
-			console.log('about to call handleJoinLink when its not password protected');
+			// console.log('about to call handleJoinLink when its not password protected');
 			const response: JoinResponse = await onJoin(joinData);
 
 			if (response.status !== 200 && response.error) {

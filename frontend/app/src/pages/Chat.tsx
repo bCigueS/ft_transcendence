@@ -228,18 +228,19 @@ export default function Chat() {
 			
 		} catch (error) {
 		  console.log(error);
+
 		}
 		return { status: 200 };
 	}, [fetchChannels, chats, handleJoinGroup]);
 	
 	const joinListener = useCallback((channelId: string) => {
-		console.log('client joined channel ', channelId);
+		// console.log('client joined channel ', channelId);
 		socket?.emit('join', parseInt(channelId, 10));
 		fetchChannels();
 	  }, [fetchChannels, socket]);
 
 	const kickListener = useCallback(async (channelId: string) => {
-		console.log('client was kicked from channel ', channelId);
+		// console.log('client was kicked from channel ', channelId);
 		if (selectedConversation && +channelId === selectedConversation.id) {
 			setSelectedConversation(undefined);
 		}
@@ -277,7 +278,7 @@ export default function Chat() {
 
 	const removeMemberListener = useCallback(
 		async (data: { channelId: number, userId: number }) => {
-			console.log('Channel that you belong to removed this member: ', data.userId);
+			// console.log('Channel that you belong to removed this member: ', data.userId);
 	
 			setChats((prevChats: Channel[]) => {
 			return prevChats.map(chat => {
@@ -310,7 +311,7 @@ export default function Chat() {
 
 	const addAdminListener = useCallback(
 		async (data: { channelId: number, userId: number }) => {
-		console.log('Channel that you belong to has a new admin: ', data.userId);
+		// console.log('Channel that you belong to has a new admin: ', data.userId);
 
 		const newAdmin = await userCtx.fetchUserById(data.userId);
 		setChats((prevChats: Channel[]) => {
@@ -342,7 +343,7 @@ export default function Chat() {
 
 	const removeAdminListener = useCallback(
 	async (data: { channelId: number, userId: number }) => {
-		console.log('Channel that you belong to removed this admin: ', data.userId);
+		// console.log('Channel that you belong to removed this admin: ', data.userId);
 
 		setChats((prevChats: Channel[]) => {
 		return prevChats.map(chat => {
@@ -373,7 +374,7 @@ export default function Chat() {
 
 	const addMutedListener = useCallback(
 		async (data: { channelId: number, userId: number }) => {
-		console.log('Channel that you belong to has a new muted: ', data.userId);
+		// console.log('Channel that you belong to has a new muted: ', data.userId);
 
 		const newMuted = await userCtx.fetchUserById(data.userId);
 		setChats((prevChats: Channel[]) => {
@@ -405,7 +406,7 @@ export default function Chat() {
 
 	const removeMutedListener = useCallback(
 	async (data: { channelId: number, userId: number }) => {
-		console.log('Channel that you belong to removed this admin: ', data.userId);
+		// console.log('Channel that you belong to removed this admin: ', data.userId);
 
 		setChats((prevChats: Channel[]) => {
 		return prevChats.map(chat => {
@@ -456,7 +457,7 @@ export default function Chat() {
 				channelId: channel.id,
 			};
 
-			console.log(member);
+			// console.log(member);
 			socket?.emit("createJoin", data);
 		}
 
@@ -533,7 +534,7 @@ export default function Chat() {
 	}, [setSocket, userCtx.user?.id]);
 
 	const handleMessageDeletion = (message: MessageAPI) => {
-		console.log('about to delete: ', message.content);
+		// console.log('about to delete: ', message.content);
 		socket?.emit('messageDeleted', { message: message })
 	}
 	
