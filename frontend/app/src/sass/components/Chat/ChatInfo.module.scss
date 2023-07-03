@@ -70,19 +70,25 @@
 			margin-left: 1rem;
 			display: flex;
 			justify-content: space-between;
-			border: 0.1rem solid black;
-			border-radius: 0.5rem;
-			width: 70%;
+			border: 0.2rem black solid;
+            padding: 0rem;
+            width: 20rem;
+			height: 3rem;
 
 			p {
+                display: flex;
+                justify-content: center;
+                align-items: center;
 				color: black;
 				padding: 1rem;
-				font-size: medium;
+				font-size: small;
 			}
 			
 			i {
+                display: flex;
+                align-items: center;
 				color: black;
-				font-size: 2rem;
+				font-size: 1.5rem;
 				padding: 1rem;
 			
 				&:hover {
@@ -93,8 +99,8 @@
 			.copiedClipboard {
 				display: flex;
 				position: absolute;
-				right: 9.2rem;
-				bottom: 19.5rem;
+				right: 14rem;
+				bottom: 18.5rem;
 				background-color: $light-vermillon;
 				padding: 1rem;
 				border-radius: 0.5rem;
