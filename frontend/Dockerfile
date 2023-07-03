@@ -10,13 +10,17 @@ WORKDIR /usr/src/app
 # WORKDIR /app
 
 # Copy the package.json and package-lock.json files to the container
-COPY ./app/package*.json ./
+COPY ./app/package.json ./
 
 # Copy the rest of the app's source code to the container
 COPY ./app ./
 
+# RUN npm install --save react react-dom react-scripts
+
+RUN rm -rf node_modules
+
 # Install dependencies
-RUN npm ci
+RUN npm install
 
 # # Build the app for production
 # RUN npm run build
