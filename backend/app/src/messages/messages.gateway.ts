@@ -70,17 +70,21 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 				creatorId: senderId
 			}
 			channel = await this.channelsService.create(createChannelDto);
+
 			const receiverSocketId = this.onlineUsers[receiverId];
 			this.io.to(receiverSocketId).emit('join', channel.id.toString());
 		}
 
-		if (channel) {	
-			this.handleMessage(receiverId, {
-			content: `${sender.name} has invited you to a game! Click the link bellow>${link}`,
-			channelId: channel.id,
-			senderId: senderId,
-			});
-		}
+		setTimeout(() => {
+			if (channel) {
+				// console.log('in message gateway, channel exists: ', channel);
+				this.handleMessage(receiverId, {
+				content: `${sender.name} has invited you to a game! Click the link bellow>${link}`,
+				channelId: channel.id,
+				senderId: senderId,
+				});
+			}
+		}, 1000);
 	});
   }
 

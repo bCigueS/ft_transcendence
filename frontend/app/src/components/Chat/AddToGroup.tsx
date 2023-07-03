@@ -76,10 +76,24 @@ const AddToGroup: React.FC<{user: UserAPI, 	onAdd?: (member: UserAPI) => void,
         })
 	}
 
+	const checkIsBlocked = (blockedId: number): boolean => {
+		if (!userCtx.user?.id) {
+		  return false;
+		}
+	  
+		const blockedUsers = userCtx.user?.block;
+	  
+		if (blockedUsers) {
+		  return blockedUsers.some((blockedUser) => blockedUser.id === blockedId);
+		}
+	  
+		return false;
+	  };
+
     return (
 		<div className={handleKickBanMute ? classes.enhancedContainer : classes.container}>
 
-			<ProfilIcon user={user} superUser={superUser}/>
+			<ProfilIcon user={user} superUser={superUser} displayCo={false}/>
 			<h2>{user?.name}</h2>
 
 			{
@@ -111,6 +125,7 @@ const AddToGroup: React.FC<{user: UserAPI, 	onAdd?: (member: UserAPI) => void,
 					}
 					{
 						userCtx.user?.id !== user.id &&
+						!checkIsBlocked(user.id) && 
 						<i
 						title='Game'
 						onClick={onPlayHandler}

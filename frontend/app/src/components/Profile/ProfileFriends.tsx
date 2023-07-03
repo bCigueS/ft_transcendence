@@ -49,7 +49,7 @@ const ProfileFriends: React.FC<{user: UserAPI; block: boolean; friend: boolean}>
 	return (
 		<div className={classes.container}>
 
-			<ProfilIcon user={props.user} />
+			<ProfilIcon user={props.user} displayCo={true}/>
 
 			<div className={classes.info}>
 				<h1>{props.user?.name}</h1>

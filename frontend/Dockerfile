@@ -21,6 +21,7 @@ COPY ./app ./
 
 # # Build the app for production
 # RUN npm run build
+RUN npm install -g serve
 
 # Copy the built app to the container
 COPY ./app/build ./build

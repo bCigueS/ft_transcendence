@@ -37,7 +37,6 @@ const GroupChat: React.FC<Props> = (props) => {
     const [ joinLink, setJoinLink ] = useState('');
 	const [ showCopiedToClipboard, setShowCopiedToClipboard ] = useState(false);
 	const userCtx = useContext(UserContext);
-    
 
     /*
         everyone can:
@@ -265,6 +264,12 @@ const GroupChat: React.FC<Props> = (props) => {
 		setTimeout(() => setShowCopiedToClipboard(false), 1500);
         e.target.focus();
       };
+
+    // const filteredMembers = (): Channel[] => {
+    // return members.filter((member) => {
+    //         const isBlocked = checkIsBlocked(member.id);
+    //             return !isBlocked;
+    // });
 
     return (
         <div className={classes.container}>

@@ -42,6 +42,20 @@ const ChatOverview: React.FC<{
 		}
 	}, [props.chat.members, props.chat.name, userCtx.user?.id])
 
+	const checkIsBlocked = (blockedId: number): boolean => {
+		if (!userCtx.user?.id) {
+		  return false;
+		}
+	  
+		const blockedUsers = userCtx.user?.block;
+	  
+		if (blockedUsers) {
+		  return blockedUsers.some((blockedUser) => blockedUser.id === blockedId);
+		}
+	  
+		return false;
+	  };
+
 	const getLastMessage = useCallback(() => {
 		const messages = props.chat.messages;
 		let latestMessage = null;
@@ -52,6 +66,16 @@ const ChatOverview: React.FC<{
 		}
 		setLastMessage(latestMessage);
 	}, [props.chat.messages])
+
+	const displayLastMessage = () => {
+
+		if (props.chat.name !== 'private')
+		{
+			if (lastMessage?.senderId && checkIsBlocked(lastMessage?.senderId))
+				return '****';
+		}
+		return lastMessage?.content;
+	}
 	
 	useEffect(() => {
 		getSender();
@@ -102,9 +126,11 @@ const ChatOverview: React.FC<{
 					</p>
 					{ props.chat.messages && 
 						props.chat.messages.length > 0 ? 
-						<p className={classes.lastMessage}>
-							{lastMessage?.content}
-						</p> 
+
+							<p className={classes.lastMessage}>
+								{displayLastMessage()}
+							</p> 
+							
 						:
 						<p className={classes.lastMessage} style={{fontStyle: 'italic'}}>
 							draft...

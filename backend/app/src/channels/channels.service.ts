@@ -480,11 +480,14 @@ export class ChannelsService {
 	  throw new ForbiddenException('You are banned from this channel');
 	}  
 
-    if (channel.isPasswordProtected && (!JoinChannelDto.password || JoinChannelDto.password.length === 0))
+  if (channel.isPasswordProtected)
+  {
+    if (!JoinChannelDto.password || JoinChannelDto.password.length === 0)
       throw new UnauthorizedException('You need to provide a password to enter that channel');
     const decryptPassword = CryptoJS.AES.decrypt(channel.password, `${process.env.NODE_ENV}`).toString(CryptoJS.enc.Utf8);
-    if (channel.isPasswordProtected && (decryptPassword !== JoinChannelDto.password))
+    if (decryptPassword !== JoinChannelDto.password)
       throw new UnauthorizedException('Wrong password provided');
+  }
     
     const memberDto: CreateChannelMembershipDto = { userId: JoinChannelDto.userId };
     await this.prisma.channelMembership.create({

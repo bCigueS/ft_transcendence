@@ -49,6 +49,21 @@ export class UsersService {
 
   async update(id: number, updateUserDto: UpdateUserDto) {
 
+    if (updateUserDto.name)
+    {
+
+      const existUser = await this.prisma.user.findUnique({
+        where: {
+          name: updateUserDto.name 
+        },
+      });
+
+      if (existUser)
+        throw new HttpException('Name already in use', 409);
+
+        // throw new ('Name already in use');
+    }
+
     const updatedUser = await this.prisma.user.update({
       where: { id },
       data: updateUserDto,

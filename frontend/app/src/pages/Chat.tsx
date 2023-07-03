@@ -93,37 +93,36 @@ export default function Chat() {
 		  channelId: message.channelId,
 		};
 
-	  
 		const newChats = [...chats];
 		const chatIndex = newChats.findIndex(chat => chat.id === newMessage.channelId);
-	  
 
 		if (chatIndex !== -1 && newChats[chatIndex].messages) {
 		  newChats[chatIndex].messages = [...newChats[chatIndex].messages, newMessage];
 		  setChats(newChats);
 		} else {
 			const createNewChat = async () => {
-			const sender = await userCtx.fetchUserById(message.senderId);
+				const sender = await userCtx.fetchUserById(message.senderId);
 
-			if (sender !== null) {
-				throw new Error('Could not fetch sender');
-			}
-			
-			const user = userCtx.user;
-			if(!user) {
-				throw new Error('User not available');
-			}
-			
-			const newChat = {
-				createdAt: new Date(),
-				creatorId: userCtx.user?.id,
-				id: message.channelId,
-				name: 'private',
-				messages: [newMessage],
-				members: [user, sender],
-			};
-			
-			setChats([...newChats, newChat]);
+				if (sender == null) {
+
+					throw new Error('Could not fetch sender');
+				}
+				
+				const user = userCtx.user;
+				if(!user) {
+					throw new Error('User not available');
+				}
+				
+				const newChat = {
+					createdAt: new Date(),
+					creatorId: userCtx.user?.id,
+					id: message.channelId,
+					name: 'private',
+					messages: [newMessage],
+					members: [user, sender],
+				};
+				
+				setChats([...newChats, newChat]);
 			}
 			createNewChat();
 		}

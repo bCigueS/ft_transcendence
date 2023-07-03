@@ -202,7 +202,8 @@ type Props = {
 					name: data.name,
 					avatar: data.avatar,
 					doubleAuth: data.doubleAuth,
-					wins: data.wins
+					wins: data.wins,
+					connected: data.status === 1 ? true : false,
 				}
 			}
 			catch (error: any) {
@@ -236,7 +237,8 @@ type Props = {
 						name: user.name,
 						avatar: user.avatar,
 						doubleAuth: user.doubleAuth,
-						wins: user.wins
+						wins: user.wins,
+						connected: user.status === 1 ? true : false,
 					}
 				});
 			} catch (error: any) {
@@ -269,7 +271,8 @@ type Props = {
 						name: user.name,
 						avatar: user.avatar,
 						doubleAuth: user.doubleAuth,
-						wins: user.wins
+						wins: user.wins,
+						connected: user.status === 1 ? true : false,
 					}
 				});
 			} catch (error: any) {
