@@ -134,7 +134,8 @@ export default function Chat() {
 			const response = await fetch('http://localhost:3000/channels/userId/' + userCtx.user?.id, {
 				method: 'GET',
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
+					'Authorization': 'Bearer ' + userCtx.logInfo?.token,
 				},
 			});
 		
@@ -151,7 +152,7 @@ export default function Chat() {
 		} catch (error: any) {
 			console.log(error.message);
 		}
-	}, [userCtx.user?.id])
+	}, [userCtx.user?.id, userCtx.logInfo?.token])
 
 	const checkIsBlocked = (blockedId: number): boolean => {
 		if (!userCtx.user?.id) {
@@ -192,7 +193,8 @@ export default function Chat() {
 			const response: Response = await fetch(`http://localhost:3000/channels/${joinData.channelId}/join`, {
 			method: 'PATCH',
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json',
+				'Authorization': 'Bearer ' + userCtx.logInfo?.token,
 			},
 			body: JSON.stringify(joinData)
 			});
@@ -231,7 +233,7 @@ export default function Chat() {
 
 		}
 		return { status: 200 };
-	}, [fetchChannels, chats, handleJoinGroup]);
+	}, [fetchChannels, chats, handleJoinGroup, userCtx.logInfo?.token]);
 	
 	const joinListener = useCallback((channelId: string) => {
 		// console.log('client joined channel ', channelId);
