@@ -72,7 +72,7 @@ const AuthForm: React.FC = () => {
 		if (data.result !== false) {
 			setToken(data.accessToken);
 			userCtx.login();
-			window.location.reload();
+			window.location.assign("http://127.0.0.1:8000");
 		}
 
 		} catch (error: any) {
@@ -87,10 +87,10 @@ const AuthForm: React.FC = () => {
 			if (doubleAuth === false) {
 				console.log("Je log")
 				userCtx.login();
-				window.location.reload();
+				window.location.assign("http://127.0.0.1:8000");
 			}
 		}
-	}, [token, doubleAuth, userCtx, userId])
+	}, [userId])
 
 
 
