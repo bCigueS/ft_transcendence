@@ -11,6 +11,7 @@ import { UsersService } from '../users/users.service';
 import { ServeInfo, CollisionInfo, GameOverInfo, ScoreInfo, UpdatedInfo } from './utils/types';
 import { GameState } from '@prisma/client';
 import EventEmitter from 'events';
+import { match } from 'assert';
 
 @WebSocketGateway({ namespace: '/pong', cors: '*' })
 export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -63,7 +64,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 				}
 			});
 			// update this game by adding a new UserGame with id of user sent change state playing
-			if (matchingGames && matchingGames[0])
+			if (matchingGames && matchingGames[0] && matchingGames[0].players[0].userId !== id)
 			{
 				const updatedGameDto: UpdateGameDto = {
 					state: GameState.PLAYING, // PLAYING
@@ -182,10 +183,13 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 				game = await this.prisma.game.findFirst({
 					where: { 
 						room: gameRoom,
+					},
+					include: {
+						players: true,
 					}
 				});
 				
-				if (!game || game.state === GameState.FINISHED) {
+				if (!game || game.state === GameState.FINISHED || game.players[0].userId === playerId) {
 					client.emit('expiredInvite', {
 						message: `Sorry, the invitation is already expired!`,
 					});

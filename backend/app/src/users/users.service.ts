@@ -3,7 +3,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User as UserEntity } from '.prisma/client';
-import { Friendship } from '@prisma/client';
+import { Friendship, GameState } from '@prisma/client';
 import { toSafeUser } from './user.utils';
 import * as AuthUtils from '../auth/auth.utils';
 
@@ -325,7 +325,8 @@ export class UsersService {
 				some: {
 				  userId: id
 				}
-			}
+			},
+			state: GameState.FINISHED,
         },
         include: {
 		  players: true,
