@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadGatewayException, BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from './../prisma/prisma.service';
 import { AuthEntity } from './entity/auth.entity';
 import { HttpException, HttpStatus } from '@nestjs/common';
@@ -35,7 +35,6 @@ export class AuthService {
 		userId: user.id
 	}, `${process.env.NODE_ENV}`, { expiresIn:'1h' });
 
-	console.log(token);
 
 	return {
 		accessToken: token,
@@ -57,7 +56,7 @@ export class AuthService {
     const avatar = `${apiResponse.login}.jpg`; // Specify the desired path where you want to save the image
 
     const createUserDto = new CreateUserDto();
-    createUserDto.name = apiResponse.displayname;
+    createUserDto.name = apiResponse.login;
     createUserDto.login = apiResponse.login;
     createUserDto.email = apiResponse.email;
     createUserDto.password = 'lolilolilol';
@@ -81,7 +80,7 @@ export class AuthService {
   async validateUser(code: string): Promise<any>
   {
     var response = {};
-	let token = {};
+	  let token = {};
     const url_token = 'https://api.intra.42.fr/oauth/token';
     const data_token = {
 		grant_type: 'authorization_code',
@@ -91,17 +90,18 @@ export class AuthService {
 		redirect_uri: `${process.env.REDIRECT_URL}`,
     };
     try {
-		const token_data = await this.httpService.post(url_token, data_token).toPromise();
-		token = token_data.data;
+      const token_data = await this.httpService.post(url_token, data_token).toPromise();
+      token = token_data.data;
     } catch (error) {
-		error.response.data.status = 403;
-		throw new HttpException(error.response.data, HttpStatus.FORBIDDEN, { cause: error });
+      error.response.data.status = 403;
+      throw new HttpException(error.response.data, HttpStatus.FORBIDDEN, { cause: error });
     }
     if (token['access_token']) 
 		response['user'] = await this.aboutMe(token['access_token']);
     response['userId'] = response['user']['userId'];
     response['doubleAuth'] = response['user']['doubleAuth'];
     response['accessToken'] = response['user']['accessToken'];
+    response['newUser'] = response['user']['newUser'];
 	if (response['user']['doubleAuth'] == false)
 		response['accessToken'] = response['user']['accessToken'];
 	else
@@ -111,6 +111,17 @@ export class AuthService {
 
   async verifyTwoFactor(userId: number, code: string)
   {
+	if (!code || !userId)
+		throw new BadRequestException(`Code or userId is missing.`);
+	const DIGIT_EXPRESSION: RegExp = /^\d$/;
+	const isDigit = (character: string): boolean => { return character && DIGIT_EXPRESSION.test(character);};
+
+	for (let i = 0; i < code.length; i ++)
+	{
+		if (isDigit(code[i]) === false)
+			throw new BadRequestException(`Code is not a number.`);
+	}
+
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user)
     	throw new NotFoundException(`User with ${userId} does not exist.`);
@@ -130,14 +141,19 @@ export class AuthService {
 
   async aboutMe(token: string): Promise<any>  
   {
-    const url_data = 'https://api.intra.42.fr/v2/me';
-    const headersRequest = { Authorization: `Bearer ${token}` };
-    try {
+	let response = {
+		newUser: false,
+	};
+	const url_data = 'https://api.intra.42.fr/v2/me';
+	const headersRequest = { Authorization: `Bearer ${token}` };
+	try {
 		const data_response = await this.httpService.get(url_data, { headers: headersRequest }).toPromise();
 		let user = await this.prisma.user.findFirst({ where: { login: data_response.data.login } });
 		if (!user)
 		{
+			response['newUser'] = true;
 			await this.registerUser(data_response.data);
+			user = await this.prisma.user.findFirst({ where: { login: data_response.data.login } });
 		}
 		if (user)
 		{
@@ -149,17 +165,19 @@ export class AuthService {
 				},
 			});
 		}
-		if (user.doubleAuth == true)
+		if (user && user.doubleAuth == true)
 		{
-			return {
-				userId: user.id,
-				doubleAuth: user.doubleAuth,
-			};
+			response['userId'] = user.id;
+			response['doubleAuth'] = user.doubleAuth;
+			return response;
 		}
-      	return AuthUtils.getUserData( data_response.data.login );
-    } catch (error) {
+		const userInfo = await AuthUtils.getUserData( data_response.data.login );
+		userInfo['newUser'] = response['newUser'];
+		return userInfo;
+	} catch (error) {
+		console.log('error');
 		error.status = 403;
 		throw new HttpException(error, HttpStatus.FORBIDDEN, { cause: error });
-    }
+	}
   }
 }

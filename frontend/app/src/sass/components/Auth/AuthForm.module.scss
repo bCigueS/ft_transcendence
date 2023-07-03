@@ -14,6 +14,15 @@
 	}
 }
 
+.imgLogo {
+	max-height: 6rem;
+	border: 0.3rem black solid;
+	position: relative;
+	transform-style: preserve-3d;
+
+	@include shadowBox();
+}
+
 .logginForm {
 	margin-bottom: 3rem;
 	width: 28rem;

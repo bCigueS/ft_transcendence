@@ -67,7 +67,7 @@ export default function SpectatorBoard(props: SpectatorProp) {
 
 	// loop to emit a join request to the server
 	useEffect(() => {
-		console.log('emit a request to join as spectator to server')
+		// console.log('emit a request to join as spectator to server')
 		// send join request to the server as a spectator
 		props.socket?.emit('spectatorJoin', { userId: props.userId, gameRoom: props.gameRoom });
 	}, [props.socket, props.gameRoom, props.userId]);
@@ -75,7 +75,7 @@ export default function SpectatorBoard(props: SpectatorProp) {
 	// receive a welcome message from server informing that you are in a specific game room, and trigger a liveBoard
 	useEffect(() => {
 		const handleWelcomeSpectator = ({ message, player, opponent, level }: { message: string, player: UserAPI, opponent: UserAPI, level: number }) => {
-			console.log({ message });
+			// console.log({ message });
 			if (player) {
 				setPlayer(player);
 				// setPlayerName(player.name);
@@ -146,7 +146,7 @@ export default function SpectatorBoard(props: SpectatorProp) {
 	// receive a confirmation from server that game is ready to be displayed
 	useEffect(() => {
 		const handleStartWatch = ({ message }: { message: string }) => {
-			console.log({ message });
+			// console.log({ message });
 			setIsReady(true);
 			startGame();
 		};
@@ -233,7 +233,7 @@ export default function SpectatorBoard(props: SpectatorProp) {
 	// receiving an alert that one of the players screen is too small
 	useEffect(() => {
 			const handleScreenTooSmall = ({ message, isTooSmall }: { message: string, isTooSmall: boolean }) => {
-				console.log({ message });
+				// console.log({ message });
 				setScreenTooSmall(isTooSmall);
 			};
 
@@ -247,7 +247,7 @@ export default function SpectatorBoard(props: SpectatorProp) {
 	// receiving a pause signal
 	useEffect(() => {
 		const handleMakePause = ({ message }: { message: string }) => {
-			console.log({ message });
+			// console.log({ message });
 			setIsPaused(current => !current);
 		};
 
@@ -261,7 +261,7 @@ export default function SpectatorBoard(props: SpectatorProp) {
 	// loop to receive a message from server that game has ended
 	useEffect(() => {
 		const handleEndWatch = ({ message }: { message: string }) => {
-			console.log('in endWatch, ', { message });
+			// console.log('in endWatch, ', { message });
 			props.socket?.emit('leaveGameRoom', props.gameRoom);
 			setClosingText(message);
 			setIsRunning(current => !current);

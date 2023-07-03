@@ -326,7 +326,7 @@ export class UsersService {
 				  userId: id
 				}
 			},
-			state: GameState.FINISHED,
+      state: GameState.FINISHED,
         },
         include: {
 		  players: true,

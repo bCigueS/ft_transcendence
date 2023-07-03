@@ -18,7 +18,6 @@ const ProfilSettings: React.FC<{user: UserAPI | null}> = ( { user } ) => {
 		avatarData.append('file', DataForm.get('file'))
 
 		if (DataForm.get('file').name) {
-			console.log(avatarData);
 			const avatarResponse = await fetch('http://localhost:3000/users/' + userCtx.user?.id + '/upload-avatar', {
 				method: 'POST',
 				headers: {

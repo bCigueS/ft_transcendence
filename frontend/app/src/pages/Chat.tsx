@@ -92,6 +92,7 @@ export default function Chat() {
 		  content: message.content,
 		  channelId: message.channelId,
 		};
+
 	  
 		const newChats = [...chats];
 		const chatIndex = newChats.findIndex(chat => chat.id === newMessage.channelId);
@@ -133,7 +134,8 @@ export default function Chat() {
 			const response = await fetch('http://localhost:3000/channels/userId/' + userCtx.user?.id, {
 				method: 'GET',
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
+					'Authorization': 'Bearer ' + userCtx.logInfo?.token,
 				},
 			});
 		
@@ -150,7 +152,7 @@ export default function Chat() {
 		} catch (error: any) {
 			console.log(error.message);
 		}
-	}, [userCtx.user?.id])
+	}, [userCtx.user?.id, userCtx.logInfo?.token])
 
 	const checkIsBlocked = (blockedId: number): boolean => {
 		if (!userCtx.user?.id) {
@@ -191,7 +193,8 @@ export default function Chat() {
 			const response: Response = await fetch(`http://localhost:3000/channels/${joinData.channelId}/join`, {
 			method: 'PATCH',
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json',
+				'Authorization': 'Bearer ' + userCtx.logInfo?.token,
 			},
 			body: JSON.stringify(joinData)
 			});
@@ -227,23 +230,25 @@ export default function Chat() {
 			
 		} catch (error) {
 		  console.log(error);
+
 		}
 		return { status: 200 };
-		}, [fetchChannels, chats, handleJoinGroup]);
+	}, [fetchChannels, chats, handleJoinGroup, userCtx.logInfo?.token]);
 	
 	const joinListener = useCallback((channelId: string) => {
-		console.log('client joined channel ', channelId);
+		// console.log('client joined channel ', channelId);
 		socket?.emit('join', parseInt(channelId, 10));
 		fetchChannels();
 	  }, [fetchChannels, socket]);
 
-	  const kickListener = useCallback(async (channelId: string) => {
-		console.log('client was kicked from channel ', channelId);
+	const kickListener = useCallback(async (channelId: string) => {
+		// console.log('client was kicked from channel ', channelId);
 		if (selectedConversation && +channelId === selectedConversation.id) {
-		  setSelectedConversation(undefined);
+			setSelectedConversation(undefined);
 		}
 		setChats(prevChats => prevChats.filter(chat => chat.id !== +channelId));
-	  }, [selectedConversation]);
+
+	}, [selectedConversation]);
 	
 	const userJoinedListener = useCallback((data : {
 			channelId: number, 
@@ -273,12 +278,164 @@ export default function Chat() {
 		}
 	}, [socket, joinListener]);
 
+	const removeMemberListener = useCallback(
+		async (data: { channelId: number, userId: number }) => {
+			// console.log('Channel that you belong to removed this member: ', data.userId);
+	
+			setChats((prevChats: Channel[]) => {
+			return prevChats.map(chat => {
+				if (chat.id === data.channelId) {
+				const members = chat.members;
+				if (members) {
+					const updatedMembers = members.filter(member => member.id !== data.userId);
+					const updatedChat: Channel = {
+					...chat,
+					members: updatedMembers
+					};
+					return updatedChat;
+				}
+				return chat;
+				} else {
+				return chat;
+				}
+			});
+		});
+	}, []);
+
 	useEffect(() => {
 		socket?.on("handleKick", kickListener);
+		socket?.on("handleRemoveMember", removeMemberListener);
 		return () => {
 		  socket?.off("handleKick", kickListener);
+		  socket?.off("handleRemoveMember", removeMemberListener);
 		}
-	}, [socket, kickListener]);
+	}, [socket, kickListener, removeMemberListener]);
+
+	const addAdminListener = useCallback(
+		async (data: { channelId: number, userId: number }) => {
+		// console.log('Channel that you belong to has a new admin: ', data.userId);
+
+		const newAdmin = await userCtx.fetchUserById(data.userId);
+		setChats((prevChats: Channel[]) => {
+		return prevChats.map(chat => {
+			if (chat.id === data.channelId) {
+			const admins = chat.admins;
+			if (admins && newAdmin !== undefined)
+			{
+				const updatedChat: Channel = {
+					...chat,
+					admins: [...admins, newAdmin]
+				};
+				return updatedChat;
+			}
+			return chat;
+			} else {
+			return chat;
+			}
+		});
+		});
+	}, [userCtx]);
+
+	useEffect(() => {
+		socket?.on("handleAddAdmin", addAdminListener);
+		return () => {
+		  socket?.off("handleAddAdmin", addAdminListener);
+		}
+	}, [socket, addAdminListener]);
+
+	const removeAdminListener = useCallback(
+	async (data: { channelId: number, userId: number }) => {
+		// console.log('Channel that you belong to removed this admin: ', data.userId);
+
+		setChats((prevChats: Channel[]) => {
+		return prevChats.map(chat => {
+			if (chat.id === data.channelId) {
+			const admins = chat.admins;
+			if (admins) {
+				const updatedAdmins = admins.filter(admin => admin.id !== data.userId);
+				const updatedChat: Channel = {
+				...chat,
+				admins: updatedAdmins
+				};
+				return updatedChat;
+			}
+			return chat;
+			} else {
+			return chat;
+			}
+		});
+		});
+	}, []);	  
+
+	useEffect(() => {
+		socket?.on("handleRemoveAdmin", removeAdminListener);
+		return () => {
+		  socket?.off("handleRemoveAdmin", removeAdminListener);
+		}
+	}, [socket, removeAdminListener]);
+
+	const addMutedListener = useCallback(
+		async (data: { channelId: number, userId: number }) => {
+		// console.log('Channel that you belong to has a new muted: ', data.userId);
+
+		const newMuted = await userCtx.fetchUserById(data.userId);
+		setChats((prevChats: Channel[]) => {
+		return prevChats.map(chat => {
+			if (chat.id === data.channelId) {
+			const muted = chat.muted;
+			if (muted && newMuted !== undefined)
+			{
+				const updatedChat: Channel = {
+					...chat,
+					muted: [...muted, newMuted]
+				};
+				return updatedChat;
+			}
+			return chat;
+			} else {
+			return chat;
+			}
+		});
+		});
+	}, [userCtx]);
+
+	useEffect(() => {
+		socket?.on("handleAddMuted", addMutedListener);
+		return () => {
+		  socket?.off("handleAddMuted", addMutedListener);
+		}
+	}, [socket, addMutedListener]);
+
+	const removeMutedListener = useCallback(
+	async (data: { channelId: number, userId: number }) => {
+		// console.log('Channel that you belong to removed this admin: ', data.userId);
+
+		setChats((prevChats: Channel[]) => {
+		return prevChats.map(chat => {
+			if (chat.id === data.channelId) {
+			const muted = chat.muted;
+			if (muted) {
+				const updatedMuted = muted.filter(mute => mute.id !== data.userId);
+				const updatedChat: Channel = {
+				...chat,
+				muted: updatedMuted
+				};
+				return updatedChat;
+			}
+			return chat;
+			} else {
+			return chat;
+			}
+		});
+		});
+	}, []);
+	  
+	useEffect(() => {
+		socket?.on("handleRemoveMuted", removeMutedListener);
+		return () => {
+		  socket?.off("handleRemoveMuted", removeMutedListener);
+		}
+	}, [socket, removeMutedListener]);
 
 	useEffect(() => {
 		socket?.on('chatDeleted', (data) => {
@@ -302,7 +459,7 @@ export default function Chat() {
 				channelId: channel.id,
 			};
 
-			console.log(member);
+			// console.log(member);
 			socket?.emit("createJoin", data);
 		}
 
@@ -317,6 +474,24 @@ export default function Chat() {
 	const handleKick = useCallback((channelId: number, kickedId: number) => {
 		// setChats(chats => chats.filter(chat => chat.id !== id));
 		socket?.emit('kickUser', { channelId: channelId, userId: kickedId });
+	}, [socket])
+
+	const handleAddAdmin = useCallback((channelId: number, userId: number) => {
+		// setChats(chats => chats.filter(chat => chat.id !== id));
+		socket?.emit('addAdmin', { channelId: channelId, userId: userId });
+	}, [socket])
+
+	const handleRemoveAdmin = useCallback((channelId: number, userId: number) => {
+		// setChats(chats => chats.filter(chat => chat.id !== id));
+		socket?.emit('removeAdmin', { channelId: channelId, userId: userId });
+	}, [socket])
+
+	const handleAddMuted = useCallback((channelId: number, userId: number) => {
+		socket?.emit('addMuted', { channelId: channelId, userId: userId });
+	}, [socket])
+
+	const handleRemoveMuted = useCallback((channelId: number, userId: number) => {
+		socket?.emit('removeMuted', { channelId: channelId, userId: userId });
 	}, [socket])
 
 	const checkLastMessageDeleted = useCallback((message: MessageAPI) => {
@@ -352,16 +527,16 @@ export default function Chat() {
 		const newSocket = io("http://localhost:3000/chat");
 		setSocket(newSocket);
 		newSocket.on('connect', () => {
-		  newSocket.emit('user_connected', userCtx.user?.id);
+		  newSocket.emit('user_connected', userCtx.user?.id, userCtx.logInfo?.token);
 		});
 	  
 		return () => {
 		  newSocket.removeAllListeners();
 		}
-	}, [setSocket, userCtx.user?.id]);
+	}, [setSocket, userCtx.user?.id, userCtx.logInfo?.token]);
 
 	const handleMessageDeletion = (message: MessageAPI) => {
-		console.log('about to delete: ', message.content);
+		// console.log('about to delete: ', message.content);
 		socket?.emit('messageDeleted', { message: message })
 	}
 	
@@ -454,7 +629,12 @@ export default function Chat() {
 						isSelected={chat.id === selectedConversation?.id ? true : false}
 						onSaveConversation={onSaveConversation}
 						onDeleteChat={handleChatDeletion}
-						onKick={handleKick}/>
+						onKick={handleKick}
+						onAddAdmin={handleAddAdmin}
+						onRemoveAdmin={handleRemoveAdmin}
+						onAddMuted={handleAddMuted}
+						onRemoveMuted={handleRemoveMuted}
+						/>
 						))
 					:
 					<NoDiscussions/>
