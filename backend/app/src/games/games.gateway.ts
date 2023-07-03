@@ -57,7 +57,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 				} catch (error) {
 					return client.disconnect();
 				}
-				console.log(`User ${userId} is connected in pong game with token ${token}`);
+				// console.log(`User ${userId} is connected in pong game with token ${token}`);
 			}
 		});
 	}
@@ -626,7 +626,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 		@MessageBody() { gameInfo, gameRoom }: { gameInfo: GameOverInfo, gameRoom: string },
 		@ConnectedSocket() client: Socket,
 		) {
-			console.log('received the disconnect signal from ' + client.id);
+			// console.log('received the disconnect signal from ' + client.id);
 
 			let game = await this.prisma.game.findUnique({
 				where: { room: gameRoom },
@@ -686,7 +686,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 	async handleDisconnect(
 		@ConnectedSocket() client: Socket,
 		) {
-			console.log(`User ${this.userId} is disconnected in pong game`);
+			// console.log(`User ${this.userId} is disconnected in pong game`);
 
 			// if the client is part of the players, get the the game that is not FINISHED
 			let playerGame = await this.prisma.game.findFirst({
@@ -719,13 +719,13 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 
 				if (playerGame.state === GameState.PLAYING) {
 					// change status of the game to finished
-					console.log('change the state of the game');
+					// console.log('change the state of the game');
 					playerGame = await this.gamesService.gameOver(playerGame.id, GameState.FINISHED);
 
 					GamesGateway.eventEmitter.emit('removeLiveGame');
 				} else {
 					// if game.state is still PENDING or WAITING, delete the game from database
-					console.log('delete the curent game from database');
+					// console.log('delete the curent game from database');
 					await this.gamesService.remove(playerGame.id);
 				}
 			}

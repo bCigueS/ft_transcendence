@@ -100,11 +100,11 @@ export default function Pong(props: PongProp) {
 			setOpponentName('Computer');
 		}
 		if (playerMode === DOUBLE_MODE && !props.inviteMode) {
-			console.log('emit a join random game request');
+			// console.log('emit a join random game request');
 			props.socket?.emit('joinRandom', { id: props.userId, lvl: level });
 		}
 		if (playerMode === DOUBLE_MODE && props.inviteMode && !props.isInvited) {
-			console.log('emit a join invitation game request');
+			// console.log('emit a join invitation game request');
 			props.socket?.emit('joinInvitation', { playerId: props.userId, opponentId: props.opponentId, lvl: level, gameRoom: props.gameRoom })
 		}
 	}, [props.socket, playerMode, level, props.gameRoom, props.userId, props.opponentId, props.inviteMode, props.isInvited]);
@@ -112,7 +112,7 @@ export default function Pong(props: PongProp) {
 	// emit a join request to the server
 	useEffect(() => {
 		if (playerMode === DOUBLE_MODE && props.inviteMode && props.isInvited) {
-			console.log('emit a join invitation game request');
+			// console.log('emit a join invitation game request');
 			props.socket?.emit('joinInvitation', { playerId: props.userId, opponentId: props.opponentId, lvl: undefined, gameRoom: props.gameRoom })
 		}
 	}, [props.socket, playerMode, props.gameRoom, props.userId, props.opponentId, props.inviteMode, props.isInvited]);
@@ -140,7 +140,7 @@ export default function Pong(props: PongProp) {
 	useEffect(() => {
 		if (playerMode === DOUBLE_MODE) {
 			const handleWelcome = ({ message, opponent, gameLevel, gameRoom }: { message: string, opponent: UserAPI, gameLevel: number, gameRoom: string }) => {
-				console.log({ message, opponent, gameRoom });
+				// console.log({ message, opponent, gameRoom });
 				if (opponent) {
 					setOpponent(opponent);
 					setOpponentName(opponent.name);
@@ -165,7 +165,7 @@ export default function Pong(props: PongProp) {
 	useEffect(() => {
 		if (playerMode === DOUBLE_MODE) {
 			const handleOpponentJoin = ({ message, opponent }: { message: string, opponent: UserAPI}) => {
-				console.log({ message, opponent });
+				// console.log({ message, opponent });
 				setOpponent(opponent);
 				setOpponentName(opponent.name);
 			};
@@ -182,7 +182,7 @@ export default function Pong(props: PongProp) {
 	useEffect(() => {
 		if (playerMode === DOUBLE_MODE) {
 			const handleStartGame = ({ message }: { message: string }) => {
-				console.log({ message });
+				// console.log({ message });
 				setIsReady(true);
 			};
 
@@ -267,7 +267,7 @@ export default function Pong(props: PongProp) {
 	useEffect(() => {
 		if (playerMode === DOUBLE_MODE) {
 			const handleMakePause = ({ message }: { message: string }) => {
-				console.log({ message });
+				// console.log({ message });
 				setIsPaused(current => !current);
 			};
 
@@ -284,7 +284,7 @@ export default function Pong(props: PongProp) {
 		setGameOver(true);
 		setIsRunning(false);
 		if (playerMode === DOUBLE_MODE && winner !== OPPONENT_WIN) {
-			console.log ('emit gameOver, and winner is ', winner);
+			// console.log ('emit gameOver, and winner is ', winner);
 			props.socket?.emit('gameOver', {
 				gameInfo: {
 					playerId: props.userId,
@@ -302,7 +302,7 @@ export default function Pong(props: PongProp) {
 	useEffect(() => {
 		if (playerMode === DOUBLE_MODE) {
 			const handleStopGame = ({ message }: { message: string }) => {
-				console.log({ message });
+				// console.log({ message });
 				setClosingText(message);
 				stopGame();
 			};
@@ -320,7 +320,7 @@ export default function Pong(props: PongProp) {
 	useEffect(() => {
 		if (playerMode === DOUBLE_MODE) {
 			const handleExpiredInvite = ({ message }: { message: string }) => {
-				console.log({ message });
+				// console.log({ message });
 				setClosingText(message);
 				setGameOver(true);
 				setPlayerMode('');
@@ -355,7 +355,7 @@ export default function Pong(props: PongProp) {
 				socketId: socketId,
 				gameRoom: gameRoom,
 			});
-			console.log('just emit updated info');
+			// console.log('just emit updated info');
 		}
 
 		props.socket?.on('updateGame', handleUpdateGame);
@@ -853,7 +853,7 @@ export default function Pong(props: PongProp) {
 	useEffect(() => {
 		if (playerMode === DOUBLE_MODE) {
 			const handleScreenTooSmall = ({ message, isTooSmall }: { message: string, isTooSmall: boolean }) => {
-				console.log({ message });
+				// console.log({ message });
 				setOtherScreenTooSmall(isTooSmall);
 			};
 

@@ -35,7 +35,6 @@ export class AuthService {
 		userId: user.id
 	}, `${process.env.NODE_ENV}`, { expiresIn:'1h' });
 
-	console.log(token);
 
 	return {
 		accessToken: token,
@@ -57,7 +56,7 @@ export class AuthService {
     const avatar = `${apiResponse.login}.jpg`; // Specify the desired path where you want to save the image
 
     const createUserDto = new CreateUserDto();
-    createUserDto.name = apiResponse.displayname;
+    createUserDto.name = apiResponse.login;
     createUserDto.login = apiResponse.login;
     createUserDto.email = apiResponse.email;
     createUserDto.password = 'lolilolilol';
@@ -81,7 +80,7 @@ export class AuthService {
   async validateUser(code: string): Promise<any>
   {
     var response = {};
-	let token = {};
+	  let token = {};
     const url_token = 'https://api.intra.42.fr/oauth/token';
     const data_token = {
 		grant_type: 'authorization_code',
@@ -91,14 +90,14 @@ export class AuthService {
 		redirect_uri: `${process.env.REDIRECT_URL}`,
     };
     try {
-		const token_data = await this.httpService.post(url_token, data_token).toPromise();
-		token = token_data.data;
+      const token_data = await this.httpService.post(url_token, data_token).toPromise();
+      token = token_data.data;
     } catch (error) {
-		error.response.data.status = 403;
-		throw new HttpException(error.response.data, HttpStatus.FORBIDDEN, { cause: error });
+      error.response.data.status = 403;
+      throw new HttpException(error.response.data, HttpStatus.FORBIDDEN, { cause: error });
     }
     if (token['access_token']) 
-		response['user'] = await this.aboutMe(token['access_token']);
+		  response['user'] = await this.aboutMe(token['access_token']);
     response['userId'] = response['user']['userId'];
     response['doubleAuth'] = response['user']['doubleAuth'];
     response['accessToken'] = response['user']['accessToken'];
@@ -130,14 +129,15 @@ export class AuthService {
 
   async aboutMe(token: string): Promise<any>  
   {
-    const url_data = 'https://api.intra.42.fr/v2/me';
-    const headersRequest = { Authorization: `Bearer ${token}` };
-    try {
+	const url_data = 'https://api.intra.42.fr/v2/me';
+	const headersRequest = { Authorization: `Bearer ${token}` };
+	try {
 		const data_response = await this.httpService.get(url_data, { headers: headersRequest }).toPromise();
 		let user = await this.prisma.user.findFirst({ where: { login: data_response.data.login } });
 		if (!user)
 		{
 			await this.registerUser(data_response.data);
+			user = await this.prisma.user.findFirst({ where: { login: data_response.data.login } });
 		}
 		if (user)
 		{
@@ -149,17 +149,18 @@ export class AuthService {
 				},
 			});
 		}
-		if (user.doubleAuth == true)
+		if (user && user.doubleAuth == true)
 		{
 			return {
 				userId: user.id,
 				doubleAuth: user.doubleAuth,
 			};
 		}
-      	return AuthUtils.getUserData( data_response.data.login );
-    } catch (error) {
+		return AuthUtils.getUserData( data_response.data.login );
+	} catch (error) {
+		console.log('error');
 		error.status = 403;
 		throw new HttpException(error, HttpStatus.FORBIDDEN, { cause: error });
-    }
+	}
   }
 }
