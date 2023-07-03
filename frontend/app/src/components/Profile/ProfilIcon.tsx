@@ -4,7 +4,13 @@ import { NavigateOptions, useNavigate } from 'react-router-dom';
 import DefaultImage from '../../assets/images/default.jpg';
 import classes from '../../sass/components/Profile/ProfilIcon.module.scss';
 
-const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: string[]; border?: boolean}> = ( { user, displayCo = true, size = [], border = false}) => {
+const ProfilIcon: React.FC<{
+	user?: UserAPI | null;
+	displayCo?: boolean;
+	size?: string[];
+	border?: boolean;
+	superUser?: boolean
+}> = ( { user, displayCo = true, size = [], border = false, superUser = false}) => {
 	
 	const [ imageUrl, setImageUrl ] = useState<string>('');
 	const [ loading , setLoading ] = useState<boolean>(false);
@@ -73,6 +79,11 @@ const ProfilIcon: React.FC<{user?: UserAPI | null; displayCo?: boolean; size?: s
 			<div 
 				className={classes.picture}
 				style={size.length > 0 ? {width: size[0], height: size[1] } : {}}>
+					{ superUser &&
+						<i className={`fa-solid fa-crown ${classes.crownIcon}`}></i>
+						// <i className="fa-thin fa-crown"></i>
+						// <div>crown here</div>
+					}
 				<img 
 					src={!loading ? imageUrl : DefaultImage} 
 					alt={user?.name} 

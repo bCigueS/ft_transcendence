@@ -1,25 +1,70 @@
 import React, { FormEvent, useContext, useEffect, useState } from 'react';
 import classes from '../../sass/components/Auth/AuthForm.module.scss';
-import { Form, useActionData } from 'react-router-dom';
+import { json } from 'react-router-dom';
 import { setTokenAuth } from '../../typescript/Auth';
 import { UserContext } from '../../store/users-contexte';
-
-interface DataError {
-	statusCode?: number,
-	errors?: string,
-	message?: string,
-}
+import ProfilPatch from '../Profile/ProfilPatch';
+import LogoPong from '../../assets/logo/pong2.svg';
 
 
 const AuthForm: React.FC = () => {
 
-	const data: DataError = useActionData() as DataError;
 	const userCtx = useContext(UserContext);
 	const [ logCode, setLogCode ] = useState<string>("");
 	const [ token, setToken ] = useState<string>("");
 	const [ userId, setUserId ] = useState<string>('');
 	const [ doubleAuth, setDoubleAuth ] = useState<boolean>(false);
 	const [ newUser, setNewUser ] = useState<boolean>(false);
+
+	const handlePatchUser = async(DataForm: any) => {
+
+		const patchData = {
+			name: DataForm.get('name') === '' ? userCtx.user?.name : DataForm.get('name'),			
+		}
+
+		const avatarData = new FormData();
+		avatarData.append('file', DataForm.get('file'))
+
+		if (DataForm.get('file').name) {
+			const avatarResponse = await fetch('http://localhost:3000/users/' + userCtx.user?.id + '/upload-avatar', {
+				method: 'POST',
+				headers: {
+					'Authorization' : 'Bearer ' + userCtx.logInfo?.token,
+				},
+				body: avatarData
+			})
+
+			if (avatarResponse.status === 422) {
+				return avatarResponse;
+			}
+
+			if (!avatarResponse.ok) {
+				throw new Error("Failed to upload Avatar");
+			}
+		}
+
+		if (patchData) {
+			const response = await fetch('http://localhost:3000/users/' + userCtx.user?.id, {
+				method: 'PATCH',
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization' : 'Bearer ' + userCtx.logInfo?.token,
+				},
+				body: JSON.stringify(patchData)
+			});
+			
+			if (response.status === 409 || response.status === 400) {
+				return response;
+			}
+			
+			if (!response.ok) {
+				throw json({message: 'Could not Patch User.'}, {status: 500});
+			}
+		}
+
+		window.location.reload();
+		userCtx.fetchUser();
+	}
 		
 	useEffect(() => {
 		if (window.location.href.includes("code="))
@@ -40,8 +85,8 @@ const AuthForm: React.FC = () => {
 					const data = await response.json();
 					setToken(data.accessToken);
 					setUserId(data.userId);
-					console.log(data);
 					setDoubleAuth(data.doubleAuth);
+					setNewUser(data.newUser);
 				}
 			}
 			fetchToken();
@@ -69,7 +114,6 @@ const AuthForm: React.FC = () => {
 			throw new Error("Failed to fetch 2fa");
 
 		const data = await response.json();
-		console.log(data);
 		if (data.result !== false) {
 			setToken(data.accessToken);
 			userCtx.login();
@@ -86,18 +130,18 @@ const AuthForm: React.FC = () => {
 		if (token || doubleAuth) {
 			setTokenAuth(token, userId);
 			if (doubleAuth === false) {
-				console.log("Je log")
 				userCtx.login();
-				window.location.assign("http://127.0.0.1:8000");
+				if (newUser === false)
+					window.location.assign("http://127.0.0.1:8000");
 			}
 		}
-	}, [userId])
+	}, [userCtx, userId, token, doubleAuth, newUser])
 
 
 
 	return (
 		<>
-			{
+			{/* {
 				!doubleAuth &&
 				<Form className={classes.logginForm} method='post'>
 					<h1>Connect Debug</h1>
@@ -116,18 +160,24 @@ const AuthForm: React.FC = () => {
 						<p className={classes.error}><span>Error {data.statusCode}</span>{data.message}</p>
 					}
 				</Form>		
+			} */}
+			{
+				(!doubleAuth && !newUser) && 
+				<div className={classes.loggin}>
+					<img className={classes.imgLogo} src={LogoPong} alt="LogoPong" />
+
+					<a  href={`http://127.0.0.1:3000/auth/forty-two`}>
+					<button 
+						className = {classes.button}>
+							Log in with<br/>
+							<span>42</span>
+					</button>
+					</a>
+				</div>
 			}
 			{
-				!doubleAuth && 
-				<div className={classes.loggin}>
-				<a  href={`http://127.0.0.1:3000/auth/forty-two`}>
-				<button 
-					className = {classes.button}>
-						Log in with<br/>
-						<span>42</span>
-				</button>
-				</a>
-			</div>
+				newUser && 
+				<ProfilPatch onPatchUser={handlePatchUser}/>
 			}
 			{
 				doubleAuth && 

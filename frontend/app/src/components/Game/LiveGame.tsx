@@ -13,13 +13,13 @@ const Livegame: React.FC = () => {
 		const newSocket = io('http://localhost:3000/');
 		setSocket(newSocket);
 		newSocket.on('connect', () => {
-			newSocket.emit('connection', userCtx.user?.id);
+			newSocket.emit('connection', userCtx.user?.id, userCtx.logInfo?.token);
 		});
 
 		return () => {
 			newSocket.close();
 		}
-	}, [setSocket, userCtx.user?.id]);
+	}, [setSocket, userCtx.user?.id, userCtx.logInfo?.token]);
 
 	useEffect(() => {
 		const handleLiveGames = ({ liveMatchArray }: { liveMatchArray: UserLiveGames[] }) => {

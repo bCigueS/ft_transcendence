@@ -1,6 +1,7 @@
 import { Logger, NotFoundException } from '@nestjs/common';
 import { OnGatewayInit, OnGatewayConnection, WebSocketGateway, SubscribeMessage, WebSocketServer, MessageBody, ConnectedSocket, OnGatewayDisconnect } from '@nestjs/websockets';
 import { Socket, Server, Namespace } from 'socket.io';
+import * as jwt from 'jsonwebtoken';
 
 import { GamesService } from './games.service';
 import { CreateGameDto } from './dto/create-game.dto';
@@ -13,6 +14,12 @@ import { GameState } from '@prisma/client';
 import EventEmitter from 'events';
 import { match } from 'assert';
 
+interface JwtPayload
+{
+	userId: string;
+	accessToken: string;
+}
+  
 @WebSocketGateway({ namespace: '/pong', cors: '*' })
 export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 	private readonly logger = new Logger(GamesGateway.name);
@@ -35,9 +42,24 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 		@ConnectedSocket() client: Socket,
 		) {
 		
-		client.on('connection', (userId: number) => {
+		client.on('connection', async (userId: number, token: string) => {
 			this.userId = userId;
-			console.log(`User ${userId} is connected in pong game`);
+			if (!token) 
+				return client.disconnect();
+			else
+			{
+				try 
+				{
+					const decodedToken = await jwt.verify(token, `${process.env.NODE_ENV}`) as JwtPayload;
+					const userId = decodedToken.userId;
+					const user = await this.prisma.user.findFirst({ where: { id: parseInt(userId) }});
+					if (!user)
+						return client.disconnect();
+				} catch (error) {
+					return client.disconnect();
+				}
+				// console.log(`User ${userId} is connected in pong game with token ${token}`);
+			}
 		});
 	}
 	
@@ -605,7 +627,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 		@MessageBody() { gameInfo, gameRoom }: { gameInfo: GameOverInfo, gameRoom: string },
 		@ConnectedSocket() client: Socket,
 		) {
-			console.log('received the disconnect signal from ' + client.id);
+			// console.log('received the disconnect signal from ' + client.id);
 
 			let game = await this.prisma.game.findUnique({
 				where: { room: gameRoom },
@@ -665,7 +687,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 	async handleDisconnect(
 		@ConnectedSocket() client: Socket,
 		) {
-			console.log(`User ${this.userId} is disconnected in pong game`);
+			// console.log(`User ${this.userId} is disconnected in pong game`);
 
 			// if the client is part of the players, get the the game that is not FINISHED
 			let playerGame = await this.prisma.game.findFirst({
@@ -698,13 +720,13 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 
 				if (playerGame.state === GameState.PLAYING) {
 					// change status of the game to finished
-					console.log('change the state of the game');
+					// console.log('change the state of the game');
 					playerGame = await this.gamesService.gameOver(playerGame.id, GameState.FINISHED);
 
 					GamesGateway.eventEmitter.emit('removeLiveGame');
 				} else {
 					// if game.state is still PENDING or WAITING, delete the game from database
-					console.log('delete the curent game from database');
+					// console.log('delete the curent game from database');
 					await this.gamesService.remove(playerGame.id);
 				}
 			}
