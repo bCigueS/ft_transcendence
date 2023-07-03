@@ -101,6 +101,7 @@ export class AuthService {
     response['userId'] = response['user']['userId'];
     response['doubleAuth'] = response['user']['doubleAuth'];
     response['accessToken'] = response['user']['accessToken'];
+    response['newUser'] = response['user']['newUser'];
 	if (response['user']['doubleAuth'] == false)
 		response['accessToken'] = response['user']['accessToken'];
 	else
@@ -170,8 +171,9 @@ export class AuthService {
 			response['doubleAuth'] = user.doubleAuth;
 			return response;
 		}
-		const userInfo = AuthUtils.getUserData( data_response.data.login );
-		return {response, userInfo};
+		const userInfo = await AuthUtils.getUserData( data_response.data.login );
+		userInfo['newUser'] = response['newUser'];
+		return userInfo;
 	} catch (error) {
 		console.log('error');
 		error.status = 403;
