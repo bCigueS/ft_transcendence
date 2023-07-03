@@ -40,7 +40,7 @@ const Overlay: React.FC<Props> = (props) => {
 			setTypeError('You need to select at least two members to create a group.');
 			return ;
 		}
-		console.log('about to create group: ', {groupName, members});
+		// console.log('about to create group: ', {groupName, members});
 
 		let membersWithConnectedUser = members;
 		if (userCtx.user) {
@@ -55,9 +55,9 @@ const Overlay: React.FC<Props> = (props) => {
 			}))
 		}
 	
-		console.log('ChanData: ', chanData);
+		// console.log('ChanData: ', chanData);
 		const newChan = await createNewChannel(chanData);
-		console.log('newChan created: ', newChan);
+		// console.log('newChan created: ', newChan);
 		// window.location.reload();
 		if (props.onCreate)
 			props.onCreate(newChan);
@@ -69,12 +69,12 @@ const Overlay: React.FC<Props> = (props) => {
 	}
 
 	const addMember = (member: UserAPI) => {
-		console.log('added member: ', member);
+		// console.log('added member: ', member);
 		setMembers([...members, member]);
 	}
 
 	const removeMember = (member: UserAPI) => {
-		console.log('removed member: ', member);
+		// console.log('removed member: ', member);
 		setMembers(members.filter(m => m.id !== member.id));
 	}
 	
