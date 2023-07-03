@@ -23,16 +23,16 @@ const PatchForm: React.FC<PatchUser> = ({ onPatchUser }) => {
 		
 		if (response?.status === 409) {
 			setPlaceholder("Already Exist!");
-			console.log("Error");
+			console.error("Error");
 		}
 		
 		if (response?.status === 400) {
-			console.log('response: ', response);
+			console.error('response: ', response);
 			setPlaceholder("Name too short!")
 		}
 
 		if (response?.status === 422) {
-			console.log('Response: ', response);
+			console.error('Response: ', response);
 			setTypeError('Not correct type (jpg/png/jpeg)');
 		}
 	}

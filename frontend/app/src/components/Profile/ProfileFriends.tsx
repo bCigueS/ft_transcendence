@@ -3,10 +3,12 @@ import React, { useContext } from 'react';
 import { UserAPI, UserContext } from '../../store/users-contexte';
 import classes from '../../sass/components/Profile/ProfileFriends.module.scss';
 import ProfilIcon from './ProfilIcon';
+import { useNavigate } from 'react-router-dom';
 
 const ProfileFriends: React.FC<{user: UserAPI; block: boolean; friend: boolean}> = ( props ) => {
 
 	const userCtx = useContext(UserContext);
+	const navigate = useNavigate();
 
 	const addBlockHandler = (event: React.MouseEvent<HTMLIFrameElement, MouseEvent>) => {
 		userCtx.fetchBlockUser(props.user);
@@ -20,6 +22,30 @@ const ProfileFriends: React.FC<{user: UserAPI; block: boolean; friend: boolean}>
 		userCtx.fetchRemoveFriend(props.user);
 	}
 
+	const handleClickMessage = () => {
+
+		navigate('/chat', {
+			state: {
+				newChat: props.user
+			}
+		});
+		
+	}
+
+	const handleClickGame = () => {
+		navigate('/pong', {
+			state: {
+				playerId: userCtx.user?.id,
+				opponentId: props.user.id,
+				gameInvitation: true,
+				isInvited: false,
+				isSpectator: false,
+				gameRoom: undefined,
+			}
+		})
+	}
+
+
 	return (
 		<div className={classes.container}>
 
@@ -30,6 +56,7 @@ const ProfileFriends: React.FC<{user: UserAPI; block: boolean; friend: boolean}>
 				{
 					!props.block && 
 					<i 
+					onClick={handleClickMessage}
 					title='Private Message'
 					className='fa-solid fa-message'>
 				</i>
@@ -54,6 +81,7 @@ const ProfileFriends: React.FC<{user: UserAPI; block: boolean; friend: boolean}>
 				{
 					!props.block && 
 					<i
+					onClick={handleClickGame}
 						title='Game'
 						className='fa-solid fa-table-tennis-paddle-ball'>
 					</i>
