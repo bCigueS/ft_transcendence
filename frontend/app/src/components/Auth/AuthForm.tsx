@@ -19,6 +19,7 @@ const AuthForm: React.FC = () => {
 	const [ token, setToken ] = useState<string>("");
 	const [ userId, setUserId ] = useState<string>('');
 	const [ doubleAuth, setDoubleAuth ] = useState<boolean>(false);
+	const [ newUser, setNewUser ] = useState<boolean>(false);
 		
 	useEffect(() => {
 		if (window.location.href.includes("code="))
@@ -133,7 +134,7 @@ const AuthForm: React.FC = () => {
 				<div className={classes.test}>
 					<form action="post" onSubmit={handleSubmit} className={classes.code}>
 						<label htmlFor="code">Enter your <span>Google Authenticator</span> code</label>
-						<input type="text" name='code' maxLength={6} />
+						<input type="text" name='code' maxLength={6} typeof='number' />
 						<button type='submit'>Log in</button>
 					</form>
 				</div>
