@@ -76,7 +76,7 @@ const MessageList: React.FC<{send: (content: string, channelId: number) => {}, c
         if (enteredText.trim().length === 0) {
 			return ;
         }
-		console.log('in handle submit to send message');
+		// console.log('in handle submit to send message');
 		send(enteredText, chat.id);
         messageInput.current!.value = '';
     }

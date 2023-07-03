@@ -35,7 +35,7 @@ const Overlay: React.FC<Props> = (props) => {
 	const [ members, setMembers ] = useState<UserAPI[]>([]);
 
 	const removeMember = (member: UserAPI) => {
-		console.log('removed member: ', member);
+		// console.log('removed member: ', member);
 		setMembers(members.filter(m => m.id !== member.id));
 	}
 

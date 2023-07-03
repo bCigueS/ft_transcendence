@@ -63,7 +63,7 @@ const AddToGroup: React.FC<{user: UserAPI, 	onAdd?: (member: UserAPI) => void,
 	}
 
 	const onPlayHandler = () => {
-		console.log('about to invite user ', user.name, ' to pong duel');
+		// console.log('about to invite user ', user.name, ' to pong duel');
 		navigate('/pong', {
             state: {
                 playerId: userCtx.user?.id,
