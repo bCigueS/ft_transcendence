@@ -94,7 +94,6 @@ export default function Pong(props: PongProp) {
 	// user info
 	const userCtx = useContext(UserContext);
 
-
 	// emit a join request to the server
 	useEffect(() => {
 		if (playerMode === SINGLE_MODE) {
@@ -827,7 +826,7 @@ export default function Pong(props: PongProp) {
 
 	// loop to detect if a screen is too small to play the pong
 	useEffect(() => {
-		if (isRunning && !isPaused && !myScreenTooSmall && (screenWidth < info.boardWidth || screenHeight < info.boardHeight)) {
+		if (isRunning && !isPaused && !myScreenTooSmall && (screenWidth < (info.boardWidth + 124) || screenHeight < (info.boardHeight + 220))) {
 			setMyScreenTooSmall(true);
 
 			if (playerMode === DOUBLE_MODE) {
@@ -837,7 +836,7 @@ export default function Pong(props: PongProp) {
 				});
 			}
 		}
-		else if (isRunning && !isPaused && myScreenTooSmall && (screenWidth >= info.boardWidth && screenHeight >= info.boardHeight)){
+		else if (isRunning && !isPaused && myScreenTooSmall && (screenWidth >= (info.boardWidth + 124) && screenHeight >= (info.boardHeight + 220))){
 			setMyScreenTooSmall(false);
 
 			if (playerMode === DOUBLE_MODE) { 

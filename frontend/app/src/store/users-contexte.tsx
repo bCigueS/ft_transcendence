@@ -5,7 +5,8 @@ export type UserMatch = {
 	user?: UserAPI,
 	opponent?: UserAPI,
 	playerScore: number,
-	opponentScore: number
+	opponentScore: number,
+	level: string
 }
 
 export type UserLiveGames = {
@@ -32,7 +33,7 @@ export const UserContext = React.createContext<{
 		user: UserAPI | null;
 		error: string | null;
 		token?: string;
-		logInfo? : {userId?: string | null, token?: string | null};
+		logInfo? : {userId?: string | null, token?: string | null, expiration: string | null};
 		isLogged: boolean;
 		deleteToken: () => void,
 		login: () => void,
@@ -51,7 +52,7 @@ export const UserContext = React.createContext<{
 	user: null,
 	error: null,
 	token: undefined,
-	logInfo: {userId: sessionStorage.getItem('userId'), token: sessionStorage.getItem('token')},
+	logInfo: {userId: sessionStorage.getItem('userId'), token: sessionStorage.getItem('token'), expiration: sessionStorage.getItem('expiration')},
 	isLogged: false,
 	login: () => {},
 	deleteToken: () => {},
@@ -84,7 +85,8 @@ type Props = {
 		
 		let logInfo = {
 			userId: sessionStorage.getItem('userId') ? sessionStorage.getItem('userId') : String(userId),
-			token: sessionStorage.getItem('token') || ''
+			token: sessionStorage.getItem('token') || '',
+			expiration: sessionStorage.getItem('expiration') || ''
 		}
 
 		const login = () => {
