@@ -1,6 +1,5 @@
 import React, { FormEvent, useCallback, useContext, useEffect, useState } from 'react';
 import classes from '../../sass/components/Profile/ProfilPatch.module.scss';
-import DefaultPreview from '../../assets/images/default.jpg';
 import { UserContext } from '../../store/users-contexte';
 
 interface PatchUser {
