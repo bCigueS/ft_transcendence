@@ -30,6 +30,7 @@ export default function RootLayout() {
 					console.error(error.message);
 				}
 			}
+
 			if ((event.key === 'token' || event.key === 'userId' || event.key === 'expiration' || event.key === 'isLogged') && event.newValue === null) {
 				if (userCtx.logInfo?.token) {
 					logout();
@@ -40,6 +41,40 @@ export default function RootLayout() {
 					window.location.reload();
 				}
 			}
+			if (event.key === 'token' && event.newValue !== userCtx.logInfo?.token) {
+				logout();
+				sessionStorage.removeItem('token');
+				sessionStorage.removeItem('userId');
+				sessionStorage.removeItem('isLogged');
+				sessionStorage.removeItem('expiration');				
+				window.location.reload();
+			}
+
+			if (event.key === 'userId' && event.newValue !== userCtx.logInfo?.userId) {
+				logout();
+				sessionStorage.removeItem('token');
+				sessionStorage.removeItem('userId');
+				sessionStorage.removeItem('isLogged');
+				sessionStorage.removeItem('expiration');				
+				window.location.reload();
+			}
+			if (event.key === 'isLogged' && event.newValue !== String(userCtx.isLogged)) {
+				logout();
+				sessionStorage.removeItem('token');
+				sessionStorage.removeItem('userId');
+				sessionStorage.removeItem('isLogged');
+				sessionStorage.removeItem('expiration');				
+				window.location.reload();
+			}
+			if (event.key === 'expiration' && event.newValue !== userCtx.logInfo?.expiration) {
+				logout();
+				sessionStorage.removeItem('token');
+				sessionStorage.removeItem('userId');
+				sessionStorage.removeItem('isLogged');
+				sessionStorage.removeItem('expiration');				
+				window.location.reload();
+			}
+				
 		};
 
 		window.addEventListener('storage', handleStorageChange);
@@ -47,7 +82,7 @@ export default function RootLayout() {
 		return () => {
 			window.removeEventListener('storage', handleStorageChange);
 		};
-	}, [userCtx.logInfo?.token])
+	}, [userCtx.logInfo?.token, userCtx.logInfo?.userId, userCtx.logInfo?.expiration, userCtx.isLogged])
 
 	useEffect(() => {
 		if (!token) {
