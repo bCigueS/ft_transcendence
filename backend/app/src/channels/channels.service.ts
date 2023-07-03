@@ -6,6 +6,7 @@ import { CreateMessageDto } from 'src/messages/dto/create-message.dto';
 import { MessagesService } from 'src/messages/messages.service';
 import { JoinChannelDto } from './dto/join-channel.dto';
 import { MessagesGateway } from 'src/messages/messages.gateway';
+import * as CryptoJS from 'crypto-js';
 
 @Injectable()
 export class ChannelsService {
@@ -14,9 +15,14 @@ export class ChannelsService {
   async create(createChannelDto: CreateChannelDto) {
     const { creatorId, name, messages, members } = createChannelDto;
 
-    if (members.length < 2) {
-      throw new Error("Invalid channel creation request: must include at least two members.");
+    if (!creatorId && !name) {
+      throw new BadRequestException("Invalid channel creation request: no name and creatorId provided.");
     }
+
+    if (members && members.length < 2) {
+      throw new BadRequestException("Invalid channel creation request: must include at least two members.");
+    }
+
 
     const channel = await this.prisma.channel.create({ 
       data: { creatorId, name },
@@ -86,6 +92,7 @@ export class ChannelsService {
     const chan = await this.prisma.channel.findUnique({
 		where: { id },
 		include: {
+        
         	creator: true,
 			messages: true,
 			members: {
@@ -153,7 +160,7 @@ export class ChannelsService {
         where: { id },
         data: {
           isPasswordProtected: isPasswordProtected,
-          password: password,
+          password: CryptoJS.AES.encrypt(password, `${process.env.NODE_ENV}`).toString(),
         }
       });
     }
@@ -475,8 +482,8 @@ export class ChannelsService {
 
     if (channel.isPasswordProtected && (!JoinChannelDto.password || JoinChannelDto.password.length === 0))
       throw new UnauthorizedException('You need to provide a password to enter that channel');
-
-    if (channel.isPasswordProtected && (channel.password !== JoinChannelDto.password))
+    const decryptPassword = CryptoJS.AES.decrypt(channel.password, `${process.env.NODE_ENV}`).toString(CryptoJS.enc.Utf8);
+    if (channel.isPasswordProtected && (decryptPassword !== JoinChannelDto.password))
       throw new UnauthorizedException('Wrong password provided');
     
     const memberDto: CreateChannelMembershipDto = { userId: JoinChannelDto.userId };

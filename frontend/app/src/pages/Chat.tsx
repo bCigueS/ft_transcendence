@@ -527,13 +527,13 @@ export default function Chat() {
 		const newSocket = io("http://localhost:3000/chat");
 		setSocket(newSocket);
 		newSocket.on('connect', () => {
-		  newSocket.emit('user_connected', userCtx.user?.id);
+		  newSocket.emit('user_connected', userCtx.user?.id, userCtx.logInfo?.token);
 		});
 	  
 		return () => {
 		  newSocket.removeAllListeners();
 		}
-	}, [setSocket, userCtx.user?.id]);
+	}, [setSocket, userCtx.user?.id, userCtx.logInfo?.token]);
 
 	const handleMessageDeletion = (message: MessageAPI) => {
 		// console.log('about to delete: ', message.content);
