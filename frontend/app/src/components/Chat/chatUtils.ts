@@ -50,15 +50,16 @@ export type JoinChannelDTO = {
     password?: string,
 }
 
+const token = sessionStorage.getItem('token');
 
 export const createNewChannel = async (chanData: CreateChannelDTO) => {
-
     try {
 
         const response = await fetch('http://localhost:3000/channels', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token,
             },
             body: JSON.stringify(chanData)
         });
@@ -83,7 +84,8 @@ export const deleteChat = async (chat: Channel) => {
         const response = await fetch('http://localhost:3000/channels/' + chat.id, {
             method: 'DELETE',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token,
             }
         });
     
@@ -106,7 +108,8 @@ export const modifyChannel = async (channelId: number, chanData: UpdateChannelDT
         const response = await fetch('http://localhost:3000/channels/' + channelId, {
             method: 'PATCH',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token,
             },
             body: JSON.stringify(chanData)
         });
@@ -129,7 +132,8 @@ export const removeAdmin = async (channelId: number, adminId: number) => {
         const response = await fetch('http://localhost:3000/channels/' + channelId + '/admins/' + adminId, {
             method: 'DELETE',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token,
             },
         });
     
@@ -152,7 +156,8 @@ export const removeBan = async (channelId: number, adminId: number) => {
         const response = await fetch('http://localhost:3000/channels/' + channelId + '/banned/' + adminId, {
             method: 'DELETE',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token,
             },
         });
     
@@ -175,7 +180,8 @@ export const removeMute = async (channelId: number, adminId: number) => {
         const response = await fetch('http://localhost:3000/channels/' + channelId + '/muted/' + adminId, {
             method: 'DELETE',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token,
             },
         });
     
@@ -198,7 +204,8 @@ export const kickUser = async (channelId: number, userId: number) => {
         const response = await fetch('http://localhost:3000/channels/' + channelId + '/kick/' + userId, {
             method: 'DELETE',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token,
             },
         });
     
@@ -222,7 +229,8 @@ export const banUser = async (channelId: number, userId: number) => {
         const response = await fetch('http://localhost:3000/channels/' + channelId + '/ban/' + userId, {
             method: 'PATCH',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token,
             },
         });
     
@@ -243,9 +251,15 @@ export const fetchChannelById = async (channelId: number) => {
 
 	let channelFound: Channel | null = null;
 	
-    console.log('in fetchChannelById with id: ', channelId);
+    // console.log('in fetchChannelById with id: ', channelId);
 	try {
-		const response = await fetch('http://localhost:3000/channels/' + channelId);
+		const response = await fetch('http://localhost:3000/channels/' + channelId, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token,
+            },
+        });
 
 		if (!response.ok)
 			throw new Error('Failed to fetch channel with id ' + channelId);
