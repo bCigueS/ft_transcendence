@@ -3,19 +3,19 @@ const prisma = new PrismaClient()
 async function main() {
 
 // User creation
-const alex = await prisma.user.upsert({
-    where: { name: 'Alex' },
-    update: {},
-    create: {
-      id42: 5,
-      email: 'achane-l@student.42.fr',
-      name: 'Alex',
-      login: 'achane-l',
-      password: 'lolilolilol',
-      avatar: 'achane-l.jpg',
-      token: '72b9f17ef081978d02e84bc259591cfdbd28fbcdaf1ddab3524b1929f78c30b4achane',
-    },
-  })
+// const alex = await prisma.user.upsert({
+//     where: { name: 'Alex' },
+//     update: {},
+//     create: {
+//       id42: 5,
+//       email: 'achane-l@student.42.fr',
+//       name: 'Alex',
+//       login: 'achane-l',
+//       password: 'lolilolilol',
+//       avatar: 'achane-l.jpg',
+//       token: '72b9f17ef081978d02e84bc259591cfdbd28fbcdaf1ddab3524b1929f78c30b4achane',
+//     },
+//   })
 // const simon = await prisma.user.upsert({
 //     where: { name: 'Simon' },
 //     update: {},
@@ -29,45 +29,45 @@ const alex = await prisma.user.upsert({
 //       token: '72b9f17ef081978d02e84bc259591cfdbd28fbcdaf1ddab3524b1929f78c30b4sbeylot',
 //     },
 //   })
-  const fany = await prisma.user.upsert({
-    where: { name: 'Faaaany' },
-    update: {},
-    create: {
-      id42: 2,
-      email: 'foctavia@student.42.fr',
-      name: 'Faaaany',
-      login: 'foctavia',
-      password: 'lolilolilol',
-      avatar: 'foctavia.jpg',
-      token: '72b9f17ef081978d02e84bc259591cfdbd28fbcdaf1ddab3524b1929f78c30b4foctavia',
-    },
-  })
-  const olivia = await prisma.user.upsert({
-    where: { name: 'Olivia' },
-    update: {},
-    create: {
-      id42: 3,
-      email: 'owalsh@student.42.fr',
-      name: 'Olivia',
-      login: 'owalsh',
-      password: 'lolilolilol',
-      avatar: 'owalsh.jpg',
-      token: '72b9f17ef081978d02e84bc259591cfdbd28fbcdaf1ddab3524b1929f78c30b4owalsh',
-    },
-  })
-  const yangchi = await prisma.user.upsert({
-    where: { name: 'Yang Chi' },
-    update: {},
-    create: {
-      id42: 4,
-      email: 'ykuo@student.42.fr',
-      name: 'Yang Chi',
-      login: 'ykuo',
-      password: 'lolilolilol',
-      avatar: 'ykuo.jpg',
-      token: '72b9f17ef081978d02e84bc259591cfdbd28fbcdaf1ddab3524b1929f78c30b4ykuo',
-    },
-});
+//   const fany = await prisma.user.upsert({
+//     where: { name: 'Faaaany' },
+//     update: {},
+//     create: {
+//       id42: 2,
+//       email: 'foctavia@student.42.fr',
+//       name: 'Faaaany',
+//       login: 'foctavia',
+//       password: 'lolilolilol',
+//       avatar: 'foctavia.jpg',
+//       token: '72b9f17ef081978d02e84bc259591cfdbd28fbcdaf1ddab3524b1929f78c30b4foctavia',
+//     },
+//   })
+//   const olivia = await prisma.user.upsert({
+//     where: { name: 'Olivia' },
+//     update: {},
+//     create: {
+//       id42: 3,
+//       email: 'owalsh@student.42.fr',
+//       name: 'Olivia',
+//       login: 'owalsh',
+//       password: 'lolilolilol',
+//       avatar: 'owalsh.jpg',
+//       token: '72b9f17ef081978d02e84bc259591cfdbd28fbcdaf1ddab3524b1929f78c30b4owalsh',
+//     },
+//   })
+//   const yangchi = await prisma.user.upsert({
+//     where: { name: 'Yang Chi' },
+//     update: {},
+//     create: {
+//       id42: 4,
+//       email: 'ykuo@student.42.fr',
+//       name: 'Yang Chi',
+//       login: 'ykuo',
+//       password: 'lolilolilol',
+//       avatar: 'ykuo.jpg',
+//       token: '72b9f17ef081978d02e84bc259591cfdbd28fbcdaf1ddab3524b1929f78c30b4ykuo',
+//     },
+// });
 
 
 // Channel creation

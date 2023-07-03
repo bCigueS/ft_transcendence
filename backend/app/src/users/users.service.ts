@@ -37,13 +37,14 @@ export class UsersService {
       },
       include: {
         following: true,
-        followers: true
-      }    
+        followers: true,
+      },
     });
 
     if (!user)
       return null;
-    return user;
+    // delete user.password;
+    return toSafeUser(user);
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {

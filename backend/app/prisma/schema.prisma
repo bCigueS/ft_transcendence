@@ -14,7 +14,7 @@ model User {
   email       String
   name        String       @unique
   login       String       @unique
-  password    String
+  password    String?
   avatar      String?      @default("default.jpg")
   doubleAuth  Boolean      @default(false)
   wins        Int          @default(0)

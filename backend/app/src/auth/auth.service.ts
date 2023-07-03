@@ -59,7 +59,7 @@ export class AuthService {
     createUserDto.name = apiResponse.login;
     createUserDto.login = apiResponse.login;
     createUserDto.email = apiResponse.email;
-    createUserDto.password = 'lolilolilol';
+    // createUserDto.password = 'lolilolilol';
     createUserDto.avatar = avatar;
 
     const user = await this.prisma.user.create({
@@ -68,7 +68,7 @@ export class AuthService {
         name: createUserDto.name,
         login: createUserDto.login,
         email: createUserDto.email,
-        password: createUserDto.password,
+        // password: createUserDto.password,
         avatar: createUserDto.avatar,
       },
     });
