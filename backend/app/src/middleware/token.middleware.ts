@@ -1,17 +1,17 @@
 import { Injectable, NestMiddleware, HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { UsersService } from 'src/users/users.service';
 import * as jwt from 'jsonwebtoken';
 
-interface JwtPayload {
+interface JwtPayload
+{
   userId: string;
   accessToken: string;
 }
 
 @Injectable()
 export class TokenMiddleware implements NestMiddleware {
-  constructor(private prisma: PrismaService, private usersService: UsersService) {}
+  constructor(private prisma: PrismaService) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
     // console.log('Executing request...');

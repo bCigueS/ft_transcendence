@@ -11,8 +11,11 @@ type Props = {
 	onInfoClick: () => void,
     onDelete: () => void,
     onRemove: (member: UserAPI) => void,
-    onAddAdmin: (member: UserAPI) => void,
-    onKick: (channelId: number, kickedId: number) => void
+    onKick: (channelId: number, kickedId: number) => void,
+    onAddAdmin: (channelId: number, userId: number) => void,
+    onRemoveAdmin: (channelId: number, userId: number) => void,
+    onAddMuted: (channelId: number, userId: number) => void,
+    onRemoveMuted: (channelId: number, userId: number) => void
 };
 
 const GroupChat: React.FC<Props> = (props) => {
@@ -27,11 +30,12 @@ const GroupChat: React.FC<Props> = (props) => {
     const [ members, setMembers ] = useState<UserAPI[]>([]);
     const [ banned, setBanned ] = useState<UserAPI[]>([]);
     const [ muted, setMuted ] = useState<UserAPI[]>([]);
-    const [ displayMembers, setDisplayMembers ] = useState(true);
+    const [ displayMembers, setDisplayMembers ] = useState(false);
     const [ displayAdmin, setDisplayAdmin ] = useState(false);
     const [ displayBanned, setDisplayBanned ] = useState(false);
     const [ displayMuted, setDisplayMuted ] = useState(false);
     const [ joinLink, setJoinLink ] = useState('');
+	const [ showCopiedToClipboard, setShowCopiedToClipboard ] = useState(false);
 	const userCtx = useContext(UserContext);
     
 
@@ -75,7 +79,6 @@ const GroupChat: React.FC<Props> = (props) => {
     }
 
     const handleClickLeave = () => {
-        console.log(userCtx.user?.name, ' left channel ', props.chat.name);
         if (userCtx.user)
             handleRemoveAdmin(userCtx.user);
         if (userCtx.user)
@@ -89,6 +92,12 @@ const GroupChat: React.FC<Props> = (props) => {
         if (userCtx.user)
             props.onKick(props.chat.id, userCtx.user.id);
     }
+
+	const isMemberCreator = (member: UserAPI) => {
+		if (member.id === props.chat.creatorId)
+            return true;
+		return false;
+	}
 
     const handleClickDelete = () => {
         setUserConfirm(true);
@@ -155,7 +164,6 @@ const GroupChat: React.FC<Props> = (props) => {
 			}
 			
 		}
-        console.log('about to cange channel protection setting : ', updatedChan);
 		await modifyChannel(props.chat.id, updatedChan);
         setIsChatPasswordProtected(!isChatPasswordProtected);
         setChatPassword('');
@@ -183,8 +191,6 @@ const GroupChat: React.FC<Props> = (props) => {
     }
 
     const handleAddAdmin = (member: UserAPI) => {
-        console.log('about to add member as admin: ', member);
-
         setAdmins([...admins, member]);
         const chanData = {
             admins: [
@@ -194,18 +200,16 @@ const GroupChat: React.FC<Props> = (props) => {
             ]
         }
         modifyChannel(props.chat.id, chanData);
+        props.onAddAdmin(props.chat.id, member.id);
     }
 
     const handleAddBanned = (member: UserAPI) => {
-        console.log('about to add member as banned: ', member);
-
 		handleKick(member);
         setBanned([...banned, member]);
         banUser(props.chat.id, member.id);
     }
 
     const handleAddMuted = (member: UserAPI) => {
-        console.log('about to add member as muted user: ', member);
 
         setMuted([...muted, member]);
         const chanData = {
@@ -216,31 +220,30 @@ const GroupChat: React.FC<Props> = (props) => {
             ]
         }
         modifyChannel(props.chat.id, chanData);
+        props.onAddMuted(props.chat.id, member.id);
     }
 
     const handleRemoveAdmin = (admin: UserAPI) => {
-        console.log('about to remove admin: ', admin);
         const newAdmins = admins.filter(a => a.id !== admin.id);
         setAdmins(newAdmins);
         removeAdmin(props.chat.id, admin.id);
+        props.onRemoveAdmin(props.chat.id, admin.id);
     }
 
     const handleRemoveBan = (ban: UserAPI) => {
-        console.log('about to remove ban: ', ban);
         const newBanned = banned.filter(b => b.id !== ban.id);
         setBanned(newBanned);
         removeBan(props.chat.id, ban.id);
     }
 
     const handleRemoveMute = (mute: UserAPI) => {
-        console.log('about to remove mute: ', mute);
         const newMuted = muted.filter(m => m.id !== mute.id);
         setMuted(newMuted);
         removeMute(props.chat.id, mute.id);
+        props.onRemoveMuted(props.chat.id, mute.id);
     }
 
     const handleKick = (member: UserAPI) => {
-        console.log('about to remove user from chat: ', member);
         handleRemoveAdmin(member);
         handleRemoveBan(member);
         handleRemoveMute(member);
@@ -258,6 +261,8 @@ const GroupChat: React.FC<Props> = (props) => {
     
       const copyToClipboard = (e: any) => {
         navigator.clipboard.writeText(joinLink);
+		setShowCopiedToClipboard(true);
+		setTimeout(() => setShowCopiedToClipboard(false), 1500);
         e.target.focus();
       };
 
@@ -284,24 +289,25 @@ const GroupChat: React.FC<Props> = (props) => {
                         members.map((member) => 
                         member.id !== userCtx.user?.id ? (
                         <AddToGroup 
-                        key={member.id} 
-                        user={member}
-                        onRemove={handleKick}
-                        onAddAdmin={handleAddAdmin}
-                        onAddBanned={handleAddBanned}
-                        onAddMuted={handleAddMuted}
-                        handleKickBanMute={canKickBanMute(member)}
-                        handleKick={true}
-                        handleBan={canBan(member)}
-                        handleMute={canMute(member)}
-                        handleDM={true}
-                        handleAddAdmin={canAddAsAdmin(member)}
+							key={member.id} 
+							user={member}
+							onRemove={handleKick}
+							onAddAdmin={handleAddAdmin}
+							onAddBanned={handleAddBanned}
+							onAddMuted={handleAddMuted}
+							handleKickBanMute={canKickBanMute(member)}
+							handleKick={true}
+							handleBan={canBan(member)}
+							handleMute={canMute(member)}
+							handleAddAdmin={canAddAsAdmin(member)}
+							superUser={isMemberCreator(member)}
                         />
                         ) : 
                         <AddToGroup 
-                        key={member.id} 
-                        user={member}
-                        />)
+							key={member.id} 
+							user={member}
+							superUser={isMemberCreator(member)}
+						/>)
                     }
                 </div>
                 <div className={classes.display}>
@@ -319,14 +325,13 @@ const GroupChat: React.FC<Props> = (props) => {
                         displayAdmin && admins.length > 0 ?
                             admins.map((admin) => (
                         <AddToGroup 
-                        key={admin.id} 
-                        user={admin}
-                        onRemove={handleRemoveAdmin}
-                        handleAddRemove={true}
-                        isSelected={true}
-                        // handleKickBanMute={canKickBanMute(administrator)}
-                        handleDM={true}
-                        />
+							key={admin.id} 
+							user={admin}
+							onRemove={handleRemoveAdmin}
+							handleAddRemove={true}
+							isSelected={true}
+							superUser={isMemberCreator(admin)}
+						/>
                         ))
                     :
                     displayAdmin && admins.length === 0 &&
@@ -348,12 +353,11 @@ const GroupChat: React.FC<Props> = (props) => {
                         displayBanned && banned.length > 0 ?
                             banned.map((ban) => (
                         <AddToGroup 
-                        key={ban.id} 
-                        user={ban}
-                        onRemove={handleRemoveBan}
-                        handleAddRemove={true}
-                        isSelected={true}
-                        handleDM={true}
+							key={ban.id} 
+							user={ban}
+							onRemove={handleRemoveBan}
+							handleAddRemove={true}
+							isSelected={true}
                         />
                         ))
                     :
@@ -381,7 +385,6 @@ const GroupChat: React.FC<Props> = (props) => {
                             onRemove={handleRemoveMute}
                             handleAddRemove={true}
                             isSelected={true}
-                            handleDM={true}
                         />
                         ))
                     :
@@ -393,21 +396,34 @@ const GroupChat: React.FC<Props> = (props) => {
                         <h2>
                             Invite your friends
                         </h2>
-                        {/* <p>Join link: {joinLink}</p> */}
-                        <button onClick={copyToClipboard}>Copy Join Link</button>
+						<div className={classes.link}>
+
+							<p>{joinLink} </p>
+							{
+								!showCopiedToClipboard &&
+								<i onClick={copyToClipboard} className="fa-solid fa-copy"> </i>
+							} 
+							{
+								showCopiedToClipboard && 
+								<div>
+									<i className="fa-solid fa-check"></i>
+									<div className={classes.copiedClipboard}>Copied!</div>
+								</div>
+							}
+						</div>
                     </div>
                     {
                         isCreator &&
                         <div>
                             <div className={classes.passwordLabel}>
-                                <h2>
-                                Password protection
-                                </h2>
                                 <i 
                                     title={isChatPasswordProtected ? "block" : "unblock"}
                                     onClick={handlePasswordProtect}
                                     className={isChatPasswordProtected ? 'fa-solid fa-lock' : 'fa-solid fa-lock-open'}>
                                 </i>
+                                <h2>
+                                Password protection
+                                </h2>
                             </div>
                         {
                             !isChatPasswordProtected && 
@@ -419,7 +435,9 @@ const GroupChat: React.FC<Props> = (props) => {
                             name='name'
                             value={chatPassword} 
                             onChange={passwordHandler}
-                            maxLength={12}/>
+                            maxLength={12}
+							placeholder="Set pass to protect channel..."
+							/>
                             <br></br>
                             </form>
                             { 

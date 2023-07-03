@@ -19,7 +19,7 @@ COPY ./app/prisma ./prisma/
 COPY ./app ./
 
 # Install app dependencies
-RUN npm ci
+RUN npm install
 
 # Generate Prisma client
 RUN npx prisma generate --schema ./prisma/schema.prisma

@@ -39,7 +39,7 @@ export default function Game() {
 		const newSocket = io('http://localhost:3000/pong');
 		setSocket(newSocket);
 		newSocket.on('connect', () => {
-			newSocket.emit('connection', userCtx.user?.id);
+			newSocket.emit('connection', userCtx.user?.id, userCtx.logInfo?.token);
 		});
 
 		return () => {
