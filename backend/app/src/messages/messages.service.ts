@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -9,10 +9,15 @@ export class MessagesService {
 	constructor(private prisma: PrismaService) { }
 	
 	async create(createMessageDto: CreateMessageDto) {
-
+		if (!createMessageDto.senderId || !createMessageDto.content || !createMessageDto.channelId) {
+			throw new BadRequestException('Invalid message data');
+		}
+		
 		const newMessage = await this.prisma.message.create({ 
 			data: {
-				...createMessageDto,
+				senderId: createMessageDto.senderId,
+				content: createMessageDto.content,
+				channelId: createMessageDto.channelId,
 		  	},
 		});
 
@@ -35,3 +40,7 @@ export class MessagesService {
 		return await this.prisma.message.delete({ where: { id } });
 	}
 }
+function sanitize(content: string) {
+	throw new Error('Function not implemented.');
+}
+
