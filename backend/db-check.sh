@@ -6,7 +6,6 @@ until PGPASSWORD=$POSTGRES_PASSWORD psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER"
   sleep 1
 done
 
-# Run Prisma migrations
 npx prisma migrate dev
 
 # Start the application
