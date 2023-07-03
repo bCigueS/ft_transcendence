@@ -1,7 +1,7 @@
 import * as speakeasy from 'speakeasy';
 import * as jwt from 'jsonwebtoken';
 import * as CryptoJS from 'crypto-js';
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { PrismaService } from './../prisma/prisma.service';
 
@@ -10,6 +10,18 @@ export function verifyTwoFactor(
 	code: string,
 	secert: string
 ) {
+	if (!code)
+		throw new BadRequestException(`Code is missing.`);
+	const DIGIT_EXPRESSION: RegExp = /^\d$/;
+	const isDigit = (character: string): boolean => {
+		return character && DIGIT_EXPRESSION.test(character);
+	};
+
+	for (let i = 0; i < code.length; i ++)
+	{
+		if (isDigit(code[i]) === false)
+			throw new BadRequestException(`Code is not a number.`);
+	}
 	
 	const verified = speakeasy.totp.verify({
 		secret: secert,

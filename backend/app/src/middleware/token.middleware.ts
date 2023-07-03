@@ -17,7 +17,7 @@ export class TokenMiddleware implements NestMiddleware {
     // console.log('Executing request...');
 
     if (!req.headers.authorization) {
-      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+      throw new HttpException('Forbidden with middleware', HttpStatus.FORBIDDEN);
     }
 
     const token = req.headers.authorization.replace('Bearer ', '');

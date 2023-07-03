@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadGatewayException, BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from './../prisma/prisma.service';
 import { AuthEntity } from './entity/auth.entity';
 import { HttpException, HttpStatus } from '@nestjs/common';
@@ -97,7 +97,7 @@ export class AuthService {
       throw new HttpException(error.response.data, HttpStatus.FORBIDDEN, { cause: error });
     }
     if (token['access_token']) 
-		  response['user'] = await this.aboutMe(token['access_token']);
+		response['user'] = await this.aboutMe(token['access_token']);
     response['userId'] = response['user']['userId'];
     response['doubleAuth'] = response['user']['doubleAuth'];
     response['accessToken'] = response['user']['accessToken'];
@@ -110,6 +110,17 @@ export class AuthService {
 
   async verifyTwoFactor(userId: number, code: string)
   {
+	if (!code || !userId)
+		throw new BadRequestException(`Code or userId is missing.`);
+	const DIGIT_EXPRESSION: RegExp = /^\d$/;
+	const isDigit = (character: string): boolean => { return character && DIGIT_EXPRESSION.test(character);};
+
+	for (let i = 0; i < code.length; i ++)
+	{
+		if (isDigit(code[i]) === false)
+			throw new BadRequestException(`Code is not a number.`);
+	}
+
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user)
     	throw new NotFoundException(`User with ${userId} does not exist.`);
@@ -129,6 +140,9 @@ export class AuthService {
 
   async aboutMe(token: string): Promise<any>  
   {
+	let response = {
+		newUser: false,
+	};
 	const url_data = 'https://api.intra.42.fr/v2/me';
 	const headersRequest = { Authorization: `Bearer ${token}` };
 	try {
@@ -136,6 +150,7 @@ export class AuthService {
 		let user = await this.prisma.user.findFirst({ where: { login: data_response.data.login } });
 		if (!user)
 		{
+			response['newUser'] = true;
 			await this.registerUser(data_response.data);
 			user = await this.prisma.user.findFirst({ where: { login: data_response.data.login } });
 		}
@@ -151,12 +166,12 @@ export class AuthService {
 		}
 		if (user && user.doubleAuth == true)
 		{
-			return {
-				userId: user.id,
-				doubleAuth: user.doubleAuth,
-			};
+			response['userId'] = user.id;
+			response['doubleAuth'] = user.doubleAuth;
+			return response;
 		}
-		return AuthUtils.getUserData( data_response.data.login );
+		const userInfo = AuthUtils.getUserData( data_response.data.login );
+		return {response, userInfo};
 	} catch (error) {
 		console.log('error');
 		error.status = 403;
