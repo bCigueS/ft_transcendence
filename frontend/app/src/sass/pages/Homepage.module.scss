@@ -8,11 +8,12 @@
 	width: 100%;
 	display: grid;
 	padding: 5rem;
-	grid-template-columns: 2fr 1.5fr;
+	grid-template-columns: 2fr 1fr;
 	grid-template-rows: 1fr;
 	gap: 5rem;
 	
-	.rules {		
+	.rules {	
+		height: 100%;	
 		gap: 1rem;
 		@include flexBox($align: flex-start);
 		
@@ -34,6 +35,7 @@
 
 			p {
 				@include text-body();
+				font-size: 1.4rem;
 				margin-bottom: 1rem;
 			}
 

@@ -29,7 +29,7 @@ const Homepage: React.FC = () => {
 					</div>
 				</div>
 			</div>
-			<LiveGame/>
+			<LiveGame/>1fr
 		</div>
 	)
 }
