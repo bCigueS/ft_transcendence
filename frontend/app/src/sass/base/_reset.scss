@@ -5,20 +5,20 @@
 	box-sizing: border-box;
 }
 
-html, body {
-	min-height: 100%;
+html {
 	height: 100%;
-	// width: 120rem;
+}
+html, body {
 	font-family: 'Inter', sans-serif;
 	font-size: 62.5%;
-	// font-size: 72.5%;
-	overflow: auto;
 }
 
 /* Body */
 body {
+	min-height: 100vh;
+	max-width: 110rem;
 	min-width: 76.8rem;
-	padding: 14.5rem 2rem;
+	margin: 0 auto;
 	background-color: $background-color;
 	@include flexBox($justify: center);
 }

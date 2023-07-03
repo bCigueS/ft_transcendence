@@ -1,11 +1,11 @@
-import React, { useContext, useState } from 'react';
+import React from 'react';
 import { json, redirect } from 'react-router-dom';
 import AuthForm from '../components/Auth/AuthForm';
-import { UserContext } from '../store/users-contexte';
+import { setTokenAuth } from '../typescript/Auth';
 
 const AuthenticationPage = () => {
 
-	const userCtx = useContext(UserContext);
+	// const userCtx = useContext(UserContext);
 	
 	return (
 		<AuthForm />
@@ -41,9 +41,10 @@ export const action = async({ request }: { request: Request }) => {
 	const resData = await response.json();
 	const token = resData.accessToken;
 	const userId = resData.userId;
-	localStorage.setItem('token', token);
-	localStorage.setItem('userId', userId);
-	localStorage.setItem('isLogged', 'true');
+	// sessionStorage.setItem('token', token);
+	// sessionStorage.setItem('userId', userId);
+	sessionStorage.setItem('isLogged', 'true');
+	setTokenAuth(token, userId);
 	window.location.reload();
 
 	return redirect('/');

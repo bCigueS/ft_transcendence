@@ -1,14 +1,19 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
 import ChatOverview from '../components/Chat/ChatOverview';
 import classes from '../sass/pages/Chat.module.scss';
-import { UserContext } from '../store/users-contexte';
+import { UserAPI, UserContext } from '../store/users-contexte';
 import NoConvo from '../components/Chat/NoConvo';
 import io, { Socket } from 'socket.io-client';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import MessageList from '../components/Chat/MessageList';
 import { Channel, JoinChannelDTO, MessageAPI, createNewChannel, deleteChat } from '../components/Chat/chatUtils';
 import ManageChats from '../components/Chat/ManageChats';
 import NoDiscussions from '../components/Chat/NoDiscussions';
+
+type JoinResponse = {
+	status: number;
+	error?: string;
+  };
 
 export default function Chat() {
 	
@@ -17,14 +22,12 @@ export default function Chat() {
 	const [ chats, setChats ] = useState<Channel[]>([]);
 	const [ socket, setSocket ] = useState<Socket>();
 	const [ messages, setMessages ] = useState<MessageAPI[] >([]);
-
 	const userCtx = useContext(UserContext);
 	const location = useLocation();
+	const navigate = useNavigate();
 
-	/*
-		FUNCTIONS FOR MESSAGING
-	*/
-
+	let state = location.state?.newChat;
+	
 	const send = async (content: string, selectedConversationId: number) => {
 
 		const message = {
@@ -69,6 +72,9 @@ export default function Chat() {
 			  setChats([...chats, newChan]);
 			}
 			onSaveConversation(newChan);
+			socket?.emit("message", message);
+			navigate('/chat');
+			return ;
 		}
 		socket?.emit("message", message);
 	}
@@ -146,37 +152,84 @@ export default function Chat() {
 		}
 	}, [userCtx.user?.id])
 
-	const handleJoinLink = async (channelId: number) => {
-		console.log('in handle join link');
-
-		if (!userCtx.user?.id)
-			return ;
-
-		const joinData: JoinChannelDTO = {
-			userId: userCtx.user?.id,
+	const checkIsBlocked = (blockedId: number): boolean => {
+		if (!userCtx.user?.id) {
+		  return false;
 		}
+	  
+		const blockedUsers = userCtx.user?.block;
+	  
+		if (blockedUsers) {
+		  return blockedUsers.some((blockedUser) => blockedUser.id === blockedId);
+		}
+	  
+		return false;
+	  };
+	  
+	const filteredChats = (): Channel[] => {
+		return chats.filter((chat) => {
+			if (chat.name === 'private' && chat.members.length === 2) {
+				const otherMember = chat.members.find((member) => member.id !== userCtx.user?.id);
+				if (otherMember) {
+					const isBlocked = checkIsBlocked(otherMember.id);
+				return !isBlocked;
+				}
+			}
+			return true;
+		});
+	};  
+	
+	const handleJoinGroup = useCallback((channelId: number, userId: number) => {
+		// setChats(chats => chats.filter(chat => chat.id !== id));
+		socket?.emit('handleJoinGroup', { channelId: channelId, userId: userId });
 		
+	}, [socket])
+
+	const handleJoinLink = useCallback(async (joinData: JoinChannelDTO): Promise<JoinResponse> => {
+
 		try {
-		  const response = await fetch(`http://localhost:3000/channels/${channelId}/join`, {
+			const response: Response = await fetch(`http://localhost:3000/channels/${joinData.channelId}/join`, {
 			method: 'PATCH',
 			headers: {
-			  'Content-Type': 'application/json'
+				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify(joinData)
-		  });
-	
-		  if (!response.ok) {
-			throw new Error("Failed to join channel!");
-		  }
-	
-		  await fetchChannels();
-		  setSelectedConversation(chats.find(chat => chat.id === channelId));
+			});
 
-		  
+			if (response?.status === 404) {
+				// console.log("It appears that this channels does not exist anymore or link has expired!");
+				return { status: 404, error: "It appears that this channels does not exist anymore or link has expired!" };
+			}
+
+			if (response?.status === 400) {
+				// console.log("It appears that you have already joined this group!");
+				return { status: 404, error: "It appears that you have already joined this group!" };
+			}
+
+			if (response?.status === 403) {
+				// console.log("You have been banned from this group.");
+				return { status: 403, error: "You have been banned from this group." };
+			}
+
+			if (response?.status === 401) {
+				// console.log("Wrong password provided!");
+				return { status: 401, error: "Wrong password provided" };
+			}
+
+			if (!response.ok) {
+				return { status: response.status, error: "An error occurred" };
+			}
+
+			await fetchChannels();
+			setSelectedConversation(chats.find(chat => chat.id === joinData.channelId));
+			handleJoinGroup(joinData.channelId, joinData.userId);
+			return { status: response.status };
+			
 		} catch (error) {
-		  console.error(error);
+		  console.log(error);
 		}
-	}
+		return { status: 200 };
+		}, [fetchChannels, chats, handleJoinGroup]);
 	
 	const joinListener = useCallback((channelId: string) => {
 		console.log('client joined channel ', channelId);
@@ -184,11 +237,28 @@ export default function Chat() {
 		fetchChannels();
 	  }, [fetchChannels, socket]);
 
-	const kickListener = useCallback((channelId: string) => {
+	  const kickListener = useCallback(async (channelId: string) => {
 		console.log('client was kicked from channel ', channelId);
+		if (selectedConversation && +channelId === selectedConversation.id) {
+		  setSelectedConversation(undefined);
+		}
+		setChats(prevChats => prevChats.filter(chat => chat.id !== +channelId));
+	  }, [selectedConversation]);
+	
+	const userJoinedListener = useCallback((data : {
+			channelId: number, 
+			updatedMembers: UserAPI[]}) => {
 		fetchChannels();
-	}, [fetchChannels, socket]);
-	  
+	}, [fetchChannels]);
+
+	useEffect(() => {
+		socket?.on('userJoined', userJoinedListener)
+	
+		return () => {
+		  socket?.off('userJoined');
+		}
+	  }, [socket, userJoinedListener]);
+
 	useEffect(() => {
 		socket?.on("message", messageListener);
 		return () => {
@@ -215,6 +285,7 @@ export default function Chat() {
 			if (chats.find(chat => chat.id === data.chatId)) {
 				setChats(chats => chats.filter(chat => chat.id !== data.chatId));
 			}
+			setSelectedConversation(undefined);
 		});
 	
 		return () => {
@@ -222,16 +293,31 @@ export default function Chat() {
 		};
 	}, [chats, socket]);
 
+	const handleCreateGroup = (channel: Channel) => {
+
+		for (const member of channel.members)
+		{
+			const data = {
+				receiverId: member.id,
+				channelId: channel.id,
+			};
+
+			console.log(member);
+			socket?.emit("createJoin", data);
+		}
+
+	}
+
 	const handleChatDeletion = useCallback((id: number) => {
 		setChats(chats => chats.filter(chat => chat.id !== id));
+		setSelectedConversation(undefined);
 		socket?.emit('chatDeleted', { chatId: id, userId: userCtx.user?.id });
 	}, [socket, userCtx.user?.id]);
 
 	const handleKick = useCallback((channelId: number, kickedId: number) => {
 		// setChats(chats => chats.filter(chat => chat.id !== id));
 		socket?.emit('kickUser', { channelId: channelId, userId: kickedId });
-
-	}, [socket, userCtx.user?.id])
+	}, [socket])
 
 	const checkLastMessageDeleted = useCallback((message: MessageAPI) => {
 		const chatMessage = chats.find(chat => chat.id === message.channelId);
@@ -304,9 +390,9 @@ export default function Chat() {
 
 	const checkPreviousPage = useCallback(() => {
 
-		if (location?.state?.newChat) {
+		if (state) {
 
-			const user = location?.state?.newChat;
+			const user = state;
 			const chatExist = chats.find(chat =>
 				chat.name === 'private' && chat.members.some(member => member.id === user.id));
 	
@@ -324,9 +410,10 @@ export default function Chat() {
 					}
 				setChats([...chats, newChat]);
 				onSaveConversation(newChat);
+
 			}
 		}
-	}, [chats, location?.state?.newChat, onSaveConversation, userCtx.user])
+	}, [chats, state, onSaveConversation, userCtx.user])
 
 	useEffect(() => {
 		if (chats) {
@@ -356,10 +443,11 @@ export default function Chat() {
 	return (
 		<div className={classes.page}>
 			<div className={classes.conversations}>
-				< ManageChats />
+				< ManageChats 
+					onCreate={handleCreateGroup}/>
 				{
 					chats && chats.length > 0 ?
-					chats.map((chat) => (
+					filteredChats().map((chat) => (
 						<ChatOverview key={chat.id}
 						chats={chats}
 						chat={chat}

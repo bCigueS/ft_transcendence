@@ -1,6 +1,8 @@
 @import '../../abstracts/mixin.scss';
 @import '../../abstracts/variables.scss';
 
+
+
 .myBubble {
     margin-bottom: 0.5rem;
     padding: 0.5rem;
@@ -19,6 +21,23 @@
         margin-top: 0.7rem;
         margin-bottom: 0.7rem;
         text-align: right;
+    }
+
+	.link {
+        display: flex;
+        flex-direction: column;
+
+        .click {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .click:hover {
+            color: $gunmetal-dark; 
+            text-decoration:none; 
+            cursor:pointer;
+        }
     }
 
 }
@@ -58,6 +77,23 @@
         border-style: solid;
     }
 
+	.link {
+        display: flex;
+        flex-direction: column;
+
+        .click {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .click:hover {
+            color: $gunmetal-dark; 
+            text-decoration:none; 
+            cursor:pointer;
+        }
+    }
+
 }
 
 .yourBubble {
@@ -87,6 +123,23 @@
 
     .sender {
         font-style: bold;
+    }
+
+    .link {
+        display: flex;
+        flex-direction: column;
+
+        .click {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .click:hover {
+            color: $gunmetal-dark; 
+            text-decoration:none; 
+            cursor:pointer;
+        }
     }
 
 }
@@ -128,7 +181,22 @@
         border-style: solid;
     }
 
+    .link {
+        display: flex;
+        flex-direction: column;
 
+        .click {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .click:hover {
+            color: $gunmetal-dark; 
+            text-decoration:none; 
+            cursor:pointer;
+        }
+    }
 
 }
 
@@ -150,9 +218,15 @@
     align-items: center;
     justify-content: center;
 	color: $gunmetal-dark;
+	margin-bottom: 1rem;
 }
 
 .senderProfile {
     position: relative;
     bottom: 1rem;
+}
+
+.blockedMessage {
+	color: transparent;
+    text-shadow: 0 0 8px #000;
 }

@@ -1,22 +1,34 @@
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 
 import classes from '../../sass/components/Chat/Message.module.scss';
 import { UserAPI, UserContext } from '../../store/users-contexte';
 import Modal from '../UI/Modal';
-import { Channel, MessageAPI } from './chatUtils';
+import { Channel, JoinChannelDTO, MessageAPI, fetchChannelById } from './chatUtils';
 import ProfilIcon from '../Profile/ProfilIcon';
+import JoinModal from './JoinModal';
+import ErrorModal from './ErrorModal';
 import { useNavigate } from 'react-router-dom';
 
+type JoinResponse = {
+	status: number;
+	error?: string;
+  };
 
 const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean, 
 					message: MessageAPI, messages: MessageAPI[], 
 					onDelete: (message: MessageAPI) => void,
 					chat: Channel,
-					onJoin: (channelId: number) => void }> = ( { isMine, isLast, displayDay, message, messages, onDelete, chat, onJoin } ) => {
+					onJoin: (joinData: JoinChannelDTO) => Promise<JoinResponse>}> = ( { isMine, isLast, displayDay, message, messages, onDelete, chat, onJoin } ) => {
 
 	const [ isHovering, setIsHovering ] = useState(false);
 	const [ showModal, setShowModal ] = useState(false);
 	const [ sender, setSender ] = useState<UserAPI | null>(null);
+	const [ channel, setChannel ] = useState<Channel | null>(null);
+	const [ joinError, setJoinError ] = useState(false);
+	const [ errorType, setErrorType ] = useState('');
+	const [ joinWithPassword, setJoinWithPassword ] = useState(false);
+	const [ senderBlocked, setSenderBlocked ] = useState(false);
+
 	const userCtx = useContext(UserContext);
 	const navigate = useNavigate();
 
@@ -52,9 +64,10 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 				}
 			});
 		
-			if (response.status === 400) {
+			if (response.status === 404) {
 				throw new Error("Failed to delete message!") ;
 			}
+
 
 			if (!response.ok)
 				throw new Error("Failed to delete message!") ;
@@ -68,20 +81,51 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 		
 	};
 
-	const displaySender = async () => {
+	const displaySender = useCallback(async () => {
 		let sender = null;
-		if (message.senderId)
+		if (message.senderId === -1)
+		{
+			sender = {
+				id: -1,
+				name: 'bot',
+				email: 'bot@student.42.fr',
+				avatar: 'bot.jpg',
+				doubleAuth: false,
+				wins: 0,
+			}
+		}
+		else if (message.senderId)
 			sender = await userCtx.fetchUserById(message.senderId);
 		if (sender)
 		{
 			setSender(sender);
+
 		}
-	}
+	}, [message.senderId, userCtx])
+
+	const checkSenderBlocked = useCallback(() => {
+		if (!userCtx.user?.id)
+			return ;
+
+		const blockedUsers = userCtx.user?.block;
+
+		if (blockedUsers)
+		{
+			for (const blockedUser of blockedUsers)
+			{
+				if (blockedUser.id === message.senderId)
+				{
+					console.log('sender is blocked');
+					setSenderBlocked(true);
+				}
+			}
+		}
+	}, [message.senderId, userCtx]);
 
 	useEffect(() => {
 		displaySender();
-	});
-
+		checkSenderBlocked();
+	}, [displaySender, checkSenderBlocked]);
 
 	const handleDeletion = () => 
 	{
@@ -112,13 +156,71 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 		});
 	}
 
+	const handleUserJoinError = () => {
+		setJoinError(false);
+	}
+
+	const handleUserJoinWithPassword = () => {
+		setJoinWithPassword(false);
+	}
+
+	const handleClickJoin = async (channelId: number) => {
+		const channel = await fetchChannelById(channelId);
+		setChannel(channel);
+
+		if (!channel)
+		{
+			setJoinError(true);
+			setErrorType('It appears that this channel does not exist anymore or the link has expired.')
+			return ;
+		}
+
+		if (!userCtx.user?.id)
+			return ;
+
+		let joinData: JoinChannelDTO = {
+			channelId: channelId,
+			userId: userCtx.user?.id,
+		}
+		
+		if (channel?.isPasswordProtected)
+		{
+			setJoinWithPassword(true);
+			return ;
+		}
+
+		try {
+			console.log('about to call handleJoinLink when its not password protected');
+			const response: JoinResponse = await onJoin(joinData);
+
+			if (response.status !== 200 && response.error) {
+				setJoinError(true);
+				setErrorType(response.error);
+				return ;
+			}
+		  
+		  } catch (error) {
+			console.error(error);
+		  }
+		
+	}
+
+	const displaySenderName = () => {
+		if (senderBlocked)
+			return '🙅 ' + sender?.name + ' ⛔';
+		return sender?.name;
+	}
+	
 	const displayMessage = () => {
 		if (message.content.includes('join/')) {
 			const channelId = message.content.split('_')[1];
 			return (
-				<a href="#" onClick={() => onJoin(+channelId)}>
-					{message.content}
-				</a>
+				<div className={classes.link}>
+					You've been invited to join a group 👇 <br></br>
+					<div className={classes.click} onClick={() => handleClickJoin(+channelId)}>
+						{message.content}
+					</div>
+				</div>
 			);
 		} else if (message.content.includes('joinGame/')) {
 			const invitation = message.content.split('>')[0];
@@ -128,20 +230,14 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 			const gameRoom = info.split('_')[0];
 			const senderId = info.split('_')[1];
 
-			const linkStyles: React.CSSProperties = {
-				cursor: 'pointer',
-				textDecoration: 'underline',
-				color: 'blue',
-			};
-
 			return (
-				<>
-					<p>{invitation}</p>
-					<div role="button" tab-index="0" onClick={() => handleClickJoinGame(+senderId, gameRoom)} style={linkStyles}>
+				<div className={classes.link}>
+					{invitation} 👇 <br></br>
+					{/* <p>{invitation}</p> */}
+					<div className={classes.click} role="button" tab-index="0" onClick={() => handleClickJoinGame(+senderId, gameRoom) }>
 						{link}
 					</div>
-				
-				</>
+				</div>
 			);
 		} else {
 		return (
@@ -149,10 +245,8 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 			);
 		}
 	}
-		
 
 	return (
-		
 		<>
 		{showModal &&
 			<Modal
@@ -162,16 +256,45 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 				onDelete={handleDeletion}
 			/>
 		}
-		{ displayDay && <div className={classes.date}>{message && date.toDateString()}</div> }
+		{joinError &&
+			<ErrorModal
+				title="Error Joining this channel"
+				message={errorType}
+				onCloseClick={handleUserJoinError}
+			/>
+		}
+
+		{joinWithPassword &&
+			<JoinModal
+				title="About to join channel"
+				message="You need to provide a password to enter that channel."
+				channel={channel}
+				onConfirm={onJoin}
+				onCloseClick={handleUserJoinWithPassword}
+			/>
+		}
+		{
+			sender && sender.id !== userCtx.user?.id && isLast ?
+			<div className={classes.senderProfile}>
+			<ProfilIcon user={sender} displayCo={false} size={["2.5rem", "2.5rem"]}/>
+			</div>
+			:
+			<div></div>
+		}
 		<div className={whichBubble()} 
 			onMouseOver={handleMouseOver}
 			onMouseOut={handleMouseOut}>
 			<div 
 				className={isMine ? classes.myMessage : classes.yourMessage}>
 				<div className={classes.sender}>
-				{ sender && sender.id !== userCtx.user?.id && chat.name !== "private" && sender?.name}
+				{ sender && sender.id !== userCtx.user?.id && chat.name !== "private" && displaySenderName()}
 				</div>
-				{ displayMessage() }
+				<div 
+				className={senderBlocked ? classes.blockedMessage : ''}>
+				{
+					displayMessage()
+				}
+				</div>
 			{ isHovering && 
 				<div className={classes.info}>
 					<div className={classes.hour}>
@@ -190,14 +313,8 @@ const Message: React.FC<{ isMine: boolean, isLast: boolean, displayDay: boolean,
 			</div>
 			
 		</div>
-		{
-			sender && sender.id !== userCtx.user?.id && isLast ?
-			<div className={classes.senderProfile}>
-			<ProfilIcon user={sender} displayCo={false} size={["2.5rem", "2.5rem"]}/>
-			</div>
-			:
-			<div></div>
-		}
+
+		{ displayDay && <div className={classes.date}>{message && date.toDateString()}</div> }
 		</>
 	)
 }

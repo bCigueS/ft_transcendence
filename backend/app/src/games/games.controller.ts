@@ -34,12 +34,6 @@ export class GamesController {
     return this.gamesService.findOne(id);
   }
 
-  // @Patch(':id')
-  // @ApiOkResponse({ type: GameEntity })
-  // update(@Param('id', ParseIntPipe) id: number, @Body() updateGameDto: UpdateGameDto) {
-  //   return this.gamesService.update(id, updateGameDto);
-  // }
-
   @Get(':id/liveGames')
   @ApiOkResponse({ type: GameEntity, isArray: true })
   async getLiveGames(@Param('id', ParseIntPipe) id: number) {
