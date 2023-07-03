@@ -8,12 +8,13 @@
 	width: 100%;
 	display: grid;
 	padding: 5rem;
-	grid-template-columns: 2fr 1.5fr;
+	grid-template-columns: 2fr 1fr;
 	grid-template-rows: 1fr;
 	gap: 5rem;
 	
-	.rules {		
-		gap: 3rem;
+	.rules {	
+		height: 100%;	
+		gap: 1rem;
 		@include flexBox($align: flex-start);
 		
 		h1 {
@@ -34,24 +35,25 @@
 
 			p {
 				@include text-body();
+				font-size: 1.4rem;
 				margin-bottom: 1rem;
 			}
 
 			.level {
 				h2 {
-					@include titleh1($fontSize: 2.4rem, $width: 22rem);
+					@include titleh1($fontSize: 2rem, $width: 20rem);
 				}
 			}
 
 			.control {
 				h2 {
-					@include titleh1($fontSize: 2.4rem, $width: 26rem);
+					@include titleh1($fontSize: 2rem, $width: 24rem);
 				}
 			}
 
 			.play {
 				h2 {
-					@include titleh1($fontSize: 2.4rem, $width: 19rem);
+					@include titleh1($fontSize: 2rem, $width: 18rem);
 				}
 
 			}

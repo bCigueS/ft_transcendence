@@ -34,29 +34,4 @@ export class MessagesService {
 	async remove(id: number) {
 		return await this.prisma.message.delete({ where: { id } });
 	}
-
-	async createChannel(createChannelDto: CreateChannelDto) {
-		const { creatorId, name, members } = createChannelDto;
-
-		if (members.length < 2) {
-			throw new Error("Invalid channel creation request: must include at least two members.");
-		}
-	  
-		const channel = await this.prisma.channel.create({
-			data: {
-				creatorId,
-				name,
-				members: {
-					create: members.map((member) => ({ userId: member.userId })),
-				},
-			},
-				include: {
-				messages: true,
-				members: true,
-			},
-		});
-	  
-		return channel;
-	}
-
 }

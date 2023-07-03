@@ -285,7 +285,6 @@ export class UsersService {
       throw new NotFoundException(`User with ${id} does not exist.`);
     }
   
-    console.log(avatarPath);
     
     return this.prisma.user.update({
       where: { id: id },

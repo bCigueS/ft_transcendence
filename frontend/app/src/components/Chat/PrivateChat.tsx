@@ -77,7 +77,7 @@ const PrivateChat: React.FC<Props> = (props) => {
                         <h3>Are you sure you wish to delete this chat?</h3>
                         <div className={classes.actions}>
                             <button className={classes.cancelButton} onClick={handleCancelDelete}>Cancel</button>
-                            <button className={classes.button} onClick={handleConfirmDelete}>Confirm</button>
+                            <button className={classes.deleteButton} onClick={handleConfirmDelete}>Confirm</button>
                         </div>
                     </div>
                 }

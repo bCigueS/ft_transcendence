@@ -50,7 +50,7 @@ export class AuthService {
 
     const targetPath = `./uploads/${filePath}`;
 
-    fs.writeFileSync(filePath, Buffer.from(response.data, 'binary'));
+    fs.writeFileSync(targetPath, Buffer.from(response.data, 'binary'));
   }
 
   async registerUser(apiResponse: any) {
@@ -101,6 +101,7 @@ export class AuthService {
 		response['user'] = await this.aboutMe(token['access_token']);
     response['userId'] = response['user']['userId'];
     response['doubleAuth'] = response['user']['doubleAuth'];
+    response['accessToken'] = response['user']['accessToken'];
 	if (response['user']['doubleAuth'] == false)
 		response['accessToken'] = response['user']['accessToken'];
 	else
@@ -116,7 +117,7 @@ export class AuthService {
     const verified = AuthUtils.verifyTwoFactor(code, user.secert);
 	if (verified)
 	{
-		let response = AuthUtils.getUserData(user);
+		let response = AuthUtils.getUserData(user.login);
 		response['accessToken'] = AuthUtils.signToken(user.id, user.token);
 		return response;
 	}
@@ -134,13 +135,17 @@ export class AuthService {
     try {
 		const data_response = await this.httpService.get(url_data, { headers: headersRequest }).toPromise();
 		let user = await this.prisma.user.findFirst({ where: { login: data_response.data.login } });
-		if (!user) await this.registerUser(data_response.data);
-		if (user) {
+		if (!user)
+		{
+			await this.registerUser(data_response.data);
+		}
+		if (user)
+		{
 			await this.prisma.user.update({
 				where: { login: data_response.data.login },
 				data: { 
-					token: CryptoJS.AES.encrypt(token, `${process.env.NODE_ENV}`).toString(),
-					status: 1
+				token: CryptoJS.AES.encrypt(token, `${process.env.NODE_ENV}`).toString(),
+				status: 1
 				},
 			});
 		}
@@ -151,9 +156,8 @@ export class AuthService {
 				doubleAuth: user.doubleAuth,
 			};
 		}
-		return AuthUtils.getUserData(user);
+      	return AuthUtils.getUserData( data_response.data.login );
     } catch (error) {
-		console.log(error);	
 		error.status = 403;
 		throw new HttpException(error, HttpStatus.FORBIDDEN, { cause: error });
     }

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useContext } from 'react';
 import { PongInfo, BallInfo, PongProp } from './utils/types';
 import ModalBoard from './ModalBoard';
 import LiveBoard from './LiveBoard';
@@ -6,7 +6,7 @@ import PausedBoard from './PausedBoard';
 import classes from '../../sass/components/Game/Pong.module.scss';
 import PlayerSide from './PlayerSide';
 import OpponentSide from './OpponentSide';
-import { UserAPI } from '../../store/users-contexte';
+import { UserAPI, UserContext } from '../../store/users-contexte';
 
 // Modal's element
 const BEGINNER_LEVEL = 0;
@@ -74,6 +74,7 @@ export default function Pong(props: PongProp) {
 	const [playerY, setPlayerY] = useState((info.boardHeight - paddleHeight) / 2);
 	const [opponentY, setOpponentY] = useState((info.boardHeight - paddleHeight) / 2);
 	const [opponentName, setOpponentName] = useState('');
+	const [opponent, setOpponent] = useState<UserAPI>();
 	// obstacle info
 	const [obstacleY, setObstacleY] = useState(info.boardHeight);
 	const [obstacleDir, setObstacleDir] = useState(true);
@@ -90,6 +91,8 @@ export default function Pong(props: PongProp) {
 	// animation
 	const frameId = useRef(0);
 	const prevFrameId = useRef(0);
+	// user info
+	const userCtx = useContext(UserContext);
 
 	// emit a join request to the server
 	useEffect(() => {
@@ -100,11 +103,19 @@ export default function Pong(props: PongProp) {
 			console.log('emit a join random game request');
 			props.socket?.emit('joinRandom', { id: props.userId, lvl: level });
 		}
-		if (playerMode === DOUBLE_MODE && props.inviteMode) {
+		if (playerMode === DOUBLE_MODE && props.inviteMode && !props.isInvited) {
 			console.log('emit a join invitation game request');
 			props.socket?.emit('joinInvitation', { playerId: props.userId, opponentId: props.opponentId, lvl: level, gameRoom: props.gameRoom })
 		}
-	}, [props.socket, playerMode, level, props.gameRoom, props.userId, props.opponentId, props.inviteMode]);
+	}, [props.socket, playerMode, level, props.gameRoom, props.userId, props.opponentId, props.inviteMode, props.isInvited]);
+
+	// emit a join request to the server
+	useEffect(() => {
+		if (playerMode === DOUBLE_MODE && props.inviteMode && props.isInvited) {
+			console.log('emit a join invitation game request');
+			props.socket?.emit('joinInvitation', { playerId: props.userId, opponentId: props.opponentId, lvl: undefined, gameRoom: props.gameRoom })
+		}
+	}, [props.socket, playerMode, props.gameRoom, props.userId, props.opponentId, props.inviteMode, props.isInvited]);
 
 	// receive a signal to send an invitation
 	useEffect(() => {
@@ -131,6 +142,7 @@ export default function Pong(props: PongProp) {
 			const handleWelcome = ({ message, opponent, gameLevel, gameRoom }: { message: string, opponent: UserAPI, gameLevel: number, gameRoom: string }) => {
 				console.log({ message, opponent, gameRoom });
 				if (opponent) {
+					setOpponent(opponent);
 					setOpponentName(opponent.name);
 				}
 				if (level !== gameLevel) {
@@ -154,6 +166,7 @@ export default function Pong(props: PongProp) {
 		if (playerMode === DOUBLE_MODE) {
 			const handleOpponentJoin = ({ message, opponent }: { message: string, opponent: UserAPI}) => {
 				console.log({ message, opponent });
+				setOpponent(opponent);
 				setOpponentName(opponent.name);
 			};
 
@@ -420,7 +433,7 @@ export default function Pong(props: PongProp) {
 		dy = ballSpeed * Math.sin(angle);
 		x = (add === true ? ballX + ballRadius : ballX - ballRadius);
 		y = ballY;
-		s = ballSpeed + 0.5
+		s = ballSpeed
 
 		return {dx, dy, x, y, s};
 	}, [ballRadius, ballX, ballY, ballSpeed]);
@@ -550,14 +563,18 @@ export default function Pong(props: PongProp) {
 					}, gameRoom: gameRoom,
 				});
 			}
-			ballServe(OPPONENT_SIDE);
+			if (playerScore <= info.winnerScore && opponentScore <= info.winnerScore) {
+				ballServe(OPPONENT_SIDE);
+			}
 		}
 		//right collision / ball passing the opponent's paddle, so player gains a point
 		if (ballX >= info.boardWidth) {
 			if (playerMode === SINGLE_MODE) {
 				setPlayerScore(p => p += 1);
 			}
-			ballServe(PLAYER_SIDE);
+			if (playerScore <= info.winnerScore && opponentScore <= info.winnerScore) {
+				ballServe(PLAYER_SIDE);
+			}
 		}
 	}, [props.socket, ballRadius, ballServe, ballX, ballY, gameRoom, level, opponentScore, playerMode, playerScore]);
 	
@@ -669,8 +686,7 @@ export default function Pong(props: PongProp) {
 					playerName: props.userName,
 					gameRoom: gameRoom,
 				});
-			}
-			if (opponentScore > info.winnerScore) {
+			} else if (opponentScore > info.winnerScore) {
 				setWinner(OPPONENT_WIN);
 			}
 		}
@@ -694,6 +710,7 @@ export default function Pong(props: PongProp) {
 				prevFrameId.current = timestamp;
 
 				// console.log('isRunning', isRunning, 'gameOver', gameOver, 'isLive', isLive);
+				// console.log('winner is', winner);
 				
 				drawBoard(context);
 				if (isRunning && !isPaused && !myScreenTooSmall && !otherScreenTooSmall) {
@@ -809,7 +826,7 @@ export default function Pong(props: PongProp) {
 
 	// loop to detect if a screen is too small to play the pong
 	useEffect(() => {
-		if (isRunning && !isPaused && !myScreenTooSmall && (screenWidth < info.boardWidth + (110 * 2) || screenHeight < info.boardHeight + (15 * 2))) {
+		if (isRunning && !isPaused && !myScreenTooSmall && (screenWidth < (info.boardWidth + 124) || screenHeight < (info.boardHeight + 220))) {
 			setMyScreenTooSmall(true);
 
 			if (playerMode === DOUBLE_MODE) {
@@ -819,7 +836,7 @@ export default function Pong(props: PongProp) {
 				});
 			}
 		}
-		else if (isRunning && !isPaused && myScreenTooSmall && (screenWidth >= info.boardWidth + (110 * 2) && screenHeight >= info.boardHeight + (15 * 2))){
+		else if (isRunning && !isPaused && myScreenTooSmall && (screenWidth >= (info.boardWidth + 124) && screenHeight >= (info.boardHeight + 220))){
 			setMyScreenTooSmall(false);
 
 			if (playerMode === DOUBLE_MODE) { 
@@ -867,7 +884,7 @@ export default function Pong(props: PongProp) {
 					onTool={(mode) => {setToolMode(mode)}}
 					onPlayerMode={(mode) => {setPlayerMode(mode)}}
 					onStartPage={() => startGame(winner === PLAYER_WIN ? PLAYER_SIDE : OPPONENT_SIDE)}
-					onRestart={() => {setOpponentName(''); setPlayerScore(0); setOpponentScore(0);}}
+					onRestart={() => {setGameOver(false); setOpponent(undefined); setOpponentName(''); setPlayerScore(0); setOpponentScore(0);}}
 					inviteMode={props.inviteMode}
 					isInvited={props.isInvited}
 					buttonText={gameOver ? "Play again" : "Start playing"}
@@ -881,7 +898,7 @@ export default function Pong(props: PongProp) {
 				/>
 			)}
 			<PlayerSide
-				playerName={props.userName}
+				player={userCtx.user}
 			/>
 			<div className={classes.container}>
 				<div className={classes.divider_line}></div>
@@ -894,6 +911,7 @@ export default function Pong(props: PongProp) {
 				</div>
 			</div>
 			<OpponentSide
+				opponent={opponent}
 				opponentName={opponentName}
 			/>
 		</>

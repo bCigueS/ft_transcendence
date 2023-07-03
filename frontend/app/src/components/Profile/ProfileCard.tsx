@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useCallback, useContext } from 'react';
 
 import { UserAPI, UserContext } from '../../store/users-contexte';
 
@@ -10,6 +10,24 @@ const ProfileCard: React.FC<{ user?: UserAPI | null}> = ( { user } ) => {
 
 	const userCtx = useContext(UserContext);
 	const navigate = useNavigate();
+	
+	const checkIsBlocked = useCallback((blockedId: number): boolean => {
+		if (!userCtx.user?.id) {
+			return false;
+		}
+	
+		const blockedUsers = userCtx.user?.block;
+	
+		if (blockedUsers) {
+			return blockedUsers.some((blockedUser) => blockedUser.id === blockedId);
+		}
+		return false;
+	}, [userCtx.user?.block, userCtx.user?.id]);
+
+	let userIsBlocked;
+
+	if (user && user.id)
+		userIsBlocked = checkIsBlocked(user?.id);
 
 	const addBlockHandler = (event: React.MouseEvent<HTMLIFrameElement, MouseEvent>) => {
 		if (user)
@@ -60,7 +78,12 @@ const ProfileCard: React.FC<{ user?: UserAPI | null}> = ( { user } ) => {
 	const handleClickGame = () => {
 		navigate('/pong', {
 			state: {
-				username: userCtx.user?.name
+				playerId: userCtx.user?.id,
+				opponentId: user?.id,
+				gameInvitation: true,
+				isInvited: false,
+				isSpectator: false,
+				gameRoom: undefined,
 			}
 		})
 	}
@@ -80,11 +103,11 @@ const ProfileCard: React.FC<{ user?: UserAPI | null}> = ( { user } ) => {
 
 				<div className={classes.info}>
 					<i className="fa-sharp fa-solid fa-chart-simple"></i>
-					<p>{ user?.gamesPlayed }</p>
+					<p>{user?.gamesPlayed}</p>
 				</div>
 			</div>
 			{
-				(user && !userCtx.isSelf(user)) && 
+				(user && !userCtx.isSelf(user) && !userIsBlocked) && 
 				<div className={classes.icon}>
 					{ friendIconDisplay() }
 					<i 

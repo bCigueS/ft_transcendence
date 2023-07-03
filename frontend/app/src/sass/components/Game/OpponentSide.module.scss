@@ -27,20 +27,15 @@
 
 	}
 
-	.divider_line {
-		// display: flex;
+	.icon {
 		margin: auto;
-		width: 20%;
 		height: 80%;
-		background-image: linear-gradient(#2E3840 70%, rgba(255,255,255,0) 0%);
-		background-position: center;
-		background-size: 5px 25px;
-		background-repeat: repeat-y;
-		align-items: center;
-		justify-content: start;
 		grid-column-start: 1;
 		grid-column-end: 2;
 		grid-row-start: 1;
+		background-color: $almost-white;
+		align-items: start;
+		justify-content: end;
 		z-index: 1;
 
 	}

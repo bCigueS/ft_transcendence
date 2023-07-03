@@ -1,5 +1,4 @@
-import { useCallback, useContext } from "react";
-import { UserAPI, UserContext } from "../../store/users-contexte";
+import { UserAPI } from "../../store/users-contexte";
 
 export interface Channel {
     createdAt: Date,
@@ -35,7 +34,7 @@ type CreateChannelDTO = {
   muted?: User[],
 };
 
-type UpdateChannelDTO = {
+export type UpdateChannelDTO = {
     name?: string,
     members?: User[],
     isPasswordProtected?: boolean,
@@ -46,6 +45,7 @@ type UpdateChannelDTO = {
   };
 
 export type JoinChannelDTO = {
+	channelId: number,
     userId: number,
     password?: string,
 }
@@ -239,5 +239,68 @@ export const banUser = async (channelId: number, userId: number) => {
 
 };
 
+export const fetchChannelById = async (channelId: number) => {
+
+	let channelFound: Channel | null = null;
+	
+    console.log('in fetchChannelById with id: ', channelId);
+	try {
+		const response = await fetch('http://localhost:3000/channels/' + channelId);
+
+		if (!response.ok)
+			throw new Error('Failed to fetch channel with id ' + channelId);
+
+		const data = await response.json();
+
+		channelFound = {
+			id: data.id,
+			createdAt: data.createdAt,
+			name: data.name,
+			creatorId: data.creatorId,
+			creator: data.creator,
+			isPasswordProtected: data.isPasswordProtected,
+			password: data.password,
+			messages: data.messages,
+			members: data.members,
+			admins: data.admins,
+			banned: data.banned,
+			muted: data.muted,
+		}
+    	return channelFound;
+
+
+	} catch (error: any) {
+		console.error(error.message);
+	}
+	return channelFound;
+};
+
+export const isMemberMuted = async (channelId: number, memberId: number) =>
+{
+	try {
+		const channel = await fetchChannelById(channelId);
+
+		if (!channel) {
+			throw new Error('Channel not found');
+		}
+
+		const mutedMembers = channel.muted;
+
+		if (mutedMembers)
+		{
+			for (const mutedMember of mutedMembers) {
+				if (mutedMember.id === memberId) {
+					return true;
+				}
+			}
+		}
+			
+		return false;
+
+	} catch (error: any) {
+		console.error(error.message);
+		return false;
+	}
+}
 
 

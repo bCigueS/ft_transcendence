@@ -71,10 +71,6 @@ export default function Leaderboard() {
 		filteredUser = sortU.winsSortedUser(userCommunity);
 	else if (filterOption === 'Less Wins')
 		filteredUser = sortU.loosesSortedUser(userCommunity);
-	else if (filterOption === 'Most played games')
-		filteredUser = sortU.mostPlayedGame(userCommunity);
-	else if (filterOption === 'Less played games')
-		filteredUser = sortU.lessPlayedGame(userCommunity);
 	else if (filterOption === 'Nickname (a-z)')
 		filteredUser = sortU.alphaOrderNick(userCommunity);
 	else if (filterOption === 'Nickname (z-a)')

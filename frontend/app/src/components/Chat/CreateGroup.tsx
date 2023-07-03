@@ -6,7 +6,7 @@ import ReactDOM from 'react-dom';
 import Card from "./../UI/Card";
 import { UserAPI, UserContext } from "../../store/users-contexte";
 import AddToGroup from "./AddToGroup";
-import { createNewChannel } from "./chatUtils";
+import { Channel, createNewChannel } from "./chatUtils";
 
 type Props = {
     children?: React.ReactNode,
@@ -15,6 +15,7 @@ type Props = {
     className?: string,
 	onCloseClick: () => void,
 	onDelete?: () => void,
+	onCreate?: (channel: Channel) => void
 };
 
 const Backdrop: React.FC<Props> = (props) => {
@@ -28,7 +29,7 @@ const Overlay: React.FC<Props> = (props) => {
 	
 	const userCtx = useContext(UserContext);
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
 		if (groupName === '' || groupName.trim() === '')
 		{
 			setTypeError('You need to provide a name to create a group.')
@@ -55,8 +56,11 @@ const Overlay: React.FC<Props> = (props) => {
 		}
 	
 		console.log('ChanData: ', chanData);
-		createNewChannel(chanData);
-		window.location.reload();
+		const newChan = await createNewChannel(chanData);
+		console.log('newChan created: ', newChan);
+		// window.location.reload();
+		if (props.onCreate)
+			props.onCreate(newChan);
 		props.onCloseClick();
     }
 
@@ -90,13 +94,13 @@ const Overlay: React.FC<Props> = (props) => {
                             onChange={nameHandler}
                             maxLength={12}/>
                     </div>
-					<div className={formclasses["members-label"]}>
+					<div className={formclasses.membersLabel}>
                         <label>Add members to group</label>
 						{
 							(userCtx.user?.id) &&
 							<div >
 								{
-									userCtx.user?.friends && 
+									userCtx.user?.friends?.length ? 
 									userCtx.user.friends.filter((friend) => !members.some(member => member.id === friend.id))
 									.map((friend) => (
 										<AddToGroup 
@@ -108,8 +112,10 @@ const Overlay: React.FC<Props> = (props) => {
 											handleAddRemove={true}
 										/>
 									))
+									:
+									<div className={formclasses.noFriends}>Go to <span>leaderbord</span> to add friends and create a group with them.</div>
 								}
-							</div>
+								</div>
 						}
 						{
 							members.length > 0 &&
@@ -156,7 +162,8 @@ const CreateGroup: React.FC<Props> = (props) => {
 							title={props.title}
 							message={props.message}
 							onCloseClick={props.onCloseClick}
-							onDelete={props.onDelete}>{props.children}</Overlay>, portalOverlays)}
+							onDelete={props.onDelete}
+							onCreate={props.onCreate}>{props.children}</Overlay>, portalOverlays)}
 		</Fragment>
 	)
 }
