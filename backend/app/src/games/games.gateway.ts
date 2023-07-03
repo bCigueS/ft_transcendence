@@ -1,6 +1,7 @@
 import { Logger, NotFoundException } from '@nestjs/common';
 import { OnGatewayInit, OnGatewayConnection, WebSocketGateway, SubscribeMessage, WebSocketServer, MessageBody, ConnectedSocket, OnGatewayDisconnect } from '@nestjs/websockets';
 import { Socket, Server, Namespace } from 'socket.io';
+import * as jwt from 'jsonwebtoken';
 
 import { GamesService } from './games.service';
 import { CreateGameDto } from './dto/create-game.dto';
@@ -12,6 +13,12 @@ import { ServeInfo, CollisionInfo, GameOverInfo, ScoreInfo, UpdatedInfo } from '
 import { GameState } from '@prisma/client';
 import EventEmitter from 'events';
 
+interface JwtPayload
+{
+	userId: string;
+	accessToken: string;
+}
+  
 @WebSocketGateway({ namespace: '/pong', cors: '*' })
 export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 	private readonly logger = new Logger(GamesGateway.name);
@@ -34,9 +41,24 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 		@ConnectedSocket() client: Socket,
 		) {
 		
-		client.on('connection', (userId: number) => {
+		client.on('connection', async (userId: number, token: string) => {
 			this.userId = userId;
-			console.log(`User ${userId} is connected in pong game`);
+			if (!token) 
+				return client.disconnect();
+			else
+			{
+				try 
+				{
+					const decodedToken = await jwt.verify(token, `${process.env.NODE_ENV}`) as JwtPayload;
+					const userId = decodedToken.userId;
+					const user = await this.prisma.user.findFirst({ where: { id: parseInt(userId) }});
+					if (!user)
+						return client.disconnect();
+				} catch (error) {
+					return client.disconnect();
+				}
+				console.log(`User ${userId} is connected in pong game with token ${token}`);
+			}
 		});
 	}
 	
@@ -63,7 +85,7 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 				}
 			});
 			// update this game by adding a new UserGame with id of user sent change state playing
-			if (matchingGames && matchingGames[0])
+			if (matchingGames && matchingGames[0] && matchingGames[0].players[0].userId !== id)
 			{
 				const updatedGameDto: UpdateGameDto = {
 					state: GameState.PLAYING, // PLAYING
@@ -182,10 +204,13 @@ export class GamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 				game = await this.prisma.game.findFirst({
 					where: { 
 						room: gameRoom,
+					},
+					include: {
+						players: true,
 					}
 				});
 				
-				if (!game || game.state === GameState.FINISHED) {
+				if (!game || game.state === GameState.FINISHED || game.players[0].userId === playerId) {
 					client.emit('expiredInvite', {
 						message: `Sorry, the invitation is already expired!`,
 					});
