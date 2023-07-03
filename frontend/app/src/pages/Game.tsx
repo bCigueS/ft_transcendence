@@ -45,7 +45,7 @@ export default function Game() {
 		return () => {
 			newSocket.close();
 		}
-	}, [setSocket, userCtx.user?.id]);
+	}, [setSocket, userCtx.user?.id, userCtx.logInfo?.token]);
 
 	if (!userId || !userName || !socket) {
 		return (

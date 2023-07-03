@@ -19,7 +19,7 @@ const Livegame: React.FC = () => {
 		return () => {
 			newSocket.close();
 		}
-	}, [setSocket, userCtx.user?.id]);
+	}, [setSocket, userCtx.user?.id, userCtx.logInfo?.token]);
 
 	useEffect(() => {
 		const handleLiveGames = ({ liveMatchArray }: { liveMatchArray: UserLiveGames[] }) => {

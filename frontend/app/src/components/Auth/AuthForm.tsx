@@ -90,7 +90,7 @@ const AuthForm: React.FC = () => {
 				window.location.assign("http://127.0.0.1:8000");
 			}
 		}
-	}, [userId])
+	}, [userCtx, userId, token, doubleAuth])
 
 
 
