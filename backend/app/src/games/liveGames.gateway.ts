@@ -1,4 +1,4 @@
-import { Logger, NotFoundException } from "@nestjs/common";
+import { Logger, NotFoundException, UseInterceptors } from "@nestjs/common";
 import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
 import EventEmitter from "events";
 import { GamesService } from "./games.service";
@@ -6,6 +6,13 @@ import { PrismaService } from "src/prisma/prisma.service";
 import { Namespace, Server, Socket } from "socket.io";
 import { LiveGamesInfo } from "./utils/types";
 import { GamesGateway } from "./games.gateway";
+import * as jwt from 'jsonwebtoken';
+
+interface JwtPayload
+{
+	userId: string;
+	accessToken: string;
+}
 
 @WebSocketGateway({ namespace: '/', cors: '*' })
 export class LiveGamesGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -35,13 +42,30 @@ export class LiveGamesGateway implements OnGatewayInit, OnGatewayConnection, OnG
 	}
 
 	// Receive connection from client
-	async handleConnection(		
+
+	async handleConnection(
 		@ConnectedSocket() client: Socket,
 		) {
-
-		client.on('connection', (userId: number) => {
+		
+		client.on('connection', async (userId: number, token: string) => {
 			this.userId = userId;
-			console.log(`User ${userId} is connected in live games`);
+			if (!token) 
+				return client.disconnect();
+			else
+			{
+				try 
+				{
+					const decodedToken = await jwt.verify(token, `${process.env.NODE_ENV}`) as JwtPayload;
+					const userId = decodedToken.userId;
+					const user = await this.prisma.user.findFirst({ where: { id: parseInt(userId) }});
+					if (!user)
+						return client.disconnect();
+				} catch (error) {
+					return client.disconnect();
+				}
+				this.userId = userId;
+				console.log(`User ${userId} is connected in live game with token ${token}`);
+			}
 		});
 	}
 
