@@ -109,11 +109,14 @@ const AddToGroup: React.FC<{user: UserAPI, 	onAdd?: (member: UserAPI) => void,
 						className='fa-solid fa-message'>
 						</i>
 					}
-					<i
+					{
+						userCtx.user?.id !== user.id &&
+						<i
 						title='Game'
 						onClick={onPlayHandler}
 						className='fa-solid fa-table-tennis-paddle-ball'>
 					</i>
+					}
 				</div>
 			}
 
