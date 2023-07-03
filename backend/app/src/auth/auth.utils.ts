@@ -41,7 +41,7 @@ export function signToken(
 	const jwtToken = jwt.sign({
 		userId: userId,
 		accessToken: token,
-	}, `${process.env.NODE_ENV}`, { expiresIn: '1h' });
+	}, `${process.env.NODE_ENV}`, { expiresIn: '2h' });
 
 	return jwtToken;
 }

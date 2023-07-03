@@ -33,7 +33,7 @@ export class AuthService {
 	const token = jwt.sign({
 		accessToken: user.token,
 		userId: user.id
-	}, `${process.env.NODE_ENV}`, { expiresIn:'1h' });
+	}, `${process.env.NODE_ENV}`, { expiresIn:'2h' });
 
 
 	return {

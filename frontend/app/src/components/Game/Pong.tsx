@@ -41,7 +41,7 @@ const info: PongInfo = {
 	playerX: 10,
 	opponentX: 620, // boardWidth - paddleWidth - 10,
 	obstacleX: 310, // (boardWidth - obstacleWidth) / 2,
-	winnerScore: 1,
+	winnerScore: 10,
 }
 
 export default function Pong(props: PongProp) {

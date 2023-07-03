@@ -33,7 +33,7 @@ export const tokenLoader = () => {
 
 export const setTokenAuth = (token: string, userId: string) => {
 	const expiration = new Date();
-	expiration.setHours(expiration.getHours() + 1);
+	expiration.setHours(expiration.getHours() + 2);
 	sessionStorage.setItem('expiration', expiration.toISOString());
 	sessionStorage.setItem('token', token);
 	sessionStorage.setItem('userId', userId)
