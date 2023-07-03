@@ -22,9 +22,9 @@ const LiveGameCard: React.FC<{ match: UserLiveGames }> = (props) => {
 
 	return (
 		<div className={classes.container} onClick={handleCardNavigate}>
-			<ProfilIcon user={props.match.player} />
+			<ProfilIcon user={props.match.player} displayCo={false} />
 			<span>VS</span>
-			<ProfilIcon user={props.match.opponent}/>
+			<ProfilIcon user={props.match.opponent} displayCo={false}/>
 		</div>
 	)
 }

@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { redirect } from 'react-router-dom';
-import { action as logout} from '../typescript/Auth';
 
 export type UserMatch = {
 	user?: UserAPI,
 	opponent?: UserAPI,
 	playerScore: number,
-	opponentScore: number
+	opponentScore: number,
+	level: string
 }
 
 export type UserLiveGames = {
@@ -33,12 +33,13 @@ export const UserContext = React.createContext<{
 		user: UserAPI | null;
 		error: string | null;
 		token?: string;
-		logInfo? : {userId?: string, token?: string};
+		logInfo? : {userId?: string | null, token?: string | null, expiration: string | null};
 		isLogged: boolean;
 		deleteToken: () => void,
 		login: () => void,
 		fetchUserFriends: (id: number) => void;
 		fetchUserBlockings: (id: number) => void;
+		fetchGamePlayed: (id: number) => Promise<number>;
 		fetchUser: () => void;
 		fetchAddFriend: (otherUser: UserAPI) => void;
 		fetchRemoveFriend: (targetUser: UserAPI) => void;
@@ -51,12 +52,13 @@ export const UserContext = React.createContext<{
 	user: null,
 	error: null,
 	token: undefined,
-	logInfo: {},
+	logInfo: {userId: sessionStorage.getItem('userId'), token: sessionStorage.getItem('token'), expiration: sessionStorage.getItem('expiration')},
 	isLogged: false,
 	login: () => {},
 	deleteToken: () => {},
 	fetchUserFriends: (id: number) => {},
 	fetchUserBlockings: (id: number) => {},
+	fetchGamePlayed: (id: number) => Promise.resolve(0),
 	fetchUser: () => {},
 	fetchAddFriend: (otherUser: UserAPI) => {},
 	fetchRemoveFriend: (targetUser: UserAPI) => {},
@@ -76,19 +78,20 @@ type Props = {
 		
 		const [ user, setUser ] = useState<UserAPI | null>(null);
 		const [ userId, setUserId ] = useState<number>(1);
-		const [ isLogged, setIsLogged ] = useState<boolean>(!localStorage.getItem('isLogged') || localStorage.getItem('isLogged') === 'false' ? false : true);
+		const [ isLogged, setIsLogged ] = useState<boolean>(!sessionStorage.getItem('isLogged') || sessionStorage.getItem('isLogged') === 'false' ? false : true);
 		const [ loading, setLoading ] = useState<boolean>(true);
 		const [ error, setError ] = useState<string | null>(null);
 
-
+		
 		let logInfo = {
-			userId: localStorage.getItem('userId') || String(userId),
-			token: localStorage.getItem('token') || ''
+			userId: sessionStorage.getItem('userId') ? sessionStorage.getItem('userId') : String(userId),
+			token: sessionStorage.getItem('token') || '',
+			expiration: sessionStorage.getItem('expiration') || ''
 		}
 
 		const login = () => {
 			setIsLogged(true);
-			localStorage.setItem('isLogged', 'true');
+			sessionStorage.setItem('isLogged', 'true');
 		}
 
 		const deleteToken = () => {
@@ -182,7 +185,7 @@ type Props = {
 			let userFound: UserAPI | null = null;
 
 			try {
-				const response = await fetch('http://localhost:3000/users/' + logInfo.userId, {
+				const response = await fetch('http://localhost:3000/users/' + userId, {
 					method: 'GET',
 					headers: {
 						'Authorization' : 'Bearer ' + logInfo.token,
@@ -207,7 +210,7 @@ type Props = {
 			}
 			return userFound;
 			
-		}, [logInfo.token, logInfo.userId])
+		}, [logInfo.token])
 
 		const fetchUserFriends = useCallback(async (id: number) => {
 			setError(null);
@@ -283,6 +286,7 @@ type Props = {
 			return user?.id === otherUser.id;
 		}
 
+
 		const fetchAddFriend = async(otherUser: UserAPI) => {
 			setError(null);
 			const friendId = {
@@ -312,6 +316,32 @@ type Props = {
 			}
 		};
 
+		const fetchGamePlayed = useCallback(async (id: number) => {
+			setError(null);
+			if (logInfo.token === '') {
+				setLoading(false);
+				return ;
+			}
+
+			try {
+				let gamePlayed;
+				const response = await fetch('http://localhost:3000/users/' + id + '/getMatches', {
+					method: 'GET',
+					headers: {
+						'Authorization': 'Bearer ' + logInfo.token,
+					}
+				});
+				if (!response.ok)
+					throw new Error('Failed to fetch games played');
+				const data = await response.json();
+				gamePlayed = data;
+
+				return gamePlayed;
+			} catch( error: any) {
+				console.error('Failed to fetch game played')
+			}
+		}, [logInfo.token])
+
 		const fetchUser = useCallback(async () => {
 			setError(null);
 			if (logInfo.token === '') {
@@ -327,11 +357,12 @@ type Props = {
 				});
 				const data = await response.json();
 			
-				if (response.status === 403) {
-					logInfo.token = '';
-					logInfo.userId = '1';
-					setIsLogged(false);
-				}
+				// if (response.status === 403) {
+				// 	// logInfo.token = '';
+				// 	// logInfo.userId = '1';
+				// 	// setIsLogged(false);
+				// 	console.log(logInfo);
+				// }
 
 				if (!response.ok) {
 					throw new Error('Failed to fetch User');
@@ -339,6 +370,7 @@ type Props = {
 
 				const userFriends = await fetchUserFriends(data.id);
 				const userBlockings = await fetchUserBlockings(data.id);
+				const gamePlayed = await fetchGamePlayed(data.id);
 		  
 				const dataUser: UserAPI = {
 				id: data.id,
@@ -347,7 +379,7 @@ type Props = {
 				email: data.email,
 				doubleAuth: data.doubleAuth,
 				wins: data.wins,
-				gamesPlayed: 0,
+				gamesPlayed: gamePlayed,
 				friends: userFriends,
 				block: userBlockings,
 				matchs: [],
@@ -361,23 +393,19 @@ type Props = {
 			finally {
 				setLoading(false);
 			}
-		}, [fetchUserFriends, fetchUserBlockings, logInfo.userId, logInfo.token]);
-		
+		}, [fetchUserFriends, fetchUserBlockings, logInfo.userId, logInfo.token, fetchGamePlayed]);
 		
 		useEffect(() => {
 			fetchUser();
 		  }, [fetchUser, userId, user?.name]);
 
 		useEffect(() => {
-			localStorage.setItem('isLogged', String(isLogged));
-		}, [isLogged, localStorage.getItem('isLogged')])
+			sessionStorage.setItem('isLogged', String(isLogged));
+		}, [isLogged])
 
 		if (loading) {
 			return <div>Loading...</div>
 		}
-
-		console.log("isLogged: ", isLogged)
-
 
 	const contextValue = {
 		user: user,
@@ -389,6 +417,7 @@ type Props = {
 		deleteToken: deleteToken,
 		fetchUserFriends: fetchUserFriends,
 		fetchUserBlockings: fetchUserBlockings,
+		fetchGamePlayed: fetchGamePlayed,
 		fetchUser: fetchUser,
 		fetchAddFriend: fetchAddFriend,
 		fetchRemoveFriend: fetchRemoveFriend,

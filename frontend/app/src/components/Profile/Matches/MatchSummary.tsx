@@ -6,17 +6,19 @@ import ProfilIcon from '../ProfilIcon';
 
 
 const MatchSummary: React.FC<{summary: UserMatch; user?: UserAPI}> = (props) => {
+
 	return (
 		<div className={classes.container}>
 
 			<div className={classes.card}>
 				<ProfilIcon user={props.user} />
-				<div>
+				<div className={classes.name}>
 					<h1>{props.user?.name}</h1>
 				</div>
 			</div>
 
 			<div className={classes.score}>
+				<p style={{fontStyle: 'italic', color:'grey'}} >{props.summary.level}</p>
 				<h1>{props.summary.playerScore}:{props.summary.opponentScore}</h1>
 			</div>
 

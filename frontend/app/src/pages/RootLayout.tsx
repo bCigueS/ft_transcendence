@@ -1,32 +1,111 @@
-import { Navigate, Outlet, useRouteLoaderData } from 'react-router-dom';
+import { Navigate, Outlet, useRouteLoaderData, useSubmit } from 'react-router-dom';
 import Nav from '../components/Nav/Nav';
 import { UserContext } from '../store/users-contexte';
-import { useContext } from 'react';
-import DoubleAuthPannel from '../components/Auth/DoubleAuthPannel';
+import { useContext, useEffect } from 'react';
+import { getAuthToken, getTokenDuration } from '../typescript/Auth';
 
 export default function RootLayout() {
 
 	const token = useRouteLoaderData('root');
+	const submit = useSubmit();
 	const userCtx = useContext(UserContext);
+	
+	useEffect(() => {
+		const handleStorageChange = (event: StorageEvent) => {
+			const logout = async() => {
+				try {
+					if (getAuthToken() === 'NONE' || getAuthToken() === 'EXPIRED') 
+						return ;
+					const response = await fetch('http://localhost:3000/users/logout', {
+						method: 'POST',
+						
+						headers: {
+							'Authorization': 'Bearer ' + getAuthToken(),
+						}
+					})
+					if (!response.ok) {
+						throw new Error('Failed to logout');
+					}
+				} catch(error: any) {
+					console.error(error.message);
+				}
+			}
 
-	console.log(userCtx.user)
+			if ((event.key === 'token' || event.key === 'userId' || event.key === 'expiration' || event.key === 'isLogged') && event.newValue === null) {
+				if (userCtx.logInfo?.token) {
+					logout();
+					sessionStorage.removeItem('token');
+					sessionStorage.removeItem('userId');
+					sessionStorage.removeItem('isLogged');
+					sessionStorage.removeItem('expiration');				
+					window.location.reload();
+				}
+			}
+			if (event.key === 'token' && event.newValue !== userCtx.logInfo?.token) {
+				logout();
+				sessionStorage.removeItem('token');
+				sessionStorage.removeItem('userId');
+				sessionStorage.removeItem('isLogged');
+				sessionStorage.removeItem('expiration');				
+				window.location.reload();
+			}
+
+			if (event.key === 'userId' && event.newValue !== userCtx.logInfo?.userId) {
+				logout();
+				sessionStorage.removeItem('token');
+				sessionStorage.removeItem('userId');
+				sessionStorage.removeItem('isLogged');
+				sessionStorage.removeItem('expiration');				
+				window.location.reload();
+			}
+			if (event.key === 'isLogged' && event.newValue !== String(userCtx.isLogged)) {
+				logout();
+				sessionStorage.removeItem('token');
+				sessionStorage.removeItem('userId');
+				sessionStorage.removeItem('isLogged');
+				sessionStorage.removeItem('expiration');				
+				window.location.reload();
+			}
+			if (event.key === 'expiration' && event.newValue !== userCtx.logInfo?.expiration) {
+				logout();
+				sessionStorage.removeItem('token');
+				sessionStorage.removeItem('userId');
+				sessionStorage.removeItem('isLogged');
+				sessionStorage.removeItem('expiration');				
+				window.location.reload();
+			}
+				
+		};
+
+		window.addEventListener('storage', handleStorageChange);
+
+		return () => {
+			window.removeEventListener('storage', handleStorageChange);
+		};
+	}, [userCtx.logInfo?.token, userCtx.logInfo?.userId, userCtx.logInfo?.expiration, userCtx.isLogged])
+
+	useEffect(() => {
+		if (!token) {
+			return;
+		}
+
+		if (token === 'EXPIRED') {
+			submit(null, {action: '/logout', method: 'post'})
+			return ;
+		}
+
+		const tokenDuration = getTokenDuration();
+		setTimeout(() => {
+			submit(null, {action: '/logout', method: 'post'})
+		}, tokenDuration)
+	}, [token, submit])
+
 	return (
 		<>
 			<Nav />
 			<main>
-				{/* { token ? ((!userCtx.user?.doubleAuth && userCtx.isLogged) ? <Outlet/> : <DoubleAuthPannel />) : <Navigate to='/auth'/>} */}
 				{ userCtx.isLogged === true ? <Outlet/> : <Navigate to='/auth'/>}
 			</main>
 		</>
 	)
 }
-
-// En gros, 
-//	Je vais me connecter a la page depuis auth, une fois que j'aurai valider je vais avoir le token, donc je vais pouvoir voir si je peux passer a la suite.
-//	La je vais devoir verifier si l'utilisateur a le double auth de set si c'est le cas, il n'est pas encore connecte et est redirige vers le double auth pour valider sa connection
-//	Si il ne l'a pas d'activer dans ce cas il est consider comme login
-
-// Donc l'idee ca va etre de, pour tester, de proteger la route 
-// CAS: 
-//	Notre utilisateur a le double auth de set
-//	On va verifier sur la 

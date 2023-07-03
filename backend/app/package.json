@@ -28,7 +28,7 @@
     "@nestjs/passport": "^9.0.3",
     "@nestjs/platform-express": "^9.4.0",
     "@nestjs/swagger": "^6.3.0",
-    "@prisma/client": "^4.16.2",
+    "@prisma/client": "^4.16.1",
     "@types/multer": "^1.4.7",
     "axios": "^1.4.0",
     "class-transformer": "^0.5.1",

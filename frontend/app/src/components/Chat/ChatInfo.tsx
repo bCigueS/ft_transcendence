@@ -28,22 +28,8 @@ const Backdrop: React.FC<BackdropProps> = (props) => {
 }
 
 const Overlay: React.FC<Props> = (props) => {
-    const [ groupName, setGroupName ] = useState<string>(''); 
 	const [ members, setMembers ] = useState<UserAPI[]>([]);
 	const [ admins, setAdmins ] = useState<UserAPI[]>([]);
-
-    const handleSubmit = () => {
-		props.onInfoClick();
-    }
-
-    const nameHandler = (event: any) => {
-		setGroupName(event.target.value);
-	}
-
-	const addMember = (member: UserAPI) => {
-		console.log('added member: ', member);
-		setMembers([...members, member]);
-	}
 
 	const removeMember = (member: UserAPI) => {
 		console.log('removed member: ', member);

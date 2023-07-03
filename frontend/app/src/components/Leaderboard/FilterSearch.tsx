@@ -26,8 +26,6 @@ const FilterSearch: React.FC<{onSaveFilter: (input: string) => void}> = ( props 
 	const filterOption: FilterOpt[] = [
 		{text: "Most Wins", option: ""},
 		{text: "Less Wins", option: ""},
-		{text: "Most played games", option: ""},
-		{text: "Less played games", option: ""},
 		{text: "Nickname (a-z)", option: ""},
 		{text: "Nickname (z-a)", option: ""}
 	];

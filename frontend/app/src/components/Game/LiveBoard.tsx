@@ -50,17 +50,12 @@ export default function LiveBoard({ isReady, playerName, opponentName, inviteMod
 				start();
 			}
 		}
-		else {
-			if (isReady) {
-				start();
-			}
-		}
 	}, [spectatorMode, state.seconds, state.time, isReady, start]);
 
 	return (
 		<div className={classes.container}>
 			<div className={classes.content}>
-				{(!isReady && spectatorMode && !isEnded) && (
+				{(spectatorMode && !isEnded) && (
 					<>
 						<h2>Welcome to live battle!!</h2>
 						<h1>{playerName} VS {opponentName}</h1>

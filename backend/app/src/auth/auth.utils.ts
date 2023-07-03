@@ -35,17 +35,16 @@ export function signToken(
 }
 
 export async function getUserData(
-	user: any,
+	login: string
 )
 {
 	const httpService = new HttpService();
 	const prisma = new PrismaService();
-
+	let user = await prisma.user.findFirst({ where: { login: login } });
 	try {
 		const url_data = 'https://api.intra.42.fr/v2/me';
 		const token = CryptoJS.AES.decrypt(user.token, `${process.env.NODE_ENV}`).toString(CryptoJS.enc.Utf8);
 		const headersRequest = { Authorization: `Bearer ${token}` };
-		
 		const data_response = await httpService.get(url_data, { headers: headersRequest }).toPromise();
 		if (user)
 			await prisma.user.update({ where: { login: data_response.data['login'] }, data: {status: 1},});
@@ -62,7 +61,7 @@ export async function getUserData(
 			last_name: data_response.data['last_name'],
 		};
 	} catch (error) {
-		console.log(error);	
+		console.log('error 65');	
 		error.status = 403;
 		throw new HttpException(error, HttpStatus.FORBIDDEN, { cause: error });
 	}

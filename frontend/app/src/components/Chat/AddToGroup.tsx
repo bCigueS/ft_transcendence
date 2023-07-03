@@ -1,6 +1,8 @@
-import { UserAPI } from "../../store/users-contexte";
+import { useNavigate } from "react-router-dom";
+import { UserAPI, UserContext } from "../../store/users-contexte";
 import ProfilIcon from "../Profile/ProfilIcon";
 import classes from './../../sass/components/Chat/AddToGroup.module.scss';
+import { useContext } from "react";
 
 const AddToGroup: React.FC<{user: UserAPI, 	onAdd?: (member: UserAPI) => void,
 	onRemove?: (member: UserAPI) => void,
@@ -29,6 +31,9 @@ const AddToGroup: React.FC<{user: UserAPI, 	onAdd?: (member: UserAPI) => void,
 		handleBan = false,
 		handleMute = false,
 		handleAddAdmin = false}) => {
+	
+	const userCtx = useContext(UserContext);
+	const navigate = useNavigate();
 
 	const onAddHandler = () => {
 		if (onAdd)
@@ -53,6 +58,20 @@ const AddToGroup: React.FC<{user: UserAPI, 	onAdd?: (member: UserAPI) => void,
 	const onAddMutedHandler = () => {
 		if (onAddMuted)
 			onAddMuted(user);
+	}
+
+	const onPlayHandler = () => {
+		console.log('about to invite user ', user.name, ' to pong duel');
+		navigate('/pong', {
+            state: {
+                playerId: userCtx.user?.id,
+                opponentId: user.id,
+                gameInvitation: true,
+                isInvited: false,
+                isSpectator: false,
+                gameRoom: undefined,
+            }
+        })
 	}
 
     return (
@@ -90,6 +109,7 @@ const AddToGroup: React.FC<{user: UserAPI, 	onAdd?: (member: UserAPI) => void,
 					}
 					<i
 						title='Game'
+						onClick={onPlayHandler}
 						className='fa-solid fa-table-tennis-paddle-ball'>
 					</i>
 				</div>
