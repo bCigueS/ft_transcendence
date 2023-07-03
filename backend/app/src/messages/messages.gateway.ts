@@ -11,7 +11,13 @@ import { MessageEntity } from './entities/message.entity';
 import { GamesGateway } from '../games/games.gateway';
 import { CreateChannelDto } from 'src/channels/dto/create-channel.dto';
 import { ChannelsService } from 'src/channels/channels.service';
+import * as jwt from 'jsonwebtoken';
 
+interface JwtPayload
+{
+	userId: string;
+	accessToken: string;
+}
 @WebSocketGateway({ namespace: '/chat', cors: '*' })
 export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
   private readonly logger = new Logger(MessagesGateway.name);
@@ -80,8 +86,25 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection {
 
   async handleConnection(client: Socket) {
 
-    client.on('user_connected', (userId) => {
-      this.onlineUsers[userId] = client.id;
+    client.on('user_connected', async (userId: number, token: string) => {
+		if (!token) 
+			return client.disconnect();
+		else
+		{
+			try 
+			{
+				const decodedToken = await jwt.verify(token, `${process.env.NODE_ENV}`) as JwtPayload;
+				const userId = decodedToken.userId;
+				const user = await this.prisma.user.findFirst({ where: { id: parseInt(userId) }});
+				if (!user)
+					return client.disconnect();
+				} catch (error) {
+					return client.disconnect();
+				}
+			// console.log(`User ${userId} is connected in messages gateway with token ${token}`);
+			this.onlineUsers[userId] = client.id;
+		}
+
     //   console.log('User connected: ', userId);
     });
 
