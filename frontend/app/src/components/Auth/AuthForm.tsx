@@ -39,7 +39,6 @@ const AuthForm: React.FC = () => {
 					const data = await response.json();
 					setToken(data.accessToken);
 					setUserId(data.userId);
-					console.log(data);
 					setDoubleAuth(data.doubleAuth);
 				}
 			}
@@ -68,7 +67,6 @@ const AuthForm: React.FC = () => {
 			throw new Error("Failed to fetch 2fa");
 
 		const data = await response.json();
-		console.log(data);
 		if (data.result !== false) {
 			setToken(data.accessToken);
 			userCtx.login();
@@ -85,7 +83,6 @@ const AuthForm: React.FC = () => {
 		if (token || doubleAuth) {
 			setTokenAuth(token, userId);
 			if (doubleAuth === false) {
-				console.log("Je log")
 				userCtx.login();
 				window.location.assign("http://127.0.0.1:8000");
 			}

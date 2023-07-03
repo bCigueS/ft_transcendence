@@ -64,7 +64,7 @@ export class LiveGamesGateway implements OnGatewayInit, OnGatewayConnection, OnG
 					return client.disconnect();
 				}
 				this.userId = userId;
-				console.log(`User ${userId} is connected in live game with token ${token}`);
+				// console.log(`User ${userId} is connected in live game with token ${token}`);
 			}
 		});
 	}
@@ -106,6 +106,6 @@ export class LiveGamesGateway implements OnGatewayInit, OnGatewayConnection, OnG
 	async handleDisconnect(
 		@ConnectedSocket() client: Socket,
 		) {
-		console.log(`User ${this.userId} is disconnected in live games`);
+		// console.log(`User ${this.userId} is disconnected in live games`);
 	}
 }
