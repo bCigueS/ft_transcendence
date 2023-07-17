@@ -37,3 +37,9 @@ This project is about creating a website for the mighty Pong contest!
 
 https://github.com/bCigueS/ft_transcendence/assets/48445174/57124f01-689e-45f6-9405-fa54f308db69
 
+## Team
+[bCigueS](https://github.com/bCigueS)
+[olivwalsh](https://github.com/olivwalsh)
+[foctavia](https://github.com/foctavia)
+[yangchi-42](https://github.com/Chenade)
+
