@@ -35,7 +35,9 @@ This project is about creating a website for the mighty Pong contest!
 ![chat](image/chat.png)
 
 
-https://github.com/bCigueS/ft_transcendence/assets/48445174/57124f01-689e-45f6-9405-fa54f308db69
+https://github.com/bCigueS/ft_transcendence/assets/48445174/d4d55c8e-c921-45a9-8fab-ad6f2919dbd8
+
+
 
 ## Team
 [bCigueS](https://github.com/bCigueS)
